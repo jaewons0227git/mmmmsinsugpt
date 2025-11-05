@@ -1257,7 +1257,7 @@ function initializeAppAfterName() {
     // 🌟 요청 반영: savedMode가 없을 경우 Dark Mode를 기본으로 설정 🌟
     let savedMode = localStorage.getItem('mode');
     if (savedMode === null) {
-        savedMode = 'dark'; 
+        savedMode = 'light'; 
     }
     const isLightMode = savedMode === 'light'; 
     modeToggleCheckbox.checked = isLightMode;
@@ -1349,3 +1349,4 @@ sendBtn.addEventListener('click', sendMessage);
 </body>
 
 </html>
+
