@@ -1,0 +1,378 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no" />
+<title>Mini Dino - Color Sky</title>
+<style>
+  html,body{
+    height:100%;
+    margin:0;
+    font-family:Inter,system-ui,Roboto,"Helvetica Neue",Arial;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:#f7f7f7;
+  }
+  #gameWrap{
+    width:900px;
+    max-width:95vw;
+    background:white;
+    border-radius:16px;
+    box-shadow:0 8px 30px rgba(20,30,40,0.12);
+    padding:18px;
+  }
+  header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:10px;
+  }
+  h1{font-size:16px;margin:0;color:#333}
+  .controls{font-size:13px;color:#666}
+  canvas{
+    display:block;
+    width:100%;
+    height:auto;
+    background:#aee1ff;
+    border-radius:12px;
+  }
+  .footer{
+    margin-top:8px;
+    font-size:13px;
+    color:#666;
+    display:flex;
+    justify-content:flex-end;
+  }
+  button{
+    background:#1a73e8;
+    color:white;
+    border:0;
+    padding:8px 12px;
+    border-radius:8px;
+    cursor:pointer;
+  }
+  @media (max-width:600px){
+    h1{font-size:14px;}
+    .controls{font-size:11px;}
+  }
+</style>
+</head>
+<body>
+<div id="gameWrap" role="application" aria-label="Mini Dino Game">
+  <header>
+    <h1>Mini Dino</h1>
+    <div class="controls">스페이스 / ↑ : 점프 · 터치 : 점프</div>
+  </header>
+
+  <canvas id="c" width="900" height="250" aria-label="game canvas"></canvas>
+
+  <div class="footer">
+    <button id="restartBtn">재시작</button>
+  </div>
+</div>
+
+<script>
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+
+let W = canvas.width;
+let H = canvas.height;
+
+function resizeForDPI(){
+  const ratio = window.devicePixelRatio || 1;
+  const styleW = canvas.clientWidth;
+  canvas.width = Math.round(styleW * ratio);
+  canvas.height = Math.round(250 * ratio);
+  ctx.setTransform(ratio,0,0,ratio,0,0);
+  W = canvas.width / ratio;
+  H = canvas.height / ratio;
+}
+resizeForDPI();
+window.addEventListener('resize', resizeForDPI);
+
+let running = false;
+let gameOver = false;
+let score = 0;
+let highScore = Number(localStorage.getItem('miniDinoHigh')||0);
+let speed = 6;
+let frame = 0;
+let gameOverAlpha = 0;
+
+// Dino
+const dino = {
+  x: 60,
+  y: 0,
+  w: 44,
+  h: 44,
+  vy: 0,
+  grounded: false,
+  jumpPower: -13,
+  gravity: 0.7,
+  blinkTimer: 0
+};
+
+// Ground
+let groundY = H - 40;
+
+// Obstacles / Clouds
+let obstacles = [];
+let clouds = [];
+let spawnTimer = 0;
+
+// Sky color logic
+let baseSky = {r:157,g:215,b:255};
+let targetSky = {r:157,g:215,b:255};
+function setSkyColorByScore(){
+  if(score >= 50){
+    if(score % 20 === 0){ // random color change every 20
+      targetSky = {
+        r:Math.floor(150+Math.random()*100),
+        g:Math.floor(150+Math.random()*100),
+        b:Math.floor(150+Math.random()*100)
+      };
+    }
+  } else if(score >= 30){
+    targetSky = {r:255,g:170,b:200}; // pink
+  } else {
+    targetSky = {r:157,g:215,b:255}; // blue
+  }
+}
+function lerp(a,b,t){ return a+(b-a)*t; }
+
+function reset(){
+  running = true;
+  gameOver = false;
+  score = 0;
+  speed = 6;
+  frame = 0;
+  dino.y = groundY - dino.h;
+  dino.vy = 0;
+  dino.grounded = true;
+  obstacles = [];
+  clouds = [];
+  spawnTimer = 0;
+  gameOverAlpha = 0;
+  baseSky = {r:157,g:215,b:255};
+  targetSky = {r:157,g:215,b:255};
+}
+
+function spawnObstacle(){
+  const t = Math.random() < 0.1 ? 'ptero' : (Math.random()<0.5?'cactus':'cactus2');
+  let h = 34;
+  if(t==='cactus2') h = 50;
+  const obs = {
+    x: W + 40,
+    y: (t==='ptero') ? groundY - dino.h - 70 - Math.random()*40 : groundY - h,
+    w: (t==='ptero')?46: (t==='cactus2'?26:22),
+    h: (t==='ptero')?30:h,
+    type:t
+  };
+  obstacles.push(obs);
+}
+
+function spawnCloud(){
+  clouds.push({
+    x: W + 40,
+    y: 40 + Math.random()*60,
+    w: 60 + Math.random()*40,
+    speed: 1 + Math.random()*1.2
+  });
+}
+
+function update(){
+  if(!running) return;
+  frame++;
+  // limit speed
+  if(frame % 300 === 0 && speed < 10) speed += 0.3;
+
+  // Dino physics
+  dino.vy += dino.gravity;
+  dino.y += dino.vy;
+  if(dino.y + dino.h >= groundY){
+    dino.y = groundY - dino.h;
+    dino.vy = 0;
+    dino.grounded = true;
+  } else dino.grounded = false;
+
+  // 점수는 시간에 따라 증가 (약 0.6초마다)
+  if(frame % 36 === 0){
+    score++;
+    setSkyColorByScore();
+  }
+
+  // obstacles
+  spawnTimer++;
+  if(spawnTimer > 60 + Math.random()*60){
+    spawnObstacle();
+    spawnTimer = 0;
+  }
+  for(let i=obstacles.length-1;i>=0;i--){
+    const o = obstacles[i];
+    o.x -= speed;
+    if(o.x + o.w < -40) obstacles.splice(i,1);
+  }
+
+  // clouds
+  if(Math.random()<0.01) spawnCloud();
+  for(let i=clouds.length-1;i>=0;i--){
+    clouds[i].x -= clouds[i].speed;
+    if(clouds[i].x + clouds[i].w < -50) clouds.splice(i,1);
+  }
+
+  // sky color interpolation
+  baseSky.r = lerp(baseSky.r,targetSky.r,0.02);
+  baseSky.g = lerp(baseSky.g,targetSky.g,0.02);
+  baseSky.b = lerp(baseSky.b,targetSky.b,0.02);
+
+  // collision
+  for(const o of obstacles){
+    if(rectIntersect(dino.x+6,dino.y,dino.w-12,dino.h,o.x,o.y,o.w,o.h)){
+      gameOver = true;
+      running = false;
+      if(score>highScore){
+        highScore=score;
+        localStorage.setItem('miniDinoHigh',String(highScore));
+      }
+    }
+  }
+}
+
+function rectIntersect(ax,ay,aw,ah,bx,by,bw,bh){
+  return ax < bx + bw && ax + aw > bx && ay < by + bh && ay + ah > by;
+}
+
+function draw(){
+  const sky = `rgb(${baseSky.r|0},${baseSky.g|0},${baseSky.b|0})`;
+  const g = ctx.createLinearGradient(0,0,0,H);
+  g.addColorStop(0, sky);
+  g.addColorStop(1, '#ffffff');
+  ctx.fillStyle = g;
+  ctx.fillRect(0,0,W,H);
+
+  // clouds
+  for(const c of clouds){
+    ctx.fillStyle='rgba(255,255,255,0.85)';
+    roundRect(ctx,c.x,c.y,c.w,26,14,true,false);
+  }
+
+  // ground
+  ctx.fillStyle='#f1f1f1';
+  ctx.fillRect(0,groundY,W,H-groundY);
+  ctx.strokeStyle='#ddd';
+  ctx.beginPath();
+  ctx.moveTo(0,groundY);
+  ctx.lineTo(W,groundY);
+  ctx.stroke();
+
+  // obstacles
+  for(const o of obstacles){
+    if(o.type==='ptero') drawPtero(o);
+    else drawCactus(o);
+  }
+
+  // dino
+  drawDino();
+
+  // score
+  ctx.fillStyle='#333';
+  ctx.font='14px Inter, Arial';
+  ctx.fillText('Score: '+score,12,22);
+  ctx.fillText('High: '+highScore,110,22);
+
+  // game over fade
+  if(gameOver){
+    if(gameOverAlpha<1) gameOverAlpha+=0.04;
+    ctx.globalAlpha = Math.min(gameOverAlpha,1);
+    ctx.fillStyle='rgba(0,0,0,0.6)';
+    roundRect(ctx,W/2-170,H/2-46,340,92,20,true,false);
+    ctx.fillStyle='#fff';
+    ctx.font='20px Inter, Arial';
+    ctx.textAlign='center';
+    ctx.fillText('게임오버',W/2,H/2-6);
+    ctx.font='14px Inter, Arial';
+    ctx.fillText('스페이스 또는 터치로 재시작',W/2,H/2+18);
+    ctx.textAlign='start';
+    ctx.globalAlpha=1;
+  }
+}
+
+function drawDino(){
+  const x=dino.x,y=dino.y;
+  ctx.fillStyle='#222';
+  roundRect(ctx,x,y,dino.w,dino.h,8,true,false);
+
+  // 👁 눈 복원
+  if(dino.blinkTimer > 6){
+    ctx.fillStyle='#fff';
+    ctx.fillRect(x+28,y+10,8,8); // 흰자
+    ctx.fillStyle='#111';
+    ctx.fillRect(x+30,y+10,4,8); // 검은자
+  }
+
+  const legOffset=(dino.grounded&&running)?Math.sin(frame/6)*4:0;
+  ctx.fillStyle='#111';
+  roundRect(ctx,x+6,y+dino.h-8+legOffset,10,8,4,true,false);
+  roundRect(ctx,x+24,y+dino.h-8-legOffset,10,8,4,true,false);
+}
+
+function drawCactus(o){
+  ctx.fillStyle='#2f6b2f';
+  roundRect(ctx,o.x,o.y,o.w,o.h,5,true,false);
+}
+function drawPtero(o){
+  ctx.fillStyle='#333';
+  ctx.beginPath();
+  ctx.ellipse(o.x+o.w/2,o.y+o.h/2,o.w/2,o.h/2,0,0,Math.PI*2);
+  ctx.fill();
+  const flap=Math.sin(frame/8)*12;
+  ctx.fillRect(o.x-6,o.y+o.h/2-6-flap,o.w+12,6+flap*0.6);
+}
+function roundRect(ctx,x,y,w,h,r,fill,stroke){
+  if(typeof r==='undefined')r=5;
+  ctx.beginPath();
+  ctx.moveTo(x+r,y);
+  ctx.arcTo(x+w,y,x+w,y+h,r);
+  ctx.arcTo(x+w,y+h,x,y+h,r);
+  ctx.arcTo(x,y+h,x,y,r);
+  ctx.arcTo(x,y,x+w,y,r);
+  ctx.closePath();
+  if(fill)ctx.fill();
+  if(stroke)ctx.stroke();
+}
+
+// loop
+function loop(){
+  update();
+  draw();
+  requestAnimationFrame(loop);
+}
+reset();
+loop();
+
+// controls
+function doJump(){
+  if(gameOver){
+    reset();
+    return;
+  }
+  if(dino.grounded){
+    dino.vy=dino.jumpPower;
+    dino.grounded=false;
+  }
+}
+window.addEventListener('keydown',e=>{
+  if(e.code==='Space'||e.code==='ArrowUp'){
+    e.preventDefault();
+    doJump();
+  }
+});
+canvas.addEventListener('mousedown',()=>doJump());
+canvas.addEventListener('touchstart',e=>{
+  e.preventDefault();
+  doJump();
+},{passive:false});
+document.getElementById('restartBtn').addEventListener('click',()=>reset());
+</script>
+</body>
+</html>
