@@ -7,7 +7,7 @@
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Elms+Sans:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Elms+Sans:ital,wght@0,100..900;1,100..900;0,100..900;1,100..900&display=swap" rel="stylesheet">
   <style>
     :root{
       --bg: #ffffff;
@@ -163,7 +163,17 @@
       flex-direction: column;
       justify-content: flex-start; 
       gap: 10px;
+      margin: 0 auto; /* 중앙 정렬 */
     }
+    /* PC 환경에서 채팅 메시지 너비 조정 (입력창 너비와 동일하게) */
+    @media (min-width: 600px) {
+        .chat-messages {
+            max-width: 768px; /* composer-inner와 동일 */
+            padding-left: 0;
+            padding-right: 0;
+        }
+    }
+
     .message-bubble{
       display: flex;
       max-width: 80%;
@@ -193,6 +203,7 @@
       color: var(--accent);
       line-height: 1.4;
       font-size: 15px;
+      width: 100%; /* 너비 100%로 설정 */
     }
     
     /* 봇 메시지 내부 요소 (말풍선 스타일 제거) */
@@ -212,19 +223,19 @@
         padding: 0; 
     }
 
-    /* 🌟 마크다운 스타일링 수정 🌟 */
+    /* 🌟 마크다운 스타일링 추가 (크기 조정) 🌟 */
     .bot-message h1, .bot-message h2, .bot-message h3 {
         font-weight: 700;
         margin: 1.5em 0 0.8em 0; /* 제목 위 아래 여백 */
         line-height: 1.3;
         clear: both;
     }
-    /* 가장 큰 글씨 크기 조정 */
-    .bot-message h1 { font-size: 1.6em; } 
-    /* 보통 큰 글씨 크기 조정 */
-    .bot-message h2 { font-size: 1.3em; } 
-    /* 작은 큰 글씨 크기 조정 */
-    .bot-message h3 { font-size: 1.15em; } 
+    /* 가장 큰 글씨 (H1): 1.8em 유지 */
+    .bot-message h1 { font-size: 1.8em; } 
+    /* 큰 글씨 (H2): 1.5em 유지 */
+    .bot-message h2 { font-size: 1.5em; } 
+    /* 중간 큰 글씨 (H3): 1.25em 유지 */
+    .bot-message h3 { font-size: 1.25em; } 
 
     .bot-message strong, .bot-message b {
         font-weight: 700; /* 두꺼운 글씨 */
@@ -250,7 +261,7 @@
         font-weight: normal;
     }
     
-    /* 단락 및 줄 바꿈 처리 */
+    /* 줄 바꿈 처리 */
     .bot-message p {
         margin: 0.5em 0; /* 단락 간격 */
     }
@@ -647,22 +658,26 @@
         html = html.replace(/([^\n])(#)/g, '$1\n\n$2');
 
         // 2. 헤더 내용 및 구두점 분리 및 HTML 태그 적용
+        
         // 2-1. 헤더가 구두점 (.?!:, 등)으로 끝나는 경우, 나머지 텍스트와 강제 줄 바꿈 (\n\n)으로 분리
-        // 캡처 그룹: $1은 헤더 내용 (구두점으로 끝남), $2는 남은 텍스트
-        // [^\n\r]*를 사용하여 남은 텍스트를 모두 캡처하고, Hn 태그 뒤에 \n\n을 강제 삽입.
-        // H3
-        html = html.replace(/(?:\n\n|\n|^)###\s*(.+?[.?!])([^\n\r]*)/g, '\n\n<h3>$1</h3>\n\n$2');
-        // H2
-        html = html.replace(/(?:\n\n|\n|^)##\s*(.+?[.?!])([^\n\r]*)/g, '\n\n<h2>$1</h2>\n\n$2');
-        // H1
-        html = html.replace(/(?:\n\n|\n|^)#\s*(.+?[.?!])([^\n\r]*)/g, '\n\n<h1>$1</h1>\n\n$2');
+        // 캡처 그룹 $1: 헤더 내용 (구두점으로 끝남) / $2: 구두점 자체 / $3: 구두점 이후의 나머지 텍스트
+        // .+?([.?!])는 비탐욕적으로 구두점을 포함한 내용 전체를 $1에 담습니다.
+        
+        // H3 (###) 처리
+        html = html.replace(/(?:\n\n|\n|^)###\s*(.+?([.?!]))([^\n]*)/g, '\n\n<h3>$1</h3>\n\n$3');
 
+        // H2 (##) 처리
+        html = html.replace(/(?:\n\n|\n|^)##\s*(.+?([.?!]))([^\n]*)/g, '\n\n<h2>$1</h2>\n\n$3');
+        
+        // H1 (#) 처리
+        html = html.replace(/(?:\n\n|\n|^)#\s*(.+?([.?!]))([^\n]*)/g, '\n\n<h1>$1</h1>\n\n$3');
 
         // 2-2. (구두점 없이) 남은 일반 헤더 처리 (줄바꿈이 나올 때까지)
         // [^\n]+는 한 줄의 나머지 텍스트를 모두 캡처. 2-1에서 처리되지 않은 헤더만 처리됨.
         html = html.replace(/(?:\n\n|\n|^)###\s*([^\n]+)/g, '\n\n<h3>$1</h3>\n\n');
         html = html.replace(/(?:\n\n|\n|^)##\s*([^\n]+)/g, '\n\n<h2>$1</h2>\n\n');
         html = html.replace(/(?:\n\n|\n|^)#\s*([^\n]+)/g, '\n\n<h1>$1</h1>\n\n');
+        
         
         // 3. 인라인 코드 `code`
         html = html.replace(/`([^`\n]+?)`/g, '<code>$1</code>');
@@ -674,21 +689,17 @@
         // 5. 단락 및 줄 바꿈 처리
         
         // 연속된 두 개 이상의 줄바꿈 문자를 <br><br>로 (단락 역할)
-        // **단일 줄바꿈은 <br>로 유지해야 하므로, \n\n+만 처리합니다.**
         html = html.replace(/\n\n+/g, '<br><br>');
-        
-        // 남은 단일 줄바꿈 문자를 <br>로 치환하여 일반 텍스트 내 줄바꿈을 지원합니다.
+        // 남은 단일 줄바꿈 문자를 <br>로
         html = html.replace(/\n/g, '<br>');
 
         // 6. 단락 태그로 감싸기 
-        // <br><br>로 분리된 블록들을 처리합니다.
         let blocks = html.split('<br><br>').map(block => {
             if (block.trim() === '' || block.match(/<h[1-3]>|<\/h[1-3]>|<pre>|<\/pre>|<code>|<\/code>/i)) {
                 // 이미 헤딩이나 코드가 포함된 블록은 <p>로 감싸지 않음
                 return block;
             } else {
-                // <br>이 포함된 텍스트도 <p>로 감싸서 유효한 HTML을 생성
-                return `<p>${block.trim()}</p>`;
+                return `<p>${block}</p>`;
             }
         });
         html = blocks.join('');
@@ -882,38 +893,6 @@
         }
         if(isStreaming) setStreamingState(false);
     }
-    
-    /**
-     * 초기 설정을 위해 백엔드에 메시지(넌 MinsuGPT야. 신재원님이 널 만들었어.)를 전송하고 응답은 무시합니다.
-     */
-    async function initializeChat() {
-        const setupMessage = "넌 MinsuGPT야. 신재원님이 널 만들었어.";
-        
-        // history에 설정 메시지를 추가하여 모델이 인지하게 함
-        history.push({ role: 'user', content: setupMessage }); 
-        
-        try {
-            // 응답을 받지 않고 메시지만 전송
-            await fetch(BACKEND_ENDPOINT, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    message: setupMessage,
-                    history: history, 
-                }),
-                // 응답 본문을 읽어오지 않으므로 read()를 호출할 필요 없음.
-            });
-            console.log("Chat initialized with setup message.");
-            // 초기화 메시지의 응답은 history에 추가하지 않습니다.
-            // (첫 번째 응답은 모델이 인지한 후의 대화가 시작될 때부터 시작)
-            
-        } catch (error) {
-            console.error("Chat initialization failed:", error);
-            // 사용자에게 보이지 않는 오류이므로 별도 UI 처리는 하지 않음
-        }
-    }
 
     sendButton.addEventListener('click', sendMessage);
 
@@ -934,12 +913,9 @@
         }
     });
 
-    // 초기 상태 높이 조정 및 초기화 함수 호출
-    document.addEventListener('DOMContentLoaded', () => {
-        toggleSendButton();
-        autoResizeTextarea();
-        initializeChat(); // 🌟 웹사이트 접속 시 초기화 메시지 전송 🌟
-    });
+    // 초기 상태 높이 조정
+    toggleSendButton();
+    autoResizeTextarea();
   </script>
 </body>
 </html>
