@@ -11,9 +11,9 @@
   <style>
     :root{
       --bg: #ffffff;
-      --accent:#111827;
+      --accent:#111827; /* 검은색 계열 */
       --send-button-disabled: #9ca3af;
-      --send-button-enabled: #111827; /* 검은색 계열 */ 
+      --send-button-enabled: #111827; 
       --composer-padding: 6px 12px;
       --composer-padding-v: 12px; 
       --input-container-padding-v: 8px; 
@@ -53,7 +53,7 @@
       margin: 0;
     }
 
-    /* 헤더 및 콘텐츠 영역 스타일 - (초기 스타일 복구) */
+    /* 🌟🌟🌟 헤더 고정 (Sticky) 적용 🌟🌟🌟 */
     .header{
       display:flex;
       justify-content:space-between;
@@ -61,6 +61,13 @@
       padding:10px 16px;
       height:56px;
       border-bottom:none;
+      
+      /* 고정 속성 */
+      position: sticky;
+      top: 0;
+      z-index: 10; /* 다른 콘텐츠 위에 표시 */
+      background: var(--bg); /* 배경색 지정 (스크롤 시 내용이 비치지 않도록) */
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05); /* 약간의 그림자 추가 */
     }
     .header-icon{
       width:32px;
@@ -189,9 +196,10 @@
       justify-content: flex-end;
       align-self: flex-end;
     }
+    /* 🌟🌟🌟 사용자 메시지 색상 변경 (연한 회색) 🌟🌟🌟 */
     .user-message .message-text{
-      background-color: var(--send-button-enabled);
-      color: #ffffff;
+      background-color: #f1f4f9; /* 연한 회색 */
+      color: var(--accent); /* 텍스트 색상 검은색 */
       border-bottom-right-radius: 4px;
     }
     
@@ -215,11 +223,14 @@
         max-width: 100%;
         box-sizing: border-box;
         white-space: normal;
+        /* 🌟🌟🌟 텍스트가 안보이는 현상 방지: 기본 색상 명시 🌟🌟🌟 */
+        color: var(--accent); 
     }
 
     /* 🌟🌟🌟 부드러운 페이드인 애니메이션 🌟🌟🌟 */
     .new-block-fade {
-        opacity: 0;
+        /* opacity는 JS에서 visible 클래스 추가 시 1로 변환됨 */
+        opacity: 0; 
         transform: translateY(10px);
         transition: opacity 0.3s ease-out, transform 0.3s ease-out;
     }
@@ -228,10 +239,18 @@
         transform: translateY(0);
     }
     
+    /* 스트리밍 중인 블록은 즉시 표시 */
+    .bot-message .streaming-block {
+        opacity: 1; 
+        transform: translateY(0);
+        transition: none; /* 스트리밍 중에는 애니메이션 제거 */
+    }
+
+    
     /* 봇 메시지 블록 스타일 */
     .bot-message-block {
         padding: 0;
-        margin-top: 5px; /* 블록 간격 */
+        margin-top: 5px; 
     }
 
     /* 마크다운 스타일링 */
@@ -317,6 +336,7 @@
       box-shadow:none; 
       height: auto;
       min-height: calc(var(--min-input-container-height) + var(--composer-padding-v)); 
+      z-index: 10; /* 헤더와 동일하게 상단에 위치 */
     }
     .composer-inner{
       display:flex;
@@ -632,8 +652,7 @@
         
         // 🌟 현재 스트리밍되는 텍스트가 들어갈 컨테이너 (Fade-in 적용)
         const streamingBlock = document.createElement('div');
-        streamingBlock.className = 'streaming-block new-block-fade';
-        streamingBlock.style.opacity = 1; // 스트리밍 중에는 항상 표시
+        streamingBlock.className = 'streaming-block new-block-fade'; 
         
         botMessageContainer.appendChild(indicatorContainer);
         botMessageContainer.appendChild(messageBlocks);
@@ -702,7 +721,6 @@
         container.appendChild(element);
 
         // 🌟 페이드인 효과 적용
-        // requestAnimationFrame을 사용하여 DOM이 업데이트된 후 바로 애니메이션 시작
         requestAnimationFrame(() => {
             element.classList.add('visible');
             chatMessages.scrollTop = chatMessages.scrollHeight;
@@ -722,19 +740,20 @@
         
         // 단락 구분자 (\n\n)를 찾습니다.
         let doubleNewlineIndex = currentRawText.indexOf('\n\n');
-        let headerNewlineIndex = -1;
         
         // 🌟 헤더와 강제 줄바꿈을 위한 정규식
         // (#+) : 헤더 마크다운 / ([^\n]+?([.?!])) : 구두점으로 끝나는 내용 / ([^\n]*) : 뒤따르는 텍스트
         const headerRegex = /^(#+)\s*([^\n]+?([.?!]))\s*([^\n]*)/;
         
         let match = currentRawText.match(headerRegex);
+        let blockCompleted = false;
 
         if (doubleNewlineIndex !== -1) {
              // 일반 단락으로 분리
              let completedBlock = currentRawText.substring(0, doubleNewlineIndex);
              blocks.push(completedBlock);
              remainingText = currentRawText.substring(doubleNewlineIndex + 2);
+             blockCompleted = true;
         } else if (match) {
             // 헤더 + 강제 줄바꿈으로 분리
             let contentBeforeTrailing = match[0].substring(0, match[0].length - match[4].length);
@@ -742,14 +761,16 @@
             
             blocks.push(contentBeforeTrailing);
             remainingText = contentAfterTrailing;
+            blockCompleted = true;
         }
-
-
+        
         // 완성된 블록이 있다면 렌더링하고 추적 변수 업데이트
         for (let block of blocks) {
             if (block.trim().length > 0) {
                 appendBlockToContainer(block.trim(), blocksContainer);
-                completedRawText += block + '\n\n'; // 완성된 블록 + 구분자 추가
+                // 블록이 완성되면 뒤에 \n\n을 추가하여 completedRawText에 기록합니다.
+                // 일반 단락 분리 (\n\n) 또는 헤더 분리 시 모두 단락이 완성된 것으로 간주합니다.
+                completedRawText += block + '\n\n'; 
             }
         }
         
@@ -784,6 +805,7 @@
             if (lastBotMessageElement) {
                 const indicator = lastBotMessageElement.querySelector('#thinking-indicator');
                 const streamingBlock = lastBotMessageElement.querySelector('.streaming-block');
+                const blocksContainer = lastBotMessageElement.querySelector('.message-blocks');
 
                 // indicator가 아직 남아있다면 메시지를 추가하지 않고 삭제
                 if (indicator && indicator.style.display !== 'none') {
@@ -793,9 +815,8 @@
                     // 현재 스트리밍 중이던 내용을 완성된 블록으로 렌더링
                     let remainingBlockContent = streamingBlock.textContent.trim();
                     if (remainingBlockContent.length > 0) {
-                        const blocksContainer = lastBotMessageElement.querySelector('.message-blocks');
                         appendBlockToContainer(remainingBlockContent, blocksContainer);
-                        completedRawText += remainingBlockContent; // 기록에 추가
+                        // completedRawText는 스트리밍 중단 시에는 업데이트하지 않아도 됩니다. (history에 최종 fullResponse가 저장됨)
                     }
                     streamingBlock.remove(); // 스트리밍 블록 제거
                 } 
