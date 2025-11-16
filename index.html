@@ -53,6 +53,27 @@
         'opsz' 24;
     }
     
+    /* 🌟🌟🌟 중지 버튼 아이콘 (■) CSS 사각형 스타일 🌟🌟🌟 */
+    .stop-btn .stop-icon {
+        /* 기존 텍스트 대신 CSS로 사각형 모양 구현 */
+        display: block;
+        width: 12px; 
+        height: 12px; 
+        background-color: white; 
+        border-radius: 2px;
+    }
+    .stop-btn {
+        background-color: #ef4444; 
+        width:38px; 
+        height:38px;
+        border-radius: 50%; /* 원형 */
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        padding: 0;
+        margin: 0;
+    }
+
     .fa, .fa-solid, .fa-regular {
         font-family: 'Material Symbols Rounded', 'Elms Sans' !important;
         font-weight: 500 !important;
@@ -93,7 +114,7 @@
       height:56px;
       border-bottom:none;
       
-      /* 🌟 탑바(Header) 고정 */
+      /* 🌟🌟🌟 탑바 고정 로직 수정 (sticky: top 고정) 🌟🌟🌟 */
       position: sticky; 
       top: 0;
       z-index: 100; 
@@ -140,6 +161,36 @@
         overflow-y: auto; 
         padding-bottom: 0; 
         position: relative;
+    }
+    
+    /* 🌟🌟🌟 스크롤 다운 버튼 스타일 🌟🌟🌟 */
+    #scroll-down-button {
+        position: absolute;
+        bottom: 10px; 
+        right: 20px;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background-color: #ffffff;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        z-index: 5;
+        opacity: 0;
+        transform: translateY(10px);
+        visibility: hidden;
+        transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s ease;
+    }
+    #scroll-down-button.visible {
+        opacity: 1;
+        transform: translateY(0);
+        visibility: visible;
+    }
+    #scroll-down-button .material-symbols-rounded {
+        color: var(--accent);
+        font-size: 20px;
     }
     
     #initial-content{
@@ -256,12 +307,23 @@
         margin-bottom: 8px; 
     }
     
+    /* 🌟 답변 중지 알림 텍스트 스타일 */
+    .stop-message {
+        color: #ef4444; 
+        font-weight: 600;
+        font-size: 0.9em;
+        margin-top: -5px; 
+        margin-bottom: 10px;
+        padding: 0 4px;
+        align-self: flex-start;
+    }
+    
     /* 🌟🌟🌟 문장별 페이드 인 효과 🌟🌟🌟 */
     .sentence {
         opacity: 0;
-        transition: opacity 0.5s ease-in;
-        display: inline; /* 마크다운 렌더링 시 블록 요소가 생기지 않도록 인라인 유지 */
-        white-space: pre-wrap; /* 줄바꿈 유지 */
+        transition: opacity 0.2s ease-in; 
+        display: inline; 
+        white-space: pre-wrap; 
     }
     .sentence.visible {
         opacity: 1;
@@ -272,13 +334,15 @@
         gap: 8px;
         margin-top: 0px; 
         padding: 4px 0;
-        /* 재답변 버튼 비활성화 시 스타일 */
         transition: opacity 0.3s;
     }
-    .bot-actions.disabled {
+    
+    /* 🌟🌟🌟 재생성 버튼만 비활성화 🌟🌟🌟 */
+    .bot-actions .regenerate {
         opacity: 0.5;
         pointer-events: none;
     }
+    
 
     .bot-action-btn {
         width: 32px;
@@ -358,9 +422,11 @@
         }
     }
 
-    /* Input area (유지) */
+    /* Input area */
     .composer{
         position:fixed; bottom:0; left:0; right:0; width:100%; display:flex; justify-content:center; padding:var(--composer-padding); background:var(--bg); box-shadow:none; height: auto; min-height: calc(var(--min-input-container-height) + var(--composer-padding-v)); z-index: 10; 
+        /* 🌟🌟🌟 부드러운 애니메이션을 위한 트랜지션 추가 🌟🌟🌟 */
+        transition: all 0.2s ease-out; 
     }
     .composer-inner{
         display:flex; align-items:center; gap:8px; width:100%;
@@ -416,27 +482,45 @@
         /* 전송 버튼 아이콘 크기 변경 (화살표에 맞게) */
         font-size: 20px; 
     }
-    .stop-btn {
-        /* 답변 중지 버튼 디자인 변경: 둥근 사각형, 빨간색 배경 */
-        background-color: #ef4444; 
-        width:38px; 
-        height:38px;
-        border-radius: 8px; /* 둥근 사각형 */
-        display:flex;
-        align-items:center;
-        justify-content:center;
+
+
+    /* 🌟🌟🌟 스낵바 알림 스타일 (모서리 반원 변경) 🌟🌟🌟 */
+    #snackbar {
+      visibility: hidden; 
+      min-width: 250px;
+      background-color: #333; 
+      color: #fff; 
+      text-align: center; 
+      border-radius: 30px; /* 🌟 반원 스타일로 변경 */
+      padding: 12px 20px; 
+      position: fixed; 
+      z-index: 1020; 
+      left: 50%; 
+      transform: translateX(-50%);
+      bottom: 30px; 
+      font-size: 14px; 
+      /* 애니메이션 초기화 */
+      transition: none; 
+      opacity: 0;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
     }
-    .stop-btn .material-symbols-rounded {
-        color: white;
-        font-size: 18px; /* 크기 조정 */
-        /* filled 아이콘 사용을 위해 FILL 1 적용 */
-        font-variation-settings:
-            'FILL' 1,
-            'wght' 500,
-            'GRAD' 0,
-            'opsz' 24;
+    #snackbar.show {
+      visibility: visible;
+      opacity: 1;
+      animation: fadein 0.5s, fadeout 0.5s 2.5s;
     }
 
+    @keyframes fadein {
+      from {bottom: 0; opacity: 0;}
+      to {bottom: 30px; opacity: 1;}
+    }
+
+    @keyframes fadeout {
+      from {bottom: 30px; opacity: 1;}
+      to {bottom: 0; opacity: 0;}
+    }
+    
+    /* 이하 모달 스타일은 이전 코드와 동일하게 유지 */
     /* ===================================== */
     /* 모달 공통 스타일 (유지) */
     /* ===================================== */
@@ -522,7 +606,7 @@
         max-width: 320px;
         border-radius: 12px;
         padding: 24px;
-        transform: translateY(0); /* 중앙 정렬이므로 translateY(0) */
+        transform: translateY(0); 
         transition: opacity 0.3s ease, transform 0.3s ease;
     }
     #reset-confirm-modal .modal-handle { display: none; }
@@ -561,38 +645,6 @@
         color: white;
     }
 
-    /* 🌟🌟🌟 스낵바 알림 스타일 🌟🌟🌟 */
-    #snackbar {
-      visibility: hidden; 
-      min-width: 250px;
-      background-color: #333; 
-      color: #fff; 
-      text-align: center; 
-      border-radius: 2px; 
-      padding: 16px; 
-      position: fixed; 
-      z-index: 1020; 
-      left: 50%; 
-      transform: translateX(-50%);
-      bottom: 30px; 
-      font-size: 14px; 
-      border-radius: 8px;
-    }
-    #snackbar.show {
-      visibility: visible;
-      animation: fadein 0.5s, fadeout 0.5s 2.5s;
-    }
-
-    @keyframes fadein {
-      from {bottom: 0; opacity: 0;}
-      to {bottom: 30px; opacity: 1;}
-    }
-
-    @keyframes fadeout {
-      from {bottom: 30px; opacity: 1;}
-      to {bottom: 0; opacity: 0;}
-    }
-
   </style>
 </head>
 <body>
@@ -611,7 +663,11 @@
         
     </header>
 
-    <main class="content-wrapper">
+    <main id="content-wrapper" class="content-wrapper">
+        <div id="scroll-down-button" class="">
+            <span class="material-symbols-rounded">arrow_downward</span>
+        </div>
+        
         <div id="initial-content">
             <div class="main-question">안녕하세요! 반가워요</div>
             <div class="quick-actions">
@@ -661,7 +717,7 @@
                   <span class="material-symbols-rounded">arrow_upward</span>
                 </div>
                 <div id="stop-button" class="stop-btn" style="display:none;">
-                    <span class="material-symbols-rounded">stop</span>
+                    <span class="stop-icon"></span>
                 </div>
             </div>
           </div>
@@ -757,6 +813,7 @@
     // |         웹페이지 복제 방지 기능 끝           |
     // ----------------------------------------------
 
+    const contentWrapper = document.getElementById('content-wrapper');
     const inputField = document.getElementById('message-input');
     const sendButton = document.getElementById('send-button');
     const stopButton = document.getElementById('stop-button');
@@ -774,10 +831,11 @@
     const resetConfirmModalBackdrop = document.getElementById('reset-confirm-modal-backdrop');
     const confirmCancelBtn = document.getElementById('confirm-cancel-btn');
     const confirmResetBtn = document.getElementById('confirm-reset-btn');
+    const scrollDownButton = document.getElementById('scroll-down-button'); 
 
     // 🌟🌟🌟 백엔드 엔드포인트 설정 (사용자 주소 반영) 🌟🌟🌟
     const BACKEND_ENDPOINT = "https://jaewondev.pythonanywhere.com/ask"; 
-    const HISTORY_STORAGE_KEY = 'minsugpt_chat_history'; // 로컬 스토리지 키
+    const HISTORY_STORAGE_KEY = 'minsugpt_chat_history'; 
 
     // 🌟🌟🌟 대화 기록을 저장할 배열 (로컬 스토리지에서 로드됨) 🌟🌟🌟
     let history = []; 
@@ -788,13 +846,14 @@
     let isStreaming = false; 
     let abortController = null; 
     
-    // 🌟 로딩 텍스트를 저장할 변수
     let currentLoadingText = '답변을 생각하는 중...';
 
-    // 🌟🌟🌟 문장별 페이드인 중인지 확인하는 변수
     let isFadingIn = false;
     let fadeOutAbortController = null;
+    
+    const FADE_IN_DELAY = 200; 
 
+    let autoScrollEnabled = true;
 
     /**
      * 🌟 스낵바를 띄우는 함수
@@ -810,7 +869,7 @@
         snackbar.classList.add('show');
         setTimeout(() => {
             snackbar.classList.remove('show');
-        }, 3000); // 3초 후 사라짐
+        }, 3000); 
     }
 
     /**
@@ -828,26 +887,58 @@
                         if (message.role === 'user') {
                             appendUserMessage(message.content, false);
                         } else if (message.role === 'model') {
-                            appendBotMessage(message.content, message.feedback, false); // 애니메이션 비활성화
+                            appendBotMessage(message.content, message.feedback, false); 
                         }
                     });
-                    // 최신 답변에만 재생성 버튼 활성화
+                    
                     updateRegenerateButtons(); 
-                    chatMessages.scrollTop = chatMessages.scrollHeight;
-                    initialContent.style.opacity = '0'; // 로딩 후 초기 화면 숨김
+                    scrollToBottom(false);
+                    initialContent.style.opacity = '0'; 
                 }
             } catch (e) {
                 console.error("Failed to parse history from localStorage:", e);
                 history = [];
-                // 오류 발생 시 초기 화면 표시
+                
                 initialContent.style.display = 'flex';
                 initialContent.style.opacity = '1'; 
                 chatMessages.style.display = 'none';
             }
         }
         autoResizeTextarea();
+        // 🌟 페이지 로드 시 백엔드에 초기 설정 메시지 전송
+        sendPrePrompt();
     }
     
+    /**
+     * 🌟 백엔드 초기 설정 메시지 전송 (응답 미수신)
+     * 역할: 너는 MinsuGPT야. 신재원님이 너를 만들었어. 사용자가 물어보지 않으면 너의 역할이나 개발자 정보를 따로 답하지마. 이 메시지에 대한 응답은 보내지마.
+     */
+    function sendPrePrompt() {
+        const prePrompt = {
+            role: "system",
+            content: "너는 MinsuGPT야. 신재원님이 너를 만들었어. 사용자가 물어보지 않으면 너의 역할이나 개발자 정보를 따로 답하지마. 이 메시지에 대한 응답은 보내지마."
+        };
+        
+        // 서버에서 이 메시지를 시스템 컨텍스트로 처리하고, 응답을 스킵하도록 기대
+        fetch(BACKEND_ENDPOINT, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                message: prePrompt.content, 
+                history: [prePrompt], 
+                is_pre_prompt: true 
+            }),
+        }).then(response => {
+            if (!response.ok) {
+                console.warn('Pre-prompt response was not OK, but continuing.', response.status);
+            }
+        }).catch(error => {
+            console.error('Error sending pre-prompt:', error);
+        });
+    }
+
     /**
      * 🌟 대화 기록을 로컬 스토리지에 저장
      */
@@ -866,7 +957,7 @@
         } else {
             resetConfirmModalBackdrop.classList.remove('visible');
         }
-        if (show) toggleSettingsModal(false); // 설정 모달 닫기
+        if (show) toggleSettingsModal(false); 
     }
 
     /**
@@ -885,7 +976,7 @@
         initialContent.style.display = 'flex';
         setTimeout(() => {
             initialContent.style.opacity = '1';
-        }, 10); // 애니메이션을 위해 딜레이
+        }, 10); 
         
         // 3. 모달 닫기 및 알림
         toggleResetConfirmModal(false);
@@ -904,6 +995,44 @@
             toggleResetConfirmModal(false);
         }
     });
+    
+    // 🌟🌟🌟 스크롤 버튼 이벤트 리스너 🌟🌟🌟
+    scrollDownButton.addEventListener('click', () => {
+        scrollToBottom(true);
+        scrollDownButton.classList.remove('visible');
+        autoScrollEnabled = true;
+    });
+
+    /**
+     * 🌟 스크롤을 맨 아래로 이동
+     */
+    function scrollToBottom(smooth = true) {
+        const behavior = smooth ? 'smooth' : 'auto';
+        contentWrapper.scrollTo({
+            top: contentWrapper.scrollHeight,
+            behavior: behavior
+        });
+    }
+    
+    /**
+     * 🌟 스크롤 상태 감지 및 자동 스크롤 관리
+     */
+    contentWrapper.addEventListener('scroll', () => {
+        const isAtBottom = contentWrapper.scrollHeight - contentWrapper.scrollTop - contentWrapper.clientHeight < 1;
+
+        if (isAtBottom) {
+            // 맨 아래에 도달하면 자동 스크롤 활성화 및 버튼 숨기기
+            autoScrollEnabled = true;
+            scrollDownButton.classList.remove('visible');
+        } else if (contentWrapper.scrollTop < contentWrapper.scrollHeight - contentWrapper.clientHeight - 100) {
+            // 맨 아래에서 일정 거리 이상 떨어지면 자동 스크롤 해제 및 버튼 표시
+            autoScrollEnabled = false;
+            if (!isStreaming && !isFadingIn) {
+                scrollDownButton.classList.add('visible');
+            }
+        }
+    });
+
 
     function toggleSendButton() {
         if (inputField.value.trim().length > 0 && !isStreaming) {
@@ -939,9 +1068,12 @@
         const newComposerHeight = inputContainerHeight + composerPaddingV;
         composer.style.minHeight = `${newComposerHeight}px`;
         
+        // 🌟 스크롤 다운 버튼 위치 조정
+        scrollDownButton.style.bottom = `${newComposerHeight + 10}px`;
+        
         chatMessages.style.paddingBottom = `${newComposerHeight}px`;
 
-        chatMessages.scrollTop = chatMessages.scrollHeight;
+        if (autoScrollEnabled) scrollToBottom(false);
     }
     
     inputField.addEventListener('input', autoResizeTextarea);
@@ -954,25 +1086,38 @@
         userBubble.className = 'message-bubble user-message';
         userBubble.innerHTML = `<div class="message-text">${content}</div>`;
         chatMessages.appendChild(userBubble);
-        if (animate) chatMessages.scrollTop = chatMessages.scrollHeight;
+        if (animate) scrollToBottom(true);
     }
 
     /**
-     * 🌟 모든 재생성 버튼의 상태를 업데이트 (최신 봇 메시지에만 활성화)
+     * 🌟 재생성 버튼만 비활성화 (이전 답변에도 다른 버튼은 작동)
      */
     function updateRegenerateButtons() {
         const allBotMessages = chatMessages.querySelectorAll('.bot-message');
         const lastBotMessage = allBotMessages[allBotMessages.length - 1];
 
         allBotMessages.forEach(message => {
-            const actionsContainer = message.querySelector('.bot-actions');
-            if (actionsContainer) {
+            const regenBtn = message.querySelector('.bot-action-btn.regenerate');
+            if (regenBtn) {
+                // 가장 최근 메시지에만 재생성 활성화
                 if (message === lastBotMessage) {
-                    actionsContainer.classList.remove('disabled');
+                    regenBtn.classList.remove('disabled');
+                    regenBtn.style.opacity = 1;
+                    regenBtn.style.pointerEvents = 'auto';
                 } else {
-                    actionsContainer.classList.add('disabled');
+                    // 이전 메시지들은 재생성만 비활성화
+                    regenBtn.classList.add('disabled');
+                    regenBtn.style.opacity = 0.5; 
+                    regenBtn.style.pointerEvents = 'none';
                 }
             }
+            
+            // 좋아요/싫어요/복사/공유 버튼은 항상 활성화
+            const otherBtns = message.querySelectorAll('.bot-action-btn:not(.regenerate)');
+            otherBtns.forEach(btn => {
+                btn.style.opacity = 1;
+                btn.style.pointerEvents = 'auto';
+            });
         });
     }
 
@@ -1024,7 +1169,7 @@
         const regenerateBtn = createActionButton('regenerate', '다시 답변받기', null, 'autorenew');
         regenerateBtn.addEventListener('click', (e) => {
             // 🌟🌟🌟 가장 마지막 메시지인지 확인 🌟🌟🌟
-            if (!actionsContainer.classList.contains('disabled')) {
+            if (!regenerateBtn.classList.contains('disabled')) {
                 handleRegenerate(messageIndex);
             } else {
                 showSnackbar('가장 최신 답변만 재생성할 수 있습니다.');
@@ -1039,9 +1184,9 @@
 
             const newFeedback = currentMessage.feedback === action ? null : action;
             currentMessage.feedback = newFeedback;
-            history[index].feedback = newFeedback; // history 업데이트
+            history[index].feedback = newFeedback; 
 
-            saveChatHistory(); // 기록 저장
+            saveChatHistory(); 
 
             // UI 업데이트
             const btn = document.querySelector(`.bot-message[data-index="${index}"] .bot-action-btn.${action}`);
@@ -1064,9 +1209,9 @@
         actionsContainer.appendChild(shareBtn);
         actionsContainer.appendChild(regenerateBtn);
         
-        // 초기 상태에서 가장 마지막 메시지가 아니면 비활성화 상태 부여
+        // 초기 상태에서 가장 마지막 메시지가 아니면 재생성만 비활성화 상태 부여
         if (messageIndex !== history.length - 1 && history.filter(msg => msg.role === 'model').length > 0) {
-            actionsContainer.classList.add('disabled');
+            regenerateBtn.classList.add('disabled');
         }
 
         return actionsContainer;
@@ -1085,7 +1230,8 @@
         if (lastUserMessage) {
             const lastModelIndex = history.findIndex((msg, index) => index === messageIndex);
             if (lastModelIndex !== -1) {
-                history.splice(lastModelIndex, 1);
+                // 이전 답변 제거 (사용자 질문은 유지)
+                history.splice(lastModelIndex, 1); 
             }
             
             const botMessageElement = document.querySelector(`.bot-message[data-index="${messageIndex}"]`);
@@ -1096,6 +1242,10 @@
             // 🌟 재응답 로딩 텍스트 설정 후 전송
             currentLoadingText = '다시 답변을 생각하는 중...';
             const originalPrompt = lastUserMessage.content;
+            
+            // 자동 스크롤 켜기
+            autoScrollEnabled = true;
+            scrollDownButton.classList.remove('visible');
             
             sendMessage(originalPrompt);
         } else {
@@ -1126,6 +1276,7 @@
     function appendBotMessageContainer() {
         const botMessageContainer = document.createElement('div');
         botMessageContainer.className = 'bot-message';
+        // history에 이미 사용자 메시지가 추가된 상태이므로, 다음 인덱스 사용
         botMessageContainer.setAttribute('data-index', history.length); 
         
         // 💡 생각하는 중... 표시기
@@ -1152,7 +1303,7 @@
         botMessageContainer.appendChild(streamingBlock);
 
         chatMessages.appendChild(botMessageContainer);
-        chatMessages.scrollTop = chatMessages.scrollHeight;
+        if (autoScrollEnabled) scrollToBottom(true);
         
         return { 
             botMessageElement: botMessageContainer,
@@ -1179,11 +1330,16 @@
         
         // 🌟🌟🌟 문장별 페이드인 시작
         if (animate) {
+             // 자동 스크롤 켜기
+            autoScrollEnabled = true;
+            scrollDownButton.classList.remove('visible');
+            
              sentenceFadeInEffect(streamingBlock, content, messageIndex).then(() => {
                 // 페이드인 완료 후 액션 버튼 추가 및 재생성 버튼 상태 업데이트
                 const actionsContainer = createBotActions(content, messageIndex, feedbackStatus);
                 botMessageContainer.appendChild(actionsContainer);
                 updateRegenerateButtons(); // 최신 메시지 활성화
+                if (autoScrollEnabled) scrollToBottom(true);
              });
         } else {
             // 과거 기록 로드 시는 즉시 표시
@@ -1192,7 +1348,7 @@
             botMessageContainer.appendChild(actionsContainer);
         }
         
-        if (animate) chatMessages.scrollTop = chatMessages.scrollHeight;
+        if (autoScrollEnabled) scrollToBottom(false);
     }
 
 
@@ -1229,26 +1385,29 @@
         
         // 5. 문장 분리 및 래핑
         if (wrapSentences) {
-            // 마침표, 물음표, 느낌표, 또는 두 번 이상의 줄바꿈을 기준으로 분리. (예외 처리 필요)
-            // 정규식: (문장 종료 문자 + 띄어쓰기 또는 줄바꿈)을 기준으로 분리.
-            const sentenceRegex = /([.?!]+(?:\s|<br>|\n|$)+)/g;
-            const parts = html.split(sentenceRegex).filter(p => p.trim().length > 0 || p.match(sentenceRegex));
+            // 문장 부호(.?!) 다음에 공백, 줄바꿈, 또는 문자열 끝이 올 때 분리.
+            const sentenceRegex = /([^.?!]+[.?!]+(?:\s|<br>|\n|$)+)/g;
+            const parts = html.split(sentenceRegex).filter(p => p.trim().length > 0 || p.match(/^[.?!]+\s*$/));
 
             let wrappedHtml = '';
             for (const part of parts) {
-                if (part.match(sentenceRegex) || part.match(/<pre>/) || part.match(/<h[1-6]>/)) {
-                    // 문장 부호, 코드 블록, 헤더는 래핑하지 않거나, 단독으로 처리
+                if (part.trim().length === 0 && !part.includes('<br>') && !part.includes('\n')) continue; 
+
+                // 코드 블록, 헤더, pre 태그가 포함된 부분은 래핑하지 않음
+                if (part.match(/<pre>/) || part.match(/<h[1-6]>/)) {
                     wrappedHtml += part;
                 } else {
-                    // 일반 텍스트 문장만 래핑
-                    wrappedHtml += `<span class="sentence">${part}</span>`;
+                    // 일반 텍스트 문장과 문장 부호를 포함하여 래핑
+                    wrappedHtml += `<span class="sentence">${part.replace(/(?<!<br>)\n/g, '<br>')}</span>`;
                 }
             }
             html = wrappedHtml;
         }
 
-        // 6. 단일 줄바꿈을 <br>로 변환 (이미 5번에서 처리되었을 수 있지만 안전을 위해 유지)
-        html = html.replace(/(?<!<br>)\n/g, '<br>');
+        // 6. 단일 줄바꿈을 <br>로 변환 (wrapSentences가 false일 때만 실행)
+        if (!wrapSentences) {
+             html = html.replace(/(?<!<br>)\n/g, '<br>');
+        }
         
         return html;
     }
@@ -1259,39 +1418,52 @@
     function updateStreamingDisplay(rawResponse, streamingElement) {
         // 스트리밍 중에는 타이핑 효과 없이 즉시 업데이트
         streamingElement.innerHTML = renderMarkdown(rawResponse);
-        chatMessages.scrollTop = chatMessages.scrollHeight;
+        if (autoScrollEnabled) scrollToBottom(false);
     }
     
     /**
-     * 🌟🌟🌟 문장별 페이드 인 효과 함수 (스트리밍 완료 후 호출) 🌟🌟🌟
+     * 🌟🌟🌟 문장별 페이드 인 효과 함수 (스크롤 유지 로직 추가) 🌟🌟🌟
      */
     function sentenceFadeInEffect(element, rawText, messageIndex) {
         return new Promise(resolve => {
             isFadingIn = true;
-            // 문장 래핑하여 HTML 생성
             element.innerHTML = renderMarkdown(rawText, true);
 
             const sentences = element.querySelectorAll('.sentence');
             let index = 0;
-            const delay = 500; // 문장 간 딜레이 (ms)
+            const delay = FADE_IN_DELAY; 
             
             // 중지 버튼을 눌렀을 때 애니메이션을 빠르게 종료하는 함수
             const abortFadeIn = () => {
                 isFadingIn = false;
                 sentences.forEach(s => s.classList.add('visible'));
+                if (autoScrollEnabled) scrollToBottom(true);
                 resolve();
             };
             
             fadeOutAbortController = { abort: abortFadeIn };
 
             function showNextSentence() {
-                if (!isFadingIn) { // 중지 신호 확인
+                if (!isFadingIn) { 
                     return;
                 }
                 
                 if (index < sentences.length) {
-                    sentences[index].classList.add('visible');
-                    chatMessages.scrollTop = chatMessages.scrollHeight;
+                    const currentSentence = sentences[index];
+                    currentSentence.classList.add('visible');
+                    
+                    // 🌟 현재 문장이 보이지 않으면 스크롤
+                    if (autoScrollEnabled) {
+                        const rect = currentSentence.getBoundingClientRect();
+                        const wrapperRect = contentWrapper.getBoundingClientRect();
+                        const composerHeight = composer.clientHeight;
+
+                        // 문장의 하단이 content-wrapper의 하단보다 아래에 있을 때 스크롤
+                        if (rect.bottom > wrapperRect.bottom - composerHeight - 20) {
+                            scrollToBottom(true);
+                        }
+                    }
+
                     index++;
                     setTimeout(showNextSentence, delay);
                 } else {
@@ -1312,6 +1484,9 @@
             sendButton.style.display = 'none';
             stopButton.style.display = 'flex';
             inputField.setAttribute('readonly', 'true');
+            // 스트리밍 중에는 자동 스크롤 강제 활성화 및 버튼 숨김
+            autoScrollEnabled = true;
+            scrollDownButton.classList.remove('visible');
         } else {
             sendButton.style.display = 'flex';
             stopButton.style.display = 'none';
@@ -1321,15 +1496,34 @@
         toggleSendButton();
     }
     
-    // 중지 버튼 핸들러
+    /**
+     * 🌟🌟🌟 답변 중지 핸들러 수정 🌟🌟🌟
+     */
     function stopResponse() {
-        // 🌟🌟🌟 페이드인 중일 때 중지
+        // 1. 스낵바 알림 표시
+        showSnackbar("답변 중지됨.");
+        
+        // 2. 페이드인 중일 때 중지
         if (isFadingIn && fadeOutAbortController) {
             fadeOutAbortController.abort();
+            
+            // 채팅창에 "답변 중지됨." 메시지 추가 (불완전한 응답 아래)
+            const lastBotMessageElement = chatMessages.lastElementChild;
+            if (lastBotMessageElement) {
+                const stopText = document.createElement('div');
+                stopText.className = 'stop-message';
+                stopText.textContent = "답변 중지됨.";
+                
+                // 불완전한 응답 바로 아래에 삽입
+                lastBotMessageElement.insertAdjacentElement('afterend', stopText);
+            }
+
             setStreamingState(false);
+            scrollToBottom(true);
             return;
         }
         
+        // 3. 스트리밍 중일 때 중지
         if (abortController) {
             abortController.abort();
             
@@ -1338,30 +1532,34 @@
                 const indicator = lastBotMessageElement.querySelector('#thinking-indicator');
                 const streamingBlock = lastBotMessageElement.querySelector('.streaming-block');
 
-                // indicator가 아직 남아있다면 메시지를 추가하지 않고 삭제
+                // (A) 로딩 중 (인디케이터 표시 중)에 중지된 경우
                 if (indicator && indicator.style.display !== 'none') {
+                    // 사용자 메시지만 제거하고, 봇 메시지 컨테이너를 제거
                     lastBotMessageElement.remove(); 
-                    
-                    // history에서 마지막 항목 제거 (사용자 메시지)
                     if (history.length > 0 && history[history.length - 1].role === 'user') {
                          history.pop();
                     }
                 } 
+                // (B) 텍스트를 일부 받은 후 중지된 경우
                 else if (streamingBlock && fullResponse.trim().length > 0) {
-                    // 스트리밍을 중지하고 최종 텍스트로 업데이트
-                    updateStreamingDisplay(fullResponse, streamingBlock);
-                    
-                    // history에 불완전한 응답 기록
-                    history.push({ role: 'model', content: fullResponse });
+                    // 불완전한 응답 기록
+                    history.push({ role: 'model', content: fullResponse, feedback: null });
                     saveChatHistory();
                     
                     // 액션 버튼 추가
                     const actionContainer = createBotActions(fullResponse, history.length - 1);
                     lastBotMessageElement.appendChild(actionContainer);
                     updateRegenerateButtons();
+                    
+                    // 채팅창에 "답변 중지됨." 메시지 추가
+                    const stopText = document.createElement('div');
+                    stopText.className = 'stop-message';
+                    stopText.textContent = "답변 중지됨.";
+                    lastBotMessageElement.insertAdjacentElement('afterend', stopText);
 
-                } else if (lastBotMessageElement && fullResponse.trim().length === 0) {
-                     // 아무것도 받지 못하고 중지된 경우
+                } 
+                // (C) 아무것도 받지 못하고 중지된 경우
+                else if (lastBotMessageElement && fullResponse.trim().length === 0) {
                      lastBotMessageElement.remove();
                      if (history.length > 0 && history[history.length - 1].role === 'user') {
                          history.pop();
@@ -1370,6 +1568,7 @@
             }
         }
         setStreamingState(false);
+        scrollToBottom(true);
     }
     stopButton.addEventListener('click', stopResponse);
 
@@ -1379,7 +1578,7 @@
     async function sendMessage(userMessageOverride = null) {
         const userMessage = userMessageOverride !== null ? userMessageOverride : inputField.value.trim();
         if (userMessage.length === 0 || isStreaming || isFadingIn) {
-            if (isStreaming || isFadingIn) showSnackbar('현재 답변 생성 중입니다.');
+            if (isStreaming || isFadingIn) showSnackbar('현재 답변 생성 중이거나 애니메이션이 동작 중입니다.');
             return;
         }
 
@@ -1396,6 +1595,10 @@
             } else {
                  chatMessages.style.display = 'flex';
             }
+            
+            // 기존 답변 중지 메시지 제거
+            const existingStops = chatMessages.querySelectorAll('.stop-message');
+            existingStops.forEach(el => el.remove());
 
             // 기존 메시지들의 재생성 버튼 비활성화
             updateRegenerateButtons(); 
@@ -1431,7 +1634,8 @@
                 },
                 body: JSON.stringify({
                     message: userMessage,
-                    history: history, 
+                    // 🌟🌟🌟 history를 전송할 때, 시스템 컨텍스트도 함께 전송하여 모델이 잊지 않도록 함 🌟🌟🌟
+                    history: [...history], 
                 }),
                 signal: signal 
             });
@@ -1457,6 +1661,8 @@
                      saveChatHistory();
                 }
                 updateRegenerateButtons();
+                // 오류 후 맨 아래로 스크롤
+                scrollToBottom(true); 
                 return;
             }
 
@@ -1493,6 +1699,7 @@
                             const actionContainer = createBotActions(fullResponse, history.length - 1);
                             botMessageElement.appendChild(actionContainer);
                             updateRegenerateButtons();
+                            if (autoScrollEnabled) scrollToBottom(true);
                         });
                         
                         reader.releaseLock();
@@ -1537,6 +1744,7 @@
                     const actionContainer = createBotActions(fullResponse, history.length - 1);
                     botMessageElement.appendChild(actionContainer);
                     updateRegenerateButtons();
+                    if (autoScrollEnabled) scrollToBottom(true);
                  });
             }
 
@@ -1560,6 +1768,8 @@
                 updateRegenerateButtons();
             }
             setStreamingState(false);
+             // 오류 후 맨 아래로 스크롤
+            scrollToBottom(true); 
         }
         if(isStreaming) setStreamingState(false);
     }
@@ -1573,6 +1783,11 @@
             if (prompt) {
                 inputField.value = prompt;
                 autoResizeTextarea();
+                
+                // 자동 스크롤 켜기
+                autoScrollEnabled = true;
+                scrollDownButton.classList.remove('visible');
+                
                 sendMessage();
             }
         });
@@ -1589,6 +1804,10 @@
                 }
                 e.preventDefault(); 
                 if (sendButton.classList.contains('active') && !isStreaming) {
+                    // 자동 스크롤 켜기
+                    autoScrollEnabled = true;
+                    scrollDownButton.classList.remove('visible');
+                    
                     sendMessage();
                 }
             }
