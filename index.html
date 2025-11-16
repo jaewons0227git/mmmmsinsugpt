@@ -223,27 +223,27 @@
         max-width: 100%;
         box-sizing: border-box;
         white-space: normal;
-        /* 🌟🌟🌟 텍스트가 안보이는 현상 방지: 기본 색상 명시 🌟🌟🌟 */
         color: var(--accent); 
     }
 
     /* 🌟🌟🌟 부드러운 페이드인 애니메이션 🌟🌟🌟 */
     .new-block-fade {
-        /* opacity는 JS에서 visible 클래스 추가 시 1로 변환됨 */
-        opacity: 0; 
+        opacity: 0; /* 초기 투명도 0 */
         transform: translateY(10px);
         transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+        color: var(--accent); /* 텍스트 색상 검은색 강제 지정 */
     }
     .new-block-fade.visible {
-        opacity: 1;
+        opacity: 1; /* 최종 투명도 1 */
         transform: translateY(0);
     }
     
-    /* 스트리밍 중인 블록은 즉시 표시 */
+    /* 🌟🌟🌟 스트리밍 중인 블록은 즉시 표시 (문제 해결 핵심) 🌟🌟🌟 */
     .bot-message .streaming-block {
-        opacity: 1; 
-        transform: translateY(0);
-        transition: none; /* 스트리밍 중에는 애니메이션 제거 */
+        opacity: 1 !important; /* 투명도를 1로 강제 적용 */
+        transform: translateY(0) !important;
+        transition: none !important; /* 애니메이션 제거 */
+        color: var(--accent) !important; /* 텍스트 색상 검은색 강제 적용 */
     }
 
     
@@ -652,6 +652,7 @@
         
         // 🌟 현재 스트리밍되는 텍스트가 들어갈 컨테이너 (Fade-in 적용)
         const streamingBlock = document.createElement('div');
+        // streaming-block에는 new-block-fade 클래스를 적용하되, CSS에서 !important로 opacity:1을 강제함
         streamingBlock.className = 'streaming-block new-block-fade'; 
         
         botMessageContainer.appendChild(indicatorContainer);
@@ -769,7 +770,6 @@
             if (block.trim().length > 0) {
                 appendBlockToContainer(block.trim(), blocksContainer);
                 // 블록이 완성되면 뒤에 \n\n을 추가하여 completedRawText에 기록합니다.
-                // 일반 단락 분리 (\n\n) 또는 헤더 분리 시 모두 단락이 완성된 것으로 간주합니다.
                 completedRawText += block + '\n\n'; 
             }
         }
@@ -816,7 +816,6 @@
                     let remainingBlockContent = streamingBlock.textContent.trim();
                     if (remainingBlockContent.length > 0) {
                         appendBlockToContainer(remainingBlockContent, blocksContainer);
-                        // completedRawText는 스트리밍 중단 시에는 업데이트하지 않아도 됩니다. (history에 최종 fullResponse가 저장됨)
                     }
                     streamingBlock.remove(); // 스트리밍 블록 제거
                 } 
