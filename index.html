@@ -93,7 +93,8 @@
       height:56px;
       border-bottom:none;
       
-      position: sticky;
+      /* 🌟 탑바(Header) 고정 */
+      position: sticky; 
       top: 0;
       z-index: 100; 
       background: var(--bg); 
@@ -120,11 +121,6 @@
       font-size:14px;
       cursor: pointer;
     }
-    /* 🌟 아이콘 제거로 인해 관련 스타일 제거 */
-    /* .plus-btn .material-symbols-rounded{
-      font-size: 16px;
-      transform:translateY(1px);
-    } */
     .profile-btn{
       width:32px;
       height:32px;
@@ -140,7 +136,8 @@
         flex-grow:1;
         display:flex;
         flex-direction:column;
-        overflow-y: auto;
+        /* 스크롤은 content-wrapper에서만 발생하도록 설정 */
+        overflow-y: auto; 
         padding-bottom: 0; 
         position: relative;
     }
@@ -259,20 +256,28 @@
         margin-bottom: 8px; 
     }
     
-    .bot-message .streaming-block {
-        opacity: 1 !important; 
-        transform: translateY(0) !important;
-        transition: none !important; 
-        color: var(--accent) !important; 
+    /* 🌟🌟🌟 문장별 페이드 인 효과 🌟🌟🌟 */
+    .sentence {
+        opacity: 0;
+        transition: opacity 0.5s ease-in;
+        display: inline; /* 마크다운 렌더링 시 블록 요소가 생기지 않도록 인라인 유지 */
+        white-space: pre-wrap; /* 줄바꿈 유지 */
     }
-
-    /* 마크다운 스타일링 (생략) */
-
+    .sentence.visible {
+        opacity: 1;
+    }
+    
     .bot-actions {
         display: flex;
         gap: 8px;
         margin-top: 0px; 
         padding: 4px 0;
+        /* 재답변 버튼 비활성화 시 스타일 */
+        transition: opacity 0.3s;
+    }
+    .bot-actions.disabled {
+        opacity: 0.5;
+        pointer-events: none;
     }
 
     .bot-action-btn {
@@ -408,16 +413,28 @@
     }
     .send-btn .material-symbols-rounded {
         color: white;
-        font-size: 18px; 
-        /* 🌟 전송 버튼 아이콘 크기 변경 (화살표에 맞게) */
+        /* 전송 버튼 아이콘 크기 변경 (화살표에 맞게) */
         font-size: 20px; 
     }
     .stop-btn {
+        /* 답변 중지 버튼 디자인 변경: 둥근 사각형, 빨간색 배경 */
         background-color: #ef4444; 
+        width:38px; 
+        height:38px;
+        border-radius: 8px; /* 둥근 사각형 */
+        display:flex;
+        align-items:center;
+        justify-content:center;
     }
     .stop-btn .material-symbols-rounded {
         color: white;
-        font-size: 16px;
+        font-size: 18px; /* 크기 조정 */
+        /* filled 아이콘 사용을 위해 FILL 1 적용 */
+        font-variation-settings:
+            'FILL' 1,
+            'wght' 500,
+            'GRAD' 0,
+            'opsz' 24;
     }
 
     /* ===================================== */
@@ -496,6 +513,86 @@
         display: none; 
     }
     
+    /* 🌟🌟🌟 대화 초기화 확인 모달 스타일 🌟🌟🌟 */
+    #reset-confirm-modal-backdrop {
+        align-items: center; 
+        z-index: 1010;
+    }
+    #reset-confirm-modal {
+        max-width: 320px;
+        border-radius: 12px;
+        padding: 24px;
+        transform: translateY(0); /* 중앙 정렬이므로 translateY(0) */
+        transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+    #reset-confirm-modal .modal-handle { display: none; }
+    #reset-confirm-modal h3 {
+        font-size: 1.2em;
+        margin: 0 0 10px 0;
+        text-align: center;
+        padding: 0;
+    }
+    #reset-confirm-modal p {
+        font-size: 0.95em;
+        color: #6b7280;
+        margin-bottom: 24px;
+        text-align: center;
+    }
+    .confirm-actions {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+    }
+    .confirm-actions button {
+        flex: 1;
+        padding: 10px 15px;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        font-size: 15px;
+    }
+    #confirm-cancel-btn {
+        background-color: #e5e8eb;
+        color: #111827;
+    }
+    #confirm-reset-btn {
+        background-color: #ef4444;
+        color: white;
+    }
+
+    /* 🌟🌟🌟 스낵바 알림 스타일 🌟🌟🌟 */
+    #snackbar {
+      visibility: hidden; 
+      min-width: 250px;
+      background-color: #333; 
+      color: #fff; 
+      text-align: center; 
+      border-radius: 2px; 
+      padding: 16px; 
+      position: fixed; 
+      z-index: 1020; 
+      left: 50%; 
+      transform: translateX(-50%);
+      bottom: 30px; 
+      font-size: 14px; 
+      border-radius: 8px;
+    }
+    #snackbar.show {
+      visibility: visible;
+      animation: fadein 0.5s, fadeout 0.5s 2.5s;
+    }
+
+    @keyframes fadein {
+      from {bottom: 0; opacity: 0;}
+      to {bottom: 30px; opacity: 1;}
+    }
+
+    @keyframes fadeout {
+      from {bottom: 30px; opacity: 1;}
+      to {bottom: 0; opacity: 0;}
+    }
+
   </style>
 </head>
 <body>
@@ -572,6 +669,8 @@
       </div>
     </div>
     
+    <div id="snackbar">메시지가 복사되었습니다.</div>
+    
     <div id="plus-modal-backdrop" class="modal-backdrop">
         <div id="plus-modal" class="modal">
             <div class="modal-handle"></div>
@@ -628,6 +727,17 @@
         </div>
     </div>
     
+    <div id="reset-confirm-modal-backdrop" class="modal-backdrop">
+        <div id="reset-confirm-modal" class="modal">
+            <h3>대화 초기화</h3>
+            <p>모든 대화 기록이 삭제되며, 이 작업은 되돌릴 수 없습니다.</p>
+            <div class="confirm-actions">
+                <button id="confirm-cancel-btn">취소</button>
+                <button id="confirm-reset-btn">초기화</button>
+            </div>
+        </div>
+    </div>
+    
   </div>
 
   <script>
@@ -660,6 +770,10 @@
     const settingsModalBackdrop = document.getElementById('settings-modal-backdrop');
     const resetChatButton = document.getElementById('reset-chat-button');
     const quickActionButtons = document.querySelectorAll('.action-btn'); 
+    const snackbar = document.getElementById('snackbar');
+    const resetConfirmModalBackdrop = document.getElementById('reset-confirm-modal-backdrop');
+    const confirmCancelBtn = document.getElementById('confirm-cancel-btn');
+    const confirmResetBtn = document.getElementById('confirm-reset-btn');
 
     // 🌟🌟🌟 백엔드 엔드포인트 설정 (사용자 주소 반영) 🌟🌟🌟
     const BACKEND_ENDPOINT = "https://jaewondev.pythonanywhere.com/ask"; 
@@ -677,6 +791,27 @@
     // 🌟 로딩 텍스트를 저장할 변수
     let currentLoadingText = '답변을 생각하는 중...';
 
+    // 🌟🌟🌟 문장별 페이드인 중인지 확인하는 변수
+    let isFadingIn = false;
+    let fadeOutAbortController = null;
+
+
+    /**
+     * 🌟 스낵바를 띄우는 함수
+     */
+    function showSnackbar(message) {
+        // 기존 애니메이션 초기화
+        snackbar.classList.remove('show');
+        snackbar.style.animation = 'none';
+        void snackbar.offsetWidth; // Reflow 강제
+        snackbar.style.animation = '';
+
+        snackbar.textContent = message;
+        snackbar.classList.add('show');
+        setTimeout(() => {
+            snackbar.classList.remove('show');
+        }, 3000); // 3초 후 사라짐
+    }
 
     /**
      * 🌟 대화 기록을 로컬 스토리지에서 로드하고 UI에 표시
@@ -693,9 +828,11 @@
                         if (message.role === 'user') {
                             appendUserMessage(message.content, false);
                         } else if (message.role === 'model') {
-                            appendBotMessage(message.content, message.feedback, false);
+                            appendBotMessage(message.content, message.feedback, false); // 애니메이션 비활성화
                         }
                     });
+                    // 최신 답변에만 재생성 버튼 활성화
+                    updateRegenerateButtons(); 
                     chatMessages.scrollTop = chatMessages.scrollHeight;
                     initialContent.style.opacity = '0'; // 로딩 후 초기 화면 숨김
                 }
@@ -719,13 +856,23 @@
     }
     
     /**
+     * 🌟 대화 초기화 확인 모달 토글
+     */
+    function toggleResetConfirmModal(show) {
+        if (show === undefined) {
+            resetConfirmModalBackdrop.classList.toggle('visible');
+        } else if (show) {
+            resetConfirmModalBackdrop.classList.add('visible');
+        } else {
+            resetConfirmModalBackdrop.classList.remove('visible');
+        }
+        if (show) toggleSettingsModal(false); // 설정 모달 닫기
+    }
+
+    /**
      * 🌟 대화 기록 초기화 및 UI 리셋
      */
     function resetChat() {
-        if (!confirm("현재 대화 기록을 모두 삭제하고 초기화하시겠습니까?")) {
-            return;
-        }
-        
         // 1. 상태 및 기록 초기화
         history = [];
         localStorage.removeItem(HISTORY_STORAGE_KEY);
@@ -740,10 +887,23 @@
             initialContent.style.opacity = '1';
         }, 10); // 애니메이션을 위해 딜레이
         
-        // 3. 모달 닫기
-        toggleSettingsModal(false);
-        alert("대화가 초기화되었습니다.");
+        // 3. 모달 닫기 및 알림
+        toggleResetConfirmModal(false);
+        showSnackbar("대화가 초기화되었습니다.");
     }
+    
+    // 이벤트 리스너: 대화 초기화 확인 모달
+    resetChatButton.addEventListener('click', (e) => {
+        e.preventDefault();
+        toggleResetConfirmModal(true);
+    });
+    confirmCancelBtn.addEventListener('click', () => toggleResetConfirmModal(false));
+    confirmResetBtn.addEventListener('click', resetChat);
+    resetConfirmModalBackdrop.addEventListener('click', (e) => {
+        if (e.target === resetConfirmModalBackdrop) {
+            toggleResetConfirmModal(false);
+        }
+    });
 
     function toggleSendButton() {
         if (inputField.value.trim().length > 0 && !isStreaming) {
@@ -797,6 +957,25 @@
         if (animate) chatMessages.scrollTop = chatMessages.scrollHeight;
     }
 
+    /**
+     * 🌟 모든 재생성 버튼의 상태를 업데이트 (최신 봇 메시지에만 활성화)
+     */
+    function updateRegenerateButtons() {
+        const allBotMessages = chatMessages.querySelectorAll('.bot-message');
+        const lastBotMessage = allBotMessages[allBotMessages.length - 1];
+
+        allBotMessages.forEach(message => {
+            const actionsContainer = message.querySelector('.bot-actions');
+            if (actionsContainer) {
+                if (message === lastBotMessage) {
+                    actionsContainer.classList.remove('disabled');
+                } else {
+                    actionsContainer.classList.add('disabled');
+                }
+            }
+        });
+    }
+
 
     /**
      * 🌟 봇 메시지 액션 버튼 생성
@@ -804,6 +983,7 @@
     function createBotActions(content, messageIndex, feedbackStatus = null) {
         const actionsContainer = document.createElement('div');
         actionsContainer.className = 'bot-actions';
+        actionsContainer.setAttribute('data-message-index', messageIndex);
 
         // 1. 좋아요 버튼 (Like)
         const likeBtn = createActionButton('like', '좋아요', feedbackStatus, 'thumb_up');
@@ -815,10 +995,10 @@
         const copyBtn = createActionButton('copy', '복사', null, 'content_copy');
         copyBtn.addEventListener('click', () => {
             navigator.clipboard.writeText(content).then(() => {
-                alert('메시지가 복사되었습니다.');
+                showSnackbar('메시지가 복사되었습니다.');
             }).catch(err => {
                 console.error('복사 실패: ', err);
-                alert('복사에 실패했습니다.');
+                showSnackbar('복사에 실패했습니다.');
             });
         });
         
@@ -832,41 +1012,22 @@
                 }).catch(error => console.error('공유 실패', error));
             } else {
                 navigator.clipboard.writeText(content).then(() => {
-                    alert('공유 기능이 지원되지 않아 메시지를 복사했습니다.');
+                    showSnackbar('공유 기능이 없어 메시지를 복사했습니다.');
                 }).catch(err => {
                     console.error('복사 실패: ', err);
-                    alert('공유 및 복사에 실패했습니다.');
+                    showSnackbar('공유 및 복사에 실패했습니다.');
                 });
             }
         });
 
         // 5. 다시 답변 버튼 (Regenerate)
         const regenerateBtn = createActionButton('regenerate', '다시 답변받기', null, 'autorenew');
-        regenerateBtn.addEventListener('click', () => {
-            if (isStreaming) {
-                alert('현재 답변 생성 중입니다. 잠시 후 다시 시도해 주세요.');
-                return;
-            }
-            
-            const lastUserMessage = history.slice().reverse().find(msg => msg.role === 'user');
-            if (lastUserMessage) {
-                const lastModelIndex = history.findIndex((msg, index) => index === messageIndex);
-                if (lastModelIndex !== -1) {
-                    history.splice(lastModelIndex, 1);
-                }
-                
-                const botMessageElement = document.querySelector(`.bot-message[data-index="${messageIndex}"]`);
-                if (botMessageElement) {
-                     botMessageElement.remove();
-                }
-                
-                // 🌟 재응답 로딩 텍스트 설정 후 전송
-                currentLoadingText = '다시 답변을 생각하는 중...';
-                const originalPrompt = lastUserMessage.content;
-                
-                sendMessage(originalPrompt);
+        regenerateBtn.addEventListener('click', (e) => {
+            // 🌟🌟🌟 가장 마지막 메시지인지 확인 🌟🌟🌟
+            if (!actionsContainer.classList.contains('disabled')) {
+                handleRegenerate(messageIndex);
             } else {
-                alert('다시 답변받을 이전 사용자 메시지가 없습니다.');
+                showSnackbar('가장 최신 답변만 재생성할 수 있습니다.');
             }
         });
 
@@ -902,8 +1063,44 @@
         actionsContainer.appendChild(copyBtn);
         actionsContainer.appendChild(shareBtn);
         actionsContainer.appendChild(regenerateBtn);
+        
+        // 초기 상태에서 가장 마지막 메시지가 아니면 비활성화 상태 부여
+        if (messageIndex !== history.length - 1 && history.filter(msg => msg.role === 'model').length > 0) {
+            actionsContainer.classList.add('disabled');
+        }
 
         return actionsContainer;
+    }
+
+    /**
+     * 🌟 재생성 로직 처리
+     */
+    function handleRegenerate(messageIndex) {
+        if (isStreaming || isFadingIn) {
+            showSnackbar('현재 답변 생성 중이거나 애니메이션이 동작 중입니다.');
+            return;
+        }
+
+        const lastUserMessage = history.slice().reverse().find(msg => msg.role === 'user');
+        if (lastUserMessage) {
+            const lastModelIndex = history.findIndex((msg, index) => index === messageIndex);
+            if (lastModelIndex !== -1) {
+                history.splice(lastModelIndex, 1);
+            }
+            
+            const botMessageElement = document.querySelector(`.bot-message[data-index="${messageIndex}"]`);
+            if (botMessageElement) {
+                 botMessageElement.remove();
+            }
+            
+            // 🌟 재응답 로딩 텍스트 설정 후 전송
+            currentLoadingText = '다시 답변을 생각하는 중...';
+            const originalPrompt = lastUserMessage.content;
+            
+            sendMessage(originalPrompt);
+        } else {
+            showSnackbar('다시 답변받을 이전 사용자 메시지가 없습니다.');
+        }
     }
     
     /**
@@ -976,14 +1173,25 @@
 
         const streamingBlock = document.createElement('div');
         streamingBlock.className = 'streaming-block'; 
-        streamingBlock.innerHTML = renderMarkdown(content);
         
-        const actionsContainer = createBotActions(content, messageIndex, feedbackStatus);
-
         botMessageContainer.appendChild(streamingBlock);
-        botMessageContainer.appendChild(actionsContainer);
-        
         chatMessages.appendChild(botMessageContainer);
+        
+        // 🌟🌟🌟 문장별 페이드인 시작
+        if (animate) {
+             sentenceFadeInEffect(streamingBlock, content, messageIndex).then(() => {
+                // 페이드인 완료 후 액션 버튼 추가 및 재생성 버튼 상태 업데이트
+                const actionsContainer = createBotActions(content, messageIndex, feedbackStatus);
+                botMessageContainer.appendChild(actionsContainer);
+                updateRegenerateButtons(); // 최신 메시지 활성화
+             });
+        } else {
+            // 과거 기록 로드 시는 즉시 표시
+            streamingBlock.innerHTML = renderMarkdown(content);
+            const actionsContainer = createBotActions(content, messageIndex, feedbackStatus);
+            botMessageContainer.appendChild(actionsContainer);
+        }
+        
         if (animate) chatMessages.scrollTop = chatMessages.scrollHeight;
     }
 
@@ -996,41 +1204,104 @@
     }
 
     /**
-     * 원본 마크다운 텍스트를 HTML로 변환합니다.
+     * 원본 마크다운 텍스트를 HTML로 변환합니다. (문장 분리 포함)
      */
-    function renderMarkdown(rawText) {
+    function renderMarkdown(rawText, wrapSentences = false) {
         if (!rawText) return "";
         let html = rawText.replace(/\r/g, ''); 
         
-        // 1. 블록 코드 ```code```
+        // 1. 블록 코드 ```code``` (문장 분리 제외)
         html = html.replace(/```([^`]+?)```/gs, (match, content) => {
              return `<pre><code>${content.trim()}</code></pre>`;
         });
         
-        // 2. 헤더 (#, ##, ###)
+        // 2. 헤더 (#, ##, ###) (문장 분리 제외)
         html = html.replace(/^(#+)\s*([^\n]+)/gm, (match, hashes, content) => {
             return `<h${hashes.length}>${content}</h${hashes.length}>`;
         });
         
-        // 3. 인라인 코드 `code`
+        // 3. 인라인 코드 `code` (문장 분리 제외)
         html = html.replace(/`([^`\n]+?)`/g, '<code>$1</code>');
 
         // 4. 굵은 글씨 **text** 또는 __text__
         html = html.replace(/\*\*([^\*]+?)\*\*/g, '<strong>$1</strong>');
         html = html.replace(/__([^__]+?)__/g, '<strong>$1</strong>');
         
-        // 5. 단일 줄바꿈을 <br>로 변환
-        html = html.replace(/\n/g, '<br>');
+        // 5. 문장 분리 및 래핑
+        if (wrapSentences) {
+            // 마침표, 물음표, 느낌표, 또는 두 번 이상의 줄바꿈을 기준으로 분리. (예외 처리 필요)
+            // 정규식: (문장 종료 문자 + 띄어쓰기 또는 줄바꿈)을 기준으로 분리.
+            const sentenceRegex = /([.?!]+(?:\s|<br>|\n|$)+)/g;
+            const parts = html.split(sentenceRegex).filter(p => p.trim().length > 0 || p.match(sentenceRegex));
+
+            let wrappedHtml = '';
+            for (const part of parts) {
+                if (part.match(sentenceRegex) || part.match(/<pre>/) || part.match(/<h[1-6]>/)) {
+                    // 문장 부호, 코드 블록, 헤더는 래핑하지 않거나, 단독으로 처리
+                    wrappedHtml += part;
+                } else {
+                    // 일반 텍스트 문장만 래핑
+                    wrappedHtml += `<span class="sentence">${part}</span>`;
+                }
+            }
+            html = wrappedHtml;
+        }
+
+        // 6. 단일 줄바꿈을 <br>로 변환 (이미 5번에서 처리되었을 수 있지만 안전을 위해 유지)
+        html = html.replace(/(?<!<br>)\n/g, '<br>');
         
         return html;
     }
     
     /**
-     * 스트리밍되는 전체 텍스트를 기반으로 내용을 덮어씁니다.
+     * 스트리밍되는 전체 텍스트를 기반으로 내용을 덮어씁니다. (스트리밍 중에만 사용)
      */
     function updateStreamingDisplay(rawResponse, streamingElement) {
+        // 스트리밍 중에는 타이핑 효과 없이 즉시 업데이트
         streamingElement.innerHTML = renderMarkdown(rawResponse);
         chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+    
+    /**
+     * 🌟🌟🌟 문장별 페이드 인 효과 함수 (스트리밍 완료 후 호출) 🌟🌟🌟
+     */
+    function sentenceFadeInEffect(element, rawText, messageIndex) {
+        return new Promise(resolve => {
+            isFadingIn = true;
+            // 문장 래핑하여 HTML 생성
+            element.innerHTML = renderMarkdown(rawText, true);
+
+            const sentences = element.querySelectorAll('.sentence');
+            let index = 0;
+            const delay = 500; // 문장 간 딜레이 (ms)
+            
+            // 중지 버튼을 눌렀을 때 애니메이션을 빠르게 종료하는 함수
+            const abortFadeIn = () => {
+                isFadingIn = false;
+                sentences.forEach(s => s.classList.add('visible'));
+                resolve();
+            };
+            
+            fadeOutAbortController = { abort: abortFadeIn };
+
+            function showNextSentence() {
+                if (!isFadingIn) { // 중지 신호 확인
+                    return;
+                }
+                
+                if (index < sentences.length) {
+                    sentences[index].classList.add('visible');
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
+                    index++;
+                    setTimeout(showNextSentence, delay);
+                } else {
+                    isFadingIn = false;
+                    resolve();
+                }
+            }
+
+            showNextSentence();
+        });
     }
 
 
@@ -1052,6 +1323,13 @@
     
     // 중지 버튼 핸들러
     function stopResponse() {
+        // 🌟🌟🌟 페이드인 중일 때 중지
+        if (isFadingIn && fadeOutAbortController) {
+            fadeOutAbortController.abort();
+            setStreamingState(false);
+            return;
+        }
+        
         if (abortController) {
             abortController.abort();
             
@@ -1080,6 +1358,7 @@
                     // 액션 버튼 추가
                     const actionContainer = createBotActions(fullResponse, history.length - 1);
                     lastBotMessageElement.appendChild(actionContainer);
+                    updateRegenerateButtons();
 
                 } else if (lastBotMessageElement && fullResponse.trim().length === 0) {
                      // 아무것도 받지 못하고 중지된 경우
@@ -1099,7 +1378,10 @@
 
     async function sendMessage(userMessageOverride = null) {
         const userMessage = userMessageOverride !== null ? userMessageOverride : inputField.value.trim();
-        if (userMessage.length === 0 || isStreaming) return;
+        if (userMessage.length === 0 || isStreaming || isFadingIn) {
+            if (isStreaming || isFadingIn) showSnackbar('현재 답변 생성 중입니다.');
+            return;
+        }
 
         // 1. UI 표시 및 history 업데이트 (재생성이 아닐 경우)
         if (userMessageOverride === null) {
@@ -1114,6 +1396,9 @@
             } else {
                  chatMessages.style.display = 'flex';
             }
+
+            // 기존 메시지들의 재생성 버튼 비활성화
+            updateRegenerateButtons(); 
 
             appendUserMessage(userMessage);
             history.push({ role: 'user', content: userMessage }); 
@@ -1171,6 +1456,7 @@
                      history.pop();
                      saveChatHistory();
                 }
+                updateRegenerateButtons();
                 return;
             }
 
@@ -1192,17 +1478,22 @@
                     const cleanPart = part; 
                     if (cleanPart.trim() === "[DONE]") {
                         fullResponse += buffer;
-                        updateStreamingDisplay(fullResponse, streamingBlockElement);
                         
-                        // 🌟 스트리밍 종료 후 최종 처리
+                        // 🌟🌟🌟 스트리밍 종료 후 최종 페이드인 효과 적용 🌟🌟🌟
                         setStreamingState(false);
                         history.push({ role: 'model', content: fullResponse, feedback: null });
                         saveChatHistory();
                         
-                        // 액션 버튼 추가
+                        // 로딩 인디케이터 제거
                         botMessageElement.removeChild(indicatorElement); 
-                        const actionContainer = createBotActions(fullResponse, history.length - 1);
-                        botMessageElement.appendChild(actionContainer);
+                        
+                        // 최종 페이드인 효과 시작
+                        sentenceFadeInEffect(streamingBlockElement, fullResponse, history.length - 1).then(() => {
+                            // 페이드인 완료 후 액션 버튼 추가 및 재생성 버튼 상태 업데이트
+                            const actionContainer = createBotActions(fullResponse, history.length - 1);
+                            botMessageElement.appendChild(actionContainer);
+                            updateRegenerateButtons();
+                        });
                         
                         reader.releaseLock();
                         return; 
@@ -1216,6 +1507,7 @@
                         
                         fullResponse += cleanPart + '\n'; 
                         
+                        // 스트리밍 중에는 타이핑 효과 없이 즉시 업데이트
                         updateStreamingDisplay(fullResponse, streamingBlockElement);
                     }
                 }
@@ -1231,21 +1523,28 @@
             }
             
             if (isStreaming) {
-                 // 🌟 스트리밍 종료 후 최종 처리
+                 // 🌟🌟🌟 스트리밍 종료 후 최종 페이드인 효과 적용 🌟🌟🌟
                  setStreamingState(false);
                  history.push({ role: 'model', content: fullResponse, feedback: null });
                  saveChatHistory();
                  
-                 // 액션 버튼 추가
+                 // 로딩 인디케이터 제거
                  botMessageElement.removeChild(indicatorElement); 
-                 const actionContainer = createBotActions(fullResponse, history.length - 1);
-                 botMessageElement.appendChild(actionContainer);
+                 
+                 // 최종 페이드인 효과 시작
+                 sentenceFadeInEffect(streamingBlockElement, fullResponse, history.length - 1).then(() => {
+                    // 페이드인 완료 후 액션 버튼 추가 및 재생성 버튼 상태 업데이트
+                    const actionContainer = createBotActions(fullResponse, history.length - 1);
+                    botMessageElement.appendChild(actionContainer);
+                    updateRegenerateButtons();
+                 });
             }
 
 
         } catch (error) {
             if (error.name === 'AbortError') {
                 console.log('Fetch aborted by user or cleanup triggered.');
+                // 이미 stopResponse에서 처리됨
             } else {
                 console.error('Fetch/Streaming Error:', error);
                 const errorMsg = `⚠️ 통신 오류: 서버에 연결할 수 없습니다. CORS 설정 또는 주소를 확인해 주세요. (Error: ${error.message})`;
@@ -1258,6 +1557,7 @@
                      history.pop();
                      saveChatHistory();
                 }
+                updateRegenerateButtons();
             }
             setStreamingState(false);
         }
@@ -1347,9 +1647,6 @@
         }
     });
     
-    // 대화 초기화 버튼 클릭 시
-    resetChatButton.addEventListener('click', resetChat);
-
 
     // 초기 상태 로드 및 높이 조정
     loadChatHistory();
