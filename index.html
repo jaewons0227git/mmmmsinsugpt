@@ -184,21 +184,103 @@
       color: #ffffff;
       border-bottom-right-radius: 4px;
     }
+    
+    /* 봇 메시지 컨테이너 스타일 */
     .bot-message{
       align-self: flex-start;
       margin-top: 10px;
-      padding: 10px 0;
+      padding: 0; 
       color: var(--accent);
       line-height: 1.4;
       font-size: 15px;
-      transition: opacity 0.5s ease-out; 
     }
-    /* 타이핑 효과 대신 스트리밍 시 필요한 스타일 */
+    
+    /* 봇 메시지 내부 요소 (말풍선 스타일 제거) */
+    .bot-message > span, .bot-message > div {
+        display: block;
+        padding: 0; 
+        border-radius: 0; 
+        background-color: transparent; 
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+    
+    /* 스트리밍 텍스트 스타일 (마크다운 렌더링을 위해 white-space: normal로 변경) */
     .bot-message .streaming-text {
-        white-space: pre-wrap;
-        /* 타이핑 효과를 위한 opacity 트랜지션 대신 즉시 표시 */
+        white-space: normal;
+        display: block;
+        padding: 0; 
     }
 
+    /* 🌟 마크다운 스타일링 추가 🌟 */
+    .bot-message h1, .bot-message h2, .bot-message h3 {
+        font-weight: 700;
+        margin: 1.5em 0 0.8em 0; /* 제목 위 아래 여백 */
+        line-height: 1.3;
+        clear: both;
+    }
+    .bot-message h1 { font-size: 2em; } /* 가장 큰 글씨 */
+    .bot-message h2 { font-size: 1.5em; } /* 큰 글씨 */
+    .bot-message h3 { font-size: 1.25em; } /* 중간 큰 글씨 */
+
+    .bot-message strong, .bot-message b {
+        font-weight: 700; /* 두꺼운 글씨 */
+    }
+
+    /* 코드 및 스크립트 스타일 */
+    .bot-message pre {
+        background-color: #f3f4f6; /* 회색 배경 */
+        padding: 10px;
+        border-radius: 6px;
+        overflow-x: auto;
+        font-size: 0.9em;
+        margin: 8px 0;
+        white-space: pre-wrap;
+    }
+    .bot-message code {
+        font-family: monospace;
+    }
+    .bot-message .streaming-text code {
+        background-color: #e5e7eb;
+        padding: 2px 4px;
+        border-radius: 3px;
+        font-weight: normal;
+    }
+    
+    /* 줄 바꿈 처리 */
+    .bot-message p {
+        margin: 0.5em 0; /* 단락 간격 */
+    }
+    /* --------------------------------- */
+
+    /* 💡 생각하는 중... 애니메이션 스타일 */
+    .thinking-indicator-text {
+        font-weight: 500;
+        padding: 10px 0; /* 로딩 텍스트의 상하 여백만 유지 */
+        
+        /* 시머링 효과를 위한 설정 */
+        background-color: var(--accent); 
+        background-image: linear-gradient(
+            90deg,
+            #111827 0%,
+            #ffffff 20%, /* 흰색 그라데이션 시작 */
+            #111827 40%
+        );
+        background-size: 200% 100%; 
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        animation: shimmer 1.5s infinite linear;
+    }
+
+    /* 🌟 애니메이션 방향: 왼쪽으로 이동 🌟 */
+    @keyframes shimmer {
+        0% {
+            background-position: 100% 0; /* 오른쪽 끝에서 시작 */
+        }
+        100% {
+            background-position: -100% 0; /* 왼쪽 끝으로 이동 */
+        }
+    }
 
     /* Input area */
     .composer{
@@ -402,7 +484,7 @@
           <textarea id="message-input" placeholder="Minsu GPT" rows="1"></textarea>
           
           <div class="mic-voice-container">
-            <div class="mic-icon">
+            <div id="mic-icon" class="mic-icon">
                 <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="22" height="22">
                     <path d="M12 14a3 3 0 0 0 3-3V7a3 3 0 0 0-6 0v4a3 3 0 0 0 3 3z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
                     <path d="M19 11v1a7 7 0 0 1-14 0v-1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
@@ -433,27 +515,13 @@
     // |         웹페이지 복제 방지 기능 시작         |
     // ----------------------------------------------
     document.addEventListener('contextmenu', function(e) {
-      e.preventDefault(); // 마우스 오른쪽 버튼 클릭 방지
+      e.preventDefault(); 
     });
 
     document.onkeydown = function(e) {
-      // F12 키 (123)
-      if (e.keyCode == 123) {
-        e.preventDefault();
-        return false;
-      }
-      
-      // Ctrl+Shift+I (개발자 도구), Ctrl+Shift+J (콘솔), Ctrl+Shift+C (요소 검사)
-      if (e.ctrlKey && e.shiftKey && (e.keyCode == 'I'.charCodeAt(0) || e.keyCode == 'J'.charCodeAt(0) || e.keyCode == 'C'.charCodeAt(0))) {
-        e.preventDefault();
-        return false;
-      }
-      
-      // Ctrl+U (소스 보기)
-      if (e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) {
-        e.preventDefault();
-        return false;
-      }
+      if (e.keyCode == 123) { e.preventDefault(); return false; } // F12
+      if (e.ctrlKey && e.shiftKey && (e.keyCode == 'I'.charCodeAt(0) || e.keyCode == 'J'.charCodeAt(0) || e.keyCode == 'C'.charCodeAt(0))) { e.preventDefault(); return false; } // Ctrl+Shift+I/J/C
+      if (e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) { e.preventDefault(); return false; } // Ctrl+U
     };
     // ----------------------------------------------
     // |         웹페이지 복제 방지 기능 끝           |
@@ -471,14 +539,13 @@
     const BACKEND_ENDPOINT = "https://jaewondev.pythonanywhere.com/ask"; 
 
     // 🌟🌟🌟 대화 기록을 저장할 배열 🌟🌟🌟
-    // Gemini의 contents 형식에 맞춤: [{role: "user"|"model", content: "text"}]
     let history = []; 
 
     const MAX_ROWS = 6;
     const MIN_ROWS = 1;
     const isMobile = () => /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || window.innerWidth <= 768;
-    let isStreaming = false; // 스트리밍 응답 중인지 확인하는 플래그
-    let abortController = null; // 요청 중단을 위한 AbortController
+    let isStreaming = false; 
+    let abortController = null; 
 
     chatMessages.style.display = 'none';
 
@@ -498,27 +565,16 @@
         const inputContainerPaddingV = 8; 
         const minInputContainerHeight = parseFloat(style.getPropertyValue('--min-input-container-height')); 
 
-        // 1. scrollHeight를 측정하기 위해 일시적으로 height를 auto로 설정 (rows가 1일 때 기준)
         inputField.rows = MIN_ROWS;
         inputField.style.height = 'auto'; 
 
-        // 2. 새로운 높이 결정 (스크롤 높이 기준)
         let scrollH = inputField.scrollHeight;
-        
-        // 3. 현재 내용이 몇 줄인지 계산 (scrollH를 line_height_px로 나눔)
         let newRows = Math.round(scrollH / line_height_px);
-
-        // 4. Rows 값 제한 및 적용
         newRows = Math.max(MIN_ROWS, Math.min(MAX_ROWS, newRows));
         inputField.rows = newRows;
-        
-        // 5. rows가 변경되었으므로, height를 다시 auto로 설정하여 rows에 따른 높이를 반영
         inputField.style.height = 'auto';
         
-        // 6. textarea의 최종 높이 계산
         const finalTextareaHeight = inputField.offsetHeight; 
-
-        // 7. input-container 및 composer 높이 계산 및 적용
         const contentHeight = finalTextareaHeight + inputContainerPaddingV;
         const inputContainerHeight = Math.max(contentHeight, minInputContainerHeight);
         
@@ -534,27 +590,108 @@
     
     inputField.addEventListener('input', autoResizeTextarea);
 
-    // 봇 메시지 컨테이너를 생성하고 메시지 기록에 추가
+    /**
+     * 봇 메시지 컨테이너를 생성하고 '생각하는 중...' 표시기 포함
+     * @returns {Object} {indicatorElement, streamingElement}
+     */
     function appendBotMessageContainer() {
         const botMessageContainer = document.createElement('div');
         botMessageContainer.className = 'bot-message';
         
-        // 스트리밍 텍스트를 담을 내부 요소
+        // 💡 생각하는 중... 표시기
+        const indicatorContainer = document.createElement('div');
+        indicatorContainer.id = 'thinking-indicator';
+        
+        // 말풍선 스타일 제거를 위해 <span>에 직접 클래스 적용
+        const indicatorText = document.createElement('span');
+        indicatorText.className = 'thinking-indicator-text';
+        indicatorText.textContent = '답변을 생각하는 중...';
+        
+        indicatorContainer.appendChild(indicatorText);
+        botMessageContainer.appendChild(indicatorContainer);
+        
+        // 스트리밍 텍스트를 담을 요소 (처음에는 숨김)
         const streamingText = document.createElement('div');
         streamingText.className = 'streaming-text';
+        streamingText.style.display = 'none'; // 처음에는 숨김
         botMessageContainer.appendChild(streamingText);
 
         chatMessages.appendChild(botMessageContainer);
         chatMessages.scrollTop = chatMessages.scrollHeight;
         
-        return streamingText;
+        return { indicatorElement: indicatorContainer, streamingElement: streamingText };
     }
     
-    // 스트리밍 텍스트를 현재 메시지 컨테이너에 추가 (글자 단위 업데이트 필요 없음)
-    function appendStreamingText(element, chunk) {
-        element.textContent += chunk;
-        chatMessages.scrollTop = chatMessages.scrollHeight;
+    function startStreamingUI(indicator, streaming) {
+        // '생각하는 중...' 숨기고 스트리밍 텍스트 표시
+        indicator.style.display = 'none';
+        streaming.style.display = 'block';
     }
+
+    /**
+     * 원본 마크다운 텍스트를 HTML로 변환합니다.
+     * @param {string} rawText - 변환할 원본 마크다운 텍스트.
+     */
+    function renderMarkdown(rawText) {
+        if (!rawText) return "";
+        
+        let html = rawText.replace(/\r/g, ''); 
+        
+        // 1. 헤더 앞에 줄 바꿈 강제 (안녕##반가워요 같은 경우를 대비)
+        // [줄바꿈이 아닌 문자](###) 패턴을 찾아 [줄바꿈][줄바꿈](###)으로 치환
+        html = html.replace(/([^\n])(###)/g, '$1\n\n$2');
+        html = html.replace(/([^\n])(##)/g, '$1\n\n$2');
+        html = html.replace(/([^\n])(#)/g, '$1\n\n$2');
+
+        // 2. 헤더 내용 및 구두점 분리 및 HTML 태그 적용
+        // 2-1. 헤더가 구두점 (.?!:, 등)으로 끝나는 경우, 나머지 텍스트와 강제 줄 바꿈 (\n\n)으로 분리
+        // 캡처 그룹: $1은 헤더 내용 (구두점으로 끝남), $2는 남은 텍스트
+        // [^\n\r]*를 사용하여 남은 텍스트를 모두 캡처하고, Hn 태그 뒤에 \n\n을 강제 삽입.
+        // H3
+        html = html.replace(/(?:\n\n|\n|^)###\s*(.+?[.?!])([^\n\r]*)/g, '\n\n<h3>$1</h3>\n\n$2');
+        // H2
+        html = html.replace(/(?:\n\n|\n|^)##\s*(.+?[.?!])([^\n\r]*)/g, '\n\n<h2>$1</h2>\n\n$2');
+        // H1
+        html = html.replace(/(?:\n\n|\n|^)#\s*(.+?[.?!])([^\n\r]*)/g, '\n\n<h1>$1</h1>\n\n$2');
+
+
+        // 2-2. (구두점 없이) 남은 일반 헤더 처리 (줄바꿈이 나올 때까지)
+        // [^\n]+는 한 줄의 나머지 텍스트를 모두 캡처. 2-1에서 처리되지 않은 헤더만 처리됨.
+        html = html.replace(/(?:\n\n|\n|^)###\s*([^\n]+)/g, '\n\n<h3>$1</h3>\n\n');
+        html = html.replace(/(?:\n\n|\n|^)##\s*([^\n]+)/g, '\n\n<h2>$1</h2>\n\n');
+        html = html.replace(/(?:\n\n|\n|^)#\s*([^\n]+)/g, '\n\n<h1>$1</h1>\n\n');
+        
+        // 3. 인라인 코드 `code`
+        html = html.replace(/`([^`\n]+?)`/g, '<code>$1</code>');
+
+        // 4. 굵은 글씨 **text** 또는 __text__
+        html = html.replace(/\*\*([^\*]+?)\*\*/g, '<strong>$1</strong>');
+        html = html.replace(/__([^__]+?)__/g, '<strong>$1</strong>');
+        
+        // 5. 단락 및 줄 바꿈 처리
+        
+        // 연속된 두 개 이상의 줄바꿈 문자를 <br><br>로 (단락 역할)
+        html = html.replace(/\n\n+/g, '<br><br>');
+        // 남은 단일 줄바꿈 문자를 <br>로
+        html = html.replace(/\n/g, '<br>');
+
+        // 6. 단락 태그로 감싸기 
+        let blocks = html.split('<br><br>').map(block => {
+            if (block.trim() === '' || block.match(/<h[1-3]>|<\/h[1-3]>|<pre>|<\/pre>|<code>|<\/code>/i)) {
+                // 이미 헤딩이나 코드가 포함된 블록은 <p>로 감싸지 않음
+                return block;
+            } else {
+                return `<p>${block}</p>`;
+            }
+        });
+        html = blocks.join('');
+        
+        // 7. 불필요한 시작/끝 <br> 제거
+        html = html.replace(/^(<br>)+/, '').replace(/(<br>)+$/, '');
+
+        return html;
+    }
+
 
     // 중지 버튼 활성화/비활성화 및 상태 업데이트
     function setStreamingState(active) {
@@ -576,13 +713,22 @@
     function stopResponse() {
         if (abortController) {
             abortController.abort();
-            console.log("메시지 응답이 사용자 요청으로 중지되었습니다.");
             
-            // 응답 중지 시 메시지 기록에 현재까지 받은 응답을 저장해야 함
-            const lastBotMessageElement = chatMessages.lastElementChild.querySelector('.streaming-text');
+            const lastBotMessageElement = chatMessages.lastElementChild;
             if (lastBotMessageElement) {
-                // history 업데이트
-                history.push({ role: 'model', content: lastBotMessageElement.textContent });
+                const streamingText = lastBotMessageElement.querySelector('.streaming-text');
+                const indicator = lastBotMessageElement.querySelector('#thinking-indicator');
+
+                if (indicator && indicator.style.display !== 'none') {
+                    lastBotMessageElement.remove(); 
+                } 
+                else if (streamingText && fullResponse.trim().length > 0) {
+                     // fullResponse (raw text)를 history에 저장
+                     history.push({ role: 'model', content: fullResponse }); 
+                } 
+                else {
+                     lastBotMessageElement.remove(); 
+                }
             }
         }
         setStreamingState(false);
@@ -590,11 +736,14 @@
     stopButton.addEventListener('click', stopResponse);
 
     // 메시지 전송 처리
+    let fullResponse = ""; // 전체 RAW 마크다운 텍스트를 저장할 변수 (전역 또는 스코프 내부)
+
     async function sendMessage() {
         const userMessage = inputField.value.trim();
         if (userMessage.length === 0 || isStreaming) return;
 
-        // 1. UI 업데이트: 초기 화면 숨기고 채팅 메시지 보이기
+        // 1. 사용자 메시지 버블 추가 및 history 업데이트
+        
         if (initialContent.style.opacity !== '0') {
             initialContent.style.opacity = '0';
             setTimeout(() => {
@@ -605,28 +754,29 @@
              chatMessages.style.display = 'flex';
         }
 
-        // 2. 사용자 메시지 버블 추가 및 history 업데이트
         const userBubble = document.createElement('div');
         userBubble.className = 'message-bubble user-message';
         userBubble.innerHTML = `<div class="message-text">${userMessage}</div>`;
         chatMessages.appendChild(userBubble);
+        
         history.push({ role: 'user', content: userMessage }); 
 
-        // 3. 입력창 초기화 및 UI 상태 업데이트
+        // 2. 입력창 초기화 및 UI 상태 업데이트
         inputField.value = '';
         inputField.rows = MIN_ROWS; 
         autoResizeTextarea(); 
         
-        // 4. 봇 메시지를 위한 컨테이너 추가
-        const botStreamingElement = appendBotMessageContainer();
+        // 3. 봇 메시지를 위한 컨테이너 추가 및 로딩 표시
+        const { indicatorElement, streamingElement } = appendBotMessageContainer();
         
-        // 5. 스트리밍 상태 시작
+        // 4. 스트리밍 상태 시작
         setStreamingState(true);
         abortController = new AbortController();
         const signal = abortController.signal;
         
-        let fullResponse = "";
-        let buffer = ""; // 스트리밍 데이터 버퍼
+        fullResponse = ""; // 응답 시작 시 원본 텍스트 초기화
+        let buffer = ""; 
+        let isFirstChunk = true; 
         
         try {
             const response = await fetch(BACKEND_ENDPOINT, {
@@ -636,13 +786,14 @@
                 },
                 body: JSON.stringify({
                     message: userMessage,
-                    history: history, // 전체 대화 기록 전송
+                    history: history, 
                 }),
-                signal: signal // 중단 신호
+                signal: signal 
             });
 
             if (!response.ok) {
-                // HTTP 오류 처리
+                
+                startStreamingUI(indicatorElement, streamingElement); 
                 let errorMessage = `HTTP Error: ${response.status} ${response.statusText}`;
                 if (response.status === 429) {
                     errorMessage = "⚠️ 요청 속도 제한 초과: 잠시 후 다시 시도해 주세요.";
@@ -652,13 +803,11 @@
                      errorMessage = `⚠️ 서버 오류: 백엔드에서 문제가 발생했습니다. (HTTP ${response.status})`;
                 }
                 
-                // 오류 메시지를 사용자에게 표시
-                appendStreamingText(botStreamingElement, errorMessage);
+                streamingElement.innerHTML = `<p style="color:red;">${errorMessage}</p>`;
                 setStreamingState(false);
                 return;
             }
 
-            // 응답 스트림 처리
             const reader = response.body.getReader();
             const decoder = new TextDecoder('utf-8');
             
@@ -668,65 +817,68 @@
                     break;
                 }
                 
-                // 버퍼에 새로운 청크를 추가
                 buffer += decoder.decode(value, { stream: true });
                 
-                // 줄바꿈을 기준으로 청크를 분리
                 const parts = buffer.split('\n');
-                buffer = parts.pop(); // 마지막 부분은 불완전할 수 있으므로 버퍼에 남김
+                buffer = parts.pop(); 
 
                 for (const part of parts) {
-                    const cleanPart = part.trim();
-                    if (cleanPart === "[DONE]") {
-                        // 스트림 종료 신호 수신
+                    const cleanPart = part; 
+                    if (cleanPart.trim() === "[DONE]") {
                         setStreamingState(false);
-                        // 최종 응답 기록 및 루프 종료
                         history.push({ role: 'model', content: fullResponse });
                         reader.releaseLock();
                         return; 
                     }
                     
                     if (cleanPart.length > 0) {
-                        // 유효한 청크를 화면에 출력하고 전체 응답에 추가
-                        appendStreamingText(botStreamingElement, cleanPart);
+                        if (isFirstChunk) {
+                            startStreamingUI(indicatorElement, streamingElement); 
+                            isFirstChunk = false;
+                        }
+                        
+                        // 원본 텍스트 누적
                         fullResponse += cleanPart;
+                        
+                        // 🌟🌟🌟 실시간 마크다운 렌더링 🌟🌟🌟
+                        streamingElement.innerHTML = renderMarkdown(fullResponse);
+                        chatMessages.scrollTop = chatMessages.scrollHeight;
                     }
                 }
             }
             
-            // 스트림이 [DONE] 없이 끝났거나, 버퍼에 남은 내용이 있을 경우 처리
             if (buffer.length > 0) {
-                 appendStreamingText(botStreamingElement, buffer);
+                 if (isFirstChunk) {
+                    startStreamingUI(indicatorElement, streamingElement);
+                    isFirstChunk = false;
+                 }
                  fullResponse += buffer;
+                 streamingElement.innerHTML = renderMarkdown(fullResponse);
             }
 
             if(isStreaming) {
-                // 스트림 끝 신호가 누락되었을 경우 수동 종료
                 setStreamingState(false);
                 history.push({ role: 'model', content: fullResponse });
             }
 
-
         } catch (error) {
             if (error.name === 'AbortError') {
-                console.log('Fetch aborted by user.');
+                console.log('Fetch aborted by user or cleanup triggered.');
             } else {
                 console.error('Fetch/Streaming Error:', error);
-                
-                // 오류 메시지를 사용자에게 표시
                 const errorMsg = `⚠️ 통신 오류: 서버에 연결할 수 없습니다. CORS 설정 또는 주소를 확인해 주세요. (Error: ${error.message})`;
-                appendStreamingText(botStreamingElement, errorMsg);
+                
+                startStreamingUI(indicatorElement, streamingElement);
+                streamingElement.innerHTML = `<p style="color:red;">${errorMsg}</p>`;
             }
-            // 오류 발생 시 스트리밍 상태 강제 종료
             setStreamingState(false);
         }
-        // 최종적으로 스트리밍 상태가 해제되지 않았다면 해제
         if(isStreaming) setStreamingState(false);
     }
 
     sendButton.addEventListener('click', sendMessage);
 
-    // 엔터키 동작 (Shift+Enter는 줄바꿈, Enter만은 전송)
+    // 엔터키 동작
     inputField.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') {
             if (isMobile()) {
