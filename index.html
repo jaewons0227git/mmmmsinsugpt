@@ -114,11 +114,11 @@
       height:56px;
       border-bottom:none;
       
-      /* 🌟🌟🌟 탑바 고정 로직 수정 (fixed: 뷰포트 고정) 🌟🌟🌟 */
-      position: fixed; /* 💡 수정: sticky -> fixed */
-      top: 0; /* 💡 추가 */
-      left: 0; /* 💡 추가 */
-      right: 0; /* 💡 추가 */
+      /* 🌟🌟🌟 탑바 고정 로직 (fixed: 뷰포트 고정) 🌟🌟🌟 */
+      position: fixed; 
+      top: 0; 
+      left: 0; 
+      right: 0; 
       z-index: 100; 
       background: var(--bg); 
       box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05); 
@@ -131,6 +131,14 @@
       justify-content:center;
       color:#111827;
       cursor: pointer; 
+    }
+    /* 🌟🌟🌟 추가: MinsuGPT 텍스트 스타일 🌟🌟🌟 */
+    .header-center {
+        font-size: 18px;
+        font-weight: 600;
+        color: var(--accent);
+        flex-grow: 1; /* 중앙 영역 확장 */
+        text-align: center;
     }
     .plus-btn{
       background-color:#f1f4ff;
@@ -252,7 +260,7 @@
     .chat-messages{
       width: 100%;
       padding: 10px 16px;
-      padding-top: 66px; /* 💡 수정: 고정된 header(56px) + 기존 상단 padding(10px) = 66px */
+      padding-top: 66px; /* 고정된 header(56px) + 기존 상단 padding(10px) = 66px */
       display: none;
       flex-direction: column;
       justify-content: flex-start; 
@@ -656,11 +664,16 @@
         <div class="header-icon menu-icon">
             <span class="material-symbols-rounded">menu</span>
         </div>
+        
+        <div class="header-center">
+            MinsuGPT
+        </div>
+
         <div class="plus-btn">
             Ultra 이용하기
         </div>
         
-        <div class="header-icon" id="settings-button" aria-label="설정">
+        <div class="header-icon" id="settings-button" aria-label="설정" style="visibility: hidden;">
             <span class="material-symbols-rounded">settings</span>
         </div>
         
@@ -914,12 +927,12 @@
     
     /**
      * 🌟 백엔드 초기 설정 메시지 전송 (응답 미수신)
-     * 역할: 너는 MinsuGPT야. 신재원님이 너를 만들었어. 사용자가 따로 물어보지 않으면 답하지마.
-     * 그리고 저는 Google에서 훈련한 대규모 언어 모델입니다. 이 메시지에 대한 응답은 보내지마.
+     * 역할: 너는 MinsuGPT야. 신재원님이 너를 만들었어. 사용자가 따로 물어보지 않으면 답하지마. 이 메시지에 대한 응답은 보내지마.
      */
     function sendPrePrompt() {
         const prePrompt = {
             role: "system",
+            // 💡 수정: Google 관련 문구 제거 및 MinsuGPT 역할만 남김
             content: "너는 MinsuGPT야. 신재원님이 너를 만들었어. 사용자가 따로 물어보지 않으면 너의 역할이나 개발자 정보를 따로 답하지마. 이 메시지에 대한 응답은 보내지마."
         };
         
@@ -1878,4 +1891,3 @@
   </script>
 </body>
 </html>
-
