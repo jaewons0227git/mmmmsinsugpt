@@ -1,0 +1,1940 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MinsuGPT</title> 
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Elms+Sans:ital,wght@0,100..900;1,100..900;0,100..900;1,100..900&display=swap" rel="stylesheet">
+  
+  <link href="https://fonts.googleapis.com/icon?family=Material+Symbols+Rounded" rel="stylesheet">
+  
+  <style>
+    :root{
+      --bg: #ffffff;
+      /* 🌟🌟🌟 변경: 강조색을 핑크색 계열로 변경 🌟🌟🌟 */
+      --accent: #d32f83; /* 진한 핑크 */
+      --send-button-disabled: #fbcfe8; /* 연한 핑크 */
+      --send-button-enabled: #d32f83; /* 진한 핑크 */
+      --composer-padding: 6px 12px;
+      --composer-padding-v: 12px; 
+      --input-container-padding-v: 8px; 
+      --font-size: 16px;
+      --line-height: 1.4;
+      
+      --line-height-px: 22.4; 
+      --min-textarea-height: 22.4px; 
+      --min-input-container-height: 48px; 
+      
+      font-family: 'Elms Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans KR', 'Helvetica Neue', Arial, sans-serif;
+    }
+    
+    /* Material Symbols 아이콘 스타일 */
+    .material-symbols-rounded {
+      font-family: 'Material Symbols Rounded';
+      font-weight: normal;
+      font-style: normal;
+      font-size: 24px;
+      line-height: 1;
+      letter-spacing: normal;
+      text-transform: none;
+      display: inline-block;
+      white-space: nowrap;
+      word-wrap: normal;
+      direction: ltr;
+      -webkit-font-feature-settings: 'liga';
+      -webkit-font-smoothing: antialiased;
+      
+      font-variation-settings:
+        'FILL' 0,
+        'wght' 500,
+        'GRAD' 0,
+        'opsz' 24;
+    }
+    
+    /* 🌟🌟🌟 중지 버튼 아이콘 (■) CSS 사각형 스타일 🌟🌟🌟 */
+    .stop-btn .stop-icon {
+        display: block;
+        width: 12px; 
+        height: 12px; 
+        background-color: white; 
+        border-radius: 2px;
+    }
+    .stop-btn {
+        background-color: #ef4444; 
+        width:38px; 
+        height:38px;
+        border-radius: 50%; /* 원형 */
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        padding: 0;
+        margin: 0;
+    }
+
+    .fa, .fa-solid, .fa-regular {
+        font-family: 'Material Symbols Rounded', 'Elms Sans' !important;
+        font-weight: 500 !important;
+        font-style: normal; 
+    }
+    
+    *{
+        box-sizing:border-box;
+        -webkit-tap-highlight-color: transparent; 
+    }
+    body{
+      margin:0;
+      background:var(--bg);
+      color:var(--accent);
+      min-height:100vh;
+      display:flex;
+      justify-content:center;
+      padding:0;
+    }
+    .phone{
+      width:100%;
+      background:var(--bg);
+      border-radius:0;
+      overflow:hidden;
+      border:none;
+      display:flex;
+      flex-direction:column;
+      min-height:100vh;
+      position:relative; 
+      margin: 0;
+    }
+
+    .header{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      padding:10px 16px;
+      height:56px;
+      border-bottom:none;
+      
+      /* 🌟🌟🌟 탑바 고정 로직 (fixed: 뷰포트 고정) 🌟🌟🌟 */
+      position: fixed; 
+      top: 0; 
+      left: 0; 
+      right: 0; 
+      z-index: 100; 
+      background: var(--bg); 
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05); 
+      
+      /* 🌟🌟🌟 배경과 대비되도록 텍스트 색상을 검정색으로 설정 🌟🌟🌟 */
+      color: #111827;
+    }
+    .header-icon{
+      width:32px;
+      height:32px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color:#111827;
+      cursor: pointer; 
+      flex-shrink: 0; /* 아이콘 크기 고정 */
+    }
+    
+    /* 🌟🌟🌟 추가: MinsuGPT 텍스트 스타일 (메뉴 버튼 옆) 🌟🌟🌟 */
+    .header-title {
+        font-size: 18px;
+        font-weight: 600;
+        color: #111827; /* 검정색 유지 */
+        margin-left: 8px; /* 메뉴 버튼과의 간격 */
+        flex-shrink: 0;
+    }
+    
+    /* 🌟🌟🌟 Ultra 이용하기 버튼 컨테이너 (중앙 정렬) 🌟🌟🌟 */
+    .header-center {
+        flex-grow: 1; /* 중앙 영역 확장 */
+        text-align: center;
+        display: flex;
+        justify-content: center;
+    }
+    
+    /* 🌟🌟🌟 Ultra 버튼 색상 변경 (핑크 계열) 🌟🌟🌟 */
+    .plus-btn{
+      background-color:#ffe4f5; /* 연한 핑크 */
+      color:var(--accent); /* 진한 핑크 */
+      font-weight:600;
+      padding:6px 14px;
+      border-radius:20px;
+      display:flex;
+      align-items:center;
+      gap:4px;
+      font-size:14px;
+      cursor: pointer;
+    }
+    .profile-btn{
+      width:32px;
+      height:32px;
+      border-radius:50%;
+      background-color:#e5e8eb;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color:#111827;
+    }
+
+    .content-wrapper{
+        flex-grow:1;
+        display:flex;
+        flex-direction:column;
+        /* 스크롤은 content-wrapper에서만 발생하도록 설정 */
+        overflow-y: auto; 
+        padding-bottom: 0; 
+        position: relative;
+        
+        /* 🌟🌟🌟 채팅창 배경 이미지 설정 및 투명도 오버레이 🌟🌟🌟 */
+        background-image: url('https://i.pinimg.com/736x/81/7d/67/817d67b36e738520c0e708ba0a76f1ef.jpg');
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed; /* 배경 이미지를 뷰포트에 고정 */
+        
+        /* 🌟🌟🌟 투명한 검은색 오버레이 추가 (가독성 향상) 🌟🌟🌟 */
+        position: relative;
+    }
+    /* 오버레이 효과를 위한 가상 요소 */
+    .content-wrapper::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.1); /* 투명한 검은색 (10% 투명도) */
+        z-index: 1; /* 채팅 메시지 아래에 위치 */
+    }
+    /* 채팅 메시지가 오버레이 위에 오도록 z-index 조정 */
+    #initial-content, #chat-messages {
+        z-index: 2; 
+        position: relative; /* z-index를 적용하기 위해 필요 */
+    }
+    
+    /* 🌟🌟🌟 스크롤 다운 버튼 스타일 🌟🌟🌟 */
+    #scroll-down-button {
+        position: absolute;
+        bottom: 10px; 
+        right: 20px;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background-color: var(--bg);
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        z-index: 5;
+        opacity: 0;
+        transform: translateY(10px);
+        visibility: hidden;
+        transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s ease;
+    }
+    #scroll-down-button.visible {
+        opacity: 1;
+        transform: translateY(0);
+        visibility: visible;
+    }
+    #scroll-down-button .material-symbols-rounded {
+        color: #111827; /* 검정색 유지 */
+        font-size: 20px;
+    }
+    
+    #initial-content{
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 100%;
+      max-width: 400px;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      text-align:center;
+      padding: 0 16px;
+      transition: opacity 0.5s ease-in-out, visibility 0.5s ease-in-out;
+    }
+    .main-question{
+      font-size:22px;
+      font-weight:600;
+      margin-bottom:40px;
+      color:#111827; /* 검정색 유지 */
+    }
+    .quick-actions{
+      display:flex;
+      flex-wrap:wrap;
+      justify-content:center;
+      gap:8px;
+      max-width:400px; 
+    }
+    .action-btn{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:10px 16px;
+      border:1px solid #e5e8eb;
+      border-radius:30px;
+      font-size:15px;
+      font-weight:500;
+      color:#111827; /* 검정색 유지 */
+      background-color: rgba(255, 255, 255, 0.85); /* 배경색을 흰색에 살짝 투명하게 */
+      min-height:48px;
+      white-space:nowrap;
+      cursor: pointer;
+    }
+    .action-btn .material-symbols-rounded, .action-btn .icon-light{
+      margin-right:6px;
+      width:20px;
+      height:20px;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .action-btn.new-green .material-symbols-rounded{ color:#28a745; }
+    .action-btn.new-blue .material-symbols-rounded{ color:#007bff; }
+    .action-btn.orange .material-symbols-rounded{ color:#fd7e14; } 
+
+    .chat-messages{
+      width: 100%;
+      padding: 10px 16px;
+      padding-top: 66px; /* 고정된 header(56px) + 기존 상단 padding(10px) = 66px */
+      display: none;
+      flex-direction: column;
+      justify-content: flex-start; 
+      gap: 10px;
+      margin: 0 auto; 
+    }
+    @media (min-width: 600px) {
+        .chat-messages {
+            max-width: 768px; 
+            padding-left: 0;
+            padding-right: 0;
+        }
+    }
+
+    .message-bubble{
+      display: flex;
+      max-width: 80%;
+    }
+    .message-text{
+      padding: 10px 14px;
+      border-radius: 20px;
+      line-height: 1.4;
+      font-size: 15px;
+      white-space: pre-wrap;
+      color: #111827; /* 메시지 텍스트는 검정색 유지 */
+    }
+    .user-message{
+      justify-content: flex-end;
+      align-self: flex-end;
+    }
+    .user-message .message-text{
+      background-color: #ffe4f5; /* 🌟🌟🌟 사용자 메시지 배경색을 연한 핑크색으로 변경 🌟🌟🌟 */
+      border-bottom-right-radius: 4px;
+    }
+    
+    .bot-message{
+      align-self: flex-start;
+      margin-top: 10px;
+      padding: 0; 
+      color: #111827; /* 봇 메시지 텍스트는 검정색 유지 */
+      line-height: 1.4;
+      font-size: 15px;
+      width: 100%; 
+    }
+    
+    .bot-message .streaming-block {
+        display: block;
+        padding: 10px 14px; /* 봇 메시지에도 배경색에 대비되는 패딩 적용 */
+        border-radius: 20px; 
+        background-color: rgba(255, 255, 255, 0.9); /* 흰색 배경에 살짝 투명도 적용 */
+        max-width: 100%;
+        box-sizing: border-box;
+        white-space: normal;
+        color: #111827; 
+        margin-bottom: 8px; 
+        border-top-left-radius: 4px;
+    }
+    
+    /* 🌟 답변 중지 알림 텍스트 스타일 */
+    .stop-message {
+        color: #ef4444; 
+        font-weight: 600;
+        font-size: 0.9em;
+        margin-top: -5px; 
+        margin-bottom: 10px;
+        padding: 0 4px;
+        align-self: flex-start;
+    }
+    
+    /* 🌟🌟🌟 문장별 페이드 인 효과 🌟🌟🌟 */
+    .sentence {
+        opacity: 0;
+        transition: opacity 0.2s ease-in; 
+        display: inline; 
+        white-space: pre-wrap; 
+    }
+    .sentence.visible {
+        opacity: 1;
+    }
+    
+    .bot-actions {
+        display: flex;
+        gap: 8px;
+        margin-top: 0px; 
+        padding: 4px 0;
+        transition: opacity 0.3s;
+    }
+    
+    /* 🌟🌟🌟 재생성 버튼만 비활성화 🌟🌟🌟 */
+    .bot-actions .regenerate {
+        opacity: 0.5;
+        pointer-events: none;
+    }
+    
+
+    .bot-action-btn {
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #9ca3af; 
+        cursor: pointer;
+        border-radius: 50%;
+        transition: background-color 0.2s;
+    }
+    .bot-action-btn:hover {
+        background-color: #f3f4f6;
+    }
+    .bot-action-btn.selected {
+        color: var(--accent);
+    }
+    .bot-action-btn.selected.like {
+        /* 🌟🌟🌟 좋아요 색상도 강조색 (진한 핑크)으로 변경 🌟🌟🌟 */
+        color: var(--accent); 
+    }
+    .bot-action-btn.selected.dislike {
+        color: #ef4444; 
+    }
+
+    .bot-action-btn .material-symbols-rounded {
+        font-size: 16px;
+    }
+    .bot-action-btn.selected.like .material-symbols-rounded { color: var(--accent); }
+    .bot-action-btn.selected.dislike .material-symbols-rounded { color: #ef4444; }
+
+
+    /* 💡 생각하는 중... 애니메이션 스타일 (유지) */
+    .thinking-indicator {
+        display: flex;
+        align-items: center;
+        padding: 10px 0;
+    }
+
+    .thinking-indicator-text {
+        font-weight: 500;
+        margin-right: 8px;
+        
+        background-color: var(--accent); 
+        background-image: linear-gradient(
+            90deg,
+            var(--accent) 0%,
+            #ffffff 20%, 
+            var(--accent) 40%
+        );
+        background-size: 200% 100%; 
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        animation: shimmer 1.5s infinite linear;
+    }
+    
+    .loading-spinner {
+        display: inline-block;
+        width: 16px;
+        height: 16px;
+        border: 2px solid #ccc;
+        border-top-color: var(--accent); /* 🌟🌟🌟 스피너 색상도 핑크색으로 변경 🌟🌟🌟 */
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+        margin-left: 4px;
+    }
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    @keyframes shimmer {
+        0% {
+            background-position: 100% 0; 
+        }
+        100% {
+            background-position: -100% 0; 
+        }
+    }
+
+    /* Input area */
+    .composer{
+        position:fixed; bottom:0; left:0; right:0; width:100%; display:flex; justify-content:center; padding:var(--composer-padding); background:var(--bg); box-shadow:none; height: auto; min-height: calc(var(--min-input-container-height) + var(--composer-padding-v)); z-index: 10; 
+        /* 🌟🌟🌟 부드러운 애니메이션을 위한 트랜지션 추가 🌟🌟🌟 */
+        transition: all 0.2s ease-out; 
+    }
+    .composer-inner{
+        display:flex; align-items:center; gap:8px; width:100%;
+    }
+    @media (min-width: 600px) {
+        .composer-inner {
+            max-width: 768px; 
+        }
+    }
+
+    .input-container{
+      flex:1; display:flex; align-items: center; gap:8px; border-radius:24px; border:1px solid #d1d5db; padding:4px 4px 4px 16px; box-sizing:border-box; background:#ffffff; max-height: 150px; overflow: hidden; min-height: var(--min-input-container-height); 
+    }
+    .input-container textarea{
+      flex:1; border:0; outline:0; background:transparent; color:#111827; /* 텍스트 색상 검정색 유지 */ font-size:var(--font-size); min-width:0; resize: none; min-height: var(--min-textarea-height); overflow-y: hidden; padding: 0; line-height: var(--line-height); vertical-align: middle; align-self: center; font-family: inherit; 
+    }
+    .input-container textarea::placeholder{
+        color:#9ca3af;
+        font-family: inherit;
+    }
+
+    .plus{
+      width: var(--min-input-container-height); height: var(--min-input-container-height); border-radius:50%; background:#ffffff; border:1px solid #d1d5db; display:flex; align-items:center; justify-content:center; flex-shrink:0; align-self: center; cursor: pointer;
+    }
+    .plus .material-symbols-rounded {
+      font-size: 20px; 
+      color: #111827;
+    }
+
+    .mic-voice-container{
+        display:flex; gap:8px; flex-shrink:0; margin-bottom: 0;
+    }
+    .mic-icon{
+        width:38px; height:38px; display:flex; align-items:center; justify-content:center; flex-shrink:0; color:#9ca3af;
+    }
+    .mic-icon .material-symbols-rounded {
+        font-size: 20px;
+    }
+
+    .send-btn, .stop-btn{
+      width:38px; height:38px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-left:0; margin-right:4px; transition: background-color 0.2s ease; cursor: pointer;
+    }
+    .send-btn:not(.active) {
+        background-color: var(--send-button-disabled);
+        pointer-events: none;
+    }
+    .send-btn.active {
+        /* 🌟🌟🌟 전송 버튼 활성화 색상 핑크색으로 변경 🌟🌟🌟 */
+        background-color: var(--send-button-enabled); 
+        pointer-events: auto;
+    }
+    .send-btn .material-symbols-rounded {
+        color: white;
+        font-size: 20px; 
+    }
+
+
+    /* 🌟🌟🌟 스낵바 알림 스타일 (모서리 반원 변경) 🌟🌟🌟 */
+    #snackbar {
+      visibility: hidden; 
+      min-width: 250px;
+      background-color: #333; 
+      color: #fff; 
+      text-align: center; 
+      border-radius: 30px; /* 🌟 반원 스타일 유지 */
+      padding: 12px 20px; 
+      position: fixed; 
+      z-index: 1020; 
+      left: 50%; 
+      transform: translateX(-50%);
+      bottom: 30px; 
+      font-size: 14px; 
+      /* 애니메이션 초기화 */
+      transition: none; 
+      opacity: 0;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    }
+    #snackbar.show {
+      visibility: visible;
+      opacity: 1;
+      animation: fadein 0.5s, fadeout 0.5s 2.5s;
+    }
+
+    @keyframes fadein {
+      from {bottom: 0; opacity: 0;}
+      to {bottom: 30px; opacity: 1;}
+    }
+
+    @keyframes fadeout {
+      from {bottom: 30px; opacity: 1;}
+      to {bottom: 0; opacity: 0;}
+    }
+    
+    /* 이하 모달 스타일은 이전 코드와 동일하게 유지 */
+    /* ===================================== */
+    /* 모달 공통 스타일 (유지) */
+    /* ===================================== */
+    .modal-backdrop {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease; z-index: 1000; display: flex; justify-content: center; align-items: flex-end;
+    }
+    .modal-backdrop.visible {
+        opacity: 1; visibility: visible;
+    }
+    .modal {
+        width: 100%; max-width: 768px; background-color: var(--bg); border-top-left-radius: 20px; border-top-right-radius: 20px; padding: 24px 16px 40px 16px; transform: translateY(100%); transition: transform 0.3s ease-out;
+    }
+    .modal-backdrop.visible .modal {
+        transform: translateY(0);
+    }
+    .modal-handle {
+        width: 40px; height: 5px; background-color: #e5e8eb; border-radius: 5px; margin: 0 auto 20px auto;
+    }
+    .modal-grid {
+        display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 24px;
+    }
+    .modal-grid-item {
+        display: flex; flex-direction: column; align-items: center; text-align: center; padding: 12px 0; background-color: #f1f4f9; border-radius: 12px; font-size: 14px; font-weight: 500; cursor: pointer;
+    }
+    .modal-grid-icon {
+        width: 48px; height: 48px; background-color: #e5e8eb; border-radius: 12px; margin-bottom: 8px; display: flex; align-items: center; justify-content: center;
+    }
+    .modal-grid-icon .material-symbols-rounded {
+        font-size: 24px;
+        color: #111827;
+    }
+
+    .modal-option {
+        display: flex; align-items: center; padding: 12px 10px; font-size: 16px; font-weight: 500; cursor: pointer; border-radius: 8px; transition: background-color 0.1s ease;
+    }
+    .modal-option:hover {
+        background-color: #f1f4f9;
+    }
+    .modal-option-icon {
+        margin-right: 12px; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center;
+    }
+    .modal-option-icon .material-symbols-rounded {
+        font-size: 20px;
+        color: #111827;
+    }
+    
+    #settings-modal-backdrop {
+        align-items: flex-end; 
+        justify-content: center;
+    }
+    #settings-modal {
+        max-width: 768px; 
+        padding-top: 24px;
+        padding-bottom: 40px;
+        border-radius: 20px 20px 0 0;
+        transform: translateY(100%); 
+    }
+    .modal-backdrop.visible #settings-modal {
+        transform: translateY(0);
+    }
+    #settings-modal h3 {
+        font-size: 1.1em;
+        font-weight: 600;
+        margin: 0 0 16px 0;
+        padding: 0 10px;
+    }
+    
+    #reset-chat-button {
+        color: #ef4444; 
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+    #reset-chat-button .modal-option-icon {
+        display: none; 
+    }
+    
+    /* 🌟🌟🌟 대화 초기화 확인 모달 스타일 🌟🌟🌟 */
+    #reset-confirm-modal-backdrop {
+        align-items: center; 
+        z-index: 1010;
+    }
+    #reset-confirm-modal {
+        max-width: 320px;
+        border-radius: 12px;
+        padding: 24px;
+        transform: translateY(0); 
+        transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+    #reset-confirm-modal .modal-handle { display: none; }
+    #reset-confirm-modal h3 {
+        font-size: 1.2em;
+        margin: 0 0 10px 0;
+        text-align: center;
+        padding: 0;
+    }
+    #reset-confirm-modal p {
+        font-size: 0.95em;
+        color: #6b7280;
+        margin-bottom: 24px;
+        text-align: center;
+    }
+    .confirm-actions {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+    }
+    .confirm-actions button {
+        flex: 1;
+        padding: 10px 15px;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        font-size: 15px;
+    }
+    #confirm-cancel-btn {
+        background-color: #e5e8eb;
+        color: #111827;
+    }
+    #confirm-reset-btn {
+        background-color: #ef4444;
+        color: white;
+    }
+
+  </style>
+</head>
+<body>
+  <div class="phone" role="application" aria-label="채팅 UI">
+    <header class="header">
+        <div style="display: flex; align-items: center;">
+             <div class="header-icon menu-icon">
+                <span class="material-symbols-rounded">menu</span>
+            </div>
+            
+            <div class="header-title">
+                MinsuGPT
+            </div>
+        </div>
+        
+        <div class="header-center">
+            <div class="plus-btn">
+                이 앱은 베타버전 입니다.
+            </div>
+        </div>
+        
+        <div class="header-icon" id="settings-button" aria-label="설정" style="visibility: visible;"> 
+            <span class="material-symbols-rounded">settings</span>
+        </div>
+        
+    </header>
+
+    <main id="content-wrapper" class="content-wrapper">
+        <div id="scroll-down-button" class="">
+            <span class="material-symbols-rounded">arrow_downward</span>
+        </div>
+        
+        <div id="initial-content">
+            <div class="main-question">안녕하세요! 반가워요</div>
+            <div class="quick-actions">
+                <div class="action-btn new-green" data-prompt="텍스트와 함께 대화하기">
+                    <span class="material-symbols-rounded">chat</span>
+                    텍스트와 함께 대화하기
+                </div>
+                <div class="action-btn" data-prompt="브레인스토밍 시작">
+                    <div class="icon-light">💡</div>
+                    브레인스토밍
+                </div>
+                <div class="action-btn new-blue" data-prompt="글 쓰기 예시 요청">
+                    <span class="material-symbols-rounded">edit</span>
+                    글 쓰기
+                </div>
+                <div class="action-btn orange" data-prompt="텍스트 요약 방법 알려주기">
+                    <span class="material-symbols-rounded">description</span>
+                    텍스트 요약
+                </div>
+                <div class="action-btn" data-prompt="도움말">
+                    <div style="font-size:18px;">...</div>
+                    더 보기
+                </div>
+            </div>
+        </div>
+
+        <div id="chat-messages" class="chat-messages">
+            </div>
+    </main>
+
+    <div id="composer" class="composer">
+      <div class="composer-inner">
+        <div class="plus" id="plus-button" aria-label="파일 첨부">
+            <span class="material-symbols-rounded">add</span>
+        </div>
+
+        <div id="input-container" class="input-container">
+          <textarea id="message-input" placeholder="Minsu GPT" rows="1"></textarea>
+          
+          <div class="mic-voice-container">
+            <div id="mic-icon" class="mic-icon">
+                <span class="material-symbols-rounded">mic</span>
+            </div>
+            
+            <div id="action-button-container">
+                <div id="send-button" class="send-btn">
+                  <span class="material-symbols-rounded">arrow_upward</span>
+                </div>
+                <div id="stop-button" class="stop-btn" style="display:none;">
+                    <span class="stop-icon"></span>
+                </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div id="snackbar">메시지가 복사되었습니다.</div>
+    
+    <div id="plus-modal-backdrop" class="modal-backdrop">
+        <div id="plus-modal" class="modal">
+            <div class="modal-handle"></div>
+            
+            <div class="modal-grid">
+                <div class="modal-grid-item" data-action="camera">
+                    <div class="modal-grid-icon">
+                        <span class="material-symbols-rounded">photo_camera</span>
+                    </div>
+                    카메라
+                </div>
+                <div class="modal-grid-item" data-action="album">
+                    <div class="modal-grid-icon">
+                        <span class="material-symbols-rounded">image</span>
+                    </div>
+                    앨범
+                </div>
+                <div class="modal-grid-item" data-action="file">
+                    <div class="modal-grid-icon">
+                        <span class="material-symbols-rounded">upload_file</span>
+                    </div>
+                    파일
+                </div>
+            </div>
+            
+            <div class="modal-option" data-action="create-image">
+                <div class="modal-option-icon">
+                    <span class="material-symbols-rounded">auto_fix_high</span>
+                </div>
+                이미지 만들기
+            </div>
+            
+            <div class="modal-option" data-action="set-reminder">
+                <div class="modal-option-icon">
+                    <span class="material-symbols-rounded">notifications</span>
+                </div>
+                리마인더 등록하기
+            </div>
+            
+        </div>
+    </div>
+    
+    <div id="settings-modal-backdrop" class="modal-backdrop">
+        <div id="settings-modal" class="modal">
+            <div class="modal-handle"></div>
+            <h3>설정</h3>
+            
+            <div class="modal-option" id="reset-chat-button">
+                <div class="modal-option-icon">
+                </div>
+                대화 초기화
+            </div>
+            
+        </div>
+    </div>
+    
+    <div id="reset-confirm-modal-backdrop" class="modal-backdrop">
+        <div id="reset-confirm-modal" class="modal">
+            <h3>대화 초기화</h3>
+            <p>모든 대화 기록이 삭제되며, 이 작업은 되돌릴 수 없습니다.</p>
+            <div class="confirm-actions">
+                <button id="confirm-cancel-btn">취소</button>
+                <button id="confirm-reset-btn">초기화</button>
+            </div>
+        </div>
+    </div>
+    
+  </div>
+
+  <script>
+    // ----------------------------------------------
+    // |         웹페이지 복제 방지 기능 시작         |
+    // ----------------------------------------------
+    document.addEventListener('contextmenu', function(e) {
+      e.preventDefault(); 
+    });
+
+    document.onkeydown = function(e) {
+      if (e.keyCode == 123) { e.preventDefault(); return false; } 
+      if (e.ctrlKey && e.shiftKey && (e.keyCode == 'I'.charCodeAt(0) || e.keyCode == 'J'.charCodeAt(0) || e.keyCode == 'C'.charCodeAt(0))) { e.preventDefault(); return false; } 
+      if (e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) { e.preventDefault(); return false; } 
+    };
+    // ----------------------------------------------
+    // |         웹페이지 복제 방지 기능 끝           |
+    // ----------------------------------------------
+
+    const contentWrapper = document.getElementById('content-wrapper');
+    const inputField = document.getElementById('message-input');
+    const sendButton = document.getElementById('send-button');
+    const stopButton = document.getElementById('stop-button');
+    const initialContent = document.getElementById('initial-content');
+    const chatMessages = document.getElementById('chat-messages');
+    const composer = document.getElementById('composer');
+    const inputContainer = document.getElementById('input-container');
+    const plusButton = document.getElementById('plus-button');
+    const plusModalBackdrop = document.getElementById('plus-modal-backdrop');
+    const settingsButton = document.getElementById('settings-button');
+    const settingsModalBackdrop = document.getElementById('settings-modal-backdrop');
+    const resetChatButton = document.getElementById('reset-chat-button');
+    const quickActionButtons = document.querySelectorAll('.action-btn'); 
+    const snackbar = document.getElementById('snackbar');
+    const resetConfirmModalBackdrop = document.getElementById('reset-confirm-modal-backdrop');
+    const confirmCancelBtn = document.getElementById('confirm-cancel-btn');
+    const confirmResetBtn = document.getElementById('confirm-reset-btn');
+    const scrollDownButton = document.getElementById('scroll-down-button'); 
+
+    // 🌟🌟🌟 백엔드 엔드포인트 설정 (사용자 주소 반영) 🌟🌟🌟
+    const BACKEND_ENDPOINT = "https://jaewondev.pythonanywhere.com/ask"; 
+    const HISTORY_STORAGE_KEY = 'minsugpt_chat_history'; 
+
+    // 🌟🌟🌟 대화 기록을 저장할 배열 (로컬 스토리지에서 로드됨) 🌟🌟🌟
+    let history = []; 
+
+    const MAX_ROWS = 6;
+    const MIN_ROWS = 1;
+    const isMobile = () => /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || window.innerWidth <= 768;
+    let isStreaming = false; 
+    let abortController = null; 
+    
+    let currentLoadingText = '답변을 생각하는 중...';
+
+    let isFadingIn = false;
+    let fadeOutAbortController = null;
+    
+    const FADE_IN_DELAY = 200; 
+
+    let autoScrollEnabled = true;
+
+    /**
+     * 🌟 스낵바를 띄우는 함수
+     */
+    function showSnackbar(message) {
+        // 기존 애니메이션 초기화
+        snackbar.classList.remove('show');
+        snackbar.style.animation = 'none';
+        void snackbar.offsetWidth; // Reflow 강제
+        snackbar.style.animation = '';
+
+        snackbar.textContent = message;
+        snackbar.classList.add('show');
+        setTimeout(() => {
+            snackbar.classList.remove('show');
+        }, 3000); 
+    }
+
+    /**
+     * 🌟 대화 기록을 로컬 스토리지에서 로드하고 UI에 표시
+     */
+    function loadChatHistory() {
+        const storedHistory = localStorage.getItem(HISTORY_STORAGE_KEY);
+        if (storedHistory) {
+            try {
+                history = JSON.parse(storedHistory);
+                if (history.length > 0) {
+                    initialContent.style.display = 'none';
+                    chatMessages.style.display = 'flex';
+                    history.forEach(message => {
+                        if (message.role === 'user') {
+                            appendUserMessage(message.content, false);
+                        } else if (message.role === 'model') {
+                            appendBotMessage(message.content, message.feedback, false); 
+                        }
+                    });
+                    
+                    updateRegenerateButtons(); 
+                    scrollToBottom(false);
+                    initialContent.style.opacity = '0'; 
+                }
+            } catch (e) {
+                console.error("Failed to parse history from localStorage:", e);
+                history = [];
+                
+                initialContent.style.display = 'flex';
+                initialContent.style.opacity = '1'; 
+                chatMessages.style.display = 'none';
+            }
+        }
+        autoResizeTextarea();
+        // 🌟 페이지 로드 시 백엔드에 초기 설정 메시지 전송
+        sendPrePrompt();
+    }
+    
+    /**
+     * 🌟 백엔드 초기 설정 메시지 전송 (응답 미수신)
+     * 역할: 너는 MinsuGPT야. 신재원님이 너를 만들었어. 사용자가 따로 물어보지 않으면 답하지마. 이 메시지에 대한 응답은 보내지마.
+     */
+    function sendPrePrompt() {
+        const prePrompt = {
+            role: "system",
+            // 💡 수정: Google 관련 문구 제거 및 MinsuGPT 역할만 남김
+            content: "너는 MinsuGPT야. 신재원님이 너를 만들었어. 사용자가 따로 물어보지 않으면 너의 역할이나 개발자 정보를 따로 답하지마. 이 메시지에 대한 응답은 보내지마."
+        };
+        
+        // 서버에서 이 메시지를 시스템 컨텍스트로 처리하고, 응답을 스킵하도록 기대
+        fetch(BACKEND_ENDPOINT, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                message: prePrompt.content, 
+                history: [prePrompt], 
+                is_pre_prompt: true 
+            }),
+        }).then(response => {
+            if (!response.ok) {
+                console.warn('Pre-prompt response was not OK, but continuing.', response.status);
+            }
+        }).catch(error => {
+            console.error('Error sending pre-prompt:', error);
+        });
+    }
+
+    /**
+     * 🌟 대화 기록을 로컬 스토리지에 저장
+     */
+    function saveChatHistory() {
+        localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(history));
+    }
+    
+    /**
+     * 🌟 대화 초기화 확인 모달 토글
+     */
+    function toggleResetConfirmModal(show) {
+        if (show === undefined) {
+            resetConfirmModalBackdrop.classList.toggle('visible');
+        } else if (show) {
+            resetConfirmModalBackdrop.classList.add('visible');
+        } else {
+            resetConfirmModalBackdrop.classList.remove('visible');
+        }
+        if (show) toggleSettingsModal(false); 
+    }
+
+    /**
+     * 🌟 대화 기록 초기화 및 UI 리셋
+     */
+    function resetChat() {
+        // 1. 상태 및 기록 초기화
+        history = [];
+        localStorage.removeItem(HISTORY_STORAGE_KEY);
+        
+        // 2. UI 초기화
+        chatMessages.innerHTML = '';
+        chatMessages.style.display = 'none';
+        
+        initialContent.style.opacity = '0';
+        initialContent.style.display = 'flex';
+        setTimeout(() => {
+            initialContent.style.opacity = '1';
+        }, 10); 
+        
+        // 3. 모달 닫기 및 알림
+        toggleResetConfirmModal(false);
+        showSnackbar("대화가 초기화되었습니다.");
+    }
+    
+    // 이벤트 리스너: 대화 초기화 확인 모달
+    resetChatButton.addEventListener('click', (e) => {
+        e.preventDefault();
+        toggleResetConfirmModal(true);
+    });
+    confirmCancelBtn.addEventListener('click', () => toggleResetConfirmModal(false));
+    confirmResetBtn.addEventListener('click', resetChat);
+    resetConfirmModalBackdrop.addEventListener('click', (e) => {
+        if (e.target === resetConfirmModalBackdrop) {
+            toggleResetConfirmModal(false);
+        }
+    });
+    
+    // 🌟🌟🌟 스크롤 버튼 이벤트 리스너 🌟🌟🌟
+    scrollDownButton.addEventListener('click', () => {
+        scrollToBottom(true);
+        scrollDownButton.classList.remove('visible');
+        autoScrollEnabled = true;
+    });
+
+    /**
+     * 🌟 스크롤을 맨 아래로 이동
+     */
+    function scrollToBottom(smooth = true) {
+        const behavior = smooth ? 'smooth' : 'auto';
+        contentWrapper.scrollTo({
+            top: contentWrapper.scrollHeight,
+            behavior: behavior
+        });
+    }
+    
+    /**
+     * 🌟 스크롤 상태 감지 및 자동 스크롤 관리
+     */
+    contentWrapper.addEventListener('scroll', () => {
+        const isAtBottom = contentWrapper.scrollHeight - contentWrapper.scrollTop - contentWrapper.clientHeight < 1;
+
+        if (isAtBottom) {
+            // 맨 아래에 도달하면 자동 스크롤 활성화 및 버튼 숨기기
+            autoScrollEnabled = true;
+            scrollDownButton.classList.remove('visible');
+        } else if (contentWrapper.scrollTop < contentWrapper.scrollHeight - contentWrapper.clientHeight - 100) {
+            // 맨 아래에서 일정 거리 이상 떨어지면 자동 스크롤 해제 및 버튼 표시
+            autoScrollEnabled = false;
+            if (!isStreaming && !isFadingIn) {
+                scrollDownButton.classList.add('visible');
+            }
+        }
+    });
+
+
+    function toggleSendButton() {
+        if (inputField.value.trim().length > 0 && !isStreaming) {
+            sendButton.classList.add('active');
+        } else {
+            sendButton.classList.remove('active');
+        }
+    }
+    inputField.addEventListener('input', toggleSendButton);
+
+    function autoResizeTextarea() {
+        const style = getComputedStyle(inputField);
+        const line_height_px = parseFloat(style.getPropertyValue('--line-height-px')) || 22.4; 
+        const composerPaddingV = 12; 
+        const inputContainerPaddingV = 8; 
+        const minInputContainerHeight = parseFloat(style.getPropertyValue('--min-input-container-height')) || 48; 
+
+        inputField.rows = MIN_ROWS;
+        inputField.style.height = 'auto'; 
+
+        let scrollH = inputField.scrollHeight;
+        let newRows = Math.round(scrollH / line_height_px);
+        newRows = Math.max(MIN_ROWS, Math.min(MAX_ROWS, newRows));
+        inputField.rows = newRows;
+        inputField.style.height = 'auto';
+        
+        const finalTextareaHeight = inputField.offsetHeight; 
+        const contentHeight = finalTextareaHeight + inputContainerPaddingV;
+        const inputContainerHeight = Math.max(contentHeight, minInputContainerHeight);
+        
+        inputContainer.style.minHeight = `${inputContainerHeight}px`;
+
+        const newComposerHeight = inputContainerHeight + composerPaddingV;
+        composer.style.minHeight = `${newComposerHeight}px`;
+        
+        // 🌟 스크롤 다운 버튼 위치 조정
+        scrollDownButton.style.bottom = `${newComposerHeight + 10}px`;
+        
+        chatMessages.style.paddingBottom = `${newComposerHeight}px`;
+
+        if (autoScrollEnabled) scrollToBottom(false);
+    }
+    
+    inputField.addEventListener('input', autoResizeTextarea);
+    
+    /**
+     * 사용자 메시지 버블을 UI에 추가합니다.
+     */
+    function appendUserMessage(content, animate = true) {
+        const userBubble = document.createElement('div');
+        userBubble.className = 'message-bubble user-message';
+        userBubble.innerHTML = `<div class="message-text">${content}</div>`;
+        chatMessages.appendChild(userBubble);
+        if (animate) scrollToBottom(true);
+    }
+
+    /**
+     * 🌟 재생성 버튼만 비활성화 (이전 답변에도 다른 버튼은 작동)
+     */
+    function updateRegenerateButtons() {
+        const allBotMessages = chatMessages.querySelectorAll('.bot-message');
+        const lastBotMessage = allBotMessages[allBotMessages.length - 1];
+
+        allBotMessages.forEach(message => {
+            const regenBtn = message.querySelector('.bot-action-btn.regenerate');
+            if (regenBtn) {
+                // 가장 최근 메시지에만 재생성 활성화
+                if (message === lastBotMessage) {
+                    regenBtn.classList.remove('disabled');
+                    regenBtn.style.opacity = 1;
+                    regenBtn.style.pointerEvents = 'auto';
+                } else {
+                    // 이전 메시지들은 재생성만 비활성화
+                    regenBtn.classList.add('disabled');
+                    regenBtn.style.opacity = 0.5; 
+                    regenBtn.style.pointerEvents = 'none';
+                }
+            }
+            
+            // 좋아요/싫어요/복사/공유 버튼은 항상 활성화
+            const otherBtns = message.querySelectorAll('.bot-action-btn:not(.regenerate)');
+            otherBtns.forEach(btn => {
+                btn.style.opacity = 1;
+                btn.style.pointerEvents = 'auto';
+            });
+        });
+    }
+
+
+    /**
+     * 🌟 봇 메시지 액션 버튼 생성
+     */
+    function createBotActions(content, messageIndex, feedbackStatus = null) {
+        const actionsContainer = document.createElement('div');
+        actionsContainer.className = 'bot-actions';
+        actionsContainer.setAttribute('data-message-index', messageIndex);
+
+        // 1. 좋아요 버튼 (Like)
+        const likeBtn = createActionButton('like', '좋아요', feedbackStatus, 'thumb_up');
+        
+        // 2. 싫어요 버튼 (Dislike)
+        const dislikeBtn = createActionButton('dislike', '싫어요', feedbackStatus, 'thumb_down');
+        
+        // 3. 복사 버튼 (Copy)
+        const copyBtn = createActionButton('copy', '복사', null, 'content_copy');
+        copyBtn.addEventListener('click', () => {
+            navigator.clipboard.writeText(content).then(() => {
+                showSnackbar('메시지가 복사되었습니다.');
+            }).catch(err => {
+                console.error('복사 실패: ', err);
+                showSnackbar('복사에 실패했습니다.');
+            });
+        });
+        
+        // 4. 공유 버튼 (Share)
+        const shareBtn = createActionButton('share', '공유', null, 'share');
+        shareBtn.addEventListener('click', () => {
+            if (navigator.share) {
+                navigator.share({
+                    title: 'MinsuGPT 공유',
+                    text: content,
+                }).catch(error => console.error('공유 실패', error));
+            } else {
+                navigator.clipboard.writeText(content).then(() => {
+                    showSnackbar('공유 기능이 없어 메시지를 복사했습니다.');
+                }).catch(err => {
+                    console.error('복사 실패: ', err);
+                    showSnackbar('공유 및 복사에 실패했습니다.');
+                });
+            }
+        });
+
+        // 5. 다시 답변 버튼 (Regenerate)
+        const regenerateBtn = createActionButton('regenerate', '다시 답변받기', null, 'autorenew');
+        regenerateBtn.addEventListener('click', (e) => {
+            // 🌟🌟🌟 가장 마지막 메시지인지 확인 🌟🌟🌟
+            if (!regenerateBtn.classList.contains('disabled')) {
+                handleRegenerate(messageIndex);
+            } else {
+                showSnackbar('가장 최신 답변만 재생성할 수 있습니다.');
+            }
+        });
+
+
+        // 좋아요/싫어요 이벤트 리스너
+        const toggleFeedback = (action, otherAction, index) => {
+            const currentMessage = history[index];
+            if (!currentMessage || currentMessage.role !== 'model') return;
+
+            const newFeedback = currentMessage.feedback === action ? null : action;
+            currentMessage.feedback = newFeedback;
+            history[index].feedback = newFeedback; 
+
+            saveChatHistory(); 
+
+            // UI 업데이트
+            const btn = document.querySelector(`.bot-message[data-index="${index}"] .bot-action-btn.${action}`);
+            const otherBtn = document.querySelector(`.bot-message[data-index="${index}"] .bot-action-btn.${otherAction}`);
+
+            if (newFeedback) {
+                btn.classList.add('selected');
+                if (otherBtn) otherBtn.classList.remove('selected');
+            } else {
+                btn.classList.remove('selected');
+            }
+        };
+
+        likeBtn.addEventListener('click', () => toggleFeedback('like', 'dislike', messageIndex));
+        dislikeBtn.addEventListener('click', () => toggleFeedback('dislike', 'like', messageIndex));
+        
+        actionsContainer.appendChild(likeBtn);
+        actionsContainer.appendChild(dislikeBtn);
+        actionsContainer.appendChild(copyBtn);
+        actionsContainer.appendChild(shareBtn);
+        actionsContainer.appendChild(regenerateBtn);
+        
+        // 초기 상태에서 가장 마지막 메시지가 아니면 재생성만 비활성화 상태 부여
+        if (messageIndex !== history.length - 1 && history.filter(msg => msg.role === 'model').length > 0) {
+            regenerateBtn.classList.add('disabled');
+        }
+
+        return actionsContainer;
+    }
+
+    /**
+     * 🌟 재생성 로직 처리
+     */
+    function handleRegenerate(messageIndex) {
+        if (isStreaming || isFadingIn) {
+            showSnackbar('현재 답변 생성 중이거나 애니메이션이 동작 중입니다.');
+            return;
+        }
+
+        const lastUserMessage = history.slice().reverse().find(msg => msg.role === 'user');
+        if (lastUserMessage) {
+            const lastModelIndex = history.findIndex((msg, index) => index === messageIndex);
+            if (lastModelIndex !== -1) {
+                // 이전 답변 제거 (사용자 질문은 유지)
+                history.splice(lastModelIndex, 1); 
+            }
+            
+            const botMessageElement = document.querySelector(`.bot-message[data-index="${messageIndex}"]`);
+            if (botMessageElement) {
+                 botMessageElement.remove();
+            }
+            
+            // 🌟 재응답 로딩 텍스트 설정 후 전송
+            currentLoadingText = '다시 답변을 생각하는 중...';
+            const originalPrompt = lastUserMessage.content;
+            
+            // 자동 스크롤 켜기
+            autoScrollEnabled = true;
+            scrollDownButton.classList.remove('visible');
+            
+            sendMessage(originalPrompt);
+        } else {
+            showSnackbar('다시 답변받을 이전 사용자 메시지가 없습니다.');
+        }
+    }
+    
+    /**
+     * 🌟 Material Symbols 아이콘 생성 헬퍼
+     */
+    function createActionButton(actionType, ariaLabel, feedbackStatus = null, iconName) {
+        const btn = document.createElement('div');
+        btn.className = `bot-action-btn ${actionType}`;
+        btn.setAttribute('role', 'button');
+        btn.setAttribute('aria-label', ariaLabel);
+        
+        if (feedbackStatus === actionType) {
+            btn.classList.add('selected');
+        }
+
+        btn.innerHTML = `<span class="material-symbols-rounded">${iconName}</span>`;
+        return btn;
+    }
+    
+    /**
+     * 봇 메시지 컨테이너를 생성하고 '생각하는 중...' 표시기 포함
+     */
+    function appendBotMessageContainer() {
+        const botMessageContainer = document.createElement('div');
+        botMessageContainer.className = 'bot-message';
+        // history에 이미 사용자 메시지가 추가된 상태이므로, 다음 인덱스 사용
+        botMessageContainer.setAttribute('data-index', history.length); 
+        
+        // 💡 생각하는 중... 표시기
+        const indicatorContainer = document.createElement('div');
+        indicatorContainer.id = 'thinking-indicator';
+        indicatorContainer.className = 'thinking-indicator';
+        
+        const indicatorText = document.createElement('span');
+        indicatorText.className = 'thinking-indicator-text';
+        indicatorText.textContent = currentLoadingText; 
+        
+        // 🌟 스피너 엘리먼트 추가
+        const spinner = document.createElement('div');
+        spinner.className = 'loading-spinner';
+
+        indicatorContainer.appendChild(indicatorText);
+        indicatorContainer.appendChild(spinner);
+        
+        // 🌟 스트리밍되는 텍스트가 들어갈 컨테이너
+        const streamingBlock = document.createElement('div');
+        streamingBlock.className = 'streaming-block'; 
+        
+        botMessageContainer.appendChild(indicatorContainer);
+        botMessageContainer.appendChild(streamingBlock);
+
+        chatMessages.appendChild(botMessageContainer);
+        if (autoScrollEnabled) scrollToBottom(true);
+        
+        return { 
+            botMessageElement: botMessageContainer,
+            indicatorElement: indicatorContainer, 
+            streamingBlockElement: streamingBlock 
+        };
+    }
+    
+    /**
+     * 🌟 로딩 완료 후 봇 메시지에 액션 버튼을 추가합니다.
+     */
+    function appendBotMessage(content, feedbackStatus, animate = true) {
+        const botMessageContainer = document.createElement('div');
+        botMessageContainer.className = 'bot-message';
+        
+        const messageIndex = history.length - 1; 
+        botMessageContainer.setAttribute('data-index', messageIndex);
+
+        const streamingBlock = document.createElement('div');
+        streamingBlock.className = 'streaming-block'; 
+        
+        botMessageContainer.appendChild(streamingBlock);
+        chatMessages.appendChild(botMessageContainer);
+        
+        // 🌟🌟🌟 문장별 페이드인 시작
+        if (animate) {
+             // 자동 스크롤 켜기
+            autoScrollEnabled = true;
+            scrollDownButton.classList.remove('visible');
+            
+             sentenceFadeInEffect(streamingBlock, content, messageIndex).then(() => {
+                // 페이드인 완료 후 액션 버튼 추가 및 재생성 버튼 상태 업데이트
+                const actionsContainer = createBotActions(content, messageIndex, feedbackStatus);
+                botMessageContainer.appendChild(actionsContainer);
+                updateRegenerateButtons(); // 최신 메시지 활성화
+                if (autoScrollEnabled) scrollToBottom(true);
+             });
+        } else {
+            // 과거 기록 로드 시는 즉시 표시
+            streamingBlock.innerHTML = renderMarkdown(content);
+            const actionsContainer = createBotActions(content, messageIndex, feedbackStatus);
+            botMessageContainer.appendChild(actionsContainer);
+        }
+        
+        if (autoScrollEnabled) scrollToBottom(false);
+    }
+
+
+    function startStreamingUI(indicator) {
+        // '생각하는 중...' 숨기기
+        indicator.style.display = 'none';
+        // 🌟 로딩 텍스트 기본값으로 리셋
+        currentLoadingText = '답변을 생각하는 중...';
+    }
+
+    /**
+     * 원본 마크다운 텍스트를 HTML로 변환합니다. (문장 분리 포함)
+     */
+    function renderMarkdown(rawText, wrapSentences = false) {
+        if (!rawText) return "";
+        let html = rawText.replace(/\r/g, ''); 
+        
+        // 1. 블록 코드 ```code``` (문장 분리 제외)
+        html = html.replace(/```([^`]+?)```/gs, (match, content) => {
+             return `<pre><code>${content.trim()}</code></pre>`;
+        });
+        
+        // 2. 헤더 (#, ##, ###) (문장 분리 제외)
+        html = html.replace(/^(#+)\s*([^\n]+)/gm, (match, hashes, content) => {
+            return `<h${hashes.length}>${content}</h${hashes.length}>`;
+        });
+        
+        // 3. 인라인 코드 `code` (문장 분리 제외)
+        html = html.replace(/`([^`\n]+?)`/g, '<code>$1</code>');
+
+        // 4. 굵은 글씨 **text** 또는 __text__
+        html = html.replace(/\*\*([^\*]+?)\*\*/g, '<strong>$1</strong>');
+        html = html.replace(/__([^__]+?)__/g, '<strong>$1</strong>');
+        
+        // 5. 문장 분리 및 래핑
+        if (wrapSentences) {
+            // 문장 부호(.?!) 다음에 공백, 줄바꿈, 또는 문자열 끝이 올 때 분리.
+            const sentenceRegex = /([^.?!]+[.?!]+(?:\s|<br>|\n|$)+)/g;
+            const parts = html.split(sentenceRegex).filter(p => p.trim().length > 0 || p.match(/^[.?!]+\s*$/));
+
+            let wrappedHtml = '';
+            for (const part of parts) {
+                if (part.trim().length === 0 && !part.includes('<br>') && !part.includes('\n')) continue; 
+
+                // 코드 블록, 헤더, pre 태그가 포함된 부분은 래핑하지 않음
+                if (part.match(/<pre>/) || part.match(/<h[1-6]>/)) {
+                    wrappedHtml += part;
+                } else {
+                    // 일반 텍스트 문장과 문장 부호를 포함하여 래핑
+                    wrappedHtml += `<span class="sentence">${part.replace(/(?<!<br>)\n/g, '<br>')}</span>`;
+                }
+            }
+            html = wrappedHtml;
+        }
+
+        // 6. 단일 줄바꿈을 <br>로 변환 (wrapSentences가 false일 때만 실행)
+        if (!wrapSentences) {
+             html = html.replace(/(?<!<br>)\n/g, '<br>');
+        }
+        
+        return html;
+    }
+    
+    /**
+     * 스트리밍되는 전체 텍스트를 기반으로 내용을 덮어씁니다. (스트리밍 중에만 사용)
+     */
+    function updateStreamingDisplay(rawResponse, streamingElement) {
+        // 스트리밍 중에는 타이핑 효과 없이 즉시 업데이트
+        streamingElement.innerHTML = renderMarkdown(rawResponse);
+        if (autoScrollEnabled) scrollToBottom(false);
+    }
+    
+    /**
+     * 🌟🌟🌟 문장별 페이드 인 효과 함수 (스크롤 유지 로직 추가) 🌟🌟🌟
+     */
+    function sentenceFadeInEffect(element, rawText, messageIndex) {
+        return new Promise(resolve => {
+            isFadingIn = true;
+            element.innerHTML = renderMarkdown(rawText, true);
+
+            const sentences = element.querySelectorAll('.sentence');
+            let index = 0;
+            const delay = FADE_IN_DELAY; 
+            
+            // 중지 버튼을 눌렀을 때 애니메이션을 빠르게 종료하는 함수
+            const abortFadeIn = () => {
+                isFadingIn = false;
+                sentences.forEach(s => s.classList.add('visible'));
+                if (autoScrollEnabled) scrollToBottom(true);
+                resolve();
+            };
+            
+            fadeOutAbortController = { abort: abortFadeIn };
+
+            function showNextSentence() {
+                if (!isFadingIn) { 
+                    return;
+                }
+                
+                if (index < sentences.length) {
+                    const currentSentence = sentences[index];
+                    currentSentence.classList.add('visible');
+                    
+                    // 🌟 현재 문장이 보이지 않으면 스크롤
+                    if (autoScrollEnabled) {
+                        const rect = currentSentence.getBoundingClientRect();
+                        const wrapperRect = contentWrapper.getBoundingClientRect();
+                        const composerHeight = composer.clientHeight;
+
+                        // 문장의 하단이 content-wrapper의 하단보다 아래에 있을 때 스크롤
+                        if (rect.bottom > wrapperRect.bottom - composerHeight - 20) {
+                            scrollToBottom(true);
+                        }
+                    }
+
+                    index++;
+                    setTimeout(showNextSentence, delay);
+                } else {
+                    isFadingIn = false;
+                    resolve();
+                }
+            }
+
+            showNextSentence();
+        });
+    }
+
+
+    // 중지 버튼 활성화/비활성화 및 상태 업데이트
+    function setStreamingState(active) {
+        isStreaming = active;
+        if (active) {
+            sendButton.style.display = 'none';
+            stopButton.style.display = 'flex';
+            inputField.setAttribute('readonly', 'true');
+            // 스트리밍 중에는 자동 스크롤 강제 활성화 및 버튼 숨김
+            autoScrollEnabled = true;
+            scrollDownButton.classList.remove('visible');
+        } else {
+            sendButton.style.display = 'flex';
+            stopButton.style.display = 'none';
+            inputField.removeAttribute('readonly');
+            abortController = null;
+        }
+        toggleSendButton();
+    }
+    
+    /**
+     * 🌟🌟🌟 답변 중지 핸들러 수정 🌟🌟🌟
+     */
+    function stopResponse() {
+        // 1. 스낵바 알림 표시
+        showSnackbar("답변 중지됨.");
+        
+        // 2. 페이드인 중일 때 중지
+        if (isFadingIn && fadeOutAbortController) {
+            fadeOutAbortController.abort();
+            
+            // 채팅창에 "답변 중지됨." 메시지 추가 (불완전한 응답 아래)
+            const lastBotMessageElement = chatMessages.lastElementChild;
+            if (lastBotMessageElement) {
+                const stopText = document.createElement('div');
+                stopText.className = 'stop-message';
+                stopText.textContent = "답변 중지됨.";
+                
+                // 불완전한 응답 바로 아래에 삽입
+                lastBotMessageElement.insertAdjacentElement('afterend', stopText);
+            }
+
+            setStreamingState(false);
+            scrollToBottom(true);
+            return;
+        }
+        
+        // 3. 스트리밍 중일 때 중지
+        if (abortController) {
+            abortController.abort();
+            
+            const lastBotMessageElement = chatMessages.lastElementChild;
+            if (lastBotMessageElement) {
+                const indicator = lastBotMessageElement.querySelector('#thinking-indicator');
+                const streamingBlock = lastBotMessageElement.querySelector('.streaming-block');
+
+                // (A) 로딩 중 (인디케이터 표시 중)에 중지된 경우
+                if (indicator && indicator.style.display !== 'none') {
+                    // 사용자 메시지만 제거하고, 봇 메시지 컨테이너를 제거
+                    lastBotMessageElement.remove(); 
+                    if (history.length > 0 && history[history.length - 1].role === 'user') {
+                         history.pop();
+                    }
+                } 
+                // (B) 텍스트를 일부 받은 후 중지된 경우
+                else if (streamingBlock && fullResponse.trim().length > 0) {
+                    // 불완전한 응답 기록
+                    history.push({ role: 'model', content: fullResponse, feedback: null });
+                    saveChatHistory();
+                    
+                    // 액션 버튼 추가
+                    const actionContainer = createBotActions(fullResponse, history.length - 1);
+                    lastBotMessageElement.appendChild(actionContainer);
+                    updateRegenerateButtons();
+                    
+                    // 채팅창에 "답변 중지됨." 메시지 추가
+                    const stopText = document.createElement('div');
+                    stopText.className = 'stop-message';
+                    stopText.textContent = "답변 중지됨.";
+                    lastBotMessageElement.insertAdjacentElement('afterend', stopText);
+
+                } 
+                // (C) 아무것도 받지 못하고 중지된 경우
+                else if (lastBotMessageElement && fullResponse.trim().length === 0) {
+                     lastBotMessageElement.remove();
+                     if (history.length > 0 && history[history.length - 1].role === 'user') {
+                         history.pop();
+                     }
+                }
+            }
+        }
+        setStreamingState(false);
+        scrollToBottom(true);
+    }
+    stopButton.addEventListener('click', stopResponse);
+
+    // 메시지 전송 처리
+    let fullResponse = ""; 
+
+    async function sendMessage(userMessageOverride = null) {
+        const userMessage = userMessageOverride !== null ? userMessageOverride : inputField.value.trim();
+        if (userMessage.length === 0 || isStreaming || isFadingIn) {
+            if (isStreaming || isFadingIn) showSnackbar('현재 답변 생성 중이거나 애니메이션이 동작 중입니다.');
+            return;
+        }
+
+        // 1. UI 표시 및 history 업데이트 (재생성이 아닐 경우)
+        if (userMessageOverride === null) {
+            currentLoadingText = '답변을 생각하는 중...';
+            
+            if (initialContent.style.opacity !== '0') {
+                initialContent.style.opacity = '0';
+                setTimeout(() => {
+                    initialContent.style.display = 'none';
+                    chatMessages.style.display = 'flex'; 
+                }, 500); 
+            } else {
+                 chatMessages.style.display = 'flex';
+            }
+            
+            // 기존 답변 중지 메시지 제거
+            const existingStops = chatMessages.querySelectorAll('.stop-message');
+            existingStops.forEach(el => el.remove());
+
+            // 기존 메시지들의 재생성 버튼 비활성화
+            updateRegenerateButtons(); 
+
+            appendUserMessage(userMessage);
+            history.push({ role: 'user', content: userMessage }); 
+        } 
+
+        // 2. 입력창 초기화 및 UI 상태 업데이트
+        if (userMessageOverride === null) {
+            inputField.value = '';
+            inputField.rows = MIN_ROWS; 
+            autoResizeTextarea(); 
+        }
+        
+        // 3. 봇 메시지를 위한 컨테이너 추가 및 로딩 표시
+        const { botMessageElement, indicatorElement, streamingBlockElement } = appendBotMessageContainer();
+        
+        // 4. 스트리밍 상태 시작
+        setStreamingState(true);
+        abortController = new AbortController();
+        const signal = abortController.signal;
+        
+        fullResponse = ""; 
+        let buffer = ""; 
+        let isFirstChunk = true; 
+        
+        try {
+            const response = await fetch(BACKEND_ENDPOINT, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    message: userMessage,
+                    // 🌟🌟🌟 history를 전송할 때, 시스템 컨텍스트도 함께 전송하여 모델이 잊지 않도록 함 🌟🌟🌟
+                    history: [...history], 
+                }),
+                signal: signal 
+            });
+
+            if (!response.ok) {
+                
+                startStreamingUI(indicatorElement); 
+                let errorMessage = `HTTP Error: ${response.status} ${response.statusText}`;
+                if (response.status === 429) {
+                    errorMessage = "⚠️ 요청 속도 제한 초과: 잠시 후 다시 시도해 주세요.";
+                } else if (response.status === 400) {
+                    errorMessage = "⚠️ 잘못된 요청: 입력 메시지 길이 등을 확인해 주세요.";
+                } else if (response.status >= 500) {
+                     errorMessage = `⚠️ 서버 오류: 백엔드에서 문제가 발생했습니다. (HTTP ${response.status})`;
+                }
+                
+                streamingBlockElement.innerHTML = `<p style="color:red;">${errorMessage}</p>`;
+                setStreamingState(false);
+                
+                // 오류 발생 시 history에서 마지막 사용자 메시지 제거
+                if (history.length > 0 && history[history.length - 1].role === 'user') {
+                     history.pop();
+                     saveChatHistory();
+                }
+                updateRegenerateButtons();
+                // 오류 후 맨 아래로 스크롤
+                scrollToBottom(true); 
+                return;
+            }
+
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder('utf-8');
+            
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) {
+                    break;
+                }
+                
+                buffer += decoder.decode(value, { stream: true });
+                
+                const parts = buffer.split('\n');
+                buffer = parts.pop(); 
+
+                for (const part of parts) {
+                    const cleanPart = part; 
+                    if (cleanPart.trim() === "[DONE]") {
+                        fullResponse += buffer;
+                        
+                        // 🌟🌟🌟 스트리밍 종료 후 최종 페이드인 효과 적용 🌟🌟🌟
+                        setStreamingState(false);
+                        history.push({ role: 'model', content: fullResponse, feedback: null });
+                        saveChatHistory();
+                        
+                        // 로딩 인디케이터 제거
+                        botMessageElement.removeChild(indicatorElement); 
+                        
+                        // 최종 페이드인 효과 시작
+                        sentenceFadeInEffect(streamingBlockElement, fullResponse, history.length - 1).then(() => {
+                            // 페이드인 완료 후 액션 버튼 추가 및 재생성 버튼 상태 업데이트
+                            const actionContainer = createBotActions(fullResponse, history.length - 1);
+                            botMessageElement.appendChild(actionContainer);
+                            updateRegenerateButtons();
+                            if (autoScrollEnabled) scrollToBottom(true);
+                        });
+                        
+                        reader.releaseLock();
+                        return; 
+                    }
+                    
+                    if (cleanPart.length > 0) {
+                        if (isFirstChunk) {
+                            startStreamingUI(indicatorElement); 
+                            isFirstChunk = false;
+                        }
+                        
+                        fullResponse += cleanPart + '\n'; 
+                        
+                        // 스트리밍 중에는 타이핑 효과 없이 즉시 업데이트
+                        updateStreamingDisplay(fullResponse, streamingBlockElement);
+                    }
+                }
+            }
+            
+            if (buffer.length > 0) {
+                 if (isFirstChunk) {
+                    startStreamingUI(indicatorElement);
+                    isFirstChunk = false;
+                 }
+                 fullResponse += buffer;
+                 updateStreamingDisplay(fullResponse, streamingBlockElement);
+            }
+            
+            if (isStreaming) {
+                 // 🌟🌟🌟 스트리밍 종료 후 최종 페이드인 효과 적용 🌟🌟🌟
+                 setStreamingState(false);
+                 history.push({ role: 'model', content: fullResponse, feedback: null });
+                 saveChatHistory();
+                 
+                 // 로딩 인디케이터 제거
+                 botMessageElement.removeChild(indicatorElement); 
+                 
+                 // 최종 페이드인 효과 시작
+                 sentenceFadeInEffect(streamingBlockElement, fullResponse, history.length - 1).then(() => {
+                    // 페이드인 완료 후 액션 버튼 추가 및 재생성 버튼 상태 업데이트
+                    const actionContainer = createBotActions(fullResponse, history.length - 1);
+                    botMessageElement.appendChild(actionContainer);
+                    updateRegenerateButtons();
+                    if (autoScrollEnabled) scrollToBottom(true);
+                 });
+            }
+
+
+        } catch (error) {
+            if (error.name === 'AbortError') {
+                console.log('Fetch aborted by user or cleanup triggered.');
+                // 이미 stopResponse에서 처리됨
+            } else {
+                console.error('Fetch/Streaming Error:', error);
+                const errorMsg = `⚠️ 통신 오류: 서버에 연결할 수 없습니다. CORS 설정 또는 주소를 확인해 주세요. (Error: ${error.message})`;
+                
+                startStreamingUI(indicatorElement);
+                streamingBlockElement.innerHTML = `<p style="color:red;">${errorMsg}</p>`;
+                
+                // 오류 발생 시 history에서 마지막 사용자 메시지 제거 (완전한 응답 실패)
+                if (history.length > 0 && history[history.length - 1].role === 'user') {
+                     history.pop();
+                     saveChatHistory();
+                }
+                updateRegenerateButtons();
+            }
+            setStreamingState(false);
+             // 오류 후 맨 아래로 스크롤
+            scrollToBottom(true); 
+        }
+        if(isStreaming) setStreamingState(false);
+    }
+
+    sendButton.addEventListener('click', () => sendMessage());
+
+    // 🌟 Quick Action 버튼 클릭 이벤트
+    quickActionButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            const prompt = button.getAttribute('data-prompt');
+            if (prompt) {
+                inputField.value = prompt;
+                autoResizeTextarea();
+                
+                // 자동 스크롤 켜기
+                autoScrollEnabled = true;
+                scrollDownButton.classList.remove('visible');
+                
+                sendMessage();
+            }
+        });
+    });
+
+    // 엔터키 동작
+    inputField.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            if (isMobile()) {
+            } else {
+                if (e.shiftKey) {
+                    setTimeout(autoResizeTextarea, 0); 
+                    return; 
+                }
+                e.preventDefault(); 
+                if (sendButton.classList.contains('active') && !isStreaming) {
+                    // 자동 스크롤 켜기
+                    autoScrollEnabled = true;
+                    scrollDownButton.classList.remove('visible');
+                    
+                    sendMessage();
+                }
+            }
+        }
+    });
+
+    // 🌟🌟🌟 플러스 버튼 모달 토글 로직 🌟🌟🌟
+    function togglePlusModal(show) {
+        if (show === undefined) {
+            plusModalBackdrop.classList.toggle('visible');
+        } else if (show) {
+            plusModalBackdrop.classList.add('visible');
+        } else {
+            plusModalBackdrop.classList.remove('visible');
+        }
+    }
+
+    plusButton.addEventListener('click', (e) => {
+        e.preventDefault(); 
+        togglePlusModal();
+    });
+    
+    // 플러스 모달 배경 클릭 시 닫기
+    plusModalBackdrop.addEventListener('click', (e) => {
+        if (e.target === plusModalBackdrop) {
+            togglePlusModal(false);
+        }
+    });
+    // 모달 내부 버튼 클릭 시 닫기 (실제 기능은 여기에 구현해야 함)
+    document.getElementById('plus-modal').addEventListener('click', (e) => {
+        if (e.target.closest('.modal-grid-item') || e.target.closest('.modal-option')) {
+            // togglePlusModal(false); 
+        }
+    });
+    
+    // 🌟🌟🌟 설정 모달 토글 로직 🌟🌟🌟
+    function toggleSettingsModal(show) {
+        if (show === undefined) {
+            settingsModalBackdrop.classList.toggle('visible');
+        } else if (show) {
+            settingsModalBackdrop.classList.add('visible');
+        } else {
+            settingsModalBackdrop.classList.remove('visible');
+        }
+    }
+    
+    settingsButton.addEventListener('click', (e) => {
+        e.preventDefault();
+        toggleSettingsModal();
+    });
+    
+    // 설정 모달 배경 클릭 시 닫기
+    settingsModalBackdrop.addEventListener('click', (e) => {
+        if (e.target === settingsModalBackdrop) {
+            toggleSettingsModal(false);
+        }
+    });
+    
+
+    // 초기 상태 로드 및 높이 조정
+    loadChatHistory();
+    toggleSendButton();
+    autoResizeTextarea();
+  </script>
+</body>
+</html>
