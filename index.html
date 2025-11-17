@@ -131,15 +131,26 @@
       justify-content:center;
       color:#111827;
       cursor: pointer; 
+      flex-shrink: 0; /* 아이콘 크기 고정 */
     }
-    /* 🌟🌟🌟 추가: MinsuGPT 텍스트 스타일 🌟🌟🌟 */
-    .header-center {
+    
+    /* 🌟🌟🌟 추가: MinsuGPT 텍스트 스타일 (메뉴 버튼 옆) 🌟🌟🌟 */
+    .header-title {
         font-size: 18px;
         font-weight: 600;
         color: var(--accent);
+        margin-left: 8px; /* 메뉴 버튼과의 간격 */
+        flex-shrink: 0;
+    }
+    
+    /* 🌟🌟🌟 Ultra 이용하기 버튼 컨테이너 (중앙 정렬) 🌟🌟🌟 */
+    .header-center {
         flex-grow: 1; /* 중앙 영역 확장 */
         text-align: center;
+        display: flex;
+        justify-content: center;
     }
+
     .plus-btn{
       background-color:#f1f4ff;
       color:#1d6fef;
@@ -661,19 +672,23 @@
 <body>
   <div class="phone" role="application" aria-label="채팅 UI">
     <header class="header">
-        <div class="header-icon menu-icon">
-            <span class="material-symbols-rounded">menu</span>
+        <div style="display: flex; align-items: center;">
+             <div class="header-icon menu-icon">
+                <span class="material-symbols-rounded">menu</span>
+            </div>
+            
+            <div class="header-title">
+                MinsuGPT
+            </div>
         </div>
         
         <div class="header-center">
-            MinsuGPT
-        </div>
-
-        <div class="plus-btn">
-            Ultra 이용하기
+            <div class="plus-btn">
+                Ultra 이용하기
+            </div>
         </div>
         
-        <div class="header-icon" id="settings-button" aria-label="설정" style="visibility: hidden;">
+        <div class="header-icon" id="settings-button" aria-label="설정" style="visibility: visible;"> 
             <span class="material-symbols-rounded">settings</span>
         </div>
         
