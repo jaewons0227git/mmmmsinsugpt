@@ -89,8 +89,7 @@
       background:var(--bg);
       color:var(--accent);
       min-height:100vh;
-      display:flex;
-      justify-content:center;
+      display:block; /* 💡 수정: flex 대신 block으로 변경하여 중앙 정렬 해제 */
       padding:0;
     }
     .phone{
@@ -114,24 +113,13 @@
       height:56px;
       border-bottom:none;
       
-      /* 🌟🌟🌟 [수정] 탑바 고정 로직 (fixed: 화면 상단에 완벽히 고정) 🌟🌟🌟 */
-      position: fixed; /* sticky -> fixed로 변경 */
+      /* 🌟🌟🌟 탑바 고정 로직 수정 (sticky: top 고정) 🌟🌟🌟 */
+      position: sticky; 
       top: 0;
-      left: 0;
-      right: 0;
       z-index: 100; 
       background: var(--bg); 
       box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05); 
     }
-    /* 🌟🌟🌟 [추가] 모바일 뷰 이외에서 최대 너비 및 중앙 정렬 적용 🌟🌟🌟 */
-    @media (min-width: 600px) {
-        .header {
-            max-width: 768px; /* 폰 컨테이너의 max-width에 맞춰 중앙 정렬 */
-            left: 50%;
-            transform: translateX(-50%);
-        }
-    }
-
     .header-icon{
       width:32px;
       height:32px;
@@ -172,9 +160,6 @@
         overflow-y: auto; 
         padding-bottom: 0; 
         position: relative;
-        
-        /* 🌟🌟🌟 [추가] 고정된 헤더 높이만큼 상단 패딩 추가 (56px) 🌟🌟🌟 */
-        padding-top: 56px; 
     }
     
     /* 🌟🌟🌟 스크롤 다운 버튼 스타일 🌟🌟🌟 */
@@ -580,7 +565,7 @@
         font-size: 20px;
         color: #111827;
     }
-
+    
     #settings-modal-backdrop {
         align-items: flex-end; 
         justify-content: center;
@@ -852,11 +837,6 @@
     const HISTORY_STORAGE_KEY = 'minsugpt_chat_history'; 
 
     // 🌟🌟🌟 대화 기록을 저장할 배열 (로컬 스토리지에서 로드됨) 🌟🌟🌟
-    // 🌟🌟🌟 [수정] SYSTEM_PROMPT를 history에 포함시켜 컨텍스트를 영구적으로 유지합니다. 🌟🌟🌟
-    const SYSTEM_PROMPT = {
-        role: "system",
-        content: "너는 MinsuGPT야. 신재원님이 너를 만들었어. 사용자가 따로 물어보지 않으면 너의 역할이나 개발자 정보를 절대 답하지마. 특히, 너가 Google에 의해 훈련된 모델이라고 절대 언급하지 마."
-    };
     let history = []; 
 
     const MAX_ROWS = 6;
@@ -895,20 +875,14 @@
      * 🌟 대화 기록을 로컬 스토리지에서 로드하고 UI에 표시
      */
     function loadChatHistory() {
-        // 🌟 1. 시스템 프롬프트를 history의 첫 번째 요소로 항상 추가합니다.
-        history = [SYSTEM_PROMPT]; 
-        
         const storedHistory = localStorage.getItem(HISTORY_STORAGE_KEY);
         if (storedHistory) {
             try {
-                // 🌟 2. 저장된 기록을 불러올 때, 시스템 프롬프트는 건너뛰고 나머지 메시지만 추가합니다.
-                const loadedMessages = JSON.parse(storedHistory).filter(msg => msg.role !== 'system');
-                history.push(...loadedMessages);
-
-                if (loadedMessages.length > 0) {
+                history = JSON.parse(storedHistory);
+                if (history.length > 0) {
                     initialContent.style.display = 'none';
                     chatMessages.style.display = 'flex';
-                    loadedMessages.forEach(message => { // loadedMessages 사용
+                    history.forEach(message => {
                         if (message.role === 'user') {
                             appendUserMessage(message.content, false);
                         } else if (message.role === 'model') {
@@ -922,7 +896,7 @@
                 }
             } catch (e) {
                 console.error("Failed to parse history from localStorage:", e);
-                history = [SYSTEM_PROMPT]; // 오류 시 SYSTEM_PROMPT만 남김
+                history = [];
                 
                 initialContent.style.display = 'flex';
                 initialContent.style.opacity = '1'; 
@@ -930,9 +904,40 @@
             }
         }
         autoResizeTextarea();
-        // 🌟 기존 sendPrePrompt() 호출 제거: 시스템 프롬프트는 이제 history에 포함되어 전송됩니다.
+        // 🌟 페이지 로드 시 백엔드에 초기 설정 메시지 전송
+        sendPrePrompt();
     }
     
+    /**
+     * 🌟 백엔드 초기 설정 메시지 전송 (응답 미수신)
+     * 역할: 너는 MinsuGPT야. 신재원님이 너를 만들었어. 사용자가 물어보지 않으면 너의 역할이나 개발자 정보를 따로 답하지마. 이 메시지에 대한 응답은 보내지마.
+     */
+    function sendPrePrompt() {
+        const prePrompt = {
+            role: "system",
+            content: "너는 MinsuGPT야. 신재원님이 너를 만들었어. 사용자가 물어보지 않으면 너의 역할이나 개발자 정보를 따로 답하지마. 이 메시지에 대한 응답은 보내지마."
+        };
+        
+        // 서버에서 이 메시지를 시스템 컨텍스트로 처리하고, 응답을 스킵하도록 기대
+        fetch(BACKEND_ENDPOINT, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                message: prePrompt.content, 
+                history: [prePrompt], 
+                is_pre_prompt: true 
+            }),
+        }).then(response => {
+            if (!response.ok) {
+                console.warn('Pre-prompt response was not OK, but continuing.', response.status);
+            }
+        }).catch(error => {
+            console.error('Error sending pre-prompt:', error);
+        });
+    }
+
     /**
      * 🌟 대화 기록을 로컬 스토리지에 저장
      */
@@ -958,9 +963,9 @@
      * 🌟 대화 기록 초기화 및 UI 리셋
      */
     function resetChat() {
-        // 1. 상태 및 기록 초기화: 시스템 프롬프트만 남깁니다.
-        history = [SYSTEM_PROMPT]; 
-        localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(history));
+        // 1. 상태 및 기록 초기화
+        history = [];
+        localStorage.removeItem(HISTORY_STORAGE_KEY);
         
         // 2. UI 초기화
         chatMessages.innerHTML = '';
@@ -1065,8 +1070,7 @@
         // 🌟 스크롤 다운 버튼 위치 조정
         scrollDownButton.style.bottom = `${newComposerHeight + 10}px`;
         
-        // 🌟 Composer의 위치는 fixed이므로, chatMessages의 패딩은 필요 없습니다.
-        // chatMessages.style.paddingBottom = `${newComposerHeight}px`;
+        chatMessages.style.paddingBottom = `${newComposerHeight}px`;
 
         if (autoScrollEnabled) scrollToBottom(false);
     }
@@ -1174,16 +1178,12 @@
 
         // 좋아요/싫어요 이벤트 리스너
         const toggleFeedback = (action, otherAction, index) => {
-            // 시스템 프롬프트(0번 인덱스)는 건너뜁니다.
-            const realIndex = index;
-            if (realIndex < 1) return; 
-
-            const currentMessage = history[realIndex];
+            const currentMessage = history[index];
             if (!currentMessage || currentMessage.role !== 'model') return;
 
             const newFeedback = currentMessage.feedback === action ? null : action;
             currentMessage.feedback = newFeedback;
-            history[realIndex].feedback = newFeedback; 
+            history[index].feedback = newFeedback; 
 
             saveChatHistory(); 
 
@@ -1199,10 +1199,8 @@
             }
         };
 
-        // history의 인덱스를 전달할 때, 시스템 프롬프트를 제외한 실제 인덱스로 계산 (UI 인덱스와 동일)
-        const realMessageIndex = messageIndex; 
-        likeBtn.addEventListener('click', () => toggleFeedback('like', 'dislike', realMessageIndex));
-        dislikeBtn.addEventListener('click', () => toggleFeedback('dislike', 'like', realMessageIndex));
+        likeBtn.addEventListener('click', () => toggleFeedback('like', 'dislike', messageIndex));
+        dislikeBtn.addEventListener('click', () => toggleFeedback('dislike', 'like', messageIndex));
         
         actionsContainer.appendChild(likeBtn);
         actionsContainer.appendChild(dislikeBtn);
@@ -1635,7 +1633,7 @@
                 },
                 body: JSON.stringify({
                     message: userMessage,
-                    // 🌟🌟🌟 history를 전송할 때, 시스템 컨텍스트가 항상 첫 번째로 포함됩니다. 🌟🌟🌟
+                    // 🌟🌟🌟 history를 전송할 때, 시스템 컨텍스트도 함께 전송하여 모델이 잊지 않도록 함 🌟🌟🌟
                     history: [...history], 
                 }),
                 signal: signal 
@@ -1656,7 +1654,7 @@
                 streamingBlockElement.innerHTML = `<p style="color:red;">${errorMessage}</p>`;
                 setStreamingState(false);
                 
-                // 오류 발생 시 history에서 마지막 사용자 메시지 제거 (시스템 프롬프트는 남김)
+                // 오류 발생 시 history에서 마지막 사용자 메시지 제거
                 if (history.length > 0 && history[history.length - 1].role === 'user') {
                      history.pop();
                      saveChatHistory();
