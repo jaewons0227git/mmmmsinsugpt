@@ -270,24 +270,30 @@
             });
         });
     </script>
-    <a href="https://statuspage.incident.io/minsugpt" target="_blank" style="
+    <style>
+/* 텍스트 링크의 기본 스타일 */
+.server-status-link {
     position: fixed;
     bottom: 20px;
     right: 20px;
-    background-color: #4CAF50; /* 버튼 배경색 */
-    color: white; /* 텍스트 색상 */
-    padding: 10px 15px;
-    text-align: center;
-    text-decoration: none; /* 밑줄 제거 */
-    display: block;
-    border-radius: 5px; /* 모서리 둥글게 */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* 그림자 효과 */
+    color: #AAAAAA; /* 기본색: 연한 회색 */
+    text-decoration: none;
     font-family: Arial, sans-serif;
     font-size: 14px;
-    z-index: 1000; /* 다른 요소 위에 표시되도록 설정 */
-">
+    z-index: 1000;
+}
+
+/* 마우스를 올렸을 때 스타일 */
+.server-status-link:hover {
+    color: #888888; /* 호버색: 조금 더 진한 회색 */
+    text-decoration: underline; /* 밑줄 추가 */
+}
+</style>
+
+<a href="https://statuspage.incident.io/minsugpt" target="_blank" class="server-status-link">
     MinsuGPT 서버상태
 </a>
 </body>
 </html>
+
 
