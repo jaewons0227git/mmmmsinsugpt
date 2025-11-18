@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 - 페이지를 찾을 수 없습니다</title>
+    
+    <link rel="icon" href="https://i.postimg.cc/JzrLmGfG/geulim2.png" type="image/png">
+    
+    <style>
+        /* 기본 스타일 및 화이트 테마 설정 */
+        body {
+            font-family: 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f7f7f7; 
+            color: #333; 
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            text-align: center;
+        }
+
+        /* 메인 콘텐츠 영역 */
+        .content {
+            max-width: 90%; /* 화면 너비의 90%만 사용하도록 제한 */
+            padding: 40px 20px;
+        }
+
+        /* 로고 스타일 */
+        .logo {
+            width: 120px;
+            height: auto;
+            margin-bottom: 30px;
+        }
+
+        /* 오류 코드 스타일 */
+        .error-code {
+            font-size: 10rem;
+            font-weight: 900;
+            color: #999; 
+            margin-bottom: 5px;
+            line-height: 1;
+        }
+
+        /* 헤드라인 스타일 */
+        .headline {
+            /* white-space: nowrap; 제거 */
+            font-size: 2.5rem; /* 기본 크기 */
+            font-weight: 700;
+            color: #333;
+            margin-top: 5px;
+            margin-bottom: 20px;
+            /* 작은 화면에서 텍스트가 잘리지 않도록 폰트 크기 유연성 추가 */
+            font-size: clamp(1.5rem, 6vw, 2.5rem); 
+        }
+
+        /* 설명 텍스트 스타일 */
+        .description {
+            font-size: 1.1rem;
+            color: #666;
+            margin-bottom: 40px;
+            line-height: 1.7;
+        }
+
+        /* 버튼 스타일 */
+        .home-button {
+            display: inline-block;
+            background-color: #1e88e5; 
+            color: white;
+            padding: 14px 30px;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            letter-spacing: 0.5px;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 5px 15px rgba(30, 136, 229, 0.3);
+        }
+
+        .home-button:hover {
+            background-color: #1565c0;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(30, 136, 229, 0.5);
+        }
+        
+        /* 추가 안내 텍스트 */
+        .footer-text {
+            margin-top: 30px;
+            font-size: 0.9rem;
+            color: #999;
+        }
+
+        /* 모바일 반응형 (추가 조정) */
+        @media (max-width: 580px) {
+            .error-code {
+                font-size: 6rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="content">
+        
+        <img src="https://i.postimg.cc/CdpnCV9v/ms.png" alt="사이트 로고" class="logo">
+
+        <div class="error-code">404</div>
+
+        <h1 class="headline">
+            요청하신 페이지를 찾을 수 없습니다
+        </h1>
+
+        <p class="description">
+            방문하려던 주소가 잘못되었거나, 페이지가 삭제/이동되었을 수 있습니다.<br> 
+            아래 버튼을 눌러 메인 페이지로 이동해 주세요.
+        </p>
+
+        <a href="/" class="home-button">
+            사이트 메인으로 이동
+        </a>
+        
+        <p class="footer-text">
+            ©MinsuGPT All Rights Reserved.
+        </p>
+    </div>
+
+</body>
+</html>
