@@ -17,6 +17,7 @@
         :root{
             --bg: #ffffff;
             --accent:#111827; 
+            --text-light: #ffffff; /* 🌟 텍스트를 흰색으로 설정 */
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans KR', 'Helvetica Neue', Arial, sans-serif;
             --header-height: 56px; 
             --delay-img: 0.1s;
@@ -24,17 +25,18 @@
             --delay-p: 0.5s;
             --delay-input: 0.7s;
             --hide-duration: 0.3s; 
-            --transition-duration: 0.5s;
-            --glow-color: rgba(220, 220, 220, 0.4); 
-            --border-color: #d0d0d0; 
+            --background-transition-duration: 0.8s; /* 배경 색상 전환 시간 */
+            --glow-color: rgba(0, 0, 0, 0.15); 
+            --gradient-start: #ffb6c1; /* 연한 핑크 */
+            --gradient-end: #dda0dd; /* 연한 보라 */
+            --gradient-move-speed: 20s; /* 그라데이션 움직이는 속도 (약간 빠르게) */
         }
 
-        /* 폰트 적용 */
+        /* 폰트 적용 및 기본 스타일 유지 */
         body :is(.header-title, .plus-btn, .action-btn, .message-text, .input-container textarea, .modal-grid-item, .modal-option, .thinking-indicator-text, button) {
             font-family: 'Elms Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans KR', 'Helvetica Neue', Arial, sans-serif;
         }
 
-        /* Material Symbols 아이콘 스타일 */
         .material-symbols-rounded {
           font-family: 'Material Symbols Rounded';
           font-weight: normal; font-style: normal; font-size: 24px; line-height: 1; letter-spacing: normal; text-transform: none; display: inline-block; white-space: nowrap; word-wrap: normal; direction: ltr; -webkit-font-feature-settings: 'liga'; -webkit-font-smoothing: antialiased;
@@ -44,13 +46,32 @@
         /* 전체 레이아웃 및 중앙 정렬 */
         *{ box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
         body{
-            margin:0; background:var(--bg); color:var(--accent); min-height:100vh;
+            margin:0; color:var(--accent); min-height:100vh;
             padding:0; overflow: hidden; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            flex-direction: column;
+            display: flex; justify-content: center; align-items: center; flex-direction: column;
+            
+            /* 🌟🌟🌟 초기 배경 그라데이션 및 애니메이션 🌟🌟🌟 */
+            background: linear-gradient(-45deg, var(--gradient-start), var(--gradient-end), var(--gradient-start), var(--gradient-end));
+            background-size: 600% 600%; /* 그라데이션 크기를 더 크게 설정 */
+            animation: moveGradient var(--gradient-move-speed) ease infinite; /* 그라데이션 움직임 애니메이션 */
+            transition: background-color var(--background-transition-duration) ease-out; 
         }
+
+        /* 🌟🌟🌟 배경 그라데이션 움직임 키프레임 🌟🌟🌟 */
+        @keyframes moveGradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* 🌟🌟🌟 클릭 시 흰색 배경으로 전환 🌟🌟🌟 */
+        body.white-background {
+            background-color: #ffffff;
+            background-image: none; 
+            animation: none; 
+        }
+
+
         .phone{
             width:100%; min-height:100vh; position:relative; margin: 0;
             display:flex; flex-direction:column;
@@ -62,9 +83,16 @@
             height: var(--header-height); 
             border-bottom:none;
             position: fixed; top: 0; left: 0; right: 0; 
-            z-index: 1000; 
-            background: var(--bg); box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05); 
+            z-index: 10000; 
+            background: rgba(255, 255, 255, 0.8); 
+            backdrop-filter: blur(5px); 
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05); 
+            transition: background-color var(--background-transition-duration) ease-out; 
         }
+        body.white-background .header {
+             background-color: #ffffff;
+        }
+
         .header-icon{ width:32px; height:32px; display:flex; align-items:center; justify-content:center; color:#111827; cursor: pointer; flex-shrink: 0; }
         .header-left-group { display: flex; align-items: center; }
         .header-title { font-size: 18px; font-weight: 600; color: var(--accent); margin-left: 8px; flex-shrink: 0; }
@@ -72,7 +100,7 @@
         .header-center > .plus-btn { margin: 0; }
         .plus-btn{ background-color:#f1f4ff; color:#1d6fef; font-weight:600; padding:4px 10px; border-radius:16px; display:flex; align-items:center; gap:4px; font-size:12px; cursor: pointer; line-height: 1.2; }
 
-        /* 메인 콘텐츠 영역 */
+        /* 메인 콘텐츠 영역 및 정렬 */
         main {
             padding-top: var(--header-height); 
             padding-bottom: 0; 
@@ -81,9 +109,8 @@
             width: 100%; 
             flex-grow: 1; 
             text-align: center;
-            /* 🌟1. 중앙 콘텐츠 그룹을 아주 살짝 위로 올립니다. */
             transform: translateY(-20px); 
-            transition: transform var(--transition-duration) ease-out; /* 부드러운 위치 변경 */
+            transition: transform var(--background-transition-duration) ease-out; 
         }
         
         /* 페이지 접속 시 애니메이션 */
@@ -92,81 +119,75 @@
             to { opacity: 1; transform: translateY(0); }
         }
         
-        .top-image, h1, p, .message-input-container { opacity: 0; animation: fadeIn 0.6s ease-out forwards; font-family: 'Elms Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans KR', 'Helvetica Neue', Arial, sans-serif; }
+        /* 초기 애니메이션 및 콘텐츠 색상 */
+        .top-image, h1, p, .message-input-container { 
+            opacity: 0; 
+            animation: fadeIn 0.6s ease-out forwards; 
+            font-family: 'Elms Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans KR', 'Helvetica Neue', Arial, sans-serif; 
+            transition: opacity var(--hide-duration) ease-out; /* 클릭 시 사라지는 트랜지션 추가 */
+        }
         
-        /* 중앙 콘텐츠 간격 0 설정 */
-        .top-image { max-width: 100px; height: auto; margin-bottom: 0px; flex-shrink: 0; animation-delay: var(--delay-img); }
+        /* 🌟🌟🌟 텍스트 색상을 흰색으로 변경 🌟🌟🌟 */
         h1 { 
-            color: #333; font-size: 2.5em; margin-bottom: 0px; 
+            color: var(--text-light); 
+            font-size: 2.5em; margin-bottom: 0px; 
             line-height: 1.1; white-space: nowrap; overflow: hidden; animation-delay: var(--delay-h1);
             padding: 0 10px; display: block; width: 100%;
         }
         p { 
-            color: #555; font-size: 1.2em; margin-bottom: 0px; 
+            color: var(--text-light); 
+            font-size: 1.2em; margin-bottom: 0px; 
             line-height: 1.1; white-space: nowrap; overflow: hidden; animation-delay: var(--delay-p);
             padding: 0 10px; display: block; width: 100%;
         }
 
-        /* 메시지 입력창 스타일 */
+        /* 중앙 콘텐츠 간격 */
+        .top-image { max-width: 100px; height: auto; margin-bottom: 0px; flex-shrink: 0; animation-delay: var(--delay-img); }
+
+        /* 메시지 입력창 스타일 (테두리 제거, 검은 글로우) */
         .message-input-container {
             width: 90%; max-width: 600px; display: flex; align-items: center; padding: 5px 5px 5px 20px; 
-            border: 1px solid var(--border-color); 
+            border: none; 
             border-radius: 25px; 
             background-color: #ffffff; 
-            box-shadow: 0 0 10px var(--glow-color); 
+            box-shadow: 0 4px 12px var(--glow-color); 
             cursor: pointer; 
-            /* 🌟2. transition에 border와 box-shadow 추가 */
-            transition: all var(--transition-duration) cubic-bezier(0.4, 0, 0.2, 1), 
-                        border var(--transition-duration) ease-out, 
-                        box-shadow var(--transition-duration) ease-out; 
+            transition: opacity var(--hide-duration) ease-out; 
             z-index: 10; animation-delay: var(--delay-input);
             position: relative; 
             margin-top: 10px;
         }
 
-        /* 내부 요소 숨김 transition */
-        .message-input-container input[type="text"], .message-input-container .icon-button, .message-input-container .send-button, .message-input-container input[type="text"]::placeholder {
-            transition: opacity var(--hide-duration) ease-out;
-        }
-        /* 내부 요소 숨김 클래스 */
-        .message-input-container.hiding-content input[type="text"], .message-input-container.hiding-content .icon-button, .message-input-container.hiding-content .send-button {
-            opacity: 0 !important;
+        /* gradient-overlay는 이제 사용하지 않습니다. */
+        #gradient-overlay { display: none; } 
+        
+        /* 입력 필드 및 버튼 스타일 */
+        .message-input-container input[type="text"] { 
+            flex-grow: 1; border: none; outline: none; padding: 8px 10px; font-size: 1.1em; color: #333; background-color: transparent; min-width: 0; 
+            pointer-events: none; /* 클릭 이벤트를 부모로 강제 전달 */
         }
         
-        /* 클릭 시 전체 화면 전환 스타일 (테두리 및 글로우 부드럽게 사라짐) */
-        .message-input-container.full-screen-transition {
-            position: fixed !important; 
-            width: 100vw !important; 
-            height: calc(100vh - var(--header-height)) !important; 
-            top: var(--header-height) !important; 
-            left: 0 !important;
-            
-            transform: none !important; 
-            max-width: none; border-radius: 0; padding: 0; 
-            
-            /* 🌟3. 확대 시 테두리와 글로우 제거 */
-            border: none; 
-            box-shadow: none; 
-            
-            background-color: #ffffff; 
-            z-index: 999; 
+        .message-input-container input[type="text"]:read-only {
+            cursor: default; 
         }
-
-        /* 입력 필드 및 버튼 스타일 (나머지는 유지) */
-        .message-input-container input[type="text"] { flex-grow: 1; border: none; outline: none; padding: 8px 10px; font-size: 1.1em; color: #333; background-color: transparent; min-width: 0; }
+        
         .message-input-container input[type="text"]::placeholder { color: #b0b0b0; font-size: 1em; }
-        .message-input-container .icon-button { background: none; border: none; cursor: pointer; padding: 0 5px; font-size: 1.3em; color: #888; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-        .message-input-container .send-button { width: 40px; height: 40px; border: none; border-radius: 50%; background-color: #c0c0c0; color: #ffffff; font-size: 1.3em; display: flex; align-items: center; justify-content: center; margin-left: 0; margin-right: 5px; cursor: pointer; transition: background-color 0.2s; box-shadow: none; flex-shrink: 0; }
+        
+        .message-input-container .send-button { 
+            width: 40px; height: 40px; border: none; border-radius: 50%; background-color: #c0c0c0; color: #ffffff; font-size: 1.3em; display: flex; align-items: center; justify-content: center; margin-left: 0; margin-right: 5px; cursor: pointer; transition: background-color 0.2s; box-shadow: none; flex-shrink: 0; 
+            z-index: 12; 
+            pointer-events: auto; 
+        }
         .message-input-container .send-button:hover { background-color: #a0a0a0; }
 
-        /* 모바일/작은 화면 미디어 쿼리 */
+        /* 미디어 쿼리 유지 */
         @media (max-width: 600px) {
             .top-image { max-width: 70px; } h1 { font-size: 5vw; } p { font-size: 3vw; } .message-input-container { padding: 5px 5px 5px 15px; } 
-            .message-input-container input[type="text"]::placeholder { font-size: 3.5vw; } 
+            .message-input-container input[type="text"]::placeholder { color: #b0b0b0; font-size: 3.5vw; } 
             .message-input-container input[type="text"] { padding: 8px 5px; } .send-button { width: 35px; height: 35px; font-size: 1.1em; }
         }
         @media (max-width: 380px) {
-            h1 { font-size: 6vw; } p { font-size: 4vw; } .message-input-container input[type="text"]::placeholder { font-size: 4vw; } 
+            h1 { font-size: 6vw; } p { font-size: 4vw; } .message-input-container input[type="text"]::placeholder { color: #b0b0b0; font-size: 4vw; } 
         }
     </style>
 </head>
@@ -196,64 +217,59 @@
         
     </header>
 
-    <main>
+    <main id="main-content">
         <img src="https://i.postimg.cc/JzrLmGfG/geulim2.png" alt="MinsuGPT Logo" class="top-image">
         <h1>MinsuGPT 사용을 환영합니다</h1>
         <p>MinsuGPT 사용으로 업무 효율성을 높여보세요</p>
 
-        <div class="message-input-container">
+        <div class="message-input-container" id="message-input-container">
             <input type="text" id="message-input" placeholder="Minsu GPT에게 메시지 보내기" readonly>
-            <button class="icon-button"><i class="fas fa-microphone"></i></button>
             <button class="send-button"><i class="fas fa-arrow-up"></i></button>
         </div>
     </main>
     
-  </div>
-
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            const inputContainer = document.querySelector('.message-input-container');
-            const messageInput = document.getElementById('message-input');
+            const inputContainer = document.getElementById('message-input-container');
+            const mainContent = document.getElementById('main-content');
+            const body = document.body; 
             const targetUrl = "https://minsugpt.kro.kr/chat";
-            const transitionDuration = 500; // 0.5초
-            const hideDuration = 300; // 0.3초
+            
+            // CSS 변수에서 전환 시간 가져오기
+            const getCssVariable = (name) => parseFloat(getComputedStyle(document.documentElement).getPropertyValue(name).replace('s', '')) * 1000;
+            
+            const backgroundTransitionDurationMs = getCssVariable('--background-transition-duration'); // 800ms
+            const contentHideDurationMs = getCssVariable('--hide-duration'); // 300ms
+            
+            let transitionStarted = false;
 
             inputContainer.addEventListener('click', (event) => {
                 
-                // 1. 초기 콘텐츠 숨김
-                document.querySelector('h1').style.opacity = 0;
-                document.querySelector('p').style.opacity = 0;
-                document.querySelector('.top-image').style.opacity = 0;
+                // Send 버튼을 클릭했거나 이미 전환이 시작된 경우 무시
+                if (transitionStarted || event.target.closest('.send-button')) {
+                    return;
+                }
                 
-                // 2. 내부 요소 숨김 시작
-                inputContainer.classList.add('hiding-content');
-                messageInput.style.opacity = 0; 
-
-                // 3. 내부 요소 사라진 후 (0.3초) 확대 시작
+                transitionStarted = true;
+                
+                // 1. 탑바를 제외한 모든 중앙 콘텐츠 부드럽게 숨기기 (0.3초)
+                const elementsToHide = mainContent.children;
+                for (let i = 0; i < elementsToHide.length; i++) {
+                    elementsToHide[i].style.opacity = 0;
+                }
+                
+                // 2. 일정 시간 후 (콘텐츠 숨김이 끝난 후), body 배경을 흰색으로 전환 (물결 전환 효과)
                 setTimeout(() => {
-                    const rect = inputContainer.getBoundingClientRect();
-                    
-                    // a) 현재 위치와 크기를 CSS inline style로 설정하여 고정
-                    inputContainer.style.position = 'fixed';
-                    inputContainer.style.top = rect.top + 'px';
-                    inputContainer.style.left = rect.left + 'px';
-                    inputContainer.style.width = rect.width + 'px';
-                    inputContainer.style.height = rect.height + 'px';
-                    
-                    // b) 강제 리플로우를 유발하여 애니메이션 시작점을 보장 
-                    void inputContainer.offsetWidth;
+                    body.classList.add('white-background'); 
+                    document.querySelector('.header').classList.add('white-background');
+                }, contentHideDurationMs); 
 
-                    // c) 전체 화면 전환 클래스 추가 (CSS transition 시작)
-                    inputContainer.classList.add('full-screen-transition');
-                    
-                    // 4. 확대 완료(흰색 화면) 후 리디렉션하도록 로직 유지
-                    setTimeout(() => {
-                        window.location.href = targetUrl;
-                    }, transitionDuration); 
-                }, hideDuration);
+                // 3. 흰색 전환이 완료된 후 (배경 전환 시간 후), 리디렉션
+                setTimeout(() => {
+                    window.location.href = targetUrl;
+                }, contentHideDurationMs + backgroundTransitionDurationMs);
             });
         });
     </script>
 </body>
 </html>
-
