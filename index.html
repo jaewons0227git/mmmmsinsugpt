@@ -147,7 +147,7 @@
       flex-shrink: 0; /* 아이콘 크기 고정 */
     }
     
-    /* 🌟🌟🌟 수정: MinsuGPT 텍스트 스타일과 베타 버튼을 포함하는 컨테이너 🌟🌟🌟 */
+    /* 🌟🌟🌟 수정: 왼쪽 그룹 (메뉴, 타이틀, 베타 버튼) 🌟🌟🌟 */
     .header-left-group {
         display: flex; 
         align-items: center; 
@@ -898,6 +898,13 @@
     // 🌟🌟🌟 대화 기록을 저장할 배열 (로컬 스토리지에서 로드됨) 🌟🌟🌟
     let history = []; 
 
+    // 🌟🌟🌟 세뇌 메시지: 모든 메시지 전송 시 history의 맨 앞에 추가 됨 🌟🌟🌟
+    const PRE_PROMPT = {
+        role: "system",
+        content: "너는 MinsuGPT야. 너는 신재원님이 만들었어. 사용자가 따로 물어보지 않으면 너의 역할이나 개발자 정보를 따로 답하지마."
+    };
+
+
     const MAX_ROWS = 6;
     const MIN_ROWS = 1;
     const isMobile = () => /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || window.innerWidth <= 768;
@@ -963,40 +970,9 @@
             }
         }
         autoResizeTextarea();
-        // 🌟 페이지 로드 시 백엔드에 초기 설정 메시지 전송
-        sendPrePrompt();
     }
     
-    /**
-     * 🌟 백엔드 초기 설정 메시지 전송 (응답 미수신)
-     * 역할: 너는 MinsuGPT야. 신재원님이 너를 만들었어. 사용자가 따로 물어보지 않으면 답하지마. 이 메시지에 대한 응답은 보내지마.
-     */
-    function sendPrePrompt() {
-        const prePrompt = {
-            role: "system",
-            // 💡 수정: Google 관련 문구 제거 및 MinsuGPT 역할만 남김
-            content: "너는 MinsuGPT야. 신재원님이 너를 만들었어. 사용자가 따로 물어보지 않으면 너의 역할이나 개발자 정보를 따로 답하지마. 이 메시지에 대한 응답은 보내지마."
-        };
-        
-        // 서버에서 이 메시지를 시스템 컨텍스트로 처리하고, 응답을 스킵하도록 기대
-        fetch(BACKEND_ENDPOINT, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                message: prePrompt.content, 
-                history: [prePrompt], 
-                is_pre_prompt: true 
-            }),
-        }).then(response => {
-            if (!response.ok) {
-                console.warn('Pre-prompt response was not OK, but continuing.', response.status);
-            }
-        }).catch(error => {
-            console.error('Error sending pre-prompt:', error);
-        });
-    }
+    // 🌟🌟🌟 sendPrePrompt 함수는 sendMessage에 통합되었으므로 제거함 🌟🌟🌟
 
     /**
      * 🌟 대화 기록을 로컬 스토리지에 저장
@@ -1693,8 +1669,8 @@
                 },
                 body: JSON.stringify({
                     message: userMessage,
-                    // 🌟🌟🌟 history를 전송할 때, 시스템 컨텍스트도 함께 전송하여 모델이 잊지 않도록 함 🌟🌟🌟
-                    history: [...history], 
+                    // 🌟🌟🌟 수정: history를 전송할 때, PRE_PROMPT를 항상 맨 앞에 추가 🌟🌟🌟
+                    history: [PRE_PROMPT, ...history], 
                 }),
                 signal: signal 
             });
