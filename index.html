@@ -7,7 +7,7 @@
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Elms+Sans:ital,wght@0,100..900;1,100..900;0,100..900;1,100..900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Elms+Sans:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
   
   <link href="https://fonts.googleapis.com/icon?family=Material+Symbols+Rounded" rel="stylesheet">
   
@@ -27,8 +27,21 @@
       --min-textarea-height: 22.4px; 
       --min-input-container-height: 48px; 
       
-      font-family: 'Elms Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans KR', 'Helvetica Neue', Arial, sans-serif;
+      /* 🌟🌟🌟 수정: 영문은 'Elms Sans', 한글은 시스템 기본 폰트 사용 🌟🌟🌟 */
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans KR', 'Helvetica Neue', Arial, sans-serif;
     }
+    
+    /* 🌟🌟🌟 추가: Elms Sans 폰트 적용을 위한 CSS (영문만 적용됨) 🌟🌟🌟 */
+    body :is(
+        .header-title, .plus-btn, .action-btn, 
+        .message-text, .input-container textarea,
+        .modal-grid-item, .modal-option,
+        .thinking-indicator-text, button
+    ) {
+        /* font-family에 'Elms Sans'를 가장 앞에 배치하여 영문만 이 폰트를 사용하도록 함 */
+        font-family: 'Elms Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans KR', 'Helvetica Neue', Arial, sans-serif;
+    }
+
     
     /* Material Symbols 아이콘 스타일 */
     .material-symbols-rounded {
@@ -134,7 +147,14 @@
       flex-shrink: 0; /* 아이콘 크기 고정 */
     }
     
-    /* 🌟🌟🌟 추가: MinsuGPT 텍스트 스타일 (메뉴 버튼 옆) 🌟🌟🌟 */
+    /* 🌟🌟🌟 수정: MinsuGPT 텍스트 스타일과 베타 버튼을 포함하는 컨테이너 🌟🌟🌟 */
+    .header-left-group {
+        display: flex; 
+        align-items: center; 
+        /* flex-grow: 1; */
+    }
+    
+    /* 🌟🌟🌟 수정: MinsuGPT 텍스트 스타일 🌟🌟🌟 */
     .header-title {
         font-size: 18px;
         font-weight: 600;
@@ -143,25 +163,31 @@
         flex-shrink: 0;
     }
     
-    /* 🌟🌟🌟 Ultra 이용하기 버튼 컨테이너 (중앙 정렬) 🌟🌟🌟 */
+    /* 🌟🌟🌟 Ultra 이용하기 버튼 컨테이너 (중앙 정렬 - 이제 사용하지 않음) 🌟🌟🌟 */
     .header-center {
-        flex-grow: 1; /* 중앙 영역 확장 */
-        text-align: center;
+        /* flex-grow: 1; */ /* 중앙 영역 확장을 제거하고 flex-start로 변경 */
+        text-align: left;
         display: flex;
-        justify-content: center;
+        justify-content: flex-start;
+        align-items: center;
+        margin-left: 10px; /* MinsuGPT 텍스트와의 간격 */
+    }
+    .header-center > .plus-btn {
+        margin: 0; /* 기존 중앙 정렬용 margin 제거 */
     }
 
     .plus-btn{
       background-color:#f1f4ff;
       color:#1d6fef;
       font-weight:600;
-      padding:6px 14px;
-      border-radius:20px;
+      padding:4px 10px; /* 패딩을 줄여서 더 작게 만듦 */
+      border-radius:16px; /* 모서리 반경도 조정 */
       display:flex;
       align-items:center;
       gap:4px;
-      font-size:14px;
+      font-size:12px; /* 폰트 크기를 줄여서 작게 만듦 */
       cursor: pointer;
+      line-height: 1.2;
     }
     .profile-btn{
       width:32px;
@@ -672,7 +698,8 @@
 <body>
   <div class="phone" role="application" aria-label="채팅 UI">
     <header class="header">
-        <div style="display: flex; align-items: center;">
+        
+        <div class="header-left-group">
              <div class="header-icon menu-icon">
                 <span class="material-symbols-rounded">menu</span>
             </div>
@@ -680,11 +707,11 @@
             <div class="header-title">
                 MinsuGPT
             </div>
-        </div>
-        
-        <div class="header-center">
-            <div class="plus-btn">
-                이 앱은 베타버전 입니다.
+            
+            <div class="header-center">
+                <div class="plus-btn">
+                    이 앱은 베타버전 입니다.
+                </div>
             </div>
         </div>
         
