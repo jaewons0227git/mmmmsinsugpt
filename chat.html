@@ -268,30 +268,129 @@
     .mic-icon .material-symbols-rounded { font-size: 20px; }
 
     /* 📌 스타일 1: 심플 (Simple - 기존 스타일) */
+    /* 📌 스타일 1: 심플 (Simple - 요청하신 이미지 스타일) */
     .composer.style-simple {
-        background: var(--bg);
-        padding: var(--composer-padding);
-        box-shadow: none; 
-        border-top: 1px solid #f3f4f6;
+        background: transparent;
+        padding: 0 16px 24px 16px;
+        border: none;
+        box-shadow: none;
     }
+    
     .composer.style-simple .composer-inner {
-        max-width: 768px; 
-        gap: 8px;
-    }
-    .composer.style-simple .input-container {
-        border-radius: 24px; 
-        border: 1px solid #d1d5db; 
-        padding: 4px 4px 4px 16px; 
+        max-width: 768px;
         background: #ffffff;
+        border: 1px solid #e5e8eb; /* 연한 테두리 */
+        border-radius: 28px;       /* 둥근 모서리 */
+        padding: 16px 16px 12px 20px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-items: flex-end;
+        position: relative;
+    }
+
+    /* 심플 모드 내부 구조 변경 */
+    .composer.style-simple .input-area-wrapper {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        min-width: 0;
+    }
+
+    .composer.style-simple .input-container {
+        border: none;
+        background: transparent;
+        padding: 0;
+        border-radius: 0;
         max-height: 150px;
+        min-height: 24px;
     }
+    
+    .composer.style-simple .input-container textarea {
+        font-size: 17px; /* 글자 크기 약간 키움 */
+        padding: 0;
+    }
+
+    /* 기존 플러스 버튼 숨기기 */
     .composer.style-simple .plus {
-        width: var(--min-input-container-height); height: var(--min-input-container-height); 
-        border-radius: 50%; background: #ffffff; border: 1px solid #d1d5db; 
-        display: flex; align-items: center; justify-content: center; flex-shrink: 0; 
-        align-self: center; cursor: pointer;
+        display: none;
     }
-    .composer.style-simple .plus .material-symbols-rounded { font-size: 20px; color: #111827; }
+
+    /* 🌟 새로운 툴 버튼 스타일 (캡슐 모양) */
+    .simple-tools {
+        display: none; /* 기본적으로 숨김 */
+        gap: 8px;
+        margin-top: 4px;
+    }
+    .composer.style-simple .simple-tools {
+        display: flex; /* 심플 모드에서만 보임 */
+    }
+
+    .tool-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        padding: 6px 12px 6px 10px;
+        background-color: #ffffff;
+        border: 1px solid #e5e8eb;
+        border-radius: 20px;
+        font-size: 13px;
+        font-weight: 500;
+        color: #4b5563;
+        cursor: pointer;
+        transition: background-color 0.2s;
+        white-space: nowrap;
+    }
+    .tool-btn:hover { background-color: #f9fafb; }
+    .tool-btn .material-symbols-rounded { font-size: 18px; color: #6b7280; }
+
+    /* 우측 전송 버튼 영역 */
+    .composer.style-simple .right-controls {
+        display: flex;
+        align-items: flex-end;
+        margin-left: 8px;
+        margin-bottom: 2px;
+    }
+    
+    .composer.style-simple .mic-icon { display: none; } /* 심플 모드에서 마이크 숨김 (이미지에 없음) */
+    
+    /* 전송 버튼 스타일 (검은 원형) */
+    .composer.style-simple .send-btn {
+        background-color: #111827; /* 활성화 시 검은색 */
+        margin-right: 0;
+    }
+    .composer.style-simple .send-btn:not(.active) {
+        background-color: #e5e8eb; /* 비활성화 시 회색 */
+    }
+
+
+    /* 📌 스타일 2: 기본 (Default - 기존 유지, 레이아웃 호환성 수정) */
+    .composer.style-default {
+        background: transparent;
+        padding: 0 16px 24px 16px;
+        border: none;
+    }
+    .composer.style-default .composer-inner {
+        max-width: 768px;
+        background: #ffffff;
+        border-radius: 35px;
+        padding: 6px 6px 6px 8px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+        border: 1px solid #e5e8eb;
+        display: flex; align-items: center; gap: 4px;
+    }
+    .composer.style-default .input-area-wrapper { flex: 1; }
+    .composer.style-default .simple-tools { display: none; }
+    .composer.style-default .input-container { background: transparent; border: none; padding: 4px 4px 4px 8px; }
+    .composer.style-default .plus {
+        width: 36px; height: 36px; border-radius: 50%; background: #f3f4f6; border: none;
+        display: flex; align-items: center; justify-content: center; flex-shrink: 0; 
+        cursor: pointer; color: #4b5563;
+    }
+    .composer.style-default .right-controls { display: flex; align-items: center; }
 
     /* 📌 스타일 2: 기본 (Default - 이미지 스타일, 둥근 플로팅) */
     .composer.style-default {
@@ -463,30 +562,49 @@
 
         <div id="chat-messages" class="chat-messages"></div>
     </main>
-
+// 바뀜
     <div id="composer" class="composer style-default">
       <div class="composer-inner">
         <div class="plus" id="plus-button" aria-label="파일 첨부">
             <span class="material-symbols-rounded">add</span>
         </div>
 
-        <div id="input-container" class="input-container">
-          <textarea id="message-input" placeholder="MinsuGPT에게 물어보기" rows="1"></textarea>
-          
-          <div class="mic-voice-container">
-            <div id="mic-icon" class="mic-icon">
-                <span class="material-symbols-rounded">mic</span>
+        <div class="input-area-wrapper">
+            <div id="input-container" class="input-container">
+              <textarea id="message-input" placeholder="MinsuGPT에게 물어보기" rows="1"></textarea>
             </div>
             
-            <div id="action-button-container">
-                <div id="send-button" class="send-btn">
-                  <span class="material-symbols-rounded">arrow_upward</span>
+            <div class="simple-tools">
+                <div class="tool-btn" id="tool-attach">
+                    <span class="material-symbols-rounded">attach_file</span>
+                    첨부
                 </div>
-                <div id="stop-button" class="stop-btn" style="display:none;">
-                    <span class="stop-icon"></span>
+                <div class="tool-btn" id="tool-search">
+                    <span class="material-symbols-rounded">language</span>
+                    검색
+                </div>
+                <div class="tool-btn" id="tool-study">
+                    <span class="material-symbols-rounded">auto_stories</span>
+                    학습하기
                 </div>
             </div>
-          </div>
+        </div>
+
+        <div class="right-controls">
+             <div class="mic-voice-container">
+                <div id="mic-icon" class="mic-icon">
+                    <span class="material-symbols-rounded">mic</span>
+                </div>
+                
+                <div id="action-button-container">
+                    <div id="send-button" class="send-btn">
+                      <span class="material-symbols-rounded">arrow_upward</span>
+                    </div>
+                    <div id="stop-button" class="stop-btn" style="display:none;">
+                        <span class="stop-icon"></span>
+                    </div>
+                </div>
+              </div>
         </div>
       </div>
     </div>
@@ -1215,6 +1333,31 @@
     }
     settingsButton.addEventListener('click', (e) => { e.preventDefault(); toggleSettingsModal(); });
     settingsModalBackdrop.addEventListener('click', (e) => { if (e.target === settingsModalBackdrop) toggleSettingsModal(false); });
+    // 🌟 심플 모드 버튼 이벤트 연결 🌟
+    const toolAttach = document.getElementById('tool-attach');
+    const toolSearch = document.getElementById('tool-search');
+    const toolStudy = document.getElementById('tool-study');
+
+    if(toolAttach) {
+        toolAttach.addEventListener('click', (e) => {
+            e.preventDefault();
+            togglePlusModal(true); // 기존 첨부 모달 열기
+        });
+    }
+    
+    if(toolSearch) {
+        toolSearch.addEventListener('click', () => {
+            showSnackbar('검색 기능은 준비 중입니다.');
+        });
+    }
+
+    if(toolStudy) {
+        toolStudy.addEventListener('click', () => {
+            showSnackbar('학습하기 기능은 준비 중입니다.');
+        });
+    }
+
+
     
     window.onload = function() {
         loadUIStyle(); // 🌟 스타일 로드 먼저
