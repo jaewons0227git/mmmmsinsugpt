@@ -174,10 +174,10 @@
         align-items: center; 
     }
     
-    /* 🌟🌟🌟 추가: 로고 이미지 스타일 🌟🌟🌟 */
+    /* 🌟🌟🌟 요청 수정: 로고 이미지 크기 축소 (32px -> 24px) 🌟🌟🌟 */
     .header-logo {
-        width: 32px;
-        height: 32px;
+        width: 24px; 
+        height: 24px; 
         margin-left: 8px; /* 메뉴 버튼과의 간격 */
         flex-shrink: 0;
     }
@@ -489,13 +489,28 @@
     /* 💡 생각하는 중... 애니메이션 스타일 (유지) */
     .thinking-indicator {
         display: flex;
+        /* 요청 수정: 로딩 인디케이터를 좌측 정렬 */
+        justify-content: flex-start; 
+        /* 🌟🌟🌟 요청 수정: 스피너와 텍스트를 같은 줄에 수직 중앙 정렬 🌟🌟🌟 */
         align-items: center;
         padding: 10px 0;
+        margin-bottom: 8px; 
+        
+        /* 요청 수정: 부드러운 이동 애니메이션을 위한 설정 */
+        transition: transform 0.5s ease-out;
+    }
+
+    /* 🌟 요청 수정: 답변 완료 후 좌측 이동 클래스 */
+    .thinking-indicator.left-aligned {
+        transform: translateX(0); /* (이전에는 좌측 정렬이었으므로, 이 값은 유지) */
     }
 
     .thinking-indicator-text {
         font-weight: 500;
         margin-right: 8px;
+        /* 🌟🌟🌟 요청 수정: 수직 중앙 정렬을 위해 margin-top 제거 🌟🌟🌟 */
+        margin-top: 0; 
+        flex-shrink: 0;
         
         background-color: var(--accent); 
         background-image: linear-gradient(
@@ -510,18 +525,44 @@
         animation: shimmer 1.5s infinite linear;
     }
     
+    /* 🌟🌟🌟 요청 수정: 완료 후 그라데이션 고정 (흰색이 가운데 오게끔) 🌟🌟🌟 */
+    .thinking-indicator-text.completed {
+        animation: none; /* shimmer 애니메이션 중지 */
+        background-position: 50% 0; /* 흰색 부분이 텍스트 중앙에 오도록 고정 */
+    }
+    
+    /* 🌟🌟🌟 요청 수정: 커스텀 스피너 스타일 (이미지) 🌟🌟🌟 */
     .loading-spinner {
         display: inline-block;
-        width: 16px;
-        height: 16px;
-        border: 2px solid #ccc;
-        border-top-color: #111827; 
+        width: 16px; 
+        height: 16px; 
+        /* border 대신 이미지 사용 */
+        background-image: url('https://i.postimg.cc/JzrLmGfG/geulim2.png');
+        background-size: cover;
+        background-position: center;
         border-radius: 50%;
-        animation: spin 0.8s linear infinite;
-        margin-left: 4px;
+        animation: spin-custom 2s infinite cubic-bezier(0.5, 0, 0.5, 1); /* 빨리->느리게->빨리->느리게 */
+        flex-shrink: 0;
+        margin-right: 4px; /* 텍스트와 분리 */
+        
+        /* 요청 수정: 스피너 회전 복귀를 위한 초기 상태 */
+        transform: rotate(0deg); 
+        transition: transform 0.5s ease-out;
     }
-    @keyframes spin {
-        to { transform: rotate(360deg); }
+    
+    /* 🌟 요청 수정: 사용자 지정 스핀 애니메이션 */
+    @keyframes spin-custom {
+        0% { transform: rotate(0deg); }
+        25% { transform: rotate(360deg); animation-timing-function: cubic-bezier(0.5, 0, 0.5, 1); } 
+        50% { transform: rotate(720deg); animation-timing-function: cubic-bezier(0.5, 0, 0.5, 1); } 
+        75% { transform: rotate(1080deg); animation-timing-function: cubic-bezier(0.5, 0, 0.5, 1); } 
+        100% { transform: rotate(1440deg); }
+    }
+    
+    /* 🌟 요청 수정: 완료 후 스피너 회전 복귀 클래스 */
+    .loading-spinner.reset-spin {
+        animation: none; /* 스핀 애니메이션 중지 */
+        transform: rotate(0deg); /* 원래 각도로 복귀 */
     }
 
     @keyframes shimmer {
@@ -536,9 +577,17 @@
     /* Input area */
     .composer{
         position:fixed; bottom:0; left:0; right:0; width:100%; display:flex; justify-content:center; padding:var(--composer-padding); background:var(--bg); box-shadow:none; height: auto; min-height: calc(var(--min-input-container-height) + var(--composer-padding-v)); z-index: 10; 
-        /* 🌟 부드러운 애니메이션을 위한 트랜지션 추가 */
-        transition: all 0.2s ease-out; 
+        /* 🌟 요청 수정: 입력창 부드럽게 올라오는 애니메이션 적용 */
+        opacity: 0;
+        transform: translateY(100%);
+        transition: opacity 0.5s ease-out 0.2s, transform 0.5s ease-out 0.2s, all 0.2s ease-out; 
     }
+    /* 🌟 요청 수정: 애니메이션 실행 클래스 */
+    .composer.loaded {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    
     .composer-inner{
         display:flex; align-items:center; gap:8px; width:100%;
     }
@@ -1404,6 +1453,7 @@
     
     /**
      * 봇 메시지 컨테이너를 생성하고 '생각하는 중...' 표시기 포함
+     * 🌟🌟🌟 indicatorTextElement 반환하도록 수정됨 🌟🌟🌟
      */
     function appendBotMessageContainer() {
         const botMessageContainer = document.createElement('div');
@@ -1416,21 +1466,22 @@
         indicatorContainer.id = 'thinking-indicator';
         indicatorContainer.className = 'thinking-indicator';
         
+        // 🌟 요청 수정: 스피너 엘리먼트를 텍스트 앞에 위치
+        const spinner = document.createElement('div');
+        spinner.className = 'loading-spinner';
+        
         const indicatorText = document.createElement('span');
         indicatorText.className = 'thinking-indicator-text';
         indicatorText.textContent = currentLoadingText; 
         
-        // 🌟 스피너 엘리먼트 추가
-        const spinner = document.createElement('div');
-        spinner.className = 'loading-spinner';
-
-        indicatorContainer.appendChild(indicatorText);
         indicatorContainer.appendChild(spinner);
+        indicatorContainer.appendChild(indicatorText);
         
         // 🌟 스트리밍되는 텍스트가 들어갈 컨테이너
         const streamingBlock = document.createElement('div');
         streamingBlock.className = 'streaming-block'; 
         
+        // 🌟 요청 수정: 스피너와 텍스트 아래에 스트리밍 텍스트가 오도록 순서 변경
         botMessageContainer.appendChild(indicatorContainer);
         botMessageContainer.appendChild(streamingBlock);
 
@@ -1440,53 +1491,18 @@
         return { 
             botMessageElement: botMessageContainer,
             indicatorElement: indicatorContainer, 
-            streamingBlockElement: streamingBlock 
+            streamingBlockElement: streamingBlock,
+            spinnerElement: spinner,
+            // 🌟🌟🌟 indicatorTextElement 추가 🌟🌟🌟
+            indicatorTextElement: indicatorText
         };
     }
     
     /**
-     * 🌟 로딩 완료 후 봇 메시지에 액션 버튼을 추가합니다.
+     * 🌟 요청 수정: 스트리밍 시작 시 로딩 인디케이터를 유지하도록 수정
      */
-    function appendBotMessage(content, feedbackStatus, animate = true) {
-        const botMessageContainer = document.createElement('div');
-        botMessageContainer.className = 'bot-message';
-        
-        const messageIndex = history.length - 1; 
-        botMessageContainer.setAttribute('data-index', messageIndex);
-
-        const streamingBlock = document.createElement('div');
-        streamingBlock.className = 'streaming-block'; 
-        
-        botMessageContainer.appendChild(streamingBlock);
-        chatMessages.appendChild(botMessageContainer);
-        
-        // 🌟🌟🌟 문장별 페이드인 시작
-        if (animate) {
-             // 자동 스크롤 켜기
-            autoScrollEnabled = true;
-            scrollDownButton.classList.remove('visible');
-            
-             sentenceFadeInEffect(streamingBlock, content, messageIndex).then(() => {
-                // 페이드인 완료 후 액션 버튼 추가 및 재생성 버튼 상태 업데이트
-                const actionsContainer = createBotActions(content, messageIndex, feedbackStatus);
-                botMessageContainer.appendChild(actionsContainer);
-                updateRegenerateButtons(); // 최신 메시지 활성화
-                if (autoScrollEnabled) scrollToBottom(true);
-             });
-        } else {
-            // 과거 기록 로드 시는 즉시 표시
-            streamingBlock.innerHTML = renderMarkdown(content);
-            const actionsContainer = createBotActions(content, messageIndex, feedbackStatus);
-            botMessageContainer.appendChild(actionsContainer);
-        }
-        
-        if (autoScrollEnabled) scrollToBottom(false);
-    }
-
-
     function startStreamingUI(indicator) {
-        // '생각하는 중...' 숨기기
-        indicator.style.display = 'none';
+        // '생각하는 중...' 표시기 유지 (display: none 하지 않음)
         // 🌟 로딩 텍스트 기본값으로 리셋
         currentLoadingText = '답변을 생각하는 중...';
     }
@@ -1546,11 +1562,12 @@
     
     /**
      * 스트리밍되는 전체 텍스트를 기반으로 내용을 덮어씁니다. (스트리밍 중에만 사용)
+     * 🌟 요청 수정: 이제 스트리밍 중에는 사용되지 않고, 최종적으로만 사용됨.
      */
     function updateStreamingDisplay(rawResponse, streamingElement) {
         // 스트리밍 중에는 타이핑 효과 없이 즉시 업데이트
-        streamingElement.innerHTML = renderMarkdown(rawResponse);
-        if (autoScrollEnabled) scrollToBottom(false);
+        // streamingElement.innerHTML = renderMarkdown(rawResponse);
+        // if (autoScrollEnabled) scrollToBottom(false);
     }
     
     /**
@@ -1635,12 +1652,36 @@
         // 1. 스낵바 알림 표시
         showSnackbar("답변 중지됨.");
         
+        const lastBotMessageElement = chatMessages.lastElementChild;
+        let indicatorText = null;
+        let spinner = null;
+        let indicatorContainer = null;
+        
+        if (lastBotMessageElement) {
+            indicatorContainer = lastBotMessageElement.querySelector('#thinking-indicator');
+            if (indicatorContainer) {
+                spinner = indicatorContainer.querySelector('.loading-spinner');
+                indicatorText = indicatorContainer.querySelector('.thinking-indicator-text');
+            }
+        }
+        
         // 2. 페이드인 중일 때 중지
         if (isFadingIn && fadeOutAbortController) {
             fadeOutAbortController.abort();
             
-            // 채팅창에 "답변 중지됨." 메시지 추가 (불완전한 응답 아래)
-            const lastBotMessageElement = chatMessages.lastElementChild;
+            // 텍스트 변경 및 그라데이션 고정
+            if (indicatorText) {
+                indicatorText.textContent = '답변 중지됨'; 
+                indicatorText.classList.add('completed'); 
+            }
+            
+            // 인디케이터 좌측 이동
+            if (indicatorContainer) indicatorContainer.classList.add('left-aligned'); 
+            
+            // 스피너 정지 및 복귀
+            if (spinner) spinner.classList.add('reset-spin'); 
+            
+            // 불완전한 응답 아래에 "답변 중지됨." 메시지 추가 (불완전한 응답 아래)
             if (lastBotMessageElement) {
                 const stopText = document.createElement('div');
                 stopText.className = 'stop-message';
@@ -1659,13 +1700,11 @@
         if (abortController) {
             abortController.abort();
             
-            const lastBotMessageElement = chatMessages.lastElementChild;
             if (lastBotMessageElement) {
-                const indicator = lastBotMessageElement.querySelector('#thinking-indicator');
                 const streamingBlock = lastBotMessageElement.querySelector('.streaming-block');
 
-                // (A) 로딩 중 (인디케이터 표시 중)에 중지된 경우
-                if (indicator && indicator.style.display !== 'none') {
+                // (A) 로딩 중 (인디케이터 표시 중)에 중지된 경우 (텍스트를 전혀 받지 못했을 때)
+                if (fullResponse.trim().length === 0) {
                     // 사용자 메시지만 제거하고, 봇 메시지 컨테이너를 제거
                     lastBotMessageElement.remove(); 
                     if (history.length > 0 && history[history.length - 1].role === 'user') {
@@ -1677,6 +1716,16 @@
                     // 불완전한 응답 기록
                     history.push({ role: 'model', content: fullResponse, feedback: null });
                     saveChatHistory();
+                    
+                    // 🌟 요청 수정: 스피너 정지, 텍스트 변경 및 그라데이션 고정
+                    if (spinner) spinner.classList.add('reset-spin'); 
+                    if (indicatorText) {
+                        indicatorText.textContent = '답변 중지됨'; 
+                        indicatorText.classList.add('completed'); 
+                    }
+                    
+                    // 인디케이터를 좌측 끝으로 이동
+                    if (indicatorContainer) indicatorContainer.classList.add('left-aligned'); 
                     
                     // 액션 버튼 추가
                     const actionContainer = createBotActions(fullResponse, history.length - 1);
@@ -1690,13 +1739,6 @@
                     lastBotMessageElement.insertAdjacentElement('afterend', stopText);
 
                 } 
-                // (C) 아무것도 받지 못하고 중지된 경우
-                else if (lastBotMessageElement && fullResponse.trim().length === 0) {
-                     lastBotMessageElement.remove();
-                     if (history.length > 0 && history[history.length - 1].role === 'user') {
-                         history.pop();
-                     }
-                }
             }
         }
         setStreamingState(false);
@@ -1747,7 +1789,8 @@
         }
         
         // 3. 봇 메시지를 위한 컨테이너 추가 및 로딩 표시
-        const { botMessageElement, indicatorElement, streamingBlockElement } = appendBotMessageContainer();
+        // 🌟🌟🌟 indicatorTextElement 포함하도록 수정 🌟🌟🌟
+        const { botMessageElement, indicatorElement, streamingBlockElement, spinnerElement, indicatorTextElement } = appendBotMessageContainer();
         
         // 4. 스트리밍 상태 시작
         setStreamingState(true);
@@ -1785,6 +1828,14 @@
                 }
                 
                 streamingBlockElement.innerHTML = `<p style="color:red;">${errorMessage}</p>`;
+                
+                // 🌟 요청 수정: 오류 시 스피너 정지 및 복귀, 텍스트 변경
+                if (spinnerElement) spinnerElement.classList.add('reset-spin');
+                if (indicatorTextElement) {
+                    indicatorTextElement.textContent = '응답 오류';
+                    indicatorTextElement.classList.add('completed'); 
+                }
+                
                 setStreamingState(false);
                 
                 // 오류 발생 시 history에서 마지막 사용자 메시지 제거
@@ -1822,10 +1873,20 @@
                         history.push({ role: 'model', content: fullResponse, feedback: null });
                         saveChatHistory();
                         
-                        // 로딩 인디케이터 제거
-                        botMessageElement.removeChild(indicatorElement); 
+                        // 🌟 요청 수정: 로딩 인디케이터 처리
+                        if (spinnerElement) spinnerElement.classList.add('reset-spin'); // 스피너 정지 및 복귀
                         
-                        // 최종 페이드인 효과 시작
+                        // 🌟🌟🌟 요청 수정: 텍스트 변경 및 그라데이션 고정 🌟🌟🌟
+                        if (indicatorTextElement) {
+                            indicatorTextElement.textContent = '답변 완료됨'; // 텍스트 변경
+                            indicatorTextElement.classList.add('completed'); // 그라데이션 고정
+                        }
+                        
+                        // 인디케이터 좌측 이동 (CSS transition)
+                        indicatorElement.classList.add('left-aligned'); 
+
+                        
+                        // 최종 페이드인 효과 시작 (로딩 인디케이터는 유지된 채 글이 나타남)
                         sentenceFadeInEffect(streamingBlockElement, fullResponse, history.length - 1).then(() => {
                             // 페이드인 완료 후 액션 버튼 추가 및 재생성 버튼 상태 업데이트
                             const actionContainer = createBotActions(fullResponse, history.length - 1);
@@ -1847,7 +1908,9 @@
                         fullResponse += cleanPart + '\n'; 
                         
                         // 스트리밍 중에는 타이핑 효과 없이 즉시 업데이트
-                        updateStreamingDisplay(fullResponse, streamingBlockElement);
+                        // 🌟 요청 수정: 스트리밍 중에는 인디케이터 아래에 텍스트를 바로 표시
+                        streamingBlockElement.innerHTML = renderMarkdown(fullResponse);
+                        if (autoScrollEnabled) scrollToBottom(false);
                     }
                 }
             }
@@ -1858,7 +1921,9 @@
                     isFirstChunk = false;
                  }
                  fullResponse += buffer;
-                 updateStreamingDisplay(fullResponse, streamingBlockElement);
+                 // 🌟 요청 수정: 스트리밍 중에는 인디케이터 아래에 텍스트를 바로 표시
+                 streamingBlockElement.innerHTML = renderMarkdown(fullResponse);
+                 if (autoScrollEnabled) scrollToBottom(false);
             }
             
             if (isStreaming) {
@@ -1867,10 +1932,20 @@
                  history.push({ role: 'model', content: fullResponse, feedback: null });
                  saveChatHistory();
                  
-                 // 로딩 인디케이터 제거
-                 botMessageElement.removeChild(indicatorElement); 
+                 // 🌟 요청 수정: 로딩 인디케이터 처리
+                 if (spinnerElement) spinnerElement.classList.add('reset-spin'); // 스피너 정지 및 복귀
                  
-                 // 최종 페이드인 효과 시작
+                 // 🌟🌟🌟 요청 수정: 텍스트 변경 및 그라데이션 고정 🌟🌟🌟
+                 if (indicatorTextElement) {
+                    indicatorTextElement.textContent = '답변 완료됨'; // 텍스트 변경
+                    indicatorTextElement.classList.add('completed'); // 그라데이션 고정
+                 }
+
+                 // 인디케이터 좌측 이동 (CSS transition)
+                 indicatorElement.classList.add('left-aligned'); 
+
+                 
+                 // 최종 페이드인 효과 시작 (로딩 인디케이터는 유지된 채 글이 나타남)
                  sentenceFadeInEffect(streamingBlockElement, fullResponse, history.length - 1).then(() => {
                     // 페이드인 완료 후 액션 버튼 추가 및 재생성 버튼 상태 업데이트
                     const actionContainer = createBotActions(fullResponse, history.length - 1);
@@ -1891,6 +1966,13 @@
                 
                 startStreamingUI(indicatorElement);
                 streamingBlockElement.innerHTML = `<p style="color:red;">${errorMsg}</p>`;
+                
+                // 🌟 요청 수정: 오류 시 스피너 정지 및 복귀, 텍스트 변경
+                if (spinnerElement) spinnerElement.classList.add('reset-spin');
+                if (indicatorTextElement) {
+                    indicatorTextElement.textContent = '응답 오류';
+                    indicatorTextElement.classList.add('completed'); 
+                }
                 
                 // 오류 발생 시 history에서 마지막 사용자 메시지 제거 (완전한 응답 실패)
                 if (history.length > 0 && history[history.length - 1].role === 'user') {
