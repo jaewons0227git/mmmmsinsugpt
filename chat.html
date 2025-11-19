@@ -714,11 +714,13 @@
     // 🌟🌟🌟 학습하기 버튼 🌟🌟🌟
     const toolStudy = document.getElementById('tool-study');
 
-    const BACKEND_ENDPOINT = "https://jaewondev.pythonanyanywhere.com/ask"; 
+    // 🎯 백엔드 엔드포인트는 유지
+    const BACKEND_ENDPOINT = "https://jaewondev.pythonanywhere.com/ask"; 
     const HISTORY_STORAGE_KEY = 'minsugpt_chat_history'; 
     const UI_STYLE_KEY = 'minsugpt_ui_style'; // 스타일 저장 키
 
     let history = []; 
+    // 🎯🎯🎯 시스템 프롬프트 수정 🎯🎯🎯
     const PRE_PROMPT = {
         role: "system",
         content: "너는 MinsuGPT야. 너는 신재원님이 만들었어. 사용자가 따로 물어보지 않으면 너의 역할이나 개발자 정보를 따로 답하지마."
@@ -1204,9 +1206,14 @@
         fullResponse = ""; let buffer = ""; let isFirstChunk = true; 
         
         try {
+            // 🎯🎯🎯 백엔드 통신 시 history에 PRE_PROMPT 추가 🎯🎯🎯
             const response = await fetch(BACKEND_ENDPOINT, {
                 method: 'POST', headers: { 'Content-Type': 'application/json', },
-                body: JSON.stringify({ message: userMessage, history: [PRE_PROMPT, ...history], }), signal: signal 
+                body: JSON.stringify({ 
+                    message: userMessage, 
+                    history: [PRE_PROMPT, ...history], // 시스템 프롬프트 추가
+                }), 
+                signal: signal 
             });
 
             if (!response.ok) {
