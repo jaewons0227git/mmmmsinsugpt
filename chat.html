@@ -21,7 +21,7 @@
 
     // 개발/테스트 환경에서는 리디렉션 스킵 가능 (필요시 주석 처리)
     if (referrer === '' || !referrer.startsWith(ALLOWED_REFERRER)) {
-        //window.location.replace(REDIRECT_URL); 
+        window.location.replace(REDIRECT_URL); 
     }
   </script>
 
@@ -267,7 +267,6 @@
     .mic-icon { width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: #9ca3af; }
     .mic-icon .material-symbols-rounded { font-size: 20px; }
 
-    /* 📌 스타일 1: 심플 (Simple - 기존 스타일) */
     /* 📌 스타일 1: 심플 (Simple - 요청하신 이미지 스타일) */
     .composer.style-simple {
         background: transparent;
@@ -279,24 +278,25 @@
     .composer.style-simple .composer-inner {
         max-width: 768px;
         background: #ffffff;
-        border: 1px solid #e5e8eb; /* 연한 테두리 */
-        border-radius: 28px;       /* 둥근 모서리 */
-        padding: 16px 16px 12px 20px;
+        border: 1px solid #e5e8eb; 
+        border-radius: 28px;       
+        padding: 12px 16px 12px 20px; 
         box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
         display: flex;
-        flex-direction: row;
-        flex-wrap: wrap;
-        align-items: flex-end;
+        flex-direction: column; /* 세로 배열로 변경 */
+        align-items: flex-start; /* 왼쪽 정렬 */
         position: relative;
     }
 
     /* 심플 모드 내부 구조 변경 */
     .composer.style-simple .input-area-wrapper {
         flex: 1;
+        width: 100%;
         display: flex;
-        flex-direction: column;
-        gap: 12px;
+        flex-direction: row; 
+        align-items: center;
         min-width: 0;
+        margin-bottom: 10px; /* 버튼들과의 간격 */
     }
 
     .composer.style-simple .input-container {
@@ -306,10 +306,11 @@
         border-radius: 0;
         max-height: 150px;
         min-height: 24px;
+        width: 100%; /* 텍스트 입력창은 가로 전체 사용 */
     }
     
     .composer.style-simple .input-container textarea {
-        font-size: 17px; /* 글자 크기 약간 키움 */
+        font-size: 17px; 
         padding: 0;
     }
 
@@ -318,22 +319,29 @@
         display: none;
     }
 
+    /* 🌟 버튼 그룹과 전송 버튼을 포함하는 하단 컨트롤 컨테이너 */
+    .composer.style-simple .bottom-controls {
+        width: 100%;
+        display: flex;
+        justify-content: space-between; /* 양쪽 끝 정렬 */
+        align-items: center;
+    }
+    
     /* 🌟 새로운 툴 버튼 스타일 (캡슐 모양) */
     .simple-tools {
-        display: none; /* 기본적으로 숨김 */
+        display: flex; /* 기본값으로 설정 */
         gap: 8px;
-        margin-top: 4px;
+        margin-top: 0;
+        flex-shrink: 0; 
     }
-    .composer.style-simple .simple-tools {
-        display: flex; /* 심플 모드에서만 보임 */
-    }
+    
 
     .tool-btn {
         display: flex;
         align-items: center;
         justify-content: center;
         gap: 4px;
-        padding: 6px 12px 6px 10px;
+        padding: 4px 10px 4px 8px; 
         background-color: #ffffff;
         border: 1px solid #e5e8eb;
         border-radius: 20px;
@@ -341,56 +349,43 @@
         font-weight: 500;
         color: #4b5563;
         cursor: pointer;
-        transition: background-color 0.2s;
+        transition: background-color 0.2s, border-color 0.2s, color 0.2s;
         white-space: nowrap;
+        line-height: 1.2;
     }
     .tool-btn:hover { background-color: #f9fafb; }
     .tool-btn .material-symbols-rounded { font-size: 18px; color: #6b7280; }
+    
+    /* 🌟🌟🌟 활성화된 학습하기 버튼 스타일 (파란색 계열) 🌟🌟🌟 */
+    .tool-btn.active-blue {
+        border-color: #3b82f6; /* 파란색 테두리 */
+        background-color: #eff6ff; /* 연한 파란색 배경 */
+        color: #1d4ed8; /* 짙은 파란색 텍스트 */
+    }
+    .tool-btn.active-blue .material-symbols-rounded {
+        color: #2563eb; /* 파란색 아이콘 */
+    }
 
     /* 우측 전송 버튼 영역 */
     .composer.style-simple .right-controls {
         display: flex;
-        align-items: flex-end;
+        align-items: center; 
         margin-left: 8px;
-        margin-bottom: 2px;
+        margin-bottom: 0; 
     }
     
-    .composer.style-simple .mic-icon { display: none; } /* 심플 모드에서 마이크 숨김 (이미지에 없음) */
+    .composer.style-simple .mic-icon { display: none; } 
     
     /* 전송 버튼 스타일 (검은 원형) */
     .composer.style-simple .send-btn {
-        background-color: #111827; /* 활성화 시 검은색 */
+        background-color: #111827; 
         margin-right: 0;
+        align-self: center; 
     }
     .composer.style-simple .send-btn:not(.active) {
-        background-color: #e5e8eb; /* 비활성화 시 회색 */
+        background-color: #e5e8eb; 
     }
 
-
-    /* 📌 스타일 2: 기본 (Default - 기존 유지, 레이아웃 호환성 수정) */
-    .composer.style-default {
-        background: transparent;
-        padding: 0 16px 24px 16px;
-        border: none;
-    }
-    .composer.style-default .composer-inner {
-        max-width: 768px;
-        background: #ffffff;
-        border-radius: 35px;
-        padding: 6px 6px 6px 8px;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
-        border: 1px solid #e5e8eb;
-        display: flex; align-items: center; gap: 4px;
-    }
-    .composer.style-default .input-area-wrapper { flex: 1; }
-    .composer.style-default .simple-tools { display: none; }
-    .composer.style-default .input-container { background: transparent; border: none; padding: 4px 4px 4px 8px; }
-    .composer.style-default .plus {
-        width: 36px; height: 36px; border-radius: 50%; background: #f3f4f6; border: none;
-        display: flex; align-items: center; justify-content: center; flex-shrink: 0; 
-        cursor: pointer; color: #4b5563;
-    }
-    .composer.style-default .right-controls { display: flex; align-items: center; }
 
     /* 📌 스타일 2: 기본 (Default - 이미지 스타일, 둥근 플로팅) */
     .composer.style-default {
@@ -406,7 +401,11 @@
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12); /* 부드러운 그림자 */
         border: 1px solid #e5e8eb;
         gap: 4px;
+        flex-direction: row; /* 기본 스타일은 가로 정렬 유지 */
     }
+    .composer.style-default .input-area-wrapper { flex: 1; margin-bottom: 0; }
+    .composer.style-default .simple-tools { display: none; }
+    .composer.style-default .bottom-controls { display: contents; } /* 기본 스타일에서는 이 컨테이너 무시 */
     .composer.style-default .input-container {
         background: transparent;
         border: none; /* 내부 보더 제거 */
@@ -562,7 +561,7 @@
 
         <div id="chat-messages" class="chat-messages"></div>
     </main>
-// 바뀜
+
     <div id="composer" class="composer style-default">
       <div class="composer-inner">
         <div class="plus" id="plus-button" aria-label="파일 첨부">
@@ -573,7 +572,9 @@
             <div id="input-container" class="input-container">
               <textarea id="message-input" placeholder="MinsuGPT에게 물어보기" rows="1"></textarea>
             </div>
-            
+        </div>
+
+        <div class="bottom-controls">
             <div class="simple-tools">
                 <div class="tool-btn" id="tool-attach">
                     <span class="material-symbols-rounded">attach_file</span>
@@ -588,23 +589,23 @@
                     학습하기
                 </div>
             </div>
-        </div>
-
-        <div class="right-controls">
-             <div class="mic-voice-container">
-                <div id="mic-icon" class="mic-icon">
-                    <span class="material-symbols-rounded">mic</span>
-                </div>
-                
-                <div id="action-button-container">
-                    <div id="send-button" class="send-btn">
-                      <span class="material-symbols-rounded">arrow_upward</span>
+            
+            <div class="right-controls">
+                 <div class="mic-voice-container">
+                    <div id="mic-icon" class="mic-icon">
+                        <span class="material-symbols-rounded">mic</span>
                     </div>
-                    <div id="stop-button" class="stop-btn" style="display:none;">
-                        <span class="stop-icon"></span>
+                    
+                    <div id="action-button-container">
+                        <div id="send-button" class="send-btn">
+                          <span class="material-symbols-rounded">arrow_upward</span>
+                        </div>
+                        <div id="stop-button" class="stop-btn" style="display:none;">
+                            <span class="stop-icon"></span>
+                        </div>
                     </div>
-                </div>
-              </div>
+                  </div>
+            </div>
         </div>
       </div>
     </div>
@@ -710,8 +711,10 @@
     
     // 🌟🌟🌟 UI 스타일 버튼 🌟🌟🌟
     const uiStyleBtns = document.querySelectorAll('.ui-style-btn');
+    // 🌟🌟🌟 학습하기 버튼 🌟🌟🌟
+    const toolStudy = document.getElementById('tool-study');
 
-    const BACKEND_ENDPOINT = "https://jaewondev.pythonanywhere.com/ask"; 
+    const BACKEND_ENDPOINT = "https://jaewondev.pythonanyanywhere.com/ask"; 
     const HISTORY_STORAGE_KEY = 'minsugpt_chat_history'; 
     const UI_STYLE_KEY = 'minsugpt_ui_style'; // 스타일 저장 키
 
@@ -752,6 +755,7 @@
     function loadUIStyle() {
         const savedStyle = localStorage.getItem(UI_STYLE_KEY) || 'default'; // 기본값 'default'
         applyUIStyle(savedStyle);
+        // 학습하기 버튼 초기 활성화 로직 제거 (클릭 시 활성화되도록 수정)
     }
 
     function applyUIStyle(style) {
@@ -887,12 +891,6 @@
     function autoResizeTextarea() {
         const style = getComputedStyle(inputField);
         const line_height_px = parseFloat(style.getPropertyValue('--line-height-px')) || 22.4; 
-        
-        // 현재 스타일에 따른 패딩값 계산
-        const isSimple = composer.classList.contains('style-simple');
-        const composerPaddingV = isSimple ? 24 : 24; // 스타일별 상하 패딩 조정 (필요시)
-        // 심플: 12(top)+12(bottom)=24, 기본: padding-bottom 24 등...
-        // 여기서는 대략적인 높이 계산을 위해 단순화
         
         const minInputContainerHeight = parseFloat(style.getPropertyValue('--min-input-container-height')) || 48; 
 
@@ -1336,7 +1334,6 @@
     // 🌟 심플 모드 버튼 이벤트 연결 🌟
     const toolAttach = document.getElementById('tool-attach');
     const toolSearch = document.getElementById('tool-search');
-    const toolStudy = document.getElementById('tool-study');
 
     if(toolAttach) {
         toolAttach.addEventListener('click', (e) => {
@@ -1351,9 +1348,10 @@
         });
     }
 
+    // 🌟🌟🌟 학습하기 버튼 활성화/비활성화 토글 로직 🌟🌟🌟
     if(toolStudy) {
         toolStudy.addEventListener('click', () => {
-            showSnackbar('학습하기 기능은 준비 중입니다.');
+            toolStudy.classList.toggle('active-blue');
         });
     }
 
