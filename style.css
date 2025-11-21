@@ -93,10 +93,11 @@ body{ margin:0; background:var(--bg-color); color:var(--text-color); min-height:
   transition: background-color 0.3s ease;
 }
 
-/* Header (수정됨: position: fixed 제거) */
+/* Header: Fixed Position으로 변경 */
 .header{
   display:flex; justify-content:space-between; align-items:center; padding:10px 16px; height:56px; border-bottom:none; 
-  position: relative; /* fixed -> relative로 변경 */
+  position: fixed; /* relative -> fixed로 변경 */
+  top: 0; left: 0; right: 0; /* 상단 고정 위치 지정 */
   z-index: 100; 
   background: var(--bg-color); 
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05); 
@@ -159,10 +160,10 @@ body{ margin:0; background:var(--bg-color); color:var(--text-color); min-height:
 .action-btn.new-blue .material-symbols-rounded{ color:#007bff; }
 .action-btn.orange .material-symbols-rounded{ color:#fd7e14; } 
 
-/* Chat Messages (수정됨: padding-top 변경) */
+/* Chat Messages: 상단 여백 다시 66px로 변경 */
 .chat-messages{ 
     width: 100%; padding: 10px 16px; 
-    padding-top: 10px; /* 66px -> 10px */
+    padding-top: 66px; /* 10px -> 66px로 변경 */
     display: none; flex-direction: column; justify-content: flex-start; gap: 10px; margin: 0 auto; 
 }
 @media (min-width: 600px) { .chat-messages { max-width: 768px; padding-left: 0; padding-right: 0; } }
@@ -227,9 +228,10 @@ body{ margin:0; background:var(--bg-color); color:var(--text-color); min-height:
 /* 🌟🌟🌟 입력창 (Composer) 스타일 🌟🌟🌟 */
 /* ============================================ */
 
-/* Composer (수정됨: position: fixed 제거) */
+/* Composer: Fixed Position으로 변경 */
 .composer {
-    position: relative; /* fixed -> relative로 변경 */
+    position: fixed; /* relative -> fixed로 변경 */
+    bottom: 0; left: 0; right: 0; /* 하단 고정 위치 지정 */
     width: 100%; 
     display: flex; 
     justify-content: center; 
@@ -504,4 +506,4 @@ hr.modal-divider { border: 0; border-top: 1px solid var(--border-color); margin:
 .copyright-text { 
     margin-top: 40px; text-align: center; 
     font-size: 12px; color: var(--text-sub); opacity: 0.7; 
-}
+  }
