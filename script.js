@@ -297,9 +297,13 @@ function autoResizeTextarea() {
     
     inputContainer.style.minHeight = `${inputContainerHeight}px`;
 
+    // [수정된 부분]
     const composerHeight = composer.offsetHeight;
     scrollDownButton.style.bottom = `${composerHeight + 10}px`;
-    chatMessages.style.paddingBottom = `${composerHeight + 50}px`;
+    
+    // 채팅 메시지 컨테이너의 하단 패딩을 고정된 값으로 설정
+    chatMessages.style.paddingBottom = `50px`; 
+    // [수정된 부분 끝]
 
     if (autoScrollEnabled) scrollToBottom(false);
 }
