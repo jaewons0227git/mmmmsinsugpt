@@ -297,12 +297,12 @@ function autoResizeTextarea() {
     
     inputContainer.style.minHeight = `${inputContainerHeight}px`;
 
-    // [수정된 부분]
+    // [수정된 부분 - Fixed Position을 위한 하단 여백 계산 복원]
     const composerHeight = composer.offsetHeight;
     scrollDownButton.style.bottom = `${composerHeight + 10}px`;
     
-    // 채팅 메시지 컨테이너의 하단 패딩을 고정된 값으로 설정
-    chatMessages.style.paddingBottom = `50px`; 
+    // 채팅 메시지 컨테이너의 하단 패딩을 동적 계산 (입력창 높이에 따라 달라짐)
+    chatMessages.style.paddingBottom = `${composerHeight + 50}px`; 
     // [수정된 부분 끝]
 
     if (autoScrollEnabled) scrollToBottom(false);
