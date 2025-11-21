@@ -3,128 +3,96 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>404 - 페이지를 찾을 수 없습니다</title>
-    
-    <link rel="icon" href="https://i.postimg.cc/JzrLmGfG/geulim2.png" type="image/png">
-    
+    <title>404 오류</title>
+
     <style>
-        /* 기본 스타일 및 화이트 테마 설정 */
-        body {
-            font-family: 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+        * {
             margin: 0;
             padding: 0;
-            background-color: #f7f7f7; 
-            color: #333; 
+            box-sizing: border-box;
+            font-family: 'Pretendard', sans-serif;
+        }
+
+        body {
+            height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
-            text-align: center;
-        }
-
-        /* 메인 콘텐츠 영역 */
-        .content {
-            max-width: 90%; /* 화면 너비의 90%만 사용하도록 제한 */
-            padding: 40px 20px;
-        }
-
-        /* 로고 스타일 */
-        .logo {
-            width: 120px;
-            height: auto;
-            margin-bottom: 30px;
-        }
-
-        /* 오류 코드 스타일 */
-        .error-code {
-            font-size: 10rem;
-            font-weight: 900;
-            color: #999; 
-            margin-bottom: 5px;
-            line-height: 1;
-        }
-
-        /* 헤드라인 스타일 */
-        .headline {
-            /* white-space: nowrap; 제거 */
-            font-size: 2.5rem; /* 기본 크기 */
-            font-weight: 700;
+            flex-direction: column;
+            background: #ffffff;
             color: #333;
-            margin-top: 5px;
-            margin-bottom: 20px;
-            /* 작은 화면에서 텍스트가 잘리지 않도록 폰트 크기 유연성 추가 */
-            font-size: clamp(1.5rem, 6vw, 2.5rem); 
+            text-align: center;
+            padding: 20px;
         }
 
-        /* 설명 텍스트 스타일 */
-        .description {
-            font-size: 1.1rem;
-            color: #666;
-            margin-bottom: 40px;
-            line-height: 1.7;
+        img.logo {
+            width: 130px;
+            margin-bottom: 25px;
         }
 
-        /* 버튼 스타일 */
-        .home-button {
-            display: inline-block;
-            background-color: #1e88e5; 
-            color: white;
-            padding: 14px 30px;
+        h1 {
+            font-size: 55px;
+            font-weight: 900;
+            margin-bottom: 10px;
+            opacity: 0;
+            animation: fadeIn 0.4s forwards;
+        }
+
+        p {
+            font-size: 20px;
+            margin-top: 8px;
+            opacity: 0;
+            white-space: nowrap;
+        }
+
+        p.line1 {
+            animation: fadeIn 0.4s forwards;
+            animation-delay: 0.3s;
+        }
+
+        p.line2 {
+            animation: fadeIn 0.4s forwards;
+            animation-delay: 0.6s;
+        }
+
+        a {
             text-decoration: none;
-            border-radius: 8px;
-            font-weight: 600;
-            font-size: 1.1rem;
-            letter-spacing: 0.5px;
-            transition: background-color 0.3s ease, transform 0.2s ease;
-            box-shadow: 0 5px 15px rgba(30, 136, 229, 0.3);
+            padding: 12px 30px;
+            background: transparent;            /* 배경 없음 */
+            color: #000;
+            border: 2px solid #000;            /* 검정 테두리 */
+            border-radius: 999px;              /* 완전 반원 */
+            font-size: 18px;
+            margin-top: 35px;
+            opacity: 0;
+            animation: fadeIn 0.4s forwards;
+            animation-delay: 0.9s;
+            transition: 0.25s;
+            white-space: nowrap;
         }
 
-        .home-button:hover {
-            background-color: #1565c0;
-            transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(30, 136, 229, 0.5);
-        }
-        
-        /* 추가 안내 텍스트 */
-        .footer-text {
-            margin-top: 30px;
-            font-size: 0.9rem;
-            color: #999;
+        a:hover {
+            background: transparent;           /* 호버해도 배경 없음 */
+            border-color: #444;                /* 호버 시 약간 진하게 */
+            color: #222;
         }
 
-        /* 모바일 반응형 (추가 조정) */
-        @media (max-width: 580px) {
-            .error-code {
-                font-size: 6rem;
-            }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
     </style>
 </head>
 <body>
 
-    <div class="content">
-        
-        <img src="https://i.postimg.cc/CdpnCV9v/ms.png" alt="사이트 로고" class="logo">
+    <img class="logo" src="https://statuspage.incident.io/_next/image?url=https%3A%2F%2Fstorage.googleapis.com%2Fincident-io-status-page-logos%2F01KABR33MD5JQ34S3FAA435TD1%2Fminsugpt%2Fzwrf11r5.png&w=384&q=75&dpl=dpl_4t8PhFFMj6TwFgwyPje2VDRHeTsf" alt="Logo">
 
-        <div class="error-code">404</div>
+    <h1>404</h1>
 
-        <h1 class="headline">
-            요청하신 페이지를 찾을 수 없습니다
-        </h1>
+    <p class="line1">페이지를 찾을 수 없어요.</p>
+    <p class="line2">잘못된 주소이거나 삭제된 페이지입니다.</p>
 
-        <p class="description">
-            방문하려던 주소가 잘못되었거나, 페이지가 삭제/이동되었을 수 있습니다.<br> 
-            아래 버튼을 눌러 메인 페이지로 이동해 주세요.
-        </p>
-
-        <a href="/" class="home-button">
-            사이트 메인으로 이동
-        </a>
-        
-        <p class="footer-text">
-            ©MinsuGPT All Rights Reserved.
-        </p>
-    </div>
+    <a href="/">홈으로 돌아가기</a>
 
 </body>
 </html>
