@@ -26,6 +26,9 @@
   --min-textarea-height: 22.4px; 
   --min-input-container-height: 48px; 
   
+  --sidebar-width: 280px;
+  --sidebar-bg: #f9f9f9;
+  
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans KR', 'Helvetica Neue', Arial, sans-serif;
 }
 
@@ -48,6 +51,8 @@
 
   --composer-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
   --modal-overlay: rgba(0, 0, 0, 0.8);
+
+  --sidebar-bg: #171717;
 }
 
 /* 폰트 설정 */
@@ -55,7 +60,8 @@ body :is(
     .header-title, .plus-btn, .action-btn, 
     .message-text, .input-container textarea,
     .modal-grid-item, .modal-option,
-    .thinking-indicator-text, button, .ui-style-btn
+    .thinking-indicator-text, button, .ui-style-btn,
+    .sidebar-section-label, .chat-item, .user-name
 ) {
     font-family: 'Elms Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans KR', 'Helvetica Neue', Arial, sans-serif;
 }
@@ -92,6 +98,138 @@ body{ margin:0; background:var(--bg-color); color:var(--text-color); min-height:
   width:100%; background:var(--bg-color); border-radius:0; overflow:hidden; border:none; display:flex; flex-direction:column; min-height:100vh; position:relative; margin: 0;
   transition: background-color 0.3s ease;
 }
+
+/* 🌟🌟🌟 사이드바 (Sidebar) 스타일 🌟🌟🌟 */
+.sidebar {
+    position: fixed; top: 0; left: 0; bottom: 0;
+    width: var(--sidebar-width);
+    background-color: var(--sidebar-bg);
+    z-index: 2000;
+    display: flex; flex-direction: column;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease-in-out;
+    border-right: 1px solid var(--border-color);
+}
+.sidebar.open { transform: translateX(0); }
+
+.sidebar-backdrop {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background-color: var(--modal-overlay);
+    z-index: 1900;
+    opacity: 0; visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+.sidebar-backdrop.visible { opacity: 1; visibility: visible; }
+
+.sidebar-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px;
+}
+
+.sidebar-new-chat-btn {
+    flex: 1; margin-right: 10px;
+    background-color: var(--surface-color);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 10px;
+    display: flex; align-items: center; justify-content: flex-start; gap: 8px;
+    color: var(--text-color); font-size: 14px; font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+.sidebar-new-chat-btn:hover { background-color: var(--surface-hover); }
+
+.sidebar-close-btn {
+    background: transparent; border: 1px solid var(--border-color);
+    color: var(--text-color); cursor: pointer;
+    width: 40px; height: 40px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+}
+.sidebar-close-btn:hover { background-color: var(--surface-hover); }
+
+.sidebar-search-container {
+    padding: 0 16px 16px 16px;
+    position: relative;
+    display: flex; align-items: center;
+}
+.sidebar-search-container .search-icon {
+    position: absolute; left: 28px; font-size: 18px; color: var(--text-sub);
+}
+#chat-search-input {
+    width: 100%;
+    padding: 8px 10px 8px 36px;
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+    background-color: var(--surface-secondary);
+    color: var(--text-color);
+    font-size: 14px; outline: none;
+}
+#chat-search-input:focus { border-color: var(--primary-blue); }
+
+.sidebar-content {
+    flex: 1; overflow-y: auto; padding: 0 16px;
+}
+.sidebar-section-label {
+    font-size: 12px; font-weight: 600; color: var(--text-sub);
+    margin-bottom: 8px; margin-top: 10px;
+}
+
+.chat-history-list {
+    display: flex; flex-direction: column; gap: 4px; padding-bottom: 20px;
+}
+
+.chat-item {
+    padding: 10px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    color: var(--text-color);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    transition: background-color 0.2s;
+    display: flex; align-items: center; justify-content: space-between;
+    position: relative;
+}
+.chat-item:hover { background-color: var(--surface-secondary); }
+.chat-item.active { background-color: var(--surface-secondary); font-weight: 600; }
+
+.chat-item-title { flex: 1; overflow: hidden; text-overflow: ellipsis; }
+
+.chat-item-actions {
+    display: flex; gap: 4px;
+    opacity: 0; transition: opacity 0.2s;
+}
+.chat-item:hover .chat-item-actions { opacity: 1; }
+.chat-item-action-btn {
+    width: 24px; height: 24px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 4px; color: var(--text-sub);
+    cursor: pointer;
+}
+.chat-item-action-btn:hover { background-color: var(--surface-hover); color: var(--text-color); }
+.chat-item-action-btn .material-symbols-rounded { font-size: 16px; }
+
+/* 모바일에서는 항상 보이게 하거나 클릭으로 처리 */
+@media (max-width: 768px) {
+    .chat-item-actions { opacity: 1; }
+}
+
+.sidebar-footer {
+    padding: 16px; border-top: 1px solid var(--border-color);
+}
+.user-profile {
+    display: flex; align-items: center; gap: 10px;
+    cursor: pointer; padding: 8px; border-radius: 8px;
+    transition: background-color 0.2s;
+}
+.user-profile:hover { background-color: var(--surface-secondary); }
+.user-avatar {
+    width: 32px; height: 32px; background-color: var(--surface-secondary);
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+}
+.user-info { display: flex; flex-direction: column; }
+.user-name { font-size: 14px; font-weight: 500; }
+.user-plan { font-size: 12px; color: var(--text-sub); }
+
 
 /* Header */
 .header{
@@ -506,8 +644,6 @@ hr.modal-divider { border: 0; border-top: 1px solid var(--border-color); margin:
     font-size: 12px; color: var(--text-sub); opacity: 0.7; 
   }
 
-}
-
 /* 🌟 [추가] 스크롤 버튼 컨테이너 위치 고정 */
 #scroll-to-bottom-container {
     /* 입력창 위쪽에 고정: composer의 높이(56px)와 여백을 고려하여 80px로 설정 */
@@ -567,145 +703,3 @@ hr.modal-divider { border: 0; border-top: 1px solid var(--border-color); margin:
     /* 아래를 가리키는 화살표 모양으로 회전 및 위치 조정 */
     transform: translateY(-2px) rotate(45deg); 
 }
-
-
-/* 기존 CSS 내용 유지 (생략) ... */
-
-/* ============================================ */
-/* 🌟🌟🌟 사이드바 (Navigation Drawer) 🌟🌟🌟 */
-/* ============================================ */
-
-.sidebar-backdrop {
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background-color: var(--modal-overlay);
-    z-index: 1050;
-    opacity: 0; visibility: hidden;
-    transition: opacity 0.3s ease, visibility 0.3s ease;
-}
-.sidebar-backdrop.visible { opacity: 1; visibility: visible; }
-
-.sidebar {
-    position: fixed; top: 0; left: 0; bottom: 0;
-    width: 280px; /* 사이드바 너비 */
-    background-color: var(--surface-secondary);
-    z-index: 1060;
-    transform: translateX(-100%);
-    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    display: flex; flex-direction: column;
-    box-shadow: 2px 0 10px rgba(0,0,0,0.1);
-}
-.sidebar.visible { transform: translateX(0); }
-
-/* 사이드바 헤더 */
-.sidebar-header {
-    padding: 16px;
-    display: flex; flex-direction: column; gap: 12px;
-}
-
-.sidebar-top-actions {
-    display: flex; justify-content: space-between; align-items: center;
-}
-
-/* 새 채팅 버튼 (ChatGPT 스타일) */
-.sidebar-btn.new-chat-btn {
-    flex: 1; margin-right: 8px;
-    display: flex; align-items: center; justify-content: flex-start; gap: 8px;
-    background-color: var(--surface-color);
-    border: 1px solid var(--border-color);
-    padding: 10px 12px;
-    border-radius: 8px;
-    color: var(--text-color);
-    font-size: 14px; font-weight: 500;
-    cursor: pointer;
-    transition: background-color 0.2s;
-}
-.sidebar-btn.new-chat-btn:hover { background-color: var(--surface-hover); }
-
-/* 닫기 아이콘 (모바일용) */
-.sidebar-close-icon {
-    width: 32px; height: 32px;
-    border: none; background: transparent;
-    display: flex; align-items: center; justify-content: center;
-    color: var(--text-sub); cursor: pointer;
-}
-
-/* 검색창 */
-.sidebar-search-container {
-    display: flex; align-items: center;
-    background-color: var(--surface-color);
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    padding: 8px 10px;
-}
-.sidebar-search-container .search-icon { font-size: 18px; color: var(--text-sub); margin-right: 6px; }
-.sidebar-search-container input {
-    border: none; background: transparent; outline: none;
-    width: 100%; font-size: 14px; color: var(--text-color);
-    font-family: inherit;
-}
-
-/* 사이드바 콘텐츠 (채팅 목록) */
-.sidebar-content {
-    flex: 1; overflow-y: auto; padding: 10px 16px;
-}
-.sidebar-section-label {
-    font-size: 12px; font-weight: 600; color: var(--text-sub);
-    margin-bottom: 8px; margin-top: 10px;
-}
-
-/* 채팅 목록 아이템 */
-.chat-list { display: flex; flex-direction: column; gap: 4px; }
-
-.chat-list-item {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 10px 12px;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background-color 0.2s;
-    color: var(--text-color);
-    font-size: 14px;
-    position: relative;
-    group: relative;
-}
-.chat-list-item:hover { background-color: var(--surface-hover); }
-.chat-list-item.active { background-color: var(--surface-hover); font-weight: 600; }
-
-.chat-item-title {
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1;
-}
-
-/* 목록 아이템 우측 메뉴 (수정/삭제) */
-.chat-item-options {
-    display: none; /* hover 시 보여줌 */
-    align-items: center; gap: 4px;
-}
-.chat-list-item:hover .chat-item-options { display: flex; }
-
-.chat-option-btn {
-    width: 24px; height: 24px; display: flex; align-items: center; justify-content: center;
-    border-radius: 4px; color: var(--text-sub);
-}
-.chat-option-btn:hover { background-color: rgba(0,0,0,0.1); color: var(--text-color); }
-[data-theme="dark"] .chat-option-btn:hover { background-color: rgba(255,255,255,0.1); }
-
-/* 사이드바 푸터 */
-.sidebar-footer {
-    padding: 16px; border-top: 1px solid var(--border-color);
-}
-.sidebar-user-profile {
-    display: flex; align-items: center; gap: 10px;
-}
-.user-avatar {
-    width: 36px; height: 36px; border-radius: 50%;
-    background-color: var(--primary-blue); color: white;
-    display: flex; align-items: center; justify-content: center;
-}
-.user-info { display: flex; flex-direction: column; }
-.user-name { font-size: 14px; font-weight: 600; color: var(--text-color); }
-.user-plan { font-size: 12px; color: var(--text-sub); }
-
-/* PC에서 사이드바가 열려있을 때 폰(메인영역) 밀기 효과 (선택사항) */
-/* .sidebar.visible + .phone { transform: translateX(280px); } */
-
-/* 검색 결과 없음 */
-.no-search-result { font-size: 13px; color: var(--text-sub); text-align: center; padding: 20px 0; }
