@@ -507,3 +507,63 @@ hr.modal-divider { border: 0; border-top: 1px solid var(--border-color); margin:
   }
 
 }
+
+/* 🌟 [추가] 스크롤 버튼 컨테이너 위치 고정 */
+#scroll-to-bottom-container {
+    /* 입력창 위쪽에 고정: composer의 높이(56px)와 여백을 고려하여 80px로 설정 */
+    position: fixed;
+    bottom: 80px; 
+    right: 20px;
+    z-index: 1000;
+}
+
+/* 🌟 [추가] 스크롤 버튼 기본 스타일 (연한 회색 테두리의 원) */
+#scrollDownButton {
+    /* 전송 버튼과 유사하지만, 배경색과 테두리를 다르게 설정 */
+    background-color: var(--surface-color); /* 흰색 배경 */
+    border: 1px solid var(--border-color); /* 연한 회색 테두리 */
+    border-radius: 50%; /* 원 모양 */
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    transition: opacity 0.3s, transform 0.3s;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    
+    /* 초기 숨김 처리 */
+    opacity: 0;
+    pointer-events: none;
+}
+
+#scrollDownButton:hover {
+    transform: scale(1.05);
+}
+
+/* 🌟 [추가] 버튼 표시/숨김 클래스 */
+#scrollDownButton.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+#scrollDownButton.visible {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* 🌟 [핵심] 전송 버튼과 동일한 CSS 화살표 구현 */
+#scrollDownButton::after {
+    content: '';
+    display: block;
+    width: 8px; /* 화살표 너비 */
+    height: 8px; /* 화살표 높이 */
+    
+    /* 전송 버튼 아이콘의 색상과 유사하게 설정 */
+    border: 2px solid var(--text-sub); 
+    border-top: none; 
+    border-left: none; 
+    
+    /* 아래를 가리키는 화살표 모양으로 회전 및 위치 조정 */
+    transform: translateY(-2px) rotate(45deg); 
+}
