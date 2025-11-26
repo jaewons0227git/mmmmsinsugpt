@@ -13,46 +13,71 @@
   <link href="https://fonts.googleapis.com/icon?family=Material+Symbols+Rounded" rel="stylesheet">
   <link rel="icon" type="image/png" href="https://i.postimg.cc/MKBHwqWk/logogogo.png">
   <link rel="stylesheet" href="style.css"> 
-
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-
-  <script>
-    // 📢 허용된 직전 페이지 주소 (테스트 시 주석 처리 가능)
-    const ALLOWED_REFERRER = 'https://minsugpt.kro.kr/';
-    const REDIRECT_URL = 'https://minsugpt.kro.kr/';
-    const referrer = document.referrer;
-
-    if (referrer === '' || !referrer.startsWith(ALLOWED_REFERRER)) {
-    // window.location.replace(REDIRECT_URL); // 배포 시 주석 해제
-    }
-  </script>
 </head>
 <body>
+
+  <div id="sidebar-backdrop" class="sidebar-backdrop"></div>
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-top-actions">
+        <button id="sidebar-new-chat" class="sidebar-btn new-chat-btn">
+           <span class="material-symbols-rounded">add_circle</span> 새 채팅
+        </button>
+        <button id="sidebar-close-btn" class="sidebar-close-icon">
+            <span class="material-symbols-rounded">close</span>
+        </button>
+      </div>
+      
+      <div class="sidebar-search-container">
+        <span class="material-symbols-rounded search-icon">search</span>
+        <input type="text" id="chat-search-input" placeholder="채팅 검색..." />
+      </div>
+    </div>
+
+    <div class="sidebar-content">
+      <div class="sidebar-section-label">내 채팅</div>
+      <div id="chat-list-container" class="chat-list">
+        </div>
+    </div>
+    
+    <div class="sidebar-footer">
+        <div class="sidebar-user-profile">
+            <div class="user-avatar">
+                <span class="material-symbols-rounded">person</span>
+            </div>
+            <div class="user-info">
+                <span class="user-name">MinsuGPT User</span>
+                <span class="user-plan">Free Plan</span>
+            </div>
+        </div>
+    </div>
+  </aside>
+
   <div class="phone" role="application" aria-label="채팅 UI">
     <header class="header">
         <div class="header-left-group">
-             <div class="header-icon menu-icon">
+             <div class="header-icon menu-icon" id="menu-btn">
                 <span class="material-symbols-rounded">menu</span>
             </div>
             <div class="header-logo">
                 <img src="https://i.postimg.cc/MKBHwqWk/logogogo.png" alt="MinsuGPT 로고">
             </div>
-            <div class="header-title">MinsuGPT</div>
+            <div class="header-title" id="header-title">MinsuGPT</div>
             <div class="header-center">
                 <div class="plus-btn">
-                    <span>이 앱은 베타버전 입니다.</span>
+                    <span>Beta</span>
                 </div>
             </div>
         </div>
 
       <div id="scroll-to-bottom-container">
-    <button id="scrollDownButton" class="hidden" aria-label="맨 아래로 스크롤">
-        </button>
-</div>
+        <button id="scrollDownButton" class="hidden" aria-label="맨 아래로 스크롤"></button>
+      </div>
       
-        <div class="header-icon" id="settings-button" aria-label="설정" style="visibility: visible;"> 
-            <span class="material-symbols-rounded">settings</span>
-        </div>
+      <div class="header-icon" id="settings-button" aria-label="설정"> 
+          <span class="material-symbols-rounded">settings</span>
+      </div>
     </header>
 
     <main id="content-wrapper" class="content-wrapper">
@@ -176,7 +201,6 @@
         <div id="settings-modal" class="modal">
             <div class="modal-handle"></div>
             <h3>설정</h3>
-            
             <div class="ui-style-selector">
                 <span class="ui-style-label">입력창 스타일</span>
                 <div class="ui-style-options">
@@ -190,7 +214,6 @@
                     </button>
                 </div>
             </div>
-            
             <div class="ui-style-selector">
                 <span class="ui-style-label">화면 테마</span>
                 <div class="theme-btn-group">
@@ -199,16 +222,13 @@
                     <div class="theme-btn" data-theme-val="dark">다크</div>
                 </div>
             </div>
-
             <hr class="modal-divider">
-            
             <div class="modal-option" id="about-button">
                 <div class="modal-option-icon"><span class="material-symbols-rounded">info</span></div>
                 MinsuGPT 정보
             </div>
-
             <div class="modal-option" id="reset-chat-button">
-                대화 초기화
+                모든 데이터 초기화
             </div>
         </div>
     </div>
@@ -216,7 +236,7 @@
     <div id="reset-confirm-modal-backdrop" class="modal-backdrop">
         <div id="reset-confirm-modal" class="modal">
             <h3>대화 초기화</h3>
-            <p>모든 대화 기록이 삭제되며, 이 작업은 되돌릴 수 없습니다.</p>
+            <p>모든 채팅 내역이 영구적으로 삭제됩니다.</p>
             <div class="confirm-actions">
                 <button id="confirm-cancel-btn">취소</button>
                 <button id="confirm-reset-btn">초기화</button>
@@ -228,10 +248,8 @@
         <div id="about-modal" class="modal">
             <div class="modal-handle"></div>
             <h3>MinsuGPT 정보</h3>
-            
             <div class="about-info-row">빌드번호: 2539189</div>
             <div class="about-info-row">최신업데이트 날짜: 25년 11월 26일</div>
-            
             <div class="creator-section-title">제작자</div>
             <div class="creator-card">
                 <div class="creator-avatar">👨‍💻</div>
@@ -240,11 +258,9 @@
                     <div class="creator-role">Creator</div>
                 </div>
             </div>
-
             <div class="copyright-text">Copyright 2025. CorerepubliX all rights reserved.</div>
         </div>
     </div>
-
   </div>
 
   <script src="script.js"></script>
