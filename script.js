@@ -30,7 +30,6 @@ const confirmCancelBtn = document.getElementById('confirm-cancel-btn');
 const confirmResetBtn = document.getElementById('confirm-reset-btn');
 const scrollDownButton = document.getElementById('scroll-down-button'); 
 
-// 💡 [추가] About Modal 요소
 const aboutButton = document.getElementById('about-button');
 const aboutModalBackdrop = document.getElementById('about-modal-backdrop');
 
@@ -38,7 +37,6 @@ const uiStyleBtns = document.querySelectorAll('.ui-style-btn');
 const themeBtns = document.querySelectorAll('.theme-btn');
 const toolStudy = document.getElementById('tool-study');
 
-// 💡 [추가] 이미지 관련 요소
 const toolImage = document.getElementById('tool-image');
 const menuCreateImage = document.getElementById('menu-create-image');
 const imageModeIndicator = document.getElementById('image-mode-indicator');
@@ -64,13 +62,16 @@ const isMobile = () => /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent
 let isStreaming = false; 
 let abortController = null; 
 let currentLoadingText = '답변을 생각하는 중...';
-let isFadingIn = false;
-let fadeOutAbortController = null;
-const FADE_IN_DELAY = 200; 
 let autoScrollEnabled = true;
-
-// 💡 [추가] 이미지 모드 상태 변수
 let isImageMode = false;
+
+// Marked 옵션 설정 (줄바꿈 처리 등)
+if (typeof marked !== 'undefined') {
+    marked.setOptions({
+        breaks: true, // 엔터키 줄바꿈 허용
+        gfm: true     // GitHub Flavor Markdown 허용
+    });
+}
 
 // ===========================================
 // 2. UI 및 설정 (테마, 스타일, 모달) 관련 함수
@@ -116,7 +117,6 @@ function loadUIStyle() {
 }
 
 function applyUIStyle(style) {
-    // 스타일 변경 시 이미지 모드 초기화
     toggleImageMode(false);
 
     if (style === 'simple') {
@@ -149,7 +149,6 @@ function toggleImageMode(active) {
 
     if (active) {
         currentLoadingText = '이미지를 생성하는 중...';
-        
         if (isSimple) {
             toolImage.classList.add('active-purple');
         } else {
@@ -157,7 +156,6 @@ function toggleImageMode(active) {
         }
     } else {
         currentLoadingText = '답변을 생각하는 중...';
-        
         if (isSimple) {
             toolImage.classList.remove('active-purple');
         } else {
@@ -179,7 +177,6 @@ function toggleSettingsModal(show) {
     else { settingsModalBackdrop.classList.remove('visible'); }
 }
 
-// 💡 [추가] About Modal 토글 함수
 function toggleAboutModal(show) {
     if (show === undefined) { aboutModalBackdrop.classList.toggle('visible'); } 
     else if (show) { aboutModalBackdrop.classList.add('visible'); } 
@@ -288,7 +285,6 @@ function autoResizeTextarea() {
     const finalTextareaHeight = inputField.offsetHeight; 
     let contentHeight = finalTextareaHeight + 8; 
     
-    // 이미지 모드일 때 높이 추가 계산
     if (isImageMode && !composer.classList.contains('style-simple')) {
          contentHeight += 40; 
     }
@@ -300,19 +296,16 @@ function autoResizeTextarea() {
     const composerHeight = composer.offsetHeight;
     scrollDownButton.style.bottom = `${composerHeight + 10}px`;
     chatMessages.style.paddingBottom = `${composerHeight + 50}px`;
-
-    if (autoScrollEnabled) scrollToBottom(false);
 }
 
 function appendUserMessage(content, animate = true) {
     const userBubble = document.createElement('div');
     userBubble.className = 'message-bubble user-message';
-    userBubble.innerHTML = `<div class="message-text">${content}</div>`;
+    userBubble.innerHTML = `<div class="message-text">${content.replace(/\n/g, '<br>')}</div>`;
     chatMessages.appendChild(userBubble);
     if (animate) scrollToBottom(true);
 }
 
-// 💡 [추가] 이미지 메시지 전용 append 함수
 function appendBotImage(htmlContent, animate = true) {
      const botMessageContainer = document.createElement('div');
     botMessageContainer.className = 'bot-message';
@@ -335,7 +328,10 @@ function appendBotMessage(content, feedbackStatus = null, animate = true) {
 
     const streamingBlock = document.createElement('div');
     streamingBlock.className = 'streaming-block'; 
-    streamingBlock.innerHTML = renderMarkdown(content);
+    
+    // 📢 Markdown 렌더링 (marked 라이브러리 사용)
+    streamingBlock.innerHTML = typeof marked !== 'undefined' ? marked.parse(content) : content;
+    
     botMessageContainer.appendChild(streamingBlock);
 
     const actionContainer = createBotActions(content, messageIndex, feedbackStatus);
@@ -404,7 +400,7 @@ function createBotActions(content, messageIndex, feedbackStatus = null) {
 }
 
 function handleRegenerate(messageIndex) {
-    if (isStreaming || isFadingIn) { showSnackbar('현재 답변 생성 중이거나 애니메이션이 동작 중입니다.'); return; }
+    if (isStreaming) { showSnackbar('현재 답변 생성 중입니다.'); return; }
     const modelMessageIndex = history.findIndex((msg, index) => index === messageIndex && msg.role === 'model');
     if (modelMessageIndex === -1) { showSnackbar('재생성할 답변을 찾을 수 없습니다.'); return; }
 
@@ -464,60 +460,6 @@ function appendBotMessageContainer() {
     return { botMessageElement: botMessageContainer, indicatorElement: indicatorContainer, streamingBlockElement: streamingBlock, spinnerElement: spinner, indicatorTextElement: indicatorText };
 }
 
-function startStreamingUI(indicator) { }
-
-function renderMarkdown(rawText, wrapSentences = false) {
-    if (!rawText) return "";
-    let html = rawText.replace(/\r/g, ''); 
-    html = html.replace(/```([^`]+?)```/gs, (match, content) => { return `<pre><code>${content.trim()}</code></pre>`; });
-    html = html.replace(/^(#+)\s*([^\n]+)/gm, (match, hashes, content) => { return `<h${hashes.length}>${content}</h${hashes.length}>`; });
-    html = html.replace(/`([^`\n]+?)`/g, '<code>$1</code>');
-    html = html.replace(/\*\*([^\*]+?)\*\*/g, '<strong>$1</strong>');
-    html = html.replace(/__([^__]+?)__/g, '<strong>$1</strong>');
-    
-    if (wrapSentences) {
-        const sentenceRegex = /([^.?!]+[.?!]+(?:\s|<br>|\n|$)+)/g;
-        const parts = html.split(sentenceRegex).filter(p => p.trim().length > 0 || p.match(/^[.?!]+\s*$/));
-        let wrappedHtml = '';
-        for (const part of parts) {
-            if (part.trim().length === 0 && !part.includes('<br>') && !part.includes('\n')) continue; 
-            if (part.match(/<pre>/) || part.match(/<h[1-6]>/)) { wrappedHtml += part; } 
-            else { wrappedHtml += `<span class="sentence">${part.replace(/(?<!<br>)\n/g, '<br>')}</span>`; }
-        }
-        html = wrappedHtml;
-    }
-    if (!wrapSentences) { html = html.replace(/(?<!<br>)\n/g, '<br>'); }
-    return html;
-}
-
-function sentenceFadeInEffect(element, rawText, messageIndex) {
-    return new Promise(resolve => {
-        isFadingIn = true;
-        element.innerHTML = renderMarkdown(rawText, true);
-        const sentences = element.querySelectorAll('.sentence');
-        let index = 0;
-        const delay = FADE_IN_DELAY; 
-        const abortFadeIn = () => { isFadingIn = false; sentences.forEach(s => s.classList.add('visible')); if (autoScrollEnabled) scrollToBottom(true); resolve(); };
-        fadeOutAbortController = { abort: abortFadeIn };
-
-        function showNextSentence() {
-            if (!isFadingIn) { return; }
-            if (index < sentences.length) {
-                const currentSentence = sentences[index];
-                currentSentence.classList.add('visible');
-                if (autoScrollEnabled) {
-                    const rect = currentSentence.getBoundingClientRect();
-                    const wrapperRect = contentWrapper.getBoundingClientRect();
-                    const composerHeight = composer.clientHeight;
-                    if (rect.bottom > wrapperRect.bottom - composerHeight - 20) { scrollToBottom(true); }
-                }
-                index++; setTimeout(showNextSentence, delay);
-            } else { isFadingIn = false; resolve(); }
-        }
-        showNextSentence();
-    });
-}
-
 function setStreamingState(active) {
     isStreaming = active;
     if (active) {
@@ -533,41 +475,39 @@ let fullResponse = "";
 
 function stopResponse() {
     showSnackbar("답변 중지됨.");
-    const lastBotMessageElement = chatMessages.lastElementChild;
-    let indicatorText = null; let spinner = null; let indicatorContainer = null;
-    
-    if (lastBotMessageElement) {
-        indicatorContainer = lastBotMessageElement.querySelector('#thinking-indicator');
-        if (indicatorContainer) { spinner = indicatorContainer.querySelector('.loading-spinner'); indicatorText = indicatorContainer.querySelector('.thinking-indicator-text'); }
-    }
-    
-    if (isFadingIn && fadeOutAbortController) {
-        fadeOutAbortController.abort();
-        if (indicatorText) { indicatorText.textContent = '답변 중지됨'; indicatorText.classList.add('completed'); }
-        if (indicatorContainer) indicatorContainer.classList.add('left-aligned'); 
-        if (spinner) spinner.classList.add('reset-spin'); 
-        
-        if (lastBotMessageElement) {
-            const stopText = document.createElement('div'); stopText.className = 'stop-message'; stopText.textContent = "답변 중지됨.";
-            lastBotMessageElement.insertAdjacentElement('afterend', stopText);
-            history.push({ role: 'model', content: fullResponse, feedback: null }); saveChatHistory();
-            const actionContainer = createBotActions(fullResponse, history.length - 1);
-            lastBotMessageElement.appendChild(actionContainer); updateRegenerateButtons();
-        }
-        setStreamingState(false); scrollToBottom(true); return;
-    }
-    
     if (abortController) {
         abortController.abort();
-        // 중지 로직은 텍스트 생성 로직 내부에 포함됨
     }
+    
+    // 현재 답변 저장 및 마무리
+    const lastBotMessageElement = chatMessages.lastElementChild;
+    if (lastBotMessageElement) {
+        const indicatorContainer = lastBotMessageElement.querySelector('#thinking-indicator');
+        if (indicatorContainer) {
+            const spinner = indicatorContainer.querySelector('.loading-spinner');
+            const indicatorText = indicatorContainer.querySelector('.thinking-indicator-text');
+            
+            if (spinner) spinner.classList.add('reset-spin'); 
+            if (indicatorText) { indicatorText.textContent = '답변 중지됨'; indicatorText.classList.add('completed'); }
+            indicatorContainer.classList.add('left-aligned'); 
+        }
+
+        const stopText = document.createElement('div'); stopText.className = 'stop-message'; stopText.textContent = "답변 중지됨.";
+        lastBotMessageElement.insertAdjacentElement('afterend', stopText);
+        
+        history.push({ role: 'model', content: fullResponse, feedback: null }); saveChatHistory();
+        
+        const actionContainer = createBotActions(fullResponse, history.length - 1);
+        lastBotMessageElement.appendChild(actionContainer); updateRegenerateButtons();
+    }
+
     setStreamingState(false); scrollToBottom(true);
 }
 
 
 async function sendMessage(userMessageOverride = null, isRegenerate = false) {
     const userMessage = userMessageOverride !== null ? userMessageOverride : inputField.value.trim();
-    if (userMessage.length === 0 || isStreaming || isFadingIn) { if (isStreaming || isFadingIn) showSnackbar('현재 답변 생성 중이거나 애니메이션이 동작 중입니다.'); return; }
+    if (userMessage.length === 0 || isStreaming) { if (isStreaming) showSnackbar('현재 답변 생성 중입니다.'); return; }
 
     if (!isRegenerate) {
         if (isImageMode) {
@@ -596,9 +536,8 @@ async function sendMessage(userMessageOverride = null, isRegenerate = false) {
     fullResponse = ""; 
     
     try {
-        // 🌟 이미지 생성 모드 vs 텍스트 생성 모드 분기
         if (isImageMode) {
-            // 🖼️ 이미지 생성 요청 (비스트리밍)
+            // 🖼️ 이미지 생성 모드 (기존 유지)
             const response = await fetch(IMAGE_ENDPOINT, {
                 method: 'POST', headers: { 'Content-Type': 'application/json', },
                 body: JSON.stringify({ prompt: userMessage }), 
@@ -612,24 +551,19 @@ async function sendMessage(userMessageOverride = null, isRegenerate = false) {
             if (data.success && data.image_data) {
                 const imgHtml = `<img src="${data.image_data}" alt="Generated Image" style="max-width: 100%; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">`;
                 fullResponse = imgHtml;
-                
                 streamingBlockElement.innerHTML = fullResponse;
-                
                 setStreamingState(false);
                 history.push({ role: 'model', content: fullResponse, feedback: null }); saveChatHistory();
                 if (spinnerElement) spinnerElement.classList.add('reset-spin'); 
                 if (indicatorTextElement) { indicatorTextElement.textContent = '이미지 생성 완료'; indicatorTextElement.classList.add('completed'); }
                 indicatorElement.classList.add('left-aligned');
-                
-                // 이미지 생성 후 모드 자동 해제
                 toggleImageMode(false);
-                
             } else {
                 throw new Error(data.error || "이미지 생성 실패");
             }
 
         } else {
-            // 📝 기존 텍스트 생성 로직 (스트리밍)
+            // 📝 텍스트 생성 모드 (개선된 스트리밍)
             const response = await fetch(BACKEND_ENDPOINT, {
                 method: 'POST', headers: { 'Content-Type': 'application/json', },
                 body: JSON.stringify({ 
@@ -643,40 +577,40 @@ async function sendMessage(userMessageOverride = null, isRegenerate = false) {
 
             const reader = response.body.getReader();
             const decoder = new TextDecoder('utf-8');
-            let buffer = ""; let isFirstChunk = true; 
-
+            
+            // 📢 Google AI API 스트리밍 대응 로직
             while (true) {
                 const { done, value } = await reader.read();
                 if (done) break; 
-                buffer += decoder.decode(value, { stream: true });
-                const parts = buffer.split('\n');
-                buffer = parts.pop(); 
-
-                for (const part of parts) {
-                    const cleanPart = part; 
-                    if (cleanPart.trim() === "[DONE]") {
-                        fullResponse += buffer;
-                        setStreamingState(false);
-                        history.push({ role: 'model', content: fullResponse, feedback: null }); saveChatHistory();
-                        if (spinnerElement) spinnerElement.classList.add('reset-spin'); 
-                        if (indicatorTextElement) { indicatorTextElement.textContent = '답변 완료됨'; indicatorTextElement.classList.add('completed'); }
-                        indicatorElement.classList.add('left-aligned'); 
-                        sentenceFadeInEffect(streamingBlockElement, fullResponse, history.length - 1).then(() => {
-                            const actionContainer = createBotActions(fullResponse, history.length - 1);
-                            botMessageElement.appendChild(actionContainer); updateRegenerateButtons();
-                            if (autoScrollEnabled) scrollToBottom(true);
-                        });
-                        reader.releaseLock(); return; 
-                    }
-                    
-                    if (cleanPart.length > 0) {
-                        if (isFirstChunk) { startStreamingUI(indicatorElement); isFirstChunk = false; }
-                        fullResponse += cleanPart + '\n'; 
-                        streamingBlockElement.innerHTML = renderMarkdown(fullResponse);
-                        if (autoScrollEnabled) scrollToBottom(false);
-                    }
+                
+                const chunk = decoder.decode(value, { stream: true });
+                
+                // [DONE] 처리 및 텍스트 누적
+                if (chunk.includes("[DONE]")) {
+                    const parts = chunk.split("[DONE]");
+                    fullResponse += parts[0]; 
+                    // 마지막 렌더링
+                    streamingBlockElement.innerHTML = typeof marked !== 'undefined' ? marked.parse(fullResponse) : fullResponse;
+                    break;
+                } else {
+                    fullResponse += chunk;
+                    // 실시간 렌더링 및 스크롤
+                    streamingBlockElement.innerHTML = typeof marked !== 'undefined' ? marked.parse(fullResponse) : fullResponse;
+                    if (autoScrollEnabled) scrollToBottom(false);
                 }
             }
+            
+            // 완료 처리
+            setStreamingState(false);
+            history.push({ role: 'model', content: fullResponse, feedback: null }); saveChatHistory();
+            
+            if (spinnerElement) spinnerElement.classList.add('reset-spin'); 
+            if (indicatorTextElement) { indicatorTextElement.textContent = '답변 완료됨'; indicatorTextElement.classList.add('completed'); }
+            indicatorElement.classList.add('left-aligned'); 
+            
+            const actionContainer = createBotActions(fullResponse, history.length - 1);
+            botMessageElement.appendChild(actionContainer); updateRegenerateButtons();
+            if (autoScrollEnabled) scrollToBottom(true);
         }
     } catch (error) {
         if (error.name === 'AbortError') { 
@@ -684,30 +618,26 @@ async function sendMessage(userMessageOverride = null, isRegenerate = false) {
         } 
         else {
             const errorMsg = `⚠️ 오류: ${error.message}`;
-            startStreamingUI(indicatorElement); streamingBlockElement.innerHTML = `<p style="color:red;">${errorMsg}</p>`;
+            streamingBlockElement.innerHTML = `<p style="color:red;">${errorMsg}</p>`;
             if (spinnerElement) spinnerElement.classList.add('reset-spin');
             if (indicatorTextElement) { indicatorTextElement.textContent = '응답 오류'; indicatorTextElement.classList.add('completed'); }
-            // 오류 발생 시 사용자 메시지만 남기기
             if (history.length > 0 && history[history.length - 1].role === 'user') { history.pop(); saveChatHistory(); }
             updateRegenerateButtons();
         }
         setStreamingState(false); scrollToBottom(true); 
     }
-    if(isStreaming) setStreamingState(false);
 }
 
 // ===========================================
 // 5. 이벤트 리스너
 // ===========================================
 
-// 테마/스타일 변경 이벤트
 window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
     if (localStorage.getItem(THEME_KEY) === 'auto') { applyTheme('auto'); }
 });
 themeBtns.forEach(btn => { btn.addEventListener('click', () => { applyTheme(btn.dataset.themeVal); }); });
 uiStyleBtns.forEach(btn => { btn.addEventListener('click', () => { applyUIStyle(btn.dataset.style); }); });
 
-// 이미지 모드 토글
 if(toolImage) {
     toolImage.addEventListener('click', () => {
         toggleImageMode(!isImageMode);
@@ -725,13 +655,11 @@ if(closeImageModeBtn) {
     });
 }
 
-// 채팅 기본 동작
 inputField.addEventListener('input', toggleSendButton);
 inputField.addEventListener('input', autoResizeTextarea);
 sendButton.addEventListener('click', () => sendMessage());
 stopButton.addEventListener('click', stopResponse);
 
-// 입력창 엔터 키 (모바일 환경이 아닐 경우)
 inputField.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') {
         if (!isMobile()) {
@@ -744,7 +672,6 @@ inputField.addEventListener('keydown', (e) => {
     }
 });
 
-// 퀵 액션 버튼
 quickActionButtons.forEach(button => {
     button.addEventListener('click', () => {
         const prompt = button.getAttribute('data-prompt');
@@ -756,14 +683,12 @@ quickActionButtons.forEach(button => {
     });
 });
 
-// 모달 토글 버튼
 plusButton.addEventListener('click', (e) => { e.preventDefault(); togglePlusModal(); });
 plusModalBackdrop.addEventListener('click', (e) => { if (e.target === plusModalBackdrop) togglePlusModal(false); });
 
 settingsButton.addEventListener('click', (e) => { e.preventDefault(); toggleSettingsModal(); });
 settingsModalBackdrop.addEventListener('click', (e) => { if (e.target === settingsModalBackdrop) toggleSettingsModal(false); });
 
-// 💡 [추가] About Modal 토글 버튼
 if(aboutButton) {
     aboutButton.addEventListener('click', (e) => { 
         e.preventDefault(); 
@@ -773,19 +698,17 @@ if(aboutButton) {
 }
 aboutModalBackdrop.addEventListener('click', (e) => { if (e.target === aboutModalBackdrop) toggleAboutModal(false); });
 
-// 대화 초기화
 resetChatButton.addEventListener('click', (e) => { e.preventDefault(); toggleResetConfirmModal(true); });
 confirmCancelBtn.addEventListener('click', () => toggleResetConfirmModal(false));
 confirmResetBtn.addEventListener('click', resetChat);
 resetConfirmModalBackdrop.addEventListener('click', (e) => { if (e.target === resetConfirmModalBackdrop) toggleResetConfirmModal(false); });
 
-// 스크롤 및 스크롤 다운 버튼
 contentWrapper.addEventListener('scroll', () => {
     const isAtBottom = contentWrapper.scrollHeight - contentWrapper.scrollTop - contentWrapper.clientHeight < 1;
     if (isAtBottom) { autoScrollEnabled = true; scrollDownButton.classList.remove('visible'); } 
     else if (contentWrapper.scrollTop < contentWrapper.scrollHeight - contentWrapper.clientHeight - 100) {
         autoScrollEnabled = false;
-        if (!isStreaming && !isFadingIn) { scrollDownButton.classList.add('visible'); }
+        if (!isStreaming) { scrollDownButton.classList.add('visible'); }
     }
 });
 scrollDownButton.addEventListener('click', () => { scrollToBottom(true); scrollDownButton.classList.remove('visible'); autoScrollEnabled = true; });
