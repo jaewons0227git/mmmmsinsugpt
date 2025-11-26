@@ -26,623 +26,838 @@
   --min-textarea-height: 22.4px; 
   --min-input-container-height: 48px; 
   
-  --sidebar-width: 280px;
-  --sidebar-bg: #f9f9f9;
-  
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans KR', 'Helvetica Neue', Arial, sans-serif;
+
+  /* 🌟 [추가] 메뉴 관련 변수 */
+  --side-menu-width: 300px; 
 }
 
-[data-theme="dark"] {
-  --bg-color: #121212;
-  --text-color: #e5e5e5;
-  --text-sub: #a3a3a3;
-  --border-color: #333333;
-  --surface-color: #1e1e1e;
-  --surface-secondary: #2c2c2c;
-  --surface-hover: #3d3d3d;
+/* 다크 모드 */
+body[data-theme='dark'] {
+  --bg-color: #0d1117;
+  --text-color: #f0f6fc;
+  --text-sub: #8b949e;
+  --border-color: #30363d;
+  --surface-color: #161b22; 
+  --surface-secondary: #21262d; 
+  --surface-hover: #30363d;
 
-  --accent-color: #e5e5e5;
-  --primary-blue: #3b82f6;
-  --image-purple: #a78bfa;
+  --accent-color: #f0f6fc;
+  --primary-blue: #58a6ff;
+  --error-red: #f85149;
+  --image-purple: #d2a8ff;
   
-  --send-button-disabled: #333333;
-  --send-button-enabled: #e5e5e5;
-  --send-button-icon: #121212;
+  --send-button-disabled: #30363d;
+  --send-button-enabled: #58a6ff;
+  --send-button-icon: #0d1117;
 
-  --composer-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
-  --modal-overlay: rgba(0, 0, 0, 0.8);
-
-  --sidebar-bg: #171717;
+  --composer-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
 }
 
-/* 폰트 설정 */
-body :is(
-    .header-title, .plus-btn, .action-btn, 
-    .message-text, .input-container textarea,
-    .modal-grid-item, .modal-option,
-    .thinking-indicator-text, button, .ui-style-btn,
-    .sidebar-section-label, .chat-item, .user-name
-) {
-    font-family: 'Elms Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans KR', 'Helvetica Neue', Arial, sans-serif;
+/* ------------------------ 기본 및 레이아웃 ------------------------ */
+html {
+  box-sizing: border-box;
 }
 
-.material-symbols-rounded {
-  font-family: 'Material Symbols Rounded';
-  font-weight: normal;
-  font-style: normal;
-  font-size: 24px;
-  line-height: 1;
-  letter-spacing: normal;
-  text-transform: none;
-  display: inline-block;
-  white-space: nowrap;
-  word-wrap: normal;
-  direction: ltr;
-  -webkit-font-feature-settings: 'liga';
-  -webkit-font-smoothing: antialiased;
-  font-variation-settings: 'FILL' 0, 'wght' 500, 'GRAD' 0, 'opsz' 24;
+*, *::before, *::after {
+  box-sizing: inherit;
+  margin: 0;
+  padding: 0;
 }
 
-.stop-btn .stop-icon {
-    display: block; width: 12px; height: 12px; background-color: white; border-radius: 2px;
-}
-.stop-btn {
-    background-color: var(--error-red); width:38px; height:38px; border-radius: 50%; display:flex; align-items:center; justify-content:center; padding: 0; margin: 0;
-}
-
-/* 기본 스타일 */
-*{ box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
-body{ margin:0; background:var(--bg-color); color:var(--text-color); min-height:100vh; display:flex; justify-content:center; padding:0; transition: background-color 0.3s ease, color 0.3s ease; }
-
-.phone{
-  width:100%; background:var(--bg-color); border-radius:0; overflow:hidden; border:none; display:flex; flex-direction:column; min-height:100vh; position:relative; margin: 0;
-  transition: background-color 0.3s ease;
+body {
+  font-size: var(--font-size);
+  line-height: var(--line-height);
+  color: var(--text-color);
+  background-color: var(--bg-color);
+  transition: background-color 0.3s, color 0.3s;
 }
 
-/* 🌟🌟🌟 사이드바 (Sidebar) 스타일 🌟🌟🌟 */
-.sidebar {
-    position: fixed; top: 0; left: 0; bottom: 0;
-    width: var(--sidebar-width);
-    background-color: var(--sidebar-bg);
-    z-index: 2000;
-    display: flex; flex-direction: column;
-    transform: translateX(-100%);
-    transition: transform 0.3s ease-in-out;
-    border-right: 1px solid var(--border-color);
-}
-.sidebar.open { transform: translateX(0); }
-
-.sidebar-backdrop {
-    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-    background-color: var(--modal-overlay);
-    z-index: 1900;
-    opacity: 0; visibility: hidden;
-    transition: opacity 0.3s ease, visibility 0.3s ease;
-}
-.sidebar-backdrop.visible { opacity: 1; visibility: visible; }
-
-.sidebar-header {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 16px;
+.phone {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  position: relative;
 }
 
-.sidebar-new-chat-btn {
-    flex: 1; margin-right: 10px;
-    background-color: var(--surface-color);
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    padding: 10px;
-    display: flex; align-items: center; justify-content: flex-start; gap: 8px;
-    color: var(--text-color); font-size: 14px; font-weight: 500;
-    cursor: pointer;
-    transition: background-color 0.2s;
-}
-.sidebar-new-chat-btn:hover { background-color: var(--surface-hover); }
-
-.sidebar-close-btn {
-    background: transparent; border: 1px solid var(--border-color);
-    color: var(--text-color); cursor: pointer;
-    width: 40px; height: 40px; border-radius: 8px;
-    display: flex; align-items: center; justify-content: center;
-}
-.sidebar-close-btn:hover { background-color: var(--surface-hover); }
-
-.sidebar-search-container {
-    padding: 0 16px 16px 16px;
-    position: relative;
-    display: flex; align-items: center;
-}
-.sidebar-search-container .search-icon {
-    position: absolute; left: 28px; font-size: 18px; color: var(--text-sub);
-}
-#chat-search-input {
-    width: 100%;
-    padding: 8px 10px 8px 36px;
-    border-radius: 6px;
-    border: 1px solid var(--border-color);
-    background-color: var(--surface-secondary);
-    color: var(--text-color);
-    font-size: 14px; outline: none;
-}
-#chat-search-input:focus { border-color: var(--primary-blue); }
-
-.sidebar-content {
-    flex: 1; overflow-y: auto; padding: 0 16px;
-}
-.sidebar-section-label {
-    font-size: 12px; font-weight: 600; color: var(--text-sub);
-    margin-bottom: 8px; margin-top: 10px;
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  background-color: var(--surface-color);
+  border-bottom: 1px solid var(--border-color);
+  z-index: 100;
 }
 
-.chat-history-list {
-    display: flex; flex-direction: column; gap: 4px; padding-bottom: 20px;
+.header-left-group {
+    display: flex;
+    align-items: center;
+    gap: 16px;
 }
 
-.chat-item {
-    padding: 10px 12px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 14px;
-    color: var(--text-color);
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-    transition: background-color 0.2s;
-    display: flex; align-items: center; justify-content: space-between;
-    position: relative;
-}
-.chat-item:hover { background-color: var(--surface-secondary); }
-.chat-item.active { background-color: var(--surface-secondary); font-weight: 600; }
-
-.chat-item-title { flex: 1; overflow: hidden; text-overflow: ellipsis; }
-
-.chat-item-actions {
-    display: flex; gap: 4px;
-    opacity: 0; transition: opacity 0.2s;
-}
-.chat-item:hover .chat-item-actions { opacity: 1; }
-.chat-item-action-btn {
-    width: 24px; height: 24px;
-    display: flex; align-items: center; justify-content: center;
-    border-radius: 4px; color: var(--text-sub);
-    cursor: pointer;
-}
-.chat-item-action-btn:hover { background-color: var(--surface-hover); color: var(--text-color); }
-.chat-item-action-btn .material-symbols-rounded { font-size: 16px; }
-
-/* 모바일에서는 항상 보이게 하거나 클릭으로 처리 */
-@media (max-width: 768px) {
-    .chat-item-actions { opacity: 1; }
+.header-logo {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--accent-color);
 }
 
-.sidebar-footer {
-    padding: 16px; border-top: 1px solid var(--border-color);
+.header-icon {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background-color 0.2s;
 }
-.user-profile {
-    display: flex; align-items: center; gap: 10px;
-    cursor: pointer; padding: 8px; border-radius: 8px;
-    transition: background-color 0.2s;
-}
-.user-profile:hover { background-color: var(--surface-secondary); }
-.user-avatar {
-    width: 32px; height: 32px; background-color: var(--surface-secondary);
-    border-radius: 50%; display: flex; align-items: center; justify-content: center;
-}
-.user-info { display: flex; flex-direction: column; }
-.user-name { font-size: 14px; font-weight: 500; }
-.user-plan { font-size: 12px; color: var(--text-sub); }
 
-
-/* Header */
-.header{
-  display:flex; justify-content:space-between; align-items:center; padding:10px 16px; height:56px; border-bottom:none; position: fixed; top: 0; left: 0; right: 0; z-index: 100; 
-  background: var(--bg-color); 
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05); 
-  transition: background-color 0.3s ease;
+.header-icon:hover {
+  background-color: var(--surface-secondary);
 }
-[data-theme="dark"] .header { box-shadow: 0 1px 3px rgba(255,255,255, 0.05); }
 
-.header-icon{
-  width:32px; height:32px; display:flex; align-items:center; justify-content:center; color:var(--text-color); cursor: pointer; flex-shrink: 0; 
+.header-icon span {
+    font-size: 24px;
 }
-.header-left-group { display: flex; align-items: center; }
-.header-logo { width: 24px; height: 24px; margin-left: 8px; flex-shrink: 0; }
-.header-logo img { width: 100%; height: 100%; object-fit: contain; }
-.header-title { font-size: 18px; font-weight: 600; color: var(--text-color); margin-left: 8px; flex-shrink: 0; }
-.header-center { text-align: left; display: flex; justify-content: flex-start; align-items: center; margin-left: 10px; }
-.plus-btn{
-  background-color: #f1f4ff; color: #1d6fef; font-weight:600; padding:4px 10px; border-radius:16px; display:flex; align-items:center; gap:4px; font-size:12px; cursor: pointer; line-height: 1.2;
-}
-[data-theme="dark"] .plus-btn { background-color: #2d3748; color: #93c5fd; }
 
-@media (max-width: 600px) {
-    .plus-btn::after { content: "Beta"; display: inline; }
-    .plus-btn { padding: 4px 8px; }
-    .plus-btn > span { display: none; }
+/* ------------------------ 메인 컨텐츠 (채팅) ------------------------ */
+.content-wrapper {
+  flex-grow: 1;
+  padding: 56px 0 72px 0; /* Header 높이 56px, Composer 높이 72px (min) */
+  overflow-y: auto;
+  scroll-behavior: smooth;
 }
-@media (min-width: 601px) { .plus-btn > span { display: inline; } }
 
-/* Content */
-.content-wrapper{
-    flex-grow:1; display:flex; flex-direction:column; overflow-y: auto; padding-bottom: 0; position: relative;
-    opacity: 0; transform: translateY(20px); transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+.chat-messages {
+  padding: 16px 16px 0 16px;
 }
-.content-wrapper.loaded { opacity: 1; transform: translateY(0); }
 
-#scroll-down-button {
-    position: fixed; right: 20px; width: 40px; height: 40px; border-radius: 50%; 
-    background-color: var(--surface-color); 
-    border: 1px solid var(--border-color);
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 90; opacity: 0; transform: translateY(10px); visibility: hidden; transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s ease, background-color 0.3s;
+.initial-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 16px;
+  text-align: center;
+  color: var(--text-sub);
 }
-#scroll-down-button.visible { opacity: 1; transform: translateY(0); visibility: visible; }
-#scroll-down-button .material-symbols-rounded { color: var(--text-color); font-size: 20px; }
 
-#initial-content{
-  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 100%; max-width: 400px; display:flex; flex-direction:column; align-items:center; text-align:center; padding: 0 16px; transition: opacity 0.5s ease-in-out, visibility 0.5s ease-in-out;
+.initial-logo {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--text-color);
+  margin-bottom: 8px;
 }
-.main-question{ font-size:22px; font-weight:600; margin-bottom:40px; color:var(--text-color); }
 
-.quick-actions{ display:flex; flex-wrap:wrap; justify-content:center; gap:8px; max-width:400px; }
-.action-btn{
-  display:flex; align-items:center; justify-content:center; padding:10px 16px; 
-  border:1px solid var(--border-color); background-color: var(--surface-color);
-  border-radius:30px; font-size:15px; font-weight:500; color:var(--text-color); min-height:48px; white-space:nowrap; cursor: pointer;
+.initial-subtitle {
+  font-size: 1.1rem;
+  margin-bottom: 24px;
+}
+
+.quick-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+  max-width: 600px;
+  margin-top: 20px;
+}
+
+.quick-action-button {
+  background-color: var(--surface-secondary);
+  color: var(--text-color);
+  padding: 12px 16px;
+  border-radius: 20px;
+  border: 1px solid var(--border-color);
+  cursor: pointer;
+  font-size: 0.9rem;
   transition: background-color 0.2s, border-color 0.2s;
 }
-.action-btn:hover { background-color: var(--surface-hover); }
-.action-btn .material-symbols-rounded, .action-btn .icon-light{ margin-right:6px; width:20px; height:20px; font-size: 18px; display: flex; align-items: center; justify-content: center; }
 
-.action-btn.new-green .material-symbols-rounded{ color:#28a745; }
-.action-btn.new-blue .material-symbols-rounded{ color:#007bff; }
-.action-btn.orange .material-symbols-rounded{ color:#fd7e14; } 
-
-/* Chat Messages */
-.chat-messages{ width: 100%; padding: 10px 16px; padding-top: 66px; display: none; flex-direction: column; justify-content: flex-start; gap: 10px; margin: 0 auto; }
-@media (min-width: 600px) { .chat-messages { max-width: 768px; padding-left: 0; padding-right: 0; } }
-
-.message-bubble{ display: flex; max-width: 80%; }
-.message-text{ padding: 10px 14px; border-radius: 20px; line-height: 1.4; font-size: 15px; white-space: pre-wrap; }
-.user-message{ justify-content: flex-end; align-self: flex-end; }
-.user-message .message-text{ background-color: var(--surface-secondary); color: var(--text-color); border-bottom-right-radius: 4px; transition: background-color 0.3s, color 0.3s; }
-
-.bot-message{ align-self: flex-start; margin-top: 10px; padding: 0; color: var(--text-color); line-height: 1.4; font-size: 15px; width: 100%; }
-.bot-message .streaming-block { display: block; padding: 0; border-radius: 0; background-color: transparent; max-width: 100%; box-sizing: border-box; white-space: normal; color: var(--text-color); margin-bottom: 8px; }
-.stop-message { color: var(--error-red); font-weight: 600; font-size: 0.9em; margin-top: -5px; margin-bottom: 10px; padding: 0 4px; align-self: flex-start; }
-
-/* 📢 불필요한 Fade In 애니메이션 제거 */
-/* .sentence 관련 CSS 삭제됨 */
-
-.streaming-block code { background-color: var(--surface-secondary); padding: 2px 4px; border-radius: 4px; font-family: monospace; color: var(--text-color); }
-.streaming-block pre { background-color: var(--surface-secondary); padding: 12px; border-radius: 8px; overflow-x: auto; margin: 8px 0; }
-.streaming-block pre code { background-color: transparent; padding: 0; color: inherit; }
-
-/* Markdown 리스트 스타일링 보완 */
-.streaming-block ul, .streaming-block ol { padding-left: 20px; margin: 8px 0; }
-.streaming-block li { margin-bottom: 4px; }
-.streaming-block p { margin: 8px 0; }
-.streaming-block h1, .streaming-block h2, .streaming-block h3 { margin-top: 16px; margin-bottom: 8px; font-weight: 600; }
-
-.bot-actions { display: flex; gap: 8px; margin-top: 0px; padding: 4px 0; transition: opacity 0.3s; }
-.bot-actions .regenerate { opacity: 0.5; pointer-events: none; }
-.bot-action-btn { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; color: #9ca3af; cursor: pointer; border-radius: 50%; transition: background-color 0.2s; }
-.bot-action-btn:hover { background-color: var(--surface-hover); }
-.bot-action-btn.selected { color: var(--text-color); }
-.bot-action-btn.selected.like { color: var(--primary-blue); }
-.bot-action-btn.selected.dislike { color: var(--error-red); }
-.bot-action-btn .material-symbols-rounded { font-size: 16px; }
-
-/* Thinking Indicator */
-.thinking-indicator { display: flex; justify-content: flex-start; align-items: center; padding: 10px 0; margin-bottom: 8px; transition: transform 0.5s ease-out; }
-.thinking-indicator.left-aligned { transform: translateX(0); }
-.thinking-indicator-text {
-    font-weight: 500; margin-right: 8px; margin-top: 0; flex-shrink: 0;
-    background-color: var(--text-color); 
-    background-image: linear-gradient(90deg, var(--text-color) 0%, var(--bg-color) 20%, var(--text-color) 40%);
-    background-size: 200% 100%; -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-    animation: shimmer 1.5s infinite linear;
-}
-.thinking-indicator-text.completed { animation: none; background-position: 50% 0; }
-.loading-spinner {
-    display: inline-block; width: 16px; height: 16px; background-image: url('https://i.postimg.cc/MKBHwqWk/logogogo.png');
-    background-size: cover; background-position: center; border-radius: 50%;
-    animation: spin-custom 2s infinite cubic-bezier(0.5, 0, 0.5, 1); flex-shrink: 0; margin-right: 4px; 
-    transform: rotate(0deg); transition: transform 0.5s ease-out;
-}
-.loading-spinner.image-gen {
-    filter: hue-rotate(240deg) brightness(1.2); 
+.quick-action-button:hover {
+  background-color: var(--surface-hover);
+  border-color: var(--primary-blue);
 }
 
-@keyframes spin-custom {
-    0% { transform: rotate(0deg); }
-    25% { transform: rotate(360deg); animation-timing-function: cubic-bezier(0.5, 0, 0.5, 1); } 
-    50% { transform: rotate(720deg); animation-timing-function: cubic-bezier(0.5, 0, 0.5, 1); } 
-    75% { transform: rotate(1080deg); animation-timing-function: cubic-bezier(0.5, 0, 0.5, 1); } 
-    100% { transform: rotate(1440deg); }
+/* ------------------------ 메시지 스타일 ------------------------ */
+.message-container {
+  display: flex;
+  margin-bottom: 16px;
 }
-.loading-spinner.reset-spin { animation: none; transform: rotate(0deg); }
-@keyframes shimmer { 0% { background-position: 100% 0; } 100% { background-position: -100% 0; } }
 
-/* ============================================ */
-/* 🌟🌟🌟 입력창 (Composer) 스타일 🌟🌟🌟 */
-/* ============================================ */
-
-.composer {
-    position: fixed; 
-    bottom: 0; left: 0; right: 0; 
-    width: 100%; 
-    display: flex; 
-    justify-content: center; 
-    z-index: 10; 
-    opacity: 0;
-    transform: translateY(100%);
-    transition: opacity 0.5s ease-out 0.2s, transform 0.5s ease-out 0.2s, all 0.2s ease-out;
+.message-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 0.8rem;
+  margin-right: 12px;
+  flex-shrink: 0;
 }
-.composer.loaded { opacity: 1; transform: translateY(0); }
 
-.composer-inner {
-    display: flex; align-items: center; width: 100%; transition: all 0.3s ease;
-    background-color: var(--surface-color);
+.user-message-container .message-avatar {
+    background-color: var(--primary-blue);
+    color: var(--send-button-icon);
+}
+
+.ai-message-container .message-avatar {
+    background-color: var(--accent-color);
+    color: var(--surface-color);
+}
+
+.message-content {
+  max-width: 100%;
+  padding: 10px 14px;
+  border-radius: 18px;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.user-message-container {
+  justify-content: flex-end;
+}
+
+.user-message-container .message-content {
+  background-color: var(--primary-blue);
+  color: var(--send-button-icon);
+  border-bottom-right-radius: 4px;
+}
+
+.user-message-container .message-avatar {
+  order: 2; /* 아바타를 오른쪽에 배치 */
+  margin-left: 12px;
+  margin-right: 0;
+}
+
+.ai-message-container .message-content {
+  background-color: var(--surface-secondary);
+  color: var(--text-color);
+  border-bottom-left-radius: 4px;
+}
+
+/* AI 응답 관련 */
+.ai-message-container pre {
+    background: var(--surface-color);
     border: 1px solid var(--border-color);
+    padding: 10px;
+    border-radius: 8px;
+    overflow-x: auto;
+    margin-top: 10px;
+    font-size: 0.85rem;
+    color: var(--text-color);
 }
-
-.input-area-wrapper { flex: 1; margin-bottom: 0; display:flex; flex-direction:column; width:100%; }
-
-.image-mode-indicator {
-    display: none; 
-    align-items: center; 
-    justify-content: space-between;
-    background-color: rgba(139, 92, 246, 0.1); 
-    color: var(--image-purple);
-    padding: 8px 12px; 
-    margin-bottom: 4px; 
-    border-radius: 12px;
-    font-size: 13px; 
+.ai-message-container p {
+    margin-top: 10px;
+}
+.ai-message-container p:first-child {
+    margin-top: 0;
+}
+.ai-message-container strong {
     font-weight: 600;
 }
-.image-mode-indicator span { display: flex; align-items: center; gap: 6px; }
-.close-image-mode { cursor: pointer; opacity: 0.7; display: flex; align-items: center; }
-.close-image-mode:hover { opacity: 1; }
+.ai-message-container ul, .ai-message-container ol {
+    margin: 10px 0 10px 20px;
+}
+.ai-message-container li {
+    margin-bottom: 5px;
+}
+.ai-message-container blockquote {
+    margin: 10px 0;
+    padding-left: 10px;
+    border-left: 4px solid var(--primary-blue);
+    color: var(--text-sub);
+    font-style: italic;
+}
+
+/* Typing Indicator */
+.typing-indicator {
+    display: flex;
+    align-items: center;
+    padding: 10px 14px;
+    margin-left: 44px; /* 아바타+여백 */
+    max-width: 150px;
+    background-color: var(--surface-secondary);
+    border-radius: 18px;
+    border-bottom-left-radius: 4px;
+}
+.typing-indicator .dot {
+    width: 8px;
+    height: 8px;
+    margin: 0 2px;
+    background-color: var(--text-sub);
+    border-radius: 50%;
+    animation: bounce 1.4s infinite ease-in-out both;
+}
+.typing-indicator .dot:nth-child(1) { animation-delay: -0.32s; }
+.typing-indicator .dot:nth-child(2) { animation-delay: -0.16s; }
+@keyframes bounce {
+    0%, 80%, 100% { transform: scale(0); }
+    40% { transform: scale(1); }
+}
+
+/* ------------------------ 메시지 입력창 (Composer) ------------------------ */
+.composer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 12px 16px;
+  background-color: var(--surface-color);
+  box-shadow: var(--composer-shadow);
+  z-index: 100;
+  min-height: 72px; /* 12*2 + 48 (min input container height) */
+  display: flex;
+  align-items: flex-start;
+  transition: box-shadow 0.3s;
+}
 
 .input-container {
-    flex: 1; display: flex; align-items: center; gap: 8px; 
-    box-sizing: border-box; 
-    min-height: var(--min-input-container-height); 
-    overflow: hidden;
-    transition: all 0.3s ease;
+  flex-grow: 1;
+  display: flex;
+  align-items: flex-end;
+  background-color: var(--surface-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 24px;
+  padding: 0 12px;
+  min-height: var(--min-input-container-height);
+  transition: background-color 0.3s, border-color 0.3s;
 }
 
-.input-container textarea {
-    flex: 1; border: 0; outline: 0; background: transparent; color: var(--text-color); 
-    font-size: var(--font-size); min-width: 0; resize: none; 
-    min-height: var(--min-textarea-height); overflow-y: hidden; 
-    padding: 0; line-height: var(--line-height); vertical-align: middle; 
-    align-self: center; font-family: inherit; 
-}
-.input-container textarea::placeholder { color: #9ca3af; font-family: inherit; }
-
-.mic-voice-container { display: flex; gap: 8px; flex-shrink: 0; margin-bottom: 0; }
-
-.send-btn, .stop-btn {
-    width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-left: 0; margin-right: 4px; transition: background-color 0.2s ease; cursor: pointer;
-}
-.send-btn:not(.active) { background-color: var(--send-button-disabled); pointer-events: none; }
-.send-btn.active { background-color: var(--send-button-enabled); pointer-events: auto; }
-.send-btn .material-symbols-rounded { color: var(--send-button-icon); font-size: 20px; }
-
-.mic-icon { width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: #9ca3af; }
-.mic-icon .material-symbols-rounded { font-size: 20px; }
-
-/* 📌 스타일 1: 심플 (Simple) */
-.composer.style-simple {
-    background: transparent;
-    padding: 0 16px 24px 16px;
-    border: none;
-    box-shadow: none;
+.input-container:focus-within {
+  border-color: var(--primary-blue);
+  background-color: var(--surface-color);
 }
 
-.composer.style-simple .composer-inner {
-    max-width: 768px;
-    border-radius: 28px;       
-    padding: 12px 16px 12px 20px; 
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+#message-input {
+  flex-grow: 1;
+  border: none;
+  outline: none;
+  resize: none;
+  background-color: transparent;
+  color: var(--text-color);
+  font-size: 1rem;
+  line-height: var(--line-height);
+  padding: 13px 0; /* 상하 여백 조정 */
+  min-height: var(--min-textarea-height);
+  max-height: 200px; /* 최대 높이 설정 */
+  overflow-y: auto;
+}
+
+.composer-buttons {
+  display: flex;
+  align-items: flex-end;
+  padding: 8px 0;
+  gap: 4px;
+}
+
+.composer-button {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  transition: background-color 0.2s, color 0.2s, opacity 0.2s;
+  flex-shrink: 0;
+  margin-left: 4px; /* 입력창과 약간의 간격 */
+}
+
+/* 전송 버튼 */
+#send-button {
+  background-color: var(--send-button-enabled);
+  color: var(--send-button-icon);
+  opacity: 1;
+}
+
+#send-button:disabled {
+  background-color: var(--send-button-disabled);
+  cursor: default;
+  color: var(--text-sub);
+}
+
+/* 멈춤 버튼 (숨김) */
+#stop-button {
+    background-color: var(--error-red);
+    color: var(--send-button-icon);
+    display: none;
+}
+#stop-button.visible {
     display: flex;
-    flex-direction: column; 
-    align-items: flex-start; 
-    position: relative;
-}
-[data-theme="dark"] .composer.style-simple .composer-inner { box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
-
-.composer.style-simple .input-area-wrapper {
-    flex: 1; width: 100%; display: flex; flex-direction: row; align-items: center; min-width: 0; margin-bottom: 10px;
 }
 
-.composer.style-simple .input-container {
-    border: none; background: transparent; padding: 0; border-radius: 0; max-height: 150px; min-height: 24px; width: 100%;
+/* 파일 첨부/옵션 버튼 */
+#plus-button {
+    background: transparent;
+    color: var(--text-sub);
+    opacity: 0.7;
+    transition: color 0.2s;
+}
+#plus-button:hover {
+    color: var(--primary-blue);
+    opacity: 1;
 }
 
-.composer.style-simple .input-container textarea { font-size: 17px; padding: 0; }
-.composer.style-simple .plus { display: none; }
-
-.composer.style-simple .bottom-controls {
-    width: 100%; display: flex; justify-content: space-between; align-items: center;
+/* ------------------------ 모달 ------------------------ */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: var(--modal-overlay);
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s;
 }
 
-.simple-tools { display: flex; gap: 8px; margin-top: 0; flex-shrink: 0; }
-
-.tool-btn {
-    display: flex; align-items: center; justify-content: center; gap: 4px;
-    padding: 4px 10px 4px 8px; 
-    background-color: var(--surface-color);
-    border: 1px solid var(--border-color);
-    border-radius: 20px;
-    font-size: 13px; font-weight: 500; color: var(--text-sub);
-    cursor: pointer;
-    transition: background-color 0.2s, border-color 0.2s, color 0.2s;
-    white-space: nowrap; line-height: 1.2;
+.modal-backdrop.visible {
+  opacity: 1;
+  pointer-events: auto;
 }
-.tool-btn:hover { background-color: var(--surface-hover); }
-.tool-btn .material-symbols-rounded { font-size: 18px; color: #6b7280; }
 
-.tool-btn.active-blue {
-    border-color: var(--primary-blue); background-color: rgba(59, 130, 246, 0.1); color: var(--primary-blue);
+.modal {
+  background-color: var(--surface-color);
+  border-radius: 16px;
+  width: 90%;
+  max-width: 400px;
+  padding: 16px;
+  transform: translateY(20px);
+  opacity: 0;
+  transition: transform 0.3s, opacity 0.3s;
+  position: relative;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
 }
-.tool-btn.active-blue .material-symbols-rounded { color: var(--primary-blue); }
 
-.tool-btn.active-purple {
-    border-color: var(--image-purple); background-color: rgba(139, 92, 246, 0.1); color: var(--image-purple);
+.modal-backdrop.visible .modal {
+  transform: translateY(0);
+  opacity: 1;
 }
-.tool-btn.active-purple .material-symbols-rounded { color: var(--image-purple); }
 
-.composer.style-simple .right-controls { display: flex; align-items: center; margin-left: 8px; margin-bottom: 0; }
-.composer.style-simple .mic-icon { display: none; } 
-
-.composer.style-simple .send-btn { background-color: var(--send-button-enabled); margin-right: 0; align-self: center; }
-.composer.style-simple .send-btn .material-symbols-rounded { color: var(--send-button-icon); }
-.composer.style-simple .send-btn:not(.active) { background-color: var(--send-button-disabled); }
-
-
-/* 📌 스타일 2: 기본 (Default) */
-.composer.style-default {
-    background: transparent; padding: 0 16px 24px 16px; border: none;
+.modal-handle {
+    width: 40px;
+    height: 4px;
+    background-color: var(--border-color);
+    border-radius: 2px;
+    margin: 0 auto 12px;
 }
-.composer.style-default .composer-inner {
-    max-width: 768px;
-    border-radius: 35px;
-    padding: 8px 12px 8px 8px; 
-    box-shadow: var(--composer-shadow);
-    gap: 4px; flex-direction: row;
-    align-items: flex-end; 
-}
-.composer.style-default .input-area-wrapper { 
-    flex: 1; margin-bottom: 0; 
-    padding-bottom: 0; 
-}
-.composer.style-default .simple-tools { display: none; }
-.composer.style-default .bottom-controls { display: contents; }
 
-.composer.style-default .input-container {
-    background: transparent; border: none; padding: 4px 8px; max-height: 150px;
-    display: flex; align-items: center;
-    min-height: 38px; 
+.modal h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 16px;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 12px;
 }
-.composer.style-default .mic-icon { display: none; }
 
-.composer.style-default .plus {
-    width: 36px; height: 36px; border-radius: 50%;
-    background: var(--surface-secondary);
-    border: none;
-    display: flex; align-items: center; justify-content: center; flex-shrink: 0; 
-    align-self: flex-end; 
-    margin-bottom: 5px; 
-    cursor: pointer; color: var(--text-sub);
-}
-.composer.style-default .plus .material-symbols-rounded { font-size: 20px; }
-
-.composer.style-default .right-controls {
-    align-self: flex-end; 
-    margin-bottom: 5px; 
-    height: 38px; 
-    display: flex; 
+.modal-option {
+    display: flex;
     align-items: center;
-}
-
-/* ============================================ */
-
-/* Snackbar */
-#snackbar {
-  visibility: hidden; min-width: 250px; background-color: #333; color: #fff; text-align: center; border-radius: 30px; padding: 12px 20px; position: fixed; z-index: 1020; left: 50%; transform: translateX(-50%); bottom: 30px; font-size: 14px; transition: none; opacity: 0; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-}
-#snackbar.show { visibility: visible; opacity: 1; animation: fadein 0.5s, fadeout 0.5s 2.5s; }
-@keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
-@keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
-
-/* Modal Styles */
-.modal-backdrop { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--modal-overlay); opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease; z-index: 1000; display: flex; justify-content: center; align-items: flex-end; }
-.modal-backdrop.visible { opacity: 1; visibility: visible; }
-.modal { width: 100%; max-width: 768px; background-color: var(--bg-color); border-top-left-radius: 20px; border-top-right-radius: 20px; padding: 24px 16px 40px 16px; transform: translateY(100%); transition: transform 0.3s ease-out; color: var(--text-color); }
-.modal-backdrop.visible .modal { transform: translateY(0); }
-.modal-handle { width: 40px; height: 5px; background-color: var(--border-color); border-radius: 5px; margin: 0 auto 20px auto; }
-
-.modal-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 24px; }
-.modal-grid-item { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 12px 0; background-color: var(--surface-secondary); border-radius: 12px; font-size: 14px; font-weight: 500; cursor: pointer; color: var(--text-color); }
-.modal-grid-icon { width: 48px; height: 48px; background-color: var(--border-color); border-radius: 12px; margin-bottom: 8px; display: flex; align-items: center; justify-content: center; }
-.modal-grid-icon .material-symbols-rounded { font-size: 24px; color: var(--text-color); }
-
-.modal-option { display: flex; align-items: center; padding: 12px 10px; font-size: 16px; font-weight: 500; cursor: pointer; border-radius: 8px; transition: background-color 0.1s ease; color: var(--text-color); }
-.modal-option:hover { background-color: var(--surface-hover); }
-.modal-option-icon { margin-right: 12px; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; }
-.modal-option-icon .material-symbols-rounded { font-size: 20px; color: var(--text-color); }
-
-#settings-modal-backdrop { align-items: flex-end; justify-content: center; }
-#settings-modal { max-width: 768px; padding-top: 24px; padding-bottom: 40px; border-radius: 20px 20px 0 0; transform: translateY(100%); }
-.modal-backdrop.visible #settings-modal { transform: translateY(0); }
-#settings-modal h3 { font-size: 1.1em; font-weight: 600; margin: 0 0 16px 0; padding: 0 10px; color: var(--text-color); }
-
-/* UI & Theme Selector */
-.ui-style-selector { padding: 0 10px; margin-bottom: 24px; }
-.ui-style-label { font-size: 0.95em; color: var(--text-sub); margin-bottom: 10px; display: block; }
-.ui-style-options { display: flex; gap: 10px; }
-
-.ui-style-btn {
-    flex: 1; padding: 12px;
-    border: 1px solid var(--border-color);
-    background-color: var(--surface-color);
+    padding: 12px;
     border-radius: 12px;
-    font-size: 14px; font-weight: 500; color: var(--text-color);
     cursor: pointer;
-    display: flex; flex-direction: column; align-items: center; gap: 6px;
-    transition: all 0.2s;
+    transition: background-color 0.2s;
+    color: var(--text-color);
+    font-size: 0.95rem;
+    gap: 10px;
 }
-.ui-style-btn.active {
-    border-color: var(--text-color);
-    background-color: var(--surface-hover);
+.modal-option:hover {
+    background-color: var(--surface-secondary);
+}
+
+.confirm-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.confirm-actions button {
+    padding: 10px 15px;
+    border-radius: 8px;
+    border: none;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+#confirm-cancel-btn {
+    background-color: var(--surface-secondary);
+    color: var(--text-color);
+}
+
+#confirm-reset-btn {
+    background-color: var(--error-red);
+    color: var(--send-button-icon);
+}
+
+/* About Modal Specifics */
+.about-info-row {
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+    color: var(--text-sub);
+}
+.creator-section-title {
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 20px 0 10px 0;
+    color: var(--text-color);
+}
+.creator-card {
+    display: flex;
+    align-items: center;
+    background-color: var(--surface-secondary);
+    padding: 12px;
+    border-radius: 12px;
+}
+.creator-avatar {
+    font-size: 1.5rem;
+    margin-right: 10px;
+}
+.creator-info {
+    line-height: 1.2;
+}
+.creator-name {
     font-weight: 600;
 }
-.ui-style-btn .preview-icon { font-size: 24px; color: #6b7280; }
-.ui-style-btn.active .preview-icon { color: var(--text-color); }
-
-.theme-btn-group { display: flex; gap: 8px; }
-.theme-btn {
-    flex: 1; padding: 10px; border: 1px solid var(--border-color); background-color: var(--surface-color);
-    border-radius: 10px; font-size: 14px; color: var(--text-color); cursor: pointer; text-align: center;
+.creator-role {
+    font-size: 0.8rem;
+    color: var(--text-sub);
+    opacity: 0.8;
 }
-.theme-btn.active { background-color: var(--text-color); color: var(--bg-color); border-color: var(--text-color); font-weight: 600; }
-
-hr.modal-divider { border: 0; border-top: 1px solid var(--border-color); margin: 0 0 16px 0; }
-
-#reset-chat-button { color: var(--error-red); padding-left: 10px; padding-right: 10px; }
-#reset-chat-button .modal-option-icon { display: none; }
-
-#reset-confirm-modal-backdrop { align-items: center; z-index: 1010; }
-#reset-confirm-modal { max-width: 320px; border-radius: 12px; padding: 24px; transform: translateY(0); transition: opacity 0.3s ease, transform 0.3s ease; }
-#reset-confirm-modal .modal-handle { display: none; }
-#reset-confirm-modal h3 { font-size: 1.2em; margin: 0 0 10px 0; text-align: center; padding: 0; }
-#reset-confirm-modal p { font-size: 0.95em; color: var(--text-sub); margin-bottom: 24px; text-align: center; }
-.confirm-actions { display: flex; justify-content: space-between; gap: 10px; }
-.confirm-actions button { flex: 1; padding: 10px 15px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 15px; }
-#confirm-cancel-btn { background-color: var(--border-color); color: var(--text-color); }
-#confirm-reset-btn { background-color: var(--error-red); color: white; }
-
-/* 🌟 [추가] MinsuGPT 정보 모달 스타일 */
-#about-modal-backdrop { align-items: flex-end; justify-content: center; }
-#about-modal { max-width: 768px; padding-top: 24px; padding-bottom: 40px; border-radius: 20px 20px 0 0; transform: translateY(100%); }
-.modal-backdrop.visible #about-modal { transform: translateY(0); }
-#about-modal h3 { font-size: 1.1em; font-weight: 600; margin: 0 0 16px 0; padding: 0 12px; color: var(--text-color); }
-
-.about-info-row { padding: 4px 12px; color: var(--text-sub); font-size: 15px; }
-.creator-section-title { margin-top: 24px; padding: 0 12px; font-weight: 600; margin-bottom: 10px; color: var(--text-color); font-size: 15px; }
-.creator-card { 
-    background-color: var(--surface-secondary); 
-    border-radius: 12px; padding: 16px; 
-    margin: 0 10px; display: flex; align-items: center; gap: 12px; 
-}
-.creator-avatar { width: 40px; height: 40px; background-color: var(--surface-hover); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; }
-.creator-info { display: flex; flex-direction: column; }
-.creator-name { font-weight: 600; font-size: 16px; color: var(--text-color); }
-.creator-role { font-size: 13px; color: var(--text-sub); margin-top: 2px; }
 .copyright-text { 
     margin-top: 40px; text-align: center; 
     font-size: 12px; color: var(--text-sub); opacity: 0.7; 
+}
+
+
+/* ------------------------ PC 버전 (Tablet/Desktop) ------------------------ */
+@media (min-width: 768px) {
+  .phone {
+    max-width: 1000px;
+    margin: 0 auto;
+    border-left: 1px solid var(--border-color);
+    border-right: 1px solid var(--border-color);
+    box-shadow: var(--composer-shadow);
   }
+  .header {
+    left: auto;
+    max-width: 1000px;
+    margin: 0 auto;
+  }
+  .composer {
+    left: auto;
+    max-width: 1000px;
+    margin: 0 auto;
+    border-left: 1px solid var(--border-color);
+    border-right: 1px solid var(--border-color);
+  }
+  .content-wrapper {
+    padding-left: 32px;
+    padding-right: 32px;
+  }
+  .composer {
+    padding-left: 32px;
+    padding-right: 32px;
+  }
+  
+  .message-container {
+      max-width: 700px; /* PC에서 메시지 최대 너비 제한 */
+      margin-left: auto;
+      margin-right: auto;
+  }
+  .ai-message-container {
+      margin-right: auto;
+  }
+  .user-message-container {
+      margin-left: auto;
+  }
+
+}
+
+/* 🌟 [추가] 사이드 메뉴 스타일 시작 🌟 */
+
+/* ------------------------ 사이드 메뉴 전체 스타일 ------------------------ */
+.side-menu-overlay{ 
+  position:fixed; 
+  inset:0; 
+  background: var(--modal-overlay); 
+  z-index: 101; /* Header (100)보다 높게 */
+  opacity:0; 
+  pointer-events:none; 
+  transition:opacity 0.3s ease;
+}
+.side-menu-overlay.open{ opacity:1; pointer-events:auto; }
+
+.side-menu{ 
+  position:fixed; 
+  top:0; 
+  left:0; 
+  bottom:0; 
+  width:85%; 
+  max-width: var(--side-menu-width); 
+  background:var(--surface-color); 
+  box-shadow: var(--composer-shadow); 
+  z-index:102; 
+  transform:translateX(-100%); 
+  transition:transform 0.3s ease;
+  display:flex; 
+  flex-direction:column; 
+  border-right:1px solid var(--border-color); 
+  padding: 0; 
+}
+.side-menu.open{ transform:translateX(0); }
+
+/* 모바일에서 메뉴 열림 시 스크롤 방지 */
+@media(max-width: 1023px) {
+    body.menu-open {
+        overflow: hidden; 
+    }
+}
+
+/* ------------------------ PC 모드 (1024px 이상) - 기본 표시 및 컨텐츠 밀기 ------------------------ */
+@media(min-width: 1024px){
+    /* PC에서는 .phone 컨테이너 중앙 정렬 무시 */
+    .phone {
+        max-width: none;
+        margin: 0;
+        border: none;
+        box-shadow: none;
+    }
+    .header {
+        position: fixed; /* 고정 유지 */
+        max-width: none;
+        margin: 0;
+        left: 0;
+        right: 0;
+        border-right: none;
+        transition: margin-left 0.3s ease; /* 컨텐츠 밀기 애니메이션 */
+    }
+    .composer {
+        position: fixed; /* 고정 유지 */
+        max-width: none;
+        margin: 0;
+        left: 0;
+        right: 0;
+        border-left: none;
+        border-right: none;
+        transition: margin-left 0.3s ease; /* 컨텐츠 밀기 애니메이션 */
+        padding-left: 16px; /* 기본값으로 복구 */
+        padding-right: 16px; /* 기본값으로 복구 */
+    }
+
+    /* 오버레이 비활성화 */
+    .side-menu-overlay{
+        background: none; 
+        pointer-events: none;
+        width: var(--side-menu-width); 
+        position: absolute; 
+        z-index: 90; 
+    }
+    
+    /* 메뉴 기본적으로 열린 상태 */
+    .side-menu{
+        position: fixed; 
+        height: 100vh; 
+        width: var(--side-menu-width);
+        transform: translateX(0); /* 기본적으로 표시 */
+        box-shadow: none; 
+        z-index: 95; 
+        transition: transform 0.3s ease;
+    }
+    
+    /* 메뉴가 닫혔을 때 (PC 토글 액션) */
+    body:not(.menu-open) .side-menu {
+        transform: translateX(calc(-1 * var(--side-menu-width))); /* 메뉴 너비만큼 완전히 숨김 */
+    }
+
+    /* 컨텐츠 밀어내기: Header, Content, Composer에 margin-left 적용 */
+    .header, 
+    .content-wrapper, 
+    .composer {
+        transition: margin-left 0.3s ease;
+        /* width: 100%; - 이미 flex-grow로 처리됨 */
+    }
+    
+    /* 메뉴 열림 상태일 때 컨텐츠 이동 */
+    body.menu-open .header, 
+    body.menu-open .content-wrapper, 
+    body.menu-open .composer {
+        margin-left: var(--side-menu-width); 
+    }
+
+    /* PC 768px 이상에서 적용된 중앙 정렬 스타일을 덮어씀 */
+    .content-wrapper {
+        padding-left: 16px; 
+        padding-right: 16px;
+    }
+    .composer {
+        padding-left: 16px;
+        padding-right: 16px;
+    }
+    
+    .message-container {
+        max-width: 800px; /* PC에서 메시지 최대 너비 제한 (전체 화면 고려) */
+        margin-left: auto;
+        margin-right: auto;
+    }
+}
+
+/* ------------------------ 메뉴 내부 구성 요소 스타일 ------------------------ */
+.menu-header {
+  padding: 16px;
+  font-size: 1.2rem;
+  font-weight: 700; 
+  color: var(--text-color);
+  border-bottom: 1px solid var(--border-color);
+}
+.chat-list-container {
+  flex-grow: 1;
+  overflow-y: auto;
+  padding: 8px 0; 
+}
+.chat-item{ 
+  padding: 12px 16px; 
+  cursor: pointer; 
+  font-size: 0.95rem; 
+  color: var(--text-color); 
+  white-space: nowrap; 
+  overflow: hidden; 
+  text-overflow: ellipsis; 
+  margin: 4px 16px; 
+  border-radius: 16px; 
+  display: flex;
+  align-items: center;
+  justify-content: space-between; 
+  position: relative;
+  transition: background-color 0.2s; 
+}
+.chat-item:hover{ 
+  background: var(--surface-secondary); 
+}
+.chat-item.active{ 
+  background: rgba(29, 111, 239, 0.1); 
+  color: var(--primary-blue); 
+  font-weight: 600;
+  border: 1px solid var(--primary-blue);
+}
+.chat-item-text {
+    flex-grow: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding-right: 10px; 
+    pointer-events: auto; 
+}
+.delete-chat-btn {
+    opacity: 1; 
+    font-size: 1.4rem; 
+    color: var(--text-sub);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    flex-shrink: 0; 
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s;
+    z-index: 10;
+    line-height: 1; 
+}
+.delete-chat-btn:hover {
+    color: var(--error-red); 
+}
+.chat-item.active .delete-chat-btn {
+    color: var(--primary-blue); 
+}
+.menu-actions {
+    padding: 8px 16px; 
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    border-top: 1px solid var(--border-color); 
+}
+.menu-action-btn{ 
+  width:100%; 
+  padding:12px 10px;
+  border-radius:16px; 
+  border:none; 
+  cursor:pointer; 
+  font-size: 1rem; 
+  display:flex; 
+  align-items:center; 
+  transition: background-color 0.2s, transform 0.1s, box-shadow 0.2s;
+  color: var(--text-color); 
+  background: var(--surface-secondary); 
+  border: 1px solid var(--border-color);
+}
+.menu-action-btn.menu-action-new {
+    background: var(--primary-blue); 
+    color: var(--send-button-icon); 
+    border: 1px solid var(--primary-blue); 
+    font-weight: 600;
+}
+.menu-action-btn.menu-action-new:hover {
+    background: var(--primary-blue); 
+    opacity: 0.9;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+}
+.menu-bottom {
+  padding: 8px 0 20px;
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+}
+.menu-bottom-item {
+    padding: 12px 16px;
+    color: var(--text-sub);
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    font-size: 0.95rem;
+    transition: background-color 0.2s, color 0.2s;
+}
+.menu-bottom-item:hover {
+    background: var(--surface-secondary);
+    color: var(--text-color);
+}
+.menu-upgrade-btn {
+    padding: 10px 16px;
+    margin: 8px 16px; 
+    background: var(--primary-blue);
+    color: var(--send-button-icon);
+    border-radius: 8px;
+    text-align: center;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.2s, transform 0.1s;
+}
+.menu-upgrade-btn:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+/* 🌟 [추가] 사이드 메뉴 스타일 끝 🌟 */
 
 /* 🌟 [추가] 스크롤 버튼 컨테이너 위치 고정 */
 #scroll-to-bottom-container {
@@ -651,7 +866,15 @@ hr.modal-divider { border: 0; border-top: 1px solid var(--border-color); margin:
     bottom: 80px; 
     right: 20px;
     z-index: 1000;
+    transition: right 0.3s ease; /* PC 메뉴 밀림에 대비 */
 }
+@media(min-width: 1024px) {
+    /* PC 모드에서 스크롤 버튼이 메뉴에 가려지지 않도록 오른쪽 마진 적용 */
+    body.menu-open #scroll-to-bottom-container {
+        right: calc(20px + var(--side-menu-width)); 
+    }
+}
+
 
 /* 🌟 [추가] 스크롤 버튼 기본 스타일 (연한 회색 테두리의 원) */
 #scrollDownButton {
@@ -672,34 +895,61 @@ hr.modal-divider { border: 0; border-top: 1px solid var(--border-color); margin:
     opacity: 0;
     pointer-events: none;
 }
-
-#scrollDownButton:hover {
-    transform: scale(1.05);
-}
-
-/* 🌟 [추가] 버튼 표시/숨김 클래스 */
-#scrollDownButton.hidden {
-    opacity: 0;
-    pointer-events: none;
-}
-
 #scrollDownButton.visible {
     opacity: 1;
     pointer-events: auto;
 }
+#scrollDownButton:hover {
+    transform: scale(1.05);
+}
+#scrollDownButton .material-symbols-rounded {
+    font-size: 24px;
+    color: var(--text-sub);
+}
 
-/* 🌟 [핵심] 전송 버튼과 동일한 CSS 화살표 구현 */
-#scrollDownButton::after {
-    content: '';
-    display: block;
-    width: 8px; /* 화살표 너비 */
-    height: 8px; /* 화살표 높이 */
-    
-    /* 전송 버튼 아이콘의 색상과 유사하게 설정 */
-    border: 2px solid var(--text-sub); 
-    border-top: none; 
-    border-left: none; 
-    
-    /* 아래를 가리키는 화살표 모양으로 회전 및 위치 조정 */
-    transform: translateY(-2px) rotate(45deg); 
+/* ------------------------ Name Input Modal ------------------------ */
+#name-input-modal {
+    padding: 24px;
+    max-width: 340px;
+}
+#name-input-modal h3 {
+    margin-bottom: 20px;
+    padding-bottom: 0;
+    border-bottom: none;
+}
+#name-input-modal p {
+    font-size: 0.95rem;
+    color: var(--text-sub);
+    margin-bottom: 20px;
+}
+#nameInput {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background-color: var(--surface-secondary);
+    color: var(--text-color);
+    font-size: 1rem;
+    outline: none;
+    transition: border-color 0.2s;
+}
+#nameInput:focus {
+    border-color: var(--primary-blue);
+    background-color: var(--surface-color);
+}
+#nameSubmitBtn {
+    width: 100%;
+    padding: 12px;
+    margin-top: 15px;
+    background-color: var(--primary-blue);
+    color: var(--send-button-icon);
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+#nameSubmitBtn:hover {
+    opacity: 0.9;
 }
