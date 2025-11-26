@@ -703,15 +703,34 @@ confirmCancelBtn.addEventListener('click', () => toggleResetConfirmModal(false))
 confirmResetBtn.addEventListener('click', resetChat);
 resetConfirmModalBackdrop.addEventListener('click', (e) => { if (e.target === resetConfirmModalBackdrop) toggleResetConfirmModal(false); });
 
+// 🌟 [수정] 기존 스크롤 이벤트 리스너 로직을 대체합니다.
+// 스크롤 및 스크롤 다운 버튼 로직
 contentWrapper.addEventListener('scroll', () => {
-    const isAtBottom = contentWrapper.scrollHeight - contentWrapper.scrollTop - contentWrapper.clientHeight < 1;
-    if (isAtBottom) { autoScrollEnabled = true; scrollDownButton.classList.remove('visible'); } 
-    else if (contentWrapper.scrollTop < contentWrapper.scrollHeight - contentWrapper.clientHeight - 100) {
+    // 1. 현재 맨 아래로부터 떨어진 거리
+    const distanceFromBottom = contentWrapper.scrollHeight - contentWrapper.scrollTop - contentWrapper.clientHeight;
+    
+    // 2. 맨 아래에 도달했을 때 (1px 오차 허용)
+    if (distanceFromBottom <= 1) { 
+        // 🚨 중요: 스트리밍이 끝나지 않았더라도 맨 아래에 있다면 자동 스크롤 활성화 상태로 간주
+        autoScrollEnabled = true; 
+        scrollDownButton.classList.remove('visible'); 
+    } 
+    // 3. 사용자가 위로 스크롤하여 맨 아래에서 100px 이상 떨어졌을 때
+    else if (distanceFromBottom > 100) { 
         autoScrollEnabled = false;
-        if (!isStreaming) { scrollDownButton.classList.add('visible'); }
+        // 🚨 중요: 스트리밍 중이 아닐 때만 버튼을 표시
+        if (!isStreaming) { 
+            scrollDownButton.classList.add('visible'); 
+        }
     }
 });
-scrollDownButton.addEventListener('click', () => { scrollToBottom(true); scrollDownButton.classList.remove('visible'); autoScrollEnabled = true; });
+
+// 🌟 [유지] 스크롤 다운 버튼 클릭 이벤트 리스너
+scrollDownButton.addEventListener('click', () => { 
+    scrollToBottom(true); 
+    scrollDownButton.classList.remove('visible'); 
+    autoScrollEnabled = true; 
+});
 
 const toolAttach = document.getElementById('tool-attach');
 if(toolAttach) { toolAttach.addEventListener('click', (e) => { e.preventDefault(); togglePlusModal(true); }); }
