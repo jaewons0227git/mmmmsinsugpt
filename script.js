@@ -28,7 +28,6 @@ const snackbar = document.getElementById('snackbar');
 const resetConfirmModalBackdrop = document.getElementById('reset-confirm-modal-backdrop');
 const confirmCancelBtn = document.getElementById('confirm-cancel-btn');
 const confirmResetBtn = document.getElementById('confirm-reset-btn');
-// 🌟 [스크롤 버튼 통합]
 const scrollDownButton = document.getElementById('scrollDownButton'); 
 
 const aboutButton = document.getElementById('about-button');
@@ -45,7 +44,7 @@ const closeImageModeBtn = document.getElementById('close-image-mode');
 
 // 🎯 백엔드 엔드포인트
 const BACKEND_ENDPOINT = "https://jaewondev.pythonanywhere.com/ask"; 
-const IMAGE_ENDPOINT = "https://jaewondev.pythonanythonanywhere.com/generate-image"; 
+const IMAGE_ENDPOINT = "https://jaewondev.pythonanywhere.com/generate-image"; 
 
 const HISTORY_STORAGE_KEY = 'minsugpt_chat_history'; 
 const UI_STYLE_KEY = 'minsugpt_ui_style'; 
@@ -225,7 +224,6 @@ function loadChatHistory() {
             }
         });
         updateRegenerateButtons(); 
-        // 페이지 로드 시 스크롤은 window.onload에서 최종 처리합니다.
     } else {
         chatMessages.style.display = 'none';
         chatMessages.innerHTML = '';
@@ -264,7 +262,6 @@ function scrollToBottom(smooth = true) {
     const behavior = smooth ? 'smooth' : 'auto';
     contentWrapper.scrollTo({ top: contentWrapper.scrollHeight, behavior: behavior });
     
-    // 🌟 [스크롤 버튼 통합] 맨 아래로 이동했으므로 버튼 상태 업데이트 (숨김)
     toggleScrollButton();
 }
 
@@ -272,7 +269,7 @@ function scrollToBottom(smooth = true) {
 // 4. 입력창 및 메시지 UI 관련 함수
 // ===========================================
 
-// 🌟 [추가] 스크롤 버튼 표시/숨김을 관리하는 함수
+// 스크롤 버튼 표시/숨김을 관리하는 함수
 function toggleScrollButton() {
     if (!contentWrapper || !scrollDownButton) return;
 
@@ -454,7 +451,7 @@ function handleRegenerate(messageIndex) {
     }
 
     currentLoadingText = '다시 답변을 생각하는 중...';
-    // 🌟 [스크롤 통합] 재생성 시작 시 자동 스크롤 활성화 및 버튼 숨김
+    // 재생성 시작 시 자동 스크롤 활성화 및 버튼 숨김
     autoScrollEnabled = true; scrollDownButton.classList.remove('visible');
     sendMessage(originalPrompt, true); 
 }
@@ -487,7 +484,7 @@ function appendBotMessageContainer() {
     
     botMessageContainer.appendChild(indicatorContainer); botMessageContainer.appendChild(streamingBlock);
     chatMessages.appendChild(botMessageContainer);
-    // 🌟 [스크롤 통합] 메시지 컨테이너 추가 시 자동 스크롤
+    // 메시지 컨테이너 추가 시 자동 스크롤
     if (autoScrollEnabled) scrollToBottom(true);
     
     return { botMessageElement: botMessageContainer, indicatorElement: indicatorContainer, streamingBlockElement: streamingBlock, spinnerElement: spinner, indicatorTextElement: indicatorText };
@@ -497,7 +494,7 @@ function setStreamingState(active) {
     isStreaming = active;
     if (active) {
         sendButton.style.display = 'none'; stopButton.style.display = 'flex'; inputField.setAttribute('readonly', 'true');
-        // 🌟 [스크롤 통합] 스트리밍 시작 시 자동 스크롤 활성화 및 버튼 숨김
+        // 🌟 [핵심] 스트리밍 시작 시 자동 스크롤 활성화 및 버튼 숨김
         autoScrollEnabled = true; scrollDownButton.classList.remove('visible');
     } else {
         sendButton.style.display = 'flex'; stopButton.style.display = 'none'; inputField.removeAttribute('readonly'); abortController = null;
@@ -630,7 +627,7 @@ async function sendMessage(userMessageOverride = null, isRegenerate = false) {
                     fullResponse += chunk;
                     // 실시간 렌더링 및 스크롤
                     streamingBlockElement.innerHTML = typeof marked !== 'undefined' ? marked.parse(fullResponse) : fullResponse;
-                    // 🌟 [핵심 수정] autoScrollEnabled가 true일 때만, 부드럽지 않은(auto) 스크롤로 지속적으로 맨 아래로 이동
+                    // 🌟 [핵심] autoScrollEnabled가 true일 때만, 부드럽지 않은(auto) 스크롤로 지속적으로 맨 아래로 이동
                     if (autoScrollEnabled) scrollToBottom(false);
                 }
             }
@@ -645,7 +642,7 @@ async function sendMessage(userMessageOverride = null, isRegenerate = false) {
             
             const actionContainer = createBotActions(fullResponse, history.length - 1);
             botMessageElement.appendChild(actionContainer); updateRegenerateButtons();
-            // 🌟 [수정] 스트리밍이 완료되면 최종적으로 부드럽게 스크롤
+            // 스트리밍이 완료되면 최종적으로 부드럽게 스크롤
             scrollToBottom(true);
         }
     } catch (error) {
@@ -702,7 +699,7 @@ inputField.addEventListener('keydown', (e) => {
             if (e.shiftKey) { setTimeout(autoResizeTextarea, 0); return; }
             e.preventDefault(); 
             if (sendButton.classList.contains('active') && !isStreaming) {
-                // 🌟 [스크롤 통합] 메시지 전송 시 자동 스크롤 활성화 및 버튼 숨김
+                // 메시지 전송 시 자동 스크롤 활성화 및 버튼 숨김
                 autoScrollEnabled = true; scrollDownButton.classList.remove('visible'); sendMessage();
             }
         }
@@ -714,7 +711,7 @@ quickActionButtons.forEach(button => {
         const prompt = button.getAttribute('data-prompt');
         if (prompt) {
             inputField.value = prompt; autoResizeTextarea();
-            // 🌟 [스크롤 통합] 퀵액션 사용 시 자동 스크롤 활성화 및 버튼 숨김
+            // 퀵액션 사용 시 자동 스크롤 활성화 및 버튼 숨김
             autoScrollEnabled = true; scrollDownButton.classList.remove('visible');
             sendMessage(null, false); 
         }
@@ -741,7 +738,6 @@ confirmCancelBtn.addEventListener('click', () => toggleResetConfirmModal(false))
 confirmResetBtn.addEventListener('click', resetChat);
 resetConfirmModalBackdrop.addEventListener('click', (e) => { if (e.target === resetConfirmModalBackdrop) toggleResetConfirmModal(false); });
 
-// 🌟 [스크롤 통합] 기존 스크롤 이벤트 리스너 로직을 대체 및 통합합니다.
 // 스크롤 및 스크롤 다운 버튼 로직
 contentWrapper.addEventListener('scroll', () => {
     // 1. 현재 맨 아래로부터 떨어진 거리
@@ -763,7 +759,7 @@ contentWrapper.addEventListener('scroll', () => {
     }
 });
 
-// 🌟 [스크롤 통합] 스크롤 다운 버튼 클릭 이벤트 리스너
+// 스크롤 다운 버튼 클릭 이벤트 리스너
 if(scrollDownButton) {
     scrollDownButton.addEventListener('click', () => { 
         scrollToBottom(true); 
@@ -788,6 +784,6 @@ window.onload = function() {
     toggleSendButton();
     autoResizeTextarea();
     
-    // 🌟 [최종 추가] 페이지 로드 시 항상 맨 아래로 즉시 스크롤
-    scrollToBottom(false); 
+    // 페이지 로드 시 항상 맨 아래로 즉시 스크롤
+    scrollToBottom(true); 
 };
