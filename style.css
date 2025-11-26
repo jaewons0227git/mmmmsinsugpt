@@ -170,12 +170,18 @@ body{ margin:0; background:var(--bg-color); color:var(--text-color); min-height:
 .bot-message .streaming-block { display: block; padding: 0; border-radius: 0; background-color: transparent; max-width: 100%; box-sizing: border-box; white-space: normal; color: var(--text-color); margin-bottom: 8px; }
 .stop-message { color: var(--error-red); font-weight: 600; font-size: 0.9em; margin-top: -5px; margin-bottom: 10px; padding: 0 4px; align-self: flex-start; }
 
-.sentence { opacity: 0; transition: opacity 0.2s ease-in; display: inline; white-space: pre-wrap; }
-.sentence.visible { opacity: 1; }
+/* 📢 불필요한 Fade In 애니메이션 제거 */
+/* .sentence 관련 CSS 삭제됨 */
 
 .streaming-block code { background-color: var(--surface-secondary); padding: 2px 4px; border-radius: 4px; font-family: monospace; color: var(--text-color); }
 .streaming-block pre { background-color: var(--surface-secondary); padding: 12px; border-radius: 8px; overflow-x: auto; margin: 8px 0; }
 .streaming-block pre code { background-color: transparent; padding: 0; color: inherit; }
+
+/* Markdown 리스트 스타일링 보완 */
+.streaming-block ul, .streaming-block ol { padding-left: 20px; margin: 8px 0; }
+.streaming-block li { margin-bottom: 4px; }
+.streaming-block p { margin: 8px 0; }
+.streaming-block h1, .streaming-block h2, .streaming-block h3 { margin-top: 16px; margin-bottom: 8px; font-weight: 600; }
 
 .bot-actions { display: flex; gap: 8px; margin-top: 0px; padding: 4px 0; transition: opacity 0.3s; }
 .bot-actions .regenerate { opacity: 0.5; pointer-events: none; }
@@ -499,3 +505,5 @@ hr.modal-divider { border: 0; border-top: 1px solid var(--border-color); margin:
     margin-top: 40px; text-align: center; 
     font-size: 12px; color: var(--text-sub); opacity: 0.7; 
   }
+
+}
