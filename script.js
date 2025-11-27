@@ -8,7 +8,7 @@ document.onkeydown = function(e) {
 // ===========================================
 // 1. DOM 요소 및 상수 정의
 // ===========================================
-
+ 
 const phone = document.querySelector('.phone');
 const contentWrapper = document.getElementById('content-wrapper');
 const inputField = document.getElementById('message-input');
