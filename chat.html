@@ -136,8 +136,6 @@
         </div>
 
         <div class="input-area-wrapper">
-            <div id="attachment-preview-area" class="attachment-preview-area" style="display: none;"></div>
-
             <div id="image-mode-indicator" class="image-mode-indicator">
                 <span><span class="material-symbols-rounded" style="font-size: 18px;">auto_fix_high</span> 이미지 생성 모드</span>
                 <span class="material-symbols-rounded close-image-mode" id="close-image-mode" style="font-size: 18px;">close</span>
@@ -194,7 +192,7 @@
                     <div class="modal-grid-icon"><span class="material-symbols-rounded">photo_camera</span></div>
                     카메라
                 </div>
-                <div class="modal-grid-item" data-action="album" id="modal-album-btn">
+                <div class="modal-grid-item" data-action="album">
                     <div class="modal-grid-icon"><span class="material-symbols-rounded">image</span></div>
                     앨범
                 </div>
@@ -267,7 +265,6 @@
     </div>
 
     <input type="file" id="import-file-input" style="display: none;" accept=".json">
-    <input type="file" id="image-upload-input" style="display: none;" accept="image/*">
     
     <div id="about-modal-backdrop" class="modal-backdrop">
         <div id="about-modal" class="modal">
