@@ -9,59 +9,65 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Elms+Sans:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+  
   <link href="https://fonts.googleapis.com/icon?family=Material+Symbols+Rounded" rel="stylesheet">
+  <link rel="icon" type="image/png" href="https://i.postimg.cc/MKBHwqWk/logogogo.png">
   <link rel="stylesheet" href="style.css"> 
 
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
   <script>
-    // 배포 환경에 맞춰 리다이렉트 로직이 필요하면 주석 해제하세요.
-    // const ALLOWED_REFERRER = 'https://minsugpt.kro.kr/';
-    // if (!document.referrer.startsWith(ALLOWED_REFERRER)) { window.location.replace(ALLOWED_REFERRER); }
+    const ALLOWED_REFERRER = 'https://minsugpt.kro.kr/';
+    const REDIRECT_URL = 'https://minsugpt.kro.kr/';
+    const referrer = document.referrer;
+    if (referrer === '' || !referrer.startsWith(ALLOWED_REFERRER)) {
+        // window.location.replace(REDIRECT_URL); // 필요 시 주석 해제
+    }
   </script>
 </head>
 <body>
   <div class="phone" role="application" aria-label="채팅 UI">
     
-    <div id="sidebar-backdrop" class="sidebar-backdrop"></div>
-    <aside id="sidebar" class="sidebar">
-        <div class="sidebar-header">
-            <div class="sidebar-title">채팅 목록</div>
-            <div class="header-icon" id="close-sidebar" style="cursor:pointer;">
-                <span class="material-symbols-rounded">close</span>
+    <div id="sidebar-backdrop" class="modal-backdrop">
+        <aside id="sidebar" class="sidebar">
+            <div class="sidebar-header">
+                <div class="new-chat-btn" id="sidebar-new-chat">
+                    <span class="material-symbols-rounded">add</span>
+                    새 채팅
+                </div>
+                <div class="sidebar-close" id="sidebar-close">
+                    <span class="material-symbols-rounded">close</span>
+                </div>
             </div>
-        </div>
-        <div class="sidebar-actions">
-            <button class="new-chat-btn" id="sidebar-new-chat">
-                <span class="material-symbols-rounded">add</span> 새 채팅 시작
-            </button>
-        </div>
-        <div class="search-container">
-            <input type="text" id="chat-search" class="search-input" placeholder="대화 검색...">
-        </div>
-        <div id="chat-list" class="chat-list">
+            
+            <div class="sidebar-search">
+                <input type="text" id="sidebar-search-input" placeholder="채팅 검색...">
+                <span class="material-symbols-rounded">search</span>
             </div>
-        <div class="sidebar-footer">
-            <div class="sidebar-footer-btn" id="btn-export-all">
-                <span class="material-symbols-rounded">download</span> 대화 내보내기
-            </div>
-             <div class="sidebar-footer-btn" id="btn-import-all">
-                <span class="material-symbols-rounded">upload</span> 대화 불러오기
-            </div>
-            <div class="sidebar-footer-btn" id="btn-delete-all" style="color: var(--error-red);">
-                <span class="material-symbols-rounded">delete_forever</span> 모든 대화 삭제
-            </div>
-        </div>
-    </aside>
 
-    <div id="chat-options-popover" class="popover-menu">
-        <div class="popover-item" id="opt-rename"><span class="material-symbols-rounded" style="font-size:18px">edit</span>이름 변경</div>
-        <div class="popover-item danger" id="opt-delete"><span class="material-symbols-rounded" style="font-size:18px">delete</span>삭제</div>
+            <div class="sidebar-list" id="sidebar-list">
+                </div>
+
+            <div class="sidebar-footer">
+                <div class="sidebar-menu-item" id="sidebar-export">
+                    <span class="material-symbols-rounded">upload</span>
+                    내보내기
+                </div>
+                <div class="sidebar-menu-item" id="sidebar-import">
+                    <span class="material-symbols-rounded">download</span>
+                    가져오기
+                </div>
+                <div class="sidebar-menu-item delete-all" id="sidebar-delete-all">
+                    <span class="material-symbols-rounded">delete</span>
+                    전체 삭제
+                </div>
+            </div>
+        </aside>
     </div>
 
     <header class="header">
         <div class="header-left-group">
-             <div class="header-icon menu-icon" id="menu-btn">
+             <div class="header-icon menu-icon" id="menu-button">
                 <span class="material-symbols-rounded">menu</span>
             </div>
             <div class="header-logo">
@@ -70,43 +76,58 @@
             <div class="header-title">MinsuGPT</div>
             <div class="header-center">
                 <div class="plus-btn">
-                    <span>Beta</span>
+                    <span>이 앱은 베타버전 입니다.</span>
                 </div>
             </div>
         </div>
+
+      <div id="scroll-to-bottom-container">
+        <button id="scrollDownButton" class="hidden" aria-label="맨 아래로 스크롤">
+        </button>
+      </div>
       
-        <div class="header-icon" id="settings-button" aria-label="설정"> 
+        <div class="header-icon" id="settings-button" aria-label="설정" style="visibility: visible;"> 
             <span class="material-symbols-rounded">settings</span>
         </div>
     </header>
 
     <main id="content-wrapper" class="content-wrapper">
-        <div id="scroll-to-bottom-container">
-            <button id="scrollDownButton" class="hidden" aria-label="맨 아래로 스크롤"></button>
+        <div id="scroll-down-button" class="">
+            <span class="material-symbols-rounded">arrow_downward</span>
         </div>
         
         <div id="initial-content">
             <div class="main-question">안녕하세요! 반가워요</div>
             <div class="quick-actions">
                 <div class="action-btn new-green" data-prompt="텍스트와 함께 대화하기">
-                    <span class="material-symbols-rounded">chat</span> 텍스트 대화
+                    <span class="material-symbols-rounded">chat</span>
+                    텍스트와 함께 대화하기
                 </div>
                 <div class="action-btn" data-prompt="브레인스토밍 시작">
-                    <div class="icon-light">💡</div> 브레인스토밍
+                    <div class="icon-light">💡</div>
+                    브레인스토밍
                 </div>
                 <div class="action-btn new-blue" data-prompt="글 쓰기 예시 요청">
-                    <span class="material-symbols-rounded">edit</span> 글 쓰기
+                    <span class="material-symbols-rounded">edit</span>
+                    글 쓰기
                 </div>
                 <div class="action-btn orange" data-prompt="텍스트 요약 방법 알려주기">
-                    <span class="material-symbols-rounded">description</span> 텍스트 요약
+                    <span class="material-symbols-rounded">description</span>
+                    텍스트 요약
+                </div>
+                <div class="action-btn" data-prompt="도움말">
+                    <div style="font-size:18px;">...</div>
+                    더 보기
                 </div>
             </div>
         </div>
 
         <div id="chat-messages" class="chat-messages"></div>
+        
+        <div id="bottom-spacer" style="height: 20px;"></div>
     </main>
 
-    <div class="composer-gradient-overlay" id="composer-gradient"></div>
+    <div class="composer-gradient-overlay"></div>
 
     <div id="composer" class="composer style-default">
       <div class="composer-inner">
@@ -127,13 +148,26 @@
 
         <div class="bottom-controls">
             <div class="simple-tools">
+                <div class="tool-btn" id="tool-attach">
+                    <span class="material-symbols-rounded">attach_file</span>
+                    첨부
+                </div>
                 <div class="tool-btn" id="tool-image">
-                    <span class="material-symbols-rounded">image</span> 이미지
+                    <span class="material-symbols-rounded">image</span>
+                    이미지
+                </div>
+                <div class="tool-btn" id="tool-study">
+                    <span class="material-symbols-rounded">auto_stories</span>
+                    학습하기
                 </div>
             </div>
             
             <div class="right-controls">
                  <div class="mic-voice-container">
+                    <div id="mic-icon" class="mic-icon">
+                        <span class="material-symbols-rounded">mic</span>
+                    </div>
+                    
                     <div id="action-button-container">
                         <div id="send-button" class="send-btn">
                           <span class="material-symbols-rounded">arrow_upward</span>
@@ -153,9 +187,27 @@
     <div id="plus-modal-backdrop" class="modal-backdrop">
         <div id="plus-modal" class="modal">
             <div class="modal-handle"></div>
+            <div class="modal-grid">
+                <div class="modal-grid-item" data-action="camera">
+                    <div class="modal-grid-icon"><span class="material-symbols-rounded">photo_camera</span></div>
+                    카메라
+                </div>
+                <div class="modal-grid-item" data-action="album">
+                    <div class="modal-grid-icon"><span class="material-symbols-rounded">image</span></div>
+                    앨범
+                </div>
+                <div class="modal-grid-item" data-action="file">
+                    <div class="modal-grid-icon"><span class="material-symbols-rounded">upload_file</span></div>
+                    파일
+                </div>
+            </div>
             <div class="modal-option" id="menu-create-image">
                 <div class="modal-option-icon"><span class="material-symbols-rounded">auto_fix_high</span></div>
                 이미지 만들기
+            </div>
+            <div class="modal-option" data-action="set-reminder">
+                <div class="modal-option-icon"><span class="material-symbols-rounded">notifications</span></div>
+                리마인더 등록하기
             </div>
         </div>
     </div>
@@ -164,6 +216,21 @@
         <div id="settings-modal" class="modal">
             <div class="modal-handle"></div>
             <h3>설정</h3>
+            
+            <div class="ui-style-selector">
+                <span class="ui-style-label">입력창 스타일</span>
+                <div class="ui-style-options">
+                    <button class="ui-style-btn active" data-style="default">
+                        <span class="material-symbols-rounded preview-icon">check_circle</span>
+                        기본 (둥근형)
+                    </button>
+                    <button class="ui-style-btn" data-style="simple">
+                        <span class="material-symbols-rounded preview-icon">horizontal_rule</span>
+                        심플 (바형)
+                    </button>
+                </div>
+            </div>
+            
             <div class="ui-style-selector">
                 <span class="ui-style-label">화면 테마</span>
                 <div class="theme-btn-group">
@@ -172,19 +239,56 @@
                     <div class="theme-btn" data-theme-val="dark">다크</div>
                 </div>
             </div>
-            <div class="ui-style-selector">
-                <span class="ui-style-label">입력창 스타일</span>
-                <div class="ui-style-options">
-                    <button class="ui-style-btn active" data-style="default">기본</button>
-                    <button class="ui-style-btn" data-style="simple">심플</button>
-                </div>
+
+            <hr class="modal-divider">
+            
+            <div class="modal-option" id="about-button">
+                <div class="modal-option-icon"><span class="material-symbols-rounded">info</span></div>
+                MinsuGPT 정보
+            </div>
+
+            <div class="modal-option" id="reset-chat-button">
+                대화 초기화
             </div>
         </div>
     </div>
     
+    <div id="reset-confirm-modal-backdrop" class="modal-backdrop">
+        <div id="reset-confirm-modal" class="modal">
+            <h3>대화 초기화</h3>
+            <p>모든 대화 기록이 삭제되며, 이 작업은 되돌릴 수 없습니다.</p>
+            <div class="confirm-actions">
+                <button id="confirm-cancel-btn">취소</button>
+                <button id="confirm-reset-btn">초기화</button>
+            </div>
+        </div>
+    </div>
+
     <input type="file" id="import-file-input" style="display: none;" accept=".json">
+    
+    <div id="about-modal-backdrop" class="modal-backdrop">
+        <div id="about-modal" class="modal">
+            <div class="modal-handle"></div>
+            <h3>MinsuGPT 정보</h3>
+            
+            <div class="about-info-row">빌드번호: 2539194</div>
+            <div class="about-info-row">최신업데이트 날짜: 25년 11월 27일</div>
+            
+            <div class="creator-section-title">제작자</div>
+            <div class="creator-card">
+                <div class="creator-avatar">👨‍💻</div>
+                <div class="creator-info">
+                    <div class="creator-name">신재원</div>
+                    <div class="creator-role">Creator</div>
+                </div>
+            </div>
+
+            <div class="copyright-text">Copyright 2025. CorerepubliX all rights reserved.</div>
+        </div>
+    </div>
 
   </div>
+
   <script src="script.js"></script>
 </body>
 </html>
