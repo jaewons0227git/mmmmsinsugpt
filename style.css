@@ -99,7 +99,7 @@ body{ margin:0; background:var(--bg-color); color:var(--text-color); min-height:
   display:flex; justify-content:space-between; align-items:center; padding:10px 16px; height:56px; border-bottom:none; position: fixed; top: 0; left: 0; right: 0; z-index: 100; 
   background: var(--bg-color); 
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05); 
-  transition: background-color 0.3s ease, left 0.3s ease, width 0.3s ease; /* Push 애니메이션 추가 */
+  transition: background-color 0.3s ease;
 }
 [data-theme="dark"] .header { box-shadow: 0 1px 3px rgba(255,255,255, 0.05); }
 
@@ -126,7 +126,7 @@ body{ margin:0; background:var(--bg-color); color:var(--text-color); min-height:
 /* Content */
 .content-wrapper{
     flex-grow:1; display:flex; flex-direction:column; overflow-y: auto; padding-bottom: 0; position: relative;
-    opacity: 0; transform: translateY(20px); transition: opacity 0.5s ease-out, transform 0.5s ease-out, margin-left 0.3s ease; /* margin-left transition 추가 */
+    opacity: 0; transform: translateY(20px); transition: opacity 0.5s ease-out, transform 0.5s ease-out;
     /* 스크롤 동작 설정 */
     scroll-behavior: auto; /* JS에서 제어하기 위해 auto로 설정 */
 }
@@ -260,7 +260,6 @@ body{ margin:0; background:var(--bg-color); color:var(--text-color); min-height:
     background: linear-gradient(to top, var(--bg-color) 20%, rgba(255,255,255,0) 100%);
     z-index: 15; /* 콘텐츠 위, 컴포저 아래 */
     pointer-events: none; /* 클릭 통과 */
-    transition: left 0.3s ease, width 0.3s ease; /* Push 애니메이션 */
 }
 [data-theme="dark"] .composer-gradient-overlay {
     background: linear-gradient(to top, var(--bg-color) 20%, rgba(18,18,18,0) 100%);
@@ -292,52 +291,6 @@ body{ margin:0; background:var(--bg-color); color:var(--text-color); min-height:
 .image-mode-indicator span { display: flex; align-items: center; gap: 6px; }
 .close-image-mode { cursor: pointer; opacity: 0.7; display: flex; align-items: center; }
 .close-image-mode:hover { opacity: 1; }
-
-/* 🌟 첨부 파일 미리보기 카드 스타일 */
-.attachment-preview-area {
-    padding: 8px 12px;
-    margin-bottom: 4px;
-    border-radius: 12px;
-    background-color: var(--surface-secondary);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    border: 1px solid var(--border-color);
-}
-.attachment-card-info {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    overflow: hidden;
-}
-.attachment-icon {
-    width: 32px; height: 32px;
-    background-color: var(--border-color);
-    border-radius: 6px;
-    display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0;
-}
-.attachment-details {
-    display: flex; flex-direction: column;
-    overflow: hidden;
-}
-.attachment-name {
-    font-size: 13px; font-weight: 500;
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-    color: var(--text-color);
-}
-.attachment-size {
-    font-size: 11px; color: var(--text-sub);
-}
-.attachment-remove {
-    cursor: pointer;
-    color: var(--text-sub);
-    padding: 4px;
-    border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-}
-.attachment-remove:hover { background-color: rgba(0,0,0,0.1); color: var(--error-red); }
-
 
 .input-container {
     flex: 1; display: flex; align-items: center; gap: 8px; 
@@ -390,10 +343,6 @@ body{ margin:0; background:var(--bg-color); color:var(--text-color); min-height:
 
 .composer.style-simple .input-area-wrapper {
     flex: 1; width: 100%; display: flex; flex-direction: row; align-items: center; min-width: 0; margin-bottom: 10px;
-}
-/* 첨부가 있으면 세로 정렬로 변경 필요 */
-.composer.style-simple .input-area-wrapper:has(#attachment-preview-area[style="display: flex;"]) {
-    flex-direction: column; align-items: stretch;
 }
 
 .composer.style-simple .input-container {
@@ -604,38 +553,6 @@ hr.modal-divider { border: 0; border-top: 1px solid var(--border-color); margin:
 .modal-backdrop.visible .sidebar {
     transform: translateX(0);
 }
-
-/* 🌟 PC 버전 사이드바 스타일 (1024px 이상) */
-@media (min-width: 1024px) {
-    #sidebar-backdrop {
-        /* 백드롭을 투명하게 하고 클릭 통과, 항상 보이게 */
-        opacity: 1 !important; 
-        visibility: visible !important;
-        pointer-events: none; /* 클릭 이벤트 통과 */
-        background-color: transparent;
-        width: 300px; /* 사이드바 너비만큼 */
-    }
-    .sidebar {
-        transform: translateX(0) !important; /* 항상 표시 */
-        pointer-events: auto; /* 사이드바 자체는 클릭 가능 */
-        border-right: 1px solid var(--border-color);
-        box-shadow: none;
-        z-index: 50; /* 헤더보다 아래, 컨텐츠와 동일 레벨 */
-    }
-    .sidebar-close {
-        display: none !important; /* X 버튼 숨김 */
-    }
-    /* 메뉴 버튼 숨김 */
-    #menu-button { display: none !important; }
-    
-    /* 콘텐츠 Push 효과 (Body 클래스 또는 직접 지정) */
-    .header, .content-wrapper, .composer, .composer-gradient-overlay, #scroll-to-bottom-container {
-        left: 300px !important;
-        width: calc(100% - 300px) !important;
-    }
-}
-
-
 .sidebar-header {
     padding: 20px;
     display: flex;
@@ -722,11 +639,6 @@ hr.modal-divider { border: 0; border-top: 1px solid var(--border-color); margin:
 }
 .sidebar-list-item:hover .sidebar-item-actions { display: flex; }
 
-/* 🌟 모바일에서 항상 버튼 보이기 */
-@media (max-width: 768px) {
-    .sidebar-item-actions { display: flex; }
-}
-
 .item-action-btn {
     width: 24px; height: 24px; border-radius: 4px; display: flex; align-items: center; justify-content: center;
     color: var(--text-sub);
@@ -758,7 +670,6 @@ hr.modal-divider { border: 0; border-top: 1px solid var(--border-color); margin:
     bottom: 80px; 
     right: 20px;
     z-index: 1000;
-    transition: left 0.3s ease; /* Push 애니메이션 */
 }
 
 /* 🌟 [추가] 스크롤 버튼 기본 스타일 (연한 회색 테두리의 원) */
