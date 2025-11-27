@@ -55,6 +55,13 @@ const sidebarExport = document.getElementById('sidebar-export');
 const sidebarImport = document.getElementById('sidebar-import');
 const importFileInput = document.getElementById('import-file-input');
 
+// 🌟 이미지 첨부 관련 요소
+const imageUploadInput = document.getElementById('image-upload-input');
+const toolAttach = document.getElementById('tool-attach');
+const modalAlbumBtn = document.getElementById('modal-album-btn');
+const attachmentPreviewArea = document.getElementById('attachment-preview-area');
+let currentAttachedImage = null; // { name, size, base64 }
+
 // 🎯 백엔드 엔드포인트
 const BACKEND_ENDPOINT = "https://jaewondev.pythonanywhere.com/ask"; 
 const IMAGE_ENDPOINT = "https://jaewondev.pythonanywhere.com/generate-image"; 
@@ -208,8 +215,10 @@ function toggleResetConfirmModal(show) {
     if (show) toggleSettingsModal(false); 
 }
 
-// 🌟 사이드바 토글 함수
+// 🌟 사이드바 토글 함수 (PC Persistent Logic 추가)
 function toggleSidebar(show) {
+    if (window.innerWidth >= 1024) return; // PC에서는 동작 안함 (항상 열림)
+
     if (show === undefined) { sidebarBackdrop.classList.toggle('visible'); }
     else if (show) { 
         renderSidebarList(); // 열 때 목록 갱신
@@ -255,19 +264,24 @@ function loadSessions() {
         }
     }
     
-    // 마지막 세션 혹은 새 세션 로드
+    // 마지막 세션 혹은 새 세션 로드 (기본적으로 새 채팅 시작)
     if (sessions.length > 0) {
-        // 최근 세션을 불러옴
-        if (!currentSessionId) {
-            currentSessionId = sessions[0].id;
-        }
-        loadCurrentSession();
+        // 페이지 로드 시에는 항상 새 채팅으로 시작 (요청 사항)
+        startNewChat(false);
     } else {
         startNewChat(false);
     }
 }
 
 function startNewChat(skipRender = false) {
+    // 🌟 이미 빈 채팅이면 새 채팅 생성 안함
+    if (history.length === 0) {
+        if (!skipRender) {
+             toggleSidebar(false);
+        }
+        return;
+    }
+
     currentSessionId = generateSessionId();
     history = [];
     const newSession = {
@@ -282,6 +296,12 @@ function startNewChat(skipRender = false) {
         loadCurrentSession();
         toggleSidebar(false);
     }
+    // 새 채팅 시작 시 입력창 초기화
+    if(inputField) {
+        inputField.value = '';
+        autoResizeTextarea();
+    }
+    removeAttachedImage(); // 이미지 첨부 초기화
 }
 
 function loadCurrentSession() {
@@ -303,14 +323,10 @@ function deleteSession(id, e) {
     saveSessions();
     
     if (currentSessionId === id) {
-        if (sessions.length > 0) {
-            currentSessionId = sessions[0].id;
-            loadCurrentSession();
-        } else {
-            startNewChat();
-        }
+        startNewChat(); // 현재 보고있던 채팅 삭제 시 새 채팅 시작
+    } else {
+        renderSidebarList(); // 목록만 갱신
     }
-    renderSidebarList();
 }
 
 function renameSession(id, e) {
@@ -459,7 +475,7 @@ function toggleScrollButton() {
 
 
 function toggleSendButton() {
-    if (inputField.value.trim().length > 0 && !isStreaming) { sendButton.classList.add('active'); } 
+    if ((inputField.value.trim().length > 0 || currentAttachedImage) && !isStreaming) { sendButton.classList.add('active'); } 
     else { sendButton.classList.remove('active'); }
 }
 
@@ -482,6 +498,10 @@ function autoResizeTextarea() {
     if (isImageMode && !composer.classList.contains('style-simple')) {
          contentHeight += 40; 
     }
+    // 🌟 첨부 이미지가 있을 경우 높이 추가
+    if (currentAttachedImage) {
+        contentHeight += 50; 
+    }
 
     const inputContainerHeight = Math.max(contentHeight, minInputContainerHeight);
     
@@ -501,6 +521,7 @@ function appendUserMessage(content, animate = true) {
     userBubble.innerHTML = `<div class="message-text">${content.replace(/\n/g, '<br>')}</div>`;
     chatMessages.appendChild(userBubble);
     if (animate) scrollToBottom(true);
+    return userBubble; // 반환하여 위치 계산에 사용
 }
 
 function appendBotImage(htmlContent, animate = true) {
@@ -654,8 +675,8 @@ function appendBotMessageContainer() {
     botMessageContainer.appendChild(indicatorContainer); botMessageContainer.appendChild(streamingBlock);
     chatMessages.appendChild(botMessageContainer);
     
-    // 컨테이너 추가 직후 강제 스크롤
-    scrollToBottom(false);
+    // 컨테이너 추가 직후 강제 스크롤 (sendMessage에서 처리하므로 삭제 또는 유지)
+    // scrollToBottom(false);
     
     return { botMessageElement: botMessageContainer, indicatorElement: indicatorContainer, streamingBlockElement: streamingBlock, spinnerElement: spinner, indicatorTextElement: indicatorText };
 }
@@ -709,7 +730,10 @@ function stopResponse() {
 
 async function sendMessage(userMessageOverride = null, isRegenerate = false) {
     const userMessage = userMessageOverride !== null ? userMessageOverride : inputField.value.trim();
-    if (userMessage.length === 0 || isStreaming) { if (isStreaming) showSnackbar('현재 답변 생성 중입니다.'); return; }
+    // 이미지 혹은 텍스트가 있어야 함
+    if ((userMessage.length === 0 && !currentAttachedImage) || isStreaming) { if (isStreaming) showSnackbar('현재 답변 생성 중입니다.'); return; }
+
+    let userBubbleElement = null;
 
     if (!isRegenerate) {
         if (isImageMode) {
@@ -722,16 +746,42 @@ async function sendMessage(userMessageOverride = null, isRegenerate = false) {
             initialContent.style.opacity = '0'; initialContent.style.visibility = 'hidden'; 
             setTimeout(() => { initialContent.style.display = 'none'; chatMessages.style.display = 'flex'; }, 500); 
         } else { chatMessages.style.display = 'flex'; }
+        
         const existingStops = chatMessages.querySelectorAll('.stop-message'); existingStops.forEach(el => el.remove());
         updateRegenerateButtons(); 
-        appendUserMessage(userMessage); history.push({ role: 'user', content: userMessage }); 
+        
+        // 🌟 첨부 파일 텍스트에 추가
+        let finalContent = userMessage;
+        if (currentAttachedImage) {
+            finalContent = `${userMessage}\n\n[첨부 이미지: ${currentAttachedImage.name}]`;
+        }
+
+        userBubbleElement = appendUserMessage(finalContent, false); 
+        history.push({ role: 'user', content: finalContent }); 
         updateCurrentSession(); // 저장
     } 
     
-    if (userMessageOverride === null) { inputField.value = ''; inputField.rows = MIN_ROWS; autoResizeTextarea(); }
+    if (userMessageOverride === null) { 
+        inputField.value = ''; inputField.rows = MIN_ROWS; 
+        removeAttachedImage(); // 메시지 전송 후 이미지 초기화
+        autoResizeTextarea(); 
+    }
     
     const { botMessageElement, indicatorElement, streamingBlockElement, spinnerElement, indicatorTextElement } = appendBotMessageContainer();
     
+    // 🌟 [핵심] 메시지 전송 후, 사용자 메시지가 상단바 아래로 올라가도록 스크롤 조정
+    if (userBubbleElement) {
+        const headerHeight = document.querySelector('.header').offsetHeight;
+        // UserBubble의 현재 위치에서 헤더 높이와 약간의 여백(20px)을 뺀 위치로 스크롤
+        const targetScrollTop = userBubbleElement.offsetTop - headerHeight - 20;
+        
+        // 부드럽게 스크롤 이동
+        contentWrapper.scrollTo({ top: targetScrollTop, behavior: 'smooth' });
+    } else {
+        // 재생성 시에는 그냥 맨 아래로
+        scrollToBottom(true);
+    }
+
     setStreamingState(true);
     abortController = new AbortController();
     const signal = abortController.signal;
@@ -766,12 +816,18 @@ async function sendMessage(userMessageOverride = null, isRegenerate = false) {
             }
 
         } else {
+            // 🌟 이미지 첨부 시 페이로드에 이미지 데이터 포함
+            const requestBody = { 
+                message: userMessage, 
+                history: [PRE_PROMPT, ...history],
+            };
+            if (currentAttachedImage) {
+                requestBody.image = currentAttachedImage.base64;
+            }
+
             const response = await fetch(BACKEND_ENDPOINT, {
                 method: 'POST', headers: { 'Content-Type': 'application/json', },
-                body: JSON.stringify({ 
-                    message: userMessage, 
-                    history: [PRE_PROMPT, ...history],
-                }), 
+                body: JSON.stringify(requestBody), 
                 signal: signal 
             });
 
@@ -826,6 +882,60 @@ async function sendMessage(userMessageOverride = null, isRegenerate = false) {
         }
         setStreamingState(false); scrollToBottom(true); 
     }
+}
+
+// 🌟 [추가] 이미지 업로드 처리 함수
+function handleImageUpload(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+        showSnackbar('이미지 파일만 첨부할 수 있습니다.');
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function(event) {
+        currentAttachedImage = {
+            name: file.name,
+            size: (file.size / 1024).toFixed(1) + 'KB',
+            base64: event.target.result // Base64 String
+        };
+        renderAttachmentPreview();
+    };
+    reader.readAsDataURL(file);
+    e.target.value = ''; // Input 초기화
+}
+
+function renderAttachmentPreview() {
+    if (!currentAttachedImage) {
+        attachmentPreviewArea.style.display = 'none';
+        attachmentPreviewArea.innerHTML = '';
+    } else {
+        attachmentPreviewArea.style.display = 'flex';
+        attachmentPreviewArea.innerHTML = `
+            <div class="attachment-card-info">
+                <div class="attachment-icon">
+                    <span class="material-symbols-rounded" style="font-size: 20px; color: var(--text-sub);">image</span>
+                </div>
+                <div class="attachment-details">
+                    <div class="attachment-name">${currentAttachedImage.name}</div>
+                    <div class="attachment-size">${currentAttachedImage.size}</div>
+                </div>
+            </div>
+            <div class="attachment-remove" id="remove-attachment-btn">
+                <span class="material-symbols-rounded" style="font-size: 18px;">close</span>
+            </div>
+        `;
+        document.getElementById('remove-attachment-btn').addEventListener('click', removeAttachedImage);
+    }
+    toggleSendButton(); // 버튼 상태 업데이트
+    autoResizeTextarea(); // 높이 재조정
+}
+
+function removeAttachedImage() {
+    currentAttachedImage = null;
+    renderAttachmentPreview();
 }
 
 // ===========================================
@@ -991,8 +1101,27 @@ if(scrollDownButton) {
     });
 }
 
-const toolAttach = document.getElementById('tool-attach');
+// 🌟 첨부 파일 기능 이벤트 연결
 if(toolAttach) { toolAttach.addEventListener('click', (e) => { e.preventDefault(); togglePlusModal(true); }); }
+// 모달의 파일 버튼 클릭 시 이미지 업로드 실행 (단순화: '파일' 버튼이 이미지 업로드 인풋을 열도록)
+const modalFileBtn = document.querySelector('.modal-grid-item[data-action="file"]');
+if(modalFileBtn) {
+    modalFileBtn.addEventListener('click', () => {
+        togglePlusModal(false);
+        imageUploadInput.click();
+    });
+}
+// 모달의 앨범 버튼도 동일하게
+if(modalAlbumBtn) {
+    modalAlbumBtn.addEventListener('click', () => {
+        togglePlusModal(false);
+        imageUploadInput.click();
+    });
+}
+if(imageUploadInput) {
+    imageUploadInput.addEventListener('change', handleImageUpload);
+}
+
 
 if(toolStudy) { toolStudy.addEventListener('click', () => { toolStudy.classList.toggle('active-blue'); }); }
 
@@ -1018,6 +1147,7 @@ window.onload = function() {
     toggleSendButton();
     autoResizeTextarea();
     
+    // PC에서 사이드바 강제 오픈 로직은 CSS 미디어 쿼리로 처리됨
     // 페이지 로드 시 항상 맨 아래로 즉시 스크롤 (타이밍 보정)
     setTimeout(() => scrollToBottom(false), 10);
     setTimeout(() => scrollToBottom(true), 100);
