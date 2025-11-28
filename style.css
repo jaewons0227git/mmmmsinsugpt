@@ -93,7 +93,6 @@ body{ margin:0; background:var(--bg-color); color:var(--text-color); min-height:
   width:100%; background:var(--bg-color); border-radius:0; border:none; display:flex; flex-direction:column; min-height:100vh; position:relative; margin: 0;
   transition: background-color 0.3s ease;
   
-  /* 🌟 [수정] 스크롤 컨테이너를 .phone 내부로 제한하여 웹사이트 전체 스크롤 방지 */
   height: 100vh; 
   overflow: hidden; 
 }
@@ -104,7 +103,7 @@ body{ margin:0; background:var(--bg-color); color:var(--text-color); min-height:
   position: fixed; top: 0; left: 0; right: 0; z-index: 100; 
   background: var(--bg-color); 
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05); 
-  transition: background-color 0.3s ease, left 0.3s ease, width 0.3s ease; /* 🌟 transition 추가 */
+  transition: background-color 0.3s ease, left 0.3s ease, width 0.3s ease; 
 }
 [data-theme="dark"] .header { box-shadow: 0 1px 3px rgba(255,255,255, 0.05); }
 
@@ -131,23 +130,14 @@ body{ margin:0; background:var(--bg-color); color:var(--text-color); min-height:
 /* Content */
 .content-wrapper{
     flex-grow:1; display:flex; flex-direction:column; 
-    overflow-y: auto; /* 🌟 여기가 유일한 스크롤 영역 */
+    overflow-y: auto; 
     padding-bottom: 0; position: relative;
     padding-top: 56px; /* Header Height */
     opacity: 0; transform: translateY(20px); 
-    transition: opacity 0.5s ease-out, transform 0.5s ease-out, margin-left 0.3s ease; /* 🌟 margin-left transition 추가 */
+    transition: opacity 0.5s ease-out, transform 0.5s ease-out, margin-left 0.3s ease; 
     scroll-behavior: auto; 
 }
 .content-wrapper.loaded { opacity: 1; transform: translateY(0); }
-
-#scroll-down-button {
-    position: fixed; right: 20px; width: 40px; height: 40px; border-radius: 50%; 
-    background-color: var(--surface-color); 
-    border: 1px solid var(--border-color);
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 90; opacity: 0; transform: translateY(10px); visibility: hidden; transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s ease, background-color 0.3s;
-}
-#scroll-down-button.visible { opacity: 1; transform: translateY(0); visibility: visible; }
-#scroll-down-button .material-symbols-rounded { color: var(--text-color); font-size: 20px; }
 
 #initial-content{
   position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 100%; max-width: 400px; display:flex; flex-direction:column; align-items:center; text-align:center; padding: 0 16px; transition: opacity 0.5s ease-in-out, visibility 0.5s ease-in-out;
@@ -180,7 +170,7 @@ body{ margin:0; background:var(--bg-color); color:var(--text-color); min-height:
 .bot-message{ align-self: flex-start; margin-top: 10px; padding: 0; color: var(--text-color); line-height: 1.4; font-size: 15px; width: 100%; }
 .bot-message .streaming-block { display: block; padding: 0; border-radius: 0; background-color: transparent; max-width: 100%; box-sizing: border-box; white-space: normal; color: var(--text-color); margin-bottom: 8px; }
 
-/* 🌟 [추가] 봇 답변 페이드인 효과 */
+/* 봇 답변 페이드인 효과 */
 @keyframes fadeInUpNode {
     from { opacity: 0; transform: translateY(5px); }
     to { opacity: 1; transform: translateY(0); }
@@ -255,7 +245,7 @@ body{ margin:0; background:var(--bg-color); color:var(--text-color); min-height:
     z-index: 20; /* 그라데이션 오버레이보다 위로 */
     opacity: 0;
     transform: translateY(100%);
-    transition: opacity 0.5s ease-out 0.2s, transform 0.5s ease-out 0.2s, all 0.2s ease-out, left 0.3s ease, width 0.3s ease; /* 🌟 left/width transition 추가 */
+    transition: opacity 0.5s ease-out 0.2s, transform 0.5s ease-out 0.2s, all 0.2s ease-out, left 0.3s ease, width 0.3s ease; 
     background-color: var(--bg-color); 
 }
 .composer.loaded { opacity: 1; transform: translateY(0); }
@@ -516,11 +506,17 @@ hr.modal-divider { border: 0; border-top: 1px solid var(--border-color); margin:
 #reset-confirm-modal h3 { font-size: 1.2em; margin: 0 0 10px 0; text-align: center; padding: 0; }
 #reset-confirm-modal p { font-size: 0.95em; color: var(--text-sub); margin-bottom: 24px; text-align: center; }
 .confirm-actions { display: flex; justify-content: space-between; gap: 10px; }
-.confirm-actions button { flex: 1; padding: 10px 15px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 15px; }
-#confirm-cancel-btn { background-color: var(--border-color); color: var(--text-color); }
-#confirm-reset-btn { background-color: var(--error-red); color: white; }
+.confirm-actions button { 
+    flex: 1; padding: 10px 15px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 15px;
+    border: 1px solid var(--border-color); transition: filter 0.2s;
+}
+.confirm-actions button:hover { filter: brightness(0.95); }
+[data-theme="dark"] .confirm-actions button:hover { filter: brightness(1.2); }
 
-/* 🌟 [추가] MinsuGPT 정보 모달 스타일 */
+#confirm-cancel-btn { background-color: var(--border-color); color: var(--text-color); }
+#confirm-reset-btn { background-color: var(--error-red); color: white; border: none; }
+
+/* MinsuGPT 정보 모달 */
 #about-modal-backdrop { align-items: flex-end; justify-content: center; }
 #about-modal { max-width: 768px; padding-top: 24px; padding-bottom: 40px; border-radius: 20px 20px 0 0; transform: translateY(100%); }
 .modal-backdrop.visible #about-modal { transform: translateY(0); }
@@ -542,7 +538,7 @@ hr.modal-divider { border: 0; border-top: 1px solid var(--border-color); margin:
     font-size: 12px; color: var(--text-sub); opacity: 0.7; 
   }
 
-/* 🌟 [추가/수정] 사이드바 (채팅 목록) 스타일 */
+/* 🌟 [수정] 사이드바 (채팅 목록) 스타일 */
 #sidebar-backdrop {
     justify-content: flex-start; /* 왼쪽 정렬 */
     align-items: stretch;
@@ -553,10 +549,12 @@ hr.modal-divider { border: 0; border-top: 1px solid var(--border-color); margin:
     height: 100%;
     background-color: var(--bg-color);
     transform: translateX(-100%);
-    transition: transform 0.3s ease-in-out;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); /* 부드러운 애니메이션 */
     display: flex;
     flex-direction: column;
     box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+    flex-shrink: 0; /* 🌟 중요: 줄어듦 방지 */
+    z-index: 110;
 }
 .modal-backdrop.visible .sidebar {
     transform: translateX(0);
@@ -671,21 +669,24 @@ hr.modal-divider { border: 0; border-top: 1px solid var(--border-color); margin:
 .sidebar-menu-item.delete-all .material-symbols-rounded { color: var(--error-red); }
 
 
-/* 🌟 [추가] 스크롤 버튼 컨테이너 위치 고정 */
+/* 🌟 [수정] 스크롤 버튼 컨테이너 위치 고정 */
+/* 중앙 하단으로 이동 (입력창 위) */
 #scroll-to-bottom-container {
-    /* 입력창 위쪽에 고정 */
     position: fixed;
-    bottom: 80px; 
-    right: 20px;
-    z-index: 1000;
+    /* 화면 가로 중앙 */
+    left: 50%;
+    transform: translateX(-50%);
+    /* 바닥에서 띄움 (입력창 높이 + 여백 고려) */
+    bottom: 100px; 
+    z-index: 95; /* 헤더(100)보다 아래, 컨텐츠보다 위 */
+    pointer-events: none; /* 컨테이너 자체는 클릭 통과 */
 }
 
-/* 🌟 [추가] 스크롤 버튼 기본 스타일 (연한 회색 테두리의 원) */
+/* 🌟 [추가] 스크롤 버튼 기본 스타일 */
 #scrollDownButton {
-    /* 전송 버튼과 유사하지만, 배경색과 테두리를 다르게 설정 */
-    background-color: var(--surface-color); /* 흰색 배경 */
-    border: 1px solid var(--border-color); /* 연한 회색 테두리 */
-    border-radius: 50%; /* 원 모양 */
+    background-color: var(--surface-color); 
+    border: 1px solid var(--border-color); 
+    border-radius: 50%;
     width: 40px;
     height: 40px;
     cursor: pointer;
@@ -694,8 +695,6 @@ hr.modal-divider { border: 0; border-top: 1px solid var(--border-color); margin:
     display: flex;
     justify-content: center;
     align-items: center;
-    
-    /* 초기 숨김 처리 */
     opacity: 0;
     pointer-events: none;
 }
@@ -704,7 +703,6 @@ hr.modal-divider { border: 0; border-top: 1px solid var(--border-color); margin:
     transform: scale(1.05);
 }
 
-/* 🌟 [추가] 버튼 표시/숨김 클래스 */
 #scrollDownButton.hidden {
     opacity: 0;
     pointer-events: none;
@@ -715,19 +713,14 @@ hr.modal-divider { border: 0; border-top: 1px solid var(--border-color); margin:
     pointer-events: auto;
 }
 
-/* 🌟 [핵심] 전송 버튼과 동일한 CSS 화살표 구현 */
 #scrollDownButton::after {
     content: '';
     display: block;
-    width: 8px; /* 화살표 너비 */
-    height: 8px; /* 화살표 높이 */
-    
-    /* 전송 버튼 아이콘의 색상과 유사하게 설정 */
+    width: 8px; 
+    height: 8px; 
     border: 2px solid var(--text-sub); 
     border-top: none; 
     border-left: none; 
-    
-    /* 아래를 가리키는 화살표 모양으로 회전 및 위치 조정 */
     transform: translateY(-2px) rotate(45deg); 
 }
 
@@ -736,48 +729,72 @@ hr.modal-divider { border: 0; border-top: 1px solid var(--border-color); margin:
 /* ================================================================= */
 
 @media (min-width: 769px) {
-    /* 1. 사이드바가 모달이 아닌 패널처럼 동작 */
+    /* 1. 사이드바 백드롭: 투명하게 만들고 공간만 차지하지 않게 설정 */
     #sidebar-backdrop {
-        background-color: transparent !important; /* 어두운 배경 제거 */
-        width: 0; /* 클릭 이벤트가 본문을 가리지 않도록 */
-        transition: none; /* 배경색 전환 제거 */
-        z-index: 90; /* 헤더보다 아래, 컨텐츠보다 위 */
+        background-color: transparent !important;
+        width: 0;
+        transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+        z-index: 90;
+        position: fixed;
+        top: 0; bottom: 0; left: 0;
     }
 
+    /* 사이드바가 열렸을 때 백드롭이 공간(300px)을 인식하도록 함 */
     #sidebar-backdrop.visible {
-        width: 300px; /* 열렸을 때는 사이드바 영역만큼 차지 */
+        width: 300px;
     }
 
+    /* 사이드바: 기본 숨김 상태에서 시작 */
     .sidebar {
-        /* 사이드바 자체는 상호작용 가능해야 함 */
-        pointer-events: auto;
+        transform: translateX(-100%);
         border-right: 1px solid var(--border-color);
-        box-shadow: none; /* 그림자 제거하고 경계선으로 대체 */
+        box-shadow: none;
+    }
+    
+    /* 사이드바 열림: 제자리로 이동 */
+    .modal-backdrop.visible .sidebar {
+        transform: translateX(0);
     }
 
-    /* 2. 사이드바가 열렸을 때 (body에 sidebar-open 클래스가 있을 때) */
-    
-    /* 헤더 밀기 */
+    /* 2. 헤더 밀기 애니메이션 */
+    .header {
+        transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1), width 0.3s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.3s ease;
+        will-change: left, width; 
+    }
+
     body.sidebar-open .header {
         left: 300px;
         width: calc(100% - 300px);
     }
 
-    /* 메인 컨텐츠 밀기 */
+    /* 3. 메인 컨텐츠 밀기 */
+    .content-wrapper {
+        transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
     body.sidebar-open .content-wrapper {
         margin-left: 300px;
-        width: auto; /* flex-grow가 처리하지만 명시 */
+    }
+    
+    /* 4. 입력창(Composer) 및 그라데이션 밀기 */
+    .composer, .composer-gradient-overlay {
+        transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1), width 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s, opacity 0.3s;
     }
 
-    /* 입력창(Composer) 밀기 */
     body.sidebar-open .composer {
         left: 300px;
         width: calc(100% - 300px);
     }
     
-    /* 그라데이션 오버레이도 같이 밀기 */
     body.sidebar-open .composer-gradient-overlay {
         left: 300px;
         width: calc(100% - 300px);
+    }
+
+    /* 5. 🌟 스크롤 버튼 중앙 위치 보정 */
+    /* 사이드바가 열리면 입력창의 중앙도 오른쪽으로 이동하므로 버튼도 이동 */
+    body.sidebar-open #scroll-to-bottom-container {
+        /* 기존 50%에서 + 150px (사이드바 절반) 만큼 이동 */
+        left: calc(50% + 150px);
+        transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 }
