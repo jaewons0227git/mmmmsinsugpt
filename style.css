@@ -93,7 +93,7 @@ body{ margin:0; background:var(--bg-color); color:var(--text-color); min-height:
   width:100%; background:var(--bg-color); border-radius:0; border:none; display:flex; flex-direction:column; min-height:100vh; position:relative; margin: 0;
   transition: background-color 0.3s ease;
   
-  /* 🌟 [수정] 스크롤 컨테이너를 .phone 내부로 제한하여 웹사이트 전체 스크롤 방지 */
+  /* 🌟 스크롤 컨테이너를 .phone 내부로 제한하여 웹사이트 전체 스크롤 방지 */
   height: 100vh; 
   overflow: hidden; 
 }
@@ -104,7 +104,8 @@ body{ margin:0; background:var(--bg-color); color:var(--text-color); min-height:
   position: fixed; top: 0; left: 0; right: 0; z-index: 100; 
   background: var(--bg-color); 
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05); 
-  transition: background-color 0.3s ease, left 0.3s ease, width 0.3s ease; /* 🌟 transition 추가 */
+  /* 🌟 [수정] left와 width의 부드러운 전환을 위해 transition 유지 */
+  transition: background-color 0.3s ease, left 0.3s ease, width 0.3s ease; 
 }
 [data-theme="dark"] .header { box-shadow: 0 1px 3px rgba(255,255,255, 0.05); }
 
@@ -135,7 +136,8 @@ body{ margin:0; background:var(--bg-color); color:var(--text-color); min-height:
     padding-bottom: 0; position: relative;
     padding-top: 56px; /* Header Height */
     opacity: 0; transform: translateY(20px); 
-    transition: opacity 0.5s ease-out, transform 0.5s ease-out, margin-left 0.3s ease; /* 🌟 margin-left transition 추가 */
+    /* 🌟 [수정] margin-left와 width의 부드러운 전환을 위해 transition 유지 */
+    transition: opacity 0.5s ease-out, transform 0.5s ease-out, margin-left 0.3s ease, width 0.3s ease; 
     scroll-behavior: auto; 
 }
 .content-wrapper.loaded { opacity: 1; transform: translateY(0); }
@@ -180,7 +182,7 @@ body{ margin:0; background:var(--bg-color); color:var(--text-color); min-height:
 .bot-message{ align-self: flex-start; margin-top: 10px; padding: 0; color: var(--text-color); line-height: 1.4; font-size: 15px; width: 100%; }
 .bot-message .streaming-block { display: block; padding: 0; border-radius: 0; background-color: transparent; max-width: 100%; box-sizing: border-box; white-space: normal; color: var(--text-color); margin-bottom: 8px; }
 
-/* 🌟 [추가] 봇 답변 페이드인 효과 */
+/* 🌟 봇 답변 페이드인 효과 */
 @keyframes fadeInUpNode {
     from { opacity: 0; transform: translateY(5px); }
     to { opacity: 1; transform: translateY(0); }
@@ -255,7 +257,8 @@ body{ margin:0; background:var(--bg-color); color:var(--text-color); min-height:
     z-index: 20; /* 그라데이션 오버레이보다 위로 */
     opacity: 0;
     transform: translateY(100%);
-    transition: opacity 0.5s ease-out 0.2s, transform 0.5s ease-out 0.2s, all 0.2s ease-out, left 0.3s ease, width 0.3s ease; /* 🌟 left/width transition 추가 */
+    /* 🌟 [수정] left/width transition 유지 */
+    transition: opacity 0.5s ease-out 0.2s, transform 0.5s ease-out 0.2s, all 0.2s ease-out, left 0.3s ease, width 0.3s ease; 
     background-color: var(--bg-color); 
 }
 .composer.loaded { opacity: 1; transform: translateY(0); }
@@ -268,6 +271,8 @@ body{ margin:0; background:var(--bg-color); color:var(--text-color); min-height:
     background: linear-gradient(to top, var(--bg-color) 20%, rgba(255,255,255,0) 100%);
     z-index: 15; /* 콘텐츠 위, 컴포저 아래 */
     pointer-events: none; /* 클릭 통과 */
+    /* 🌟 [추가] left/width transition 추가 */
+    transition: left 0.3s ease, width 0.3s ease; 
 }
 [data-theme="dark"] .composer-gradient-overlay {
     background: linear-gradient(to top, var(--bg-color) 20%, rgba(18,18,18,0) 100%);
@@ -456,7 +461,7 @@ body{ margin:0; background:var(--bg-color); color:var(--text-color); min-height:
 /* Modal Styles */
 .modal-backdrop { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--modal-overlay); opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease; z-index: 1000; display: flex; justify-content: center; align-items: flex-end; }
 .modal-backdrop.visible { opacity: 1; visibility: visible; }
-.modal { width: 100%; max-width: 768px; background-color: var(--bg-color); border-top-left-radius: 20px; border-top-right-radius: 20px; padding: 24px 16px 40px 16px; transform: translateY(100%); transition: transform 0.3s ease-out; color: var(--text-color); }
+.modal { width: 100%; max-width: 768px; background-color: var(--bg-color); border-top-left-radius: 20px; border-top-right-radius: 20px; padding: 24px 16px 40px 16px; transform: translateY(100%); transition: transform 0.3s ease-out; color: var(--text-color); margin-left: auto; margin-right: auto; }
 .modal-backdrop.visible .modal { transform: translateY(0); }
 .modal-handle { width: 40px; height: 5px; background-color: var(--border-color); border-radius: 5px; margin: 0 auto 20px auto; }
 
@@ -510,15 +515,32 @@ hr.modal-divider { border: 0; border-top: 1px solid var(--border-color); margin:
 #reset-chat-button { color: var(--error-red); padding-left: 10px; padding-right: 10px; }
 #reset-chat-button .modal-option-icon { display: none; }
 
-#reset-confirm-modal-backdrop { align-items: center; z-index: 1010; }
-#reset-confirm-modal { max-width: 320px; border-radius: 12px; padding: 24px; transform: translateY(0); transition: opacity 0.3s ease, transform 0.3s ease; }
-#reset-confirm-modal .modal-handle { display: none; }
+/* 🌟 [수정/추가] 작은 모달 (사이드바 액션용) 중앙 정렬 및 기본 스타일 */
+#reset-confirm-modal-backdrop,
+#delete-all-confirm-modal-backdrop,
+#rename-modal-backdrop,
+#delete-chat-confirm-modal-backdrop { align-items: center; z-index: 1010; }
+
+.modal.small-modal { 
+    max-width: 320px; border-radius: 12px; padding: 24px; 
+    transform: translateY(0) !important; /* 항상 중앙에서 시작 */
+    transition: opacity 0.3s ease, transform 0.3s ease; 
+    margin: auto;
+}
+.modal.small-modal .modal-handle { display: none; }
+.modal.small-modal h3 { font-size: 1.2em; margin: 0 0 10px 0; text-align: center; padding: 0; }
+.modal.small-modal p { font-size: 0.95em; color: var(--text-sub); margin-bottom: 24px; text-align: center; }
+.modal.small-modal .confirm-actions { display: flex; justify-content: space-between; gap: 10px; }
+.modal.small-modal .confirm-actions button { flex: 1; padding: 10px 15px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 15px; }
+.modal.small-modal .delete-action { background-color: var(--error-red); color: white; }
+.modal.small-modal .confirm-actions button:not(.delete-action) { background-color: var(--border-color); color: var(--text-color); }
+.modal.small-modal #rename-input { width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 16px; color: var(--text-color); background-color: var(--surface-secondary); margin-bottom: 10px; outline: none; transition: border-color 0.2s; }
+.modal.small-modal #rename-input:focus { border-color: var(--primary-blue); }
+
+/* 기존 reset confirm 모달 수정 */
+#reset-confirm-modal { max-width: 320px; border-radius: 12px; padding: 24px; }
 #reset-confirm-modal h3 { font-size: 1.2em; margin: 0 0 10px 0; text-align: center; padding: 0; }
-#reset-confirm-modal p { font-size: 0.95em; color: var(--text-sub); margin-bottom: 24px; text-align: center; }
-.confirm-actions { display: flex; justify-content: space-between; gap: 10px; }
-.confirm-actions button { flex: 1; padding: 10px 15px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 15px; }
-#confirm-cancel-btn { background-color: var(--border-color); color: var(--text-color); }
-#confirm-reset-btn { background-color: var(--error-red); color: white; }
+
 
 /* 🌟 [추가] MinsuGPT 정보 모달 스타일 */
 #about-modal-backdrop { align-items: flex-end; justify-content: center; }
@@ -542,7 +564,7 @@ hr.modal-divider { border: 0; border-top: 1px solid var(--border-color); margin:
     font-size: 12px; color: var(--text-sub); opacity: 0.7; 
   }
 
-/* 🌟 [추가/수정] 사이드바 (채팅 목록) 스타일 */
+/* 🌟 사이드바 (채팅 목록) 스타일 */
 #sidebar-backdrop {
     justify-content: flex-start; /* 왼쪽 정렬 */
     align-items: stretch;
@@ -715,7 +737,7 @@ hr.modal-divider { border: 0; border-top: 1px solid var(--border-color); margin:
     pointer-events: auto;
 }
 
-/* 🌟 [핵심] 전송 버튼과 동일한 CSS 화살표 구현 */
+/* 🌟 전송 버튼과 동일한 CSS 화살표 구현 */
 #scrollDownButton::after {
     content: '';
     display: block;
@@ -732,50 +754,47 @@ hr.modal-divider { border: 0; border-top: 1px solid var(--border-color); margin:
 }
 
 /* ================================================================= */
-/* 🌟🌟🌟 [PC 전용] 사이드바 PUSH 효과 및 스크롤 개선 🌟🌟🌟 */
+/* 🌟🌟🌟 [PC 전용] 사이드바 PUSH 효과 및 스크롤 개선 (수정) 🌟🌟🌟 */
 /* ================================================================= */
 
 @media (min-width: 769px) {
     /* 1. 사이드바가 모달이 아닌 패널처럼 동작 */
     #sidebar-backdrop {
         background-color: transparent !important; /* 어두운 배경 제거 */
-        width: 0; /* 클릭 이벤트가 본문을 가리지 않도록 */
-        transition: none; /* 배경색 전환 제거 */
-        z-index: 90; /* 헤더보다 아래, 컨텐츠보다 위 */
+        width: 0; /* 닫혔을 때는 0 */
+        transition: width 0.3s ease; /* 🌟 [수정] width transition 추가 */
+        z-index: 90; 
+        position: fixed; top: 0; left: 0; height: 100%; /* 포지션 확실히 정의 */
     }
 
     #sidebar-backdrop.visible {
-        width: 300px; /* 열렸을 때는 사이드바 영역만큼 차지 */
+        width: 300px; /* 열렸을 때는 사이드바 너비 */
     }
-
+    
     .sidebar {
-        /* 사이드바 자체는 상호작용 가능해야 함 */
-        pointer-events: auto;
-        border-right: 1px solid var(--border-color);
-        box-shadow: none; /* 그림자 제거하고 경계선으로 대체 */
+        /* 🌟 [수정] max-width를 없애서 300px을 유지 */
+        max-width: none;
+        box-shadow: none; 
     }
 
     /* 2. 사이드바가 열렸을 때 (body에 sidebar-open 클래스가 있을 때) */
     
-    /* 헤더 밀기 */
+    /* 🌟 [수정] 헤더, 컨텐츠, 입력창 부드럽게 밀기 */
     body.sidebar-open .header {
         left: 300px;
         width: calc(100% - 300px);
     }
 
-    /* 메인 컨텐츠 밀기 */
     body.sidebar-open .content-wrapper {
         margin-left: 300px;
-        width: auto; /* flex-grow가 처리하지만 명시 */
+        width: auto; 
     }
 
-    /* 입력창(Composer) 밀기 */
     body.sidebar-open .composer {
         left: 300px;
         width: calc(100% - 300px);
     }
     
-    /* 그라데이션 오버레이도 같이 밀기 */
     body.sidebar-open .composer-gradient-overlay {
         left: 300px;
         width: calc(100% - 300px);
