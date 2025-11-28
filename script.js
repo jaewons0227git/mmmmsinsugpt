@@ -55,6 +55,21 @@ const sidebarExport = document.getElementById('sidebar-export');
 const sidebarImport = document.getElementById('sidebar-import');
 const importFileInput = document.getElementById('import-file-input');
 
+// 🌟 [신규] 모달 관련 요소 정의
+const renameModalBackdrop = document.getElementById('rename-modal-backdrop');
+const renameInput = document.getElementById('rename-input');
+const renameCancelBtn = document.getElementById('rename-cancel-btn');
+const renameConfirmBtn = document.getElementById('rename-confirm-btn');
+
+const deleteModalBackdrop = document.getElementById('delete-modal-backdrop');
+const deleteModalTitle = document.getElementById('delete-modal-title');
+const deleteModalDesc = document.getElementById('delete-modal-desc');
+const deleteCancelBtn = document.getElementById('delete-cancel-btn');
+const deleteConfirmBtn = document.getElementById('delete-confirm-btn');
+
+let targetSessionIdForAction = null;
+let deleteActionType = null; // 'single' or 'all'
+
 // 🎯 백엔드 엔드포인트
 const BACKEND_ENDPOINT = "https://jaewondev.pythonanywhere.com/ask"; 
 const IMAGE_ENDPOINT = "https://jaewondev.pythonanywhere.com/generate-image"; 
@@ -208,28 +223,60 @@ function toggleResetConfirmModal(show) {
     if (show) toggleSettingsModal(false); 
 }
 
-// 🌟 사이드바 토글 함수 (PC Push 효과 포함)
+// 🌟 [신규] PC 확인 및 모달 제어 함수
+const isPC = () => window.innerWidth >= 769;
+
+function openRenameModal(id) {
+    targetSessionIdForAction = id;
+    const session = sessions.find(s => s.id === id);
+    if (session) {
+        renameInput.value = session.title;
+        renameModalBackdrop.classList.add('visible');
+        renameInput.focus();
+    }
+}
+
+function openDeleteModal(type, id = null) {
+    deleteActionType = type;
+    targetSessionIdForAction = id;
+    if (type === 'all') {
+        deleteModalTitle.textContent = "전체 삭제";
+        deleteModalDesc.textContent = "정말로 모든 대화 기록을 삭제하시겠습니까?";
+    } else {
+        deleteModalTitle.textContent = "채팅 삭제";
+        deleteModalDesc.textContent = "이 채팅을 삭제하시겠습니까?";
+    }
+    deleteModalBackdrop.classList.add('visible');
+}
+
+function closeCustomModals() {
+    renameModalBackdrop.classList.remove('visible');
+    deleteModalBackdrop.classList.remove('visible');
+    targetSessionIdForAction = null;
+    deleteActionType = null;
+}
+
+// 🌟 [수정] 사이드바 토글 함수 (PC Push 효과 포함)
 function toggleSidebar(show) {
     if (show === undefined) { 
-        // 토글 동작
         const isVisible = sidebarBackdrop.classList.contains('visible');
         if (isVisible) {
             sidebarBackdrop.classList.remove('visible');
-            document.body.classList.remove('sidebar-open'); // PC Push용 클래스 제거
+            document.body.classList.remove('sidebar-open');
         } else {
             renderSidebarList();
             sidebarBackdrop.classList.add('visible');
-            document.body.classList.add('sidebar-open'); // PC Push용 클래스 추가
+            document.body.classList.add('sidebar-open');
         }
     }
     else if (show) { 
         renderSidebarList(); 
         sidebarBackdrop.classList.add('visible'); 
-        document.body.classList.add('sidebar-open'); // PC Push용 클래스 추가
+        document.body.classList.add('sidebar-open');
     }
     else { 
         sidebarBackdrop.classList.remove('visible'); 
-        document.body.classList.remove('sidebar-open'); // PC Push용 클래스 제거
+        document.body.classList.remove('sidebar-open');
     }
 }
 
@@ -295,7 +342,8 @@ function startNewChat(skipRender = false) {
     saveSessions();
     if (!skipRender) {
         loadCurrentSession();
-        toggleSidebar(false);
+        // 모바일일때만 닫음
+        if (!isPC()) toggleSidebar(false);
     }
 }
 
@@ -310,10 +358,19 @@ function loadCurrentSession() {
     renderChatMessages();
 }
 
+// 🌟 [수정] 삭제, 이름변경 로직 (모달 사용)
 function deleteSession(id, e) {
     if(e) e.stopPropagation();
-    if(!confirm('이 채팅을 삭제하시겠습니까?')) return;
-    
+    openDeleteModal('single', id);
+}
+
+function renameSession(id, e) {
+    if(e) e.stopPropagation();
+    openRenameModal(id);
+}
+
+// 실제 삭제 실행 함수
+function executeDeleteSession(id) {
     sessions = sessions.filter(s => s.id !== id);
     saveSessions();
     
@@ -322,19 +379,17 @@ function deleteSession(id, e) {
             currentSessionId = sessions[0].id;
             loadCurrentSession();
         } else {
-            startNewChat();
+            startNewChat(false);
         }
     }
     renderSidebarList();
+    if (!isPC()) toggleSidebar(false);
 }
 
-function renameSession(id, e) {
-    if(e) e.stopPropagation();
+// 실제 이름 변경 실행 함수
+function executeRenameSession(id, newTitle) {
     const session = sessions.find(s => s.id === id);
-    if (!session) return;
-    
-    const newTitle = prompt('채팅 이름 변경:', session.title);
-    if (newTitle) {
+    if (session && newTitle) {
         session.title = newTitle;
         saveSessions();
         renderSidebarList();
@@ -354,6 +409,7 @@ function updateCurrentSession() {
     }
 }
 
+// 🌟 [수정] 사이드바 리스트 렌더링 (PC 닫힘 방지)
 function renderSidebarList() {
     sidebarList.innerHTML = '';
     const filter = sidebarSearchInput.value.toLowerCase();
@@ -382,7 +438,7 @@ function renderSidebarList() {
         el.addEventListener('click', () => {
             currentSessionId = session.id;
             loadCurrentSession();
-            toggleSidebar(false);
+            if (!isPC()) toggleSidebar(false);
         });
         
         const editBtn = el.querySelector('.edit');
@@ -424,13 +480,17 @@ function renderChatMessages() {
     setTimeout(() => scrollToBottom(false), 0);
 }
 
+// 🌟 [수정] 전체 삭제 로직
 function resetAllChats() {
-    if(!confirm('정말로 모든 대화 기록을 삭제하시겠습니까?')) return;
+    openDeleteModal('all');
+}
+
+function executeResetAllChats() {
     sessions = [];
     localStorage.removeItem(SESSIONS_STORAGE_KEY);
     startNewChat();
-    toggleSidebar(false);
     showSnackbar('모든 대화가 삭제되었습니다.');
+    if (!isPC()) toggleSidebar(false);
 }
 
 // ===========================================
@@ -444,8 +504,6 @@ function resetAllChats() {
 function scrollToBottom(smooth = true) {
     if (!contentWrapper) return;
     
-    // JS 제어로 스크롤
-    // contentWrapper는 이제 유일한 스크롤 컨테이너입니다.
     if (smooth) {
         contentWrapper.scrollTo({ top: contentWrapper.scrollHeight, behavior: 'smooth' });
     } else {
@@ -505,8 +563,8 @@ function autoResizeTextarea() {
 
     const composerHeight = composer.offsetHeight;
     if(scrollDownButton) {
-        // 스크롤 버튼 위치 조정
-        scrollDownButton.style.bottom = `${composerHeight + 20}px`;
+        // 스크롤 버튼 위치 조정 (CSS에서 제어하지만 JS에서 보조 가능 시 사용)
+        // 현재는 CSS fixed로 제어함
     }
     chatMessages.style.paddingBottom = `${composerHeight + 20}px`;
 }
@@ -811,7 +869,6 @@ async function sendMessage(userMessageOverride = null, isRegenerate = false) {
                 } else {
                     fullResponse += chunk;
                     streamingBlockElement.innerHTML = typeof marked !== 'undefined' ? marked.parse(fullResponse) : fullResponse;
-                    // 🌟 [핵심] 스트리밍 중에는 무조건 맨 아래로 즉시 이동 (부드러움 X, 즉시)
                     contentWrapper.scrollTop = contentWrapper.scrollHeight;
                 }
             }
@@ -887,8 +944,11 @@ function importChats(e) {
                     currentSessionId = sessions[0].id;
                     loadCurrentSession();
                 }
-                toggleSidebar(false);
                 showSnackbar('채팅 내역을 불러왔습니다.');
+                
+                // 🌟 PC가 아닐 때만 닫기
+                if (!isPC()) toggleSidebar(false);
+
             } else {
                 alert('잘못된 파일 형식입니다.');
             }
@@ -904,6 +964,29 @@ function importChats(e) {
 // ===========================================
 // 6. 이벤트 리스너
 // ===========================================
+
+// 🌟 [신규] 모달 이벤트 리스너
+renameCancelBtn.addEventListener('click', closeCustomModals);
+renameConfirmBtn.addEventListener('click', () => {
+    const newTitle = renameInput.value.trim();
+    if (newTitle && targetSessionIdForAction) {
+        executeRenameSession(targetSessionIdForAction, newTitle);
+        closeCustomModals();
+    }
+});
+renameModalBackdrop.addEventListener('click', (e) => { if (e.target === renameModalBackdrop) closeCustomModals(); });
+
+deleteCancelBtn.addEventListener('click', closeCustomModals);
+deleteConfirmBtn.addEventListener('click', () => {
+    if (deleteActionType === 'all') {
+        executeResetAllChats();
+    } else if (deleteActionType === 'single' && targetSessionIdForAction) {
+        executeDeleteSession(targetSessionIdForAction);
+    }
+    closeCustomModals();
+});
+deleteModalBackdrop.addEventListener('click', (e) => { if (e.target === deleteModalBackdrop) closeCustomModals(); });
+
 
 window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
     if (localStorage.getItem(THEME_KEY) === 'auto') { applyTheme('auto'); }
@@ -984,7 +1067,6 @@ confirmResetBtn.addEventListener('click', () => {
 resetConfirmModalBackdrop.addEventListener('click', (e) => { if (e.target === resetConfirmModalBackdrop) toggleResetConfirmModal(false); });
 
 // 스크롤 및 스크롤 다운 버튼 로직
-// 🌟 contentWrapper가 이제 실제 스크롤 이벤트를 발생시킵니다.
 contentWrapper.addEventListener('scroll', () => {
     const distanceFromBottom = contentWrapper.scrollHeight - contentWrapper.scrollTop - contentWrapper.clientHeight;
     
@@ -1014,13 +1096,19 @@ if(toolAttach) { toolAttach.addEventListener('click', (e) => { e.preventDefault(
 if(toolStudy) { toolStudy.addEventListener('click', () => { toolStudy.classList.toggle('active-blue'); }); }
 
 // 🌟 사이드바 및 새 기능 이벤트 리스너
-menuButton.addEventListener('click', () => toggleSidebar()); // 토글 동작으로 변경
+menuButton.addEventListener('click', () => toggleSidebar()); // 토글 동작
 sidebarClose.addEventListener('click', () => toggleSidebar(false));
 sidebarBackdrop.addEventListener('click', (e) => { if(e.target === sidebarBackdrop) toggleSidebar(false); });
 sidebarNewChat.addEventListener('click', () => startNewChat());
 sidebarSearchInput.addEventListener('input', renderSidebarList);
 sidebarDeleteAll.addEventListener('click', resetAllChats);
-sidebarExport.addEventListener('click', exportChats);
+
+// 🌟 [수정] 내보내기/가져오기 리스너 (PC 닫힘 방지)
+sidebarExport.addEventListener('click', () => {
+    exportChats();
+    if (!isPC()) toggleSidebar(false);
+});
+
 sidebarImport.addEventListener('click', () => importFileInput.click());
 importFileInput.addEventListener('change', importChats);
 
@@ -1031,11 +1119,17 @@ importFileInput.addEventListener('change', importChats);
 window.onload = function() {
     loadTheme();
     loadUIStyle(); 
-    loadSessions(); // 🌟 loadChatHistory 대신 loadSessions 사용
+    loadSessions(); 
     toggleSendButton();
     autoResizeTextarea();
     
-    // 페이지 로드 시 항상 맨 아래로 즉시 스크롤 (타이밍 보정)
+    // 🌟 [추가] PC일 경우 기본적으로 사이드바 열기
+    if (isPC()) {
+        setTimeout(() => {
+            toggleSidebar(true);
+        }, 100);
+    }
+    
     setTimeout(() => scrollToBottom(false), 10);
     setTimeout(() => scrollToBottom(true), 100);
     animateUIOnLoad();
