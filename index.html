@@ -1,339 +1,118 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MinsuGPT</title>
-    
-<link rel="icon" href="https://i.postimg.cc/MKBHwqWk/logogogo.png" type="image/png">
-    
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Elms+Sans:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/icon?family=Material+Symbols+Rounded" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    
-    <style>
-        .header-title a {
-    text-decoration: none; /* 밑줄 제거 */
-    color: inherit;        /* 원래 글자색 유지 */
-    cursor: pointer;       /* 마우스 올렸을 때 손가락 모양 */
-}
-        :root{
-            --bg-gradient: linear-gradient(135deg, #ffc0d3 0%, #ffb3c6 25%, #c7d7ff 75%, #a8c5ff 100%);
-            --accent:#111827; 
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans KR', 'Helvetica Neue', Arial, sans-serif;
-            --header-height: 56px; 
-            --delay-img: 0.1s;
-            --delay-h1: 0.3s;
-            --delay-p: 0.5s;
-            --delay-input: 0.7s;
-            --hide-duration: 0.3s; 
-            --transition-duration: 0.5s;
-            --glow-color: rgba(220, 220, 220, 0.4); 
-            --border-color: #d0d0d0; 
-            --pink-accent: #ff69b4; /* 핑크색 정의 */
-        }
+  <meta charset="UTF-8">
+  <title>서버 점검중</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-        /* 폰트 적용 */
-        body :is(.header-title, .plus-btn, .action-btn, .message-text, .input-container textarea, .modal-grid-item, .modal-option, .thinking-indicator-text, button) {
-            font-family: 'Elms Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans KR', 'Helvetica Neue', Arial, sans-serif;
-        }
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+        "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+    }
 
-        /* Material Symbols 아이콘 스타일 */
-        .material-symbols-rounded {
-          font-family: 'Material Symbols Rounded';
-          font-weight: normal; font-style: normal; font-size: 24px; line-height: 1; letter-spacing: normal; text-transform: none; display: inline-block; white-space: nowrap; word-wrap: normal; direction: ltr; -webkit-font-feature-settings: 'liga'; -webkit-font-smoothing: antialiased;
-          font-variation-settings: 'FILL' 0, 'wght' 500, 'GRAD' 0, 'opsz' 24;
-        }
-        
-        /* 전체 레이아웃 및 중앙 정렬 */
-        *{ box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
-        body{
-            margin:0; 
-            /* PC 기본 배경: 그라데이션 유지 */
-            background: var(--bg-gradient); 
-            color:var(--accent); min-height:100vh;
-            padding:0; overflow: hidden; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            flex-direction: column;
-        }
-        
-        /* 모바일 환경 (768px 이하): 배경색 흰색으로 변경 */
-        @media (max-width: 768px) {
-            body {
-                background: #ffffff; /* 모바일 배경색 흰색 */
-            }
-        }
-        
-        .phone{
-            width:100%; min-height:100vh; position:relative; margin: 0;
-            display:flex; flex-direction:column;
-        }
-        
-        /* 헤더 스타일 */
-        .header{
-            display:flex; justify-content:space-between; align-items:center; padding:10px 16px; 
-            height: var(--header-height); 
-            border-bottom:none;
-            position: fixed; top: 0; left: 0; right: 0; 
-            z-index: 1000; 
-            background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(10px); box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05); 
-        }
-        .header-icon{ width:32px; height:32px; display:flex; align-items:center; justify-content:center; color:#111827; cursor: pointer; flex-shrink: 0; }
-        .header-left-group { display: flex; align-items: center; }
-        .header-title { font-size: 18px; font-weight: 600; color: var(--accent); margin-left: 8px; flex-shrink: 0; }
-        .header-center { text-align: left; display: flex; justify-content: flex-start; align-items: center; margin-left: 10px; }
-        .header-center > .plus-btn { margin: 0; }
-        .plus-btn{ background-color:#f1f4ff; color:#1d6fef; font-weight:600; padding:4px 10px; border-radius:16px; display:flex; align-items:center; gap:4px; font-size:12px; cursor: pointer; line-height: 1.2; }
+    body {
+      height: 100vh;
+      background: linear-gradient(135deg, #0b74ff, #5fa8ff);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
 
-        /* 메인 콘텐츠 영역 */
-        main {
-            padding-top: var(--header-height); 
-            padding-bottom: 0; 
-            display: flex; flex-direction: column; align-items: center; 
-            justify-content: center; 
-            width: 100%; 
-            flex-grow: 1; 
-            text-align: center;
-            transform: translateY(-20px); 
-            transition: opacity 0.5s ease-out, transform 0.5s ease-out;
-        }
-        
-        /* 페이지 접속 시 애니메이션 */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        .top-image, h1, p, .message-input-container { opacity: 0; animation: fadeIn 0.6s ease-out forwards; font-family: 'Elms Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans KR', 'Helvetica Neue', Arial, sans-serif; transition: opacity 0.5s ease-out, transform 0.5s ease-out; }
-        
-        /* 중앙 콘텐츠 간격 0 설정 */
-        .top-image { max-width: 100px; height: auto; margin-bottom: 0px; flex-shrink: 0; animation-delay: var(--delay-img); }
-        h1 { 
-            color: #333; /* PC 기본 색상: #333 유지 */
-            font-size: 2.5em; margin-bottom: 0px; 
-            line-height: 1.1; white-space: nowrap; overflow: hidden; animation-delay: var(--delay-h1);
-            padding: 0 10px; display: block; width: 100%;
-        }
-        
-        /* 모바일 환경 (768px 이하): H1 텍스트에 그라데이션 적용 */
-        @media (max-width: 768px) {
-            h1 {
-                background-image: var(--bg-gradient); /* 배경 그라데이션 사용 */
-                -webkit-background-clip: text; /* 텍스트 클립 */
-                background-clip: text;
-                color: transparent; /* 텍스트 색상을 투명하게 */
-            }
-        }
-        
-        p { 
-            color: #555; font-size: 1.2em; margin-bottom: 0px; 
-            line-height: 1.1; white-space: nowrap; overflow: hidden; animation-delay: var(--delay-p);
-            padding: 0 10px; display: block; width: 100%;
-        }
+    .maintenance-container {
+      background: white;
+      width: min(420px, 92%);
+      padding: 40px 26px;
+      border-radius: 18px;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.25);
+      text-align: center;
+      animation: fadeIn 0.4s ease;
+    }
 
-        /* 메시지 입력창 스타일 */
-        .message-input-container {
-            width: 90%; max-width: 600px; display: flex; align-items: center; padding: 5px 5px 5px 20px; 
-            /* PC/모바일 관계없이 핑크색 테두리 적용 */
-            border: 1px solid var(--pink-accent); 
-            border-radius: 25px; 
-            background-color: #ffffff; 
-            box-shadow: 0 0 10px var(--glow-color); 
-            cursor: pointer; 
-            transition: all var(--transition-duration) cubic-bezier(0.4, 0, 0.2, 1), 
-                        border var(--transition-duration) ease-out, 
-                        box-shadow var(--transition-duration) ease-out; 
-            z-index: 10; animation-delay: var(--delay-input);
-            position: relative; 
-            margin-top: 10px;
-        }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
 
+    .logo {
+      width: 120px;
+      margin-bottom: 20px;
+    }
 
-        /* 내부 요소 숨김 transition */
-        .message-input-container input[type="text"], .message-input-container .send-button, .message-input-container input[type="text"]::placeholder {
-            transition: opacity var(--hide-duration) ease-out;
-        }
-        /* 내부 요소 숨김 클래스 */
-        .message-input-container.hiding-content input[type="text"], .message-input-container.hiding-content .send-button {
-            opacity: 0 !important;
-        }
-        
-        /* 클릭 시 전체 화면 전환 스타일 (모바일 화면 꽉 채우기) */
-        .message-input-container.full-screen-transition {
-            width: 100vw !important; 
-            height: calc(100vh - var(--header-height)) !important; 
-            top: var(--header-height) !important; 
-            left: 0 !important;
-            
-            max-width: none; border-radius: 0; padding: 0; 
-            
-            border: none; 
-            box-shadow: none; 
-            
-            background-color: #ffffff; 
-            z-index: 999; 
-        }
+    h1 {
+      font-size: 1.8rem;
+      margin-bottom: 10px;
+      color: #111;
+    }
 
-        /* 입력 필드 및 버튼 스타일 (나머지는 유지) */
-        .message-input-container input[type="text"] { flex-grow: 1; border: none; outline: none; padding: 8px 10px; font-size: 1.1em; color: #333; background-color: transparent; min-width: 0; }
-        .message-input-container input[type="text"]::placeholder { color: #b0b0b0; font-size: 1em; }
-        
-        /* 전송 버튼 스타일 (PC/모바일 관계없이 핑크색 적용) */
-        .message-input-container .send-button { 
-            width: 40px; height: 40px; border: none; border-radius: 50%; 
-            background-color: var(--pink-accent); /* 핑크색 버튼 */
-            color: #ffffff; font-size: 1.3em; display: flex; align-items: center; justify-content: center; margin-left: 0; margin-right: 5px; cursor: pointer; transition: background-color 0.2s; box-shadow: none; flex-shrink: 0; 
-        }
-        .message-input-container .send-button:hover { 
-            background-color: #e6529c; /* 핑크색 호버 */
-        }
+    p {
+      color: #555;
+      font-size: 1rem;
+      line-height: 1.6;
+      margin-bottom: 26px;
+    }
 
-        /* 모바일/작은 화면 미디어 쿼리 */
-        @media (max-width: 600px) {
-            .top-image { max-width: 70px; } h1 { font-size: 5vw; } p { font-size: 3vw; } .message-input-container { padding: 5px 5px 5px 15px; } 
-            .message-input-container input[type="text"]::placeholder { font-size: 3.5vw; } 
-            .message-input-container input[type="text"] { padding: 8px 5px; } .send-button { width: 35px; height: 35px; font-size: 1.1em; }
-        }
-        @media (max-width: 380px) {
-            h1 { font-size: 6vw; } p { font-size: 4vw; } .message-input-container input[type="text"]::placeholder { font-size: 4vw; } 
-        }
-    </style>
+    /* 반원형 확인 버튼 */
+    .confirm-btn {
+      display: inline-block;
+      width: 160px;
+      padding: 14px 0;
+      border-radius: 9999px; /* 반원 */
+      border: none;
+      background: #0b74ff;
+      color: white;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 8px 18px rgba(11,116,255,0.28);
+      transition: transform .12s ease, box-shadow .12s ease;
+    }
+
+    .confirm-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 12px 26px rgba(11,116,255,0.33);
+    }
+
+    .confirm-btn:active {
+      transform: translateY(1px);
+    }
+  </style>
 </head>
+
 <body>
-  <div class="phone" role="application" aria-label="채팅 UI">
-    <header class="header">
-        
-        <div class="header-left-group">
-             <div class="header-icon menu-icon">
-                <span class="material-symbols-rounded">menu</span>
-            </div>
-            
-            <div class="header-title">
-                <a href="https://corerepublix.kro.kr/">
-                    CorerepubliX
-                </a>    
-            </div>
-            
-            <div class="header-center">
-                <div class="plus-btn">
-                    이 앱은 베타버전 입니다.
-                </div>
-            </div>
-        </div>
-        
-        <div class="header-icon" id="settings-button" aria-label="설정" style="visibility: visible;"> 
-            <span class="material-symbols-rounded">settings</span>
-        </div>
-        
-    </header>
 
-    <main>
-        <img src="https://i.postimg.cc/MKBHwqWk/logogogo.png" alt="MinsuGPT Logo" class="top-image">
-        <h1>MinsuGPT 사용을 환영합니다</h1>
-        <p>MinsuGPT 사용으로 업무 효율성을 높여보세요</p>
-
-        <div class="message-input-container">
-            <input type="text" id="message-input" placeholder="Minsu GPT에게 메시지 보내기" readonly>
-            <button class="send-button"><i class="fas fa-arrow-up"></i></button>
-        </div>
-    </main>
+  <div class="maintenance-container">
     
+    <!-- ✅ 로고 이미지 -->
+    <img 
+      class="logo"
+      src="https://statuspage.incident.io/_next/image?url=https%3A%2F%2Fstorage.googleapis.com%2Fincident-io-status-page-logos%2F01KABR33MD5JQ34S3FAA435TD1%2Fminsugpt%2Fzwrf11r5.png&w=384&q=75&dpl=dpl_FFU2Vc2ftf2bGnmrMJsERNFcQjnH"
+      alt="로고"
+    >
+
+    <h1>서버 점검중</h1>
+    <p>
+      현재 서버 점검및 업데이트로 인해 서버 접속이 제한됩니다.<br>
+      점검일시 2025.11.28 ~ 2025.12.11
+    </p>
+
+    <button class="confirm-btn" id="confirmBtn">확인</button>
   </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const inputContainer = document.querySelector('.message-input-container');
-            const messageInput = document.getElementById('message-input');
-            const targetUrl = "https://minsugpt.kro.kr/chat";
-            const transitionDuration = 500; // 0.5초
-            const hideDuration = 300; // 0.3초
+  <script>
+    // ✅ 이동할 주소 (원하는 곳으로 변경 가능)
+    const redirectUrl = "about:blank"; 
+    // 예시:
+    // const redirectUrl = "https://google.com";
 
-            inputContainer.addEventListener('click', (event) => {
-                const isMobile = window.innerWidth <= 768;
-                
-                if (isMobile) {
-                    // 모바일: 확대 로직 (화면 꽉 채우도록 수정된 CSS 사용)
-                    // 1. 초기 콘텐츠 숨김
-                    document.querySelector('h1').style.opacity = 0;
-                    document.querySelector('p').style.opacity = 0;
-                    document.querySelector('.top-image').style.opacity = 0;
-                    
-                    // 2. 내부 요소 숨김 시작
-                    inputContainer.classList.add('hiding-content');
-                    messageInput.style.opacity = 0; 
+    document.getElementById("confirmBtn").addEventListener("click", () => {
+      // 대부분 브라우저에서 탭 닫기는 제한되므로 리다이렉트 사용
+      window.location.href = redirectUrl;
+    });
+  </script>
 
-                    // 3. 내부 요소 사라진 후 (0.3초) 확대 시작
-                    setTimeout(() => {
-                        const rect = inputContainer.getBoundingClientRect();
-                        
-                        // a) 현재 위치와 크기를 CSS inline style로 설정하여 고정
-                        inputContainer.style.position = 'fixed';
-                        inputContainer.style.top = rect.top + 'px';
-                        inputContainer.style.left = rect.left + 'px';
-                        inputContainer.style.width = rect.width + 'px';
-                        inputContainer.style.height = rect.height + 'px';
-                        
-                        // b) 강제 리플로우를 유발하여 애니메이션 시작점을 보장 
-                        void inputContainer.offsetWidth;
-
-                        // c) 전체 화면 전환 클래스 추가 (CSS transition 시작)
-                        inputContainer.classList.add('full-screen-transition');
-                        
-                        // 4. 확대 완료(흰색 화면) 후 리디렉션하도록 로직 유지
-                        setTimeout(() => {
-                            window.location.href = targetUrl;
-                        }, transitionDuration); 
-                    }, hideDuration);
-                } else {
-                    // PC: 페이드아웃 및 배경 흰색 전환
-                    const main = document.querySelector('main');
-                    
-                    // 1. main 전체를 페이드아웃
-                    main.style.opacity = '0';
-                    main.style.transform = 'translateY(-20px)';
-                    
-                    // 2. 배경을 흰색으로 전환
-                    document.body.style.background = '#ffffff';
-                    
-                    // 3. 페이드아웃 완료 후 리디렉션
-                    setTimeout(() => {
-                        window.location.href = targetUrl;
-                    }, transitionDuration);
-                }
-            });
-        });
-    </script>
-    <style>
-/* 텍스트 링크의 기본 스타일 */
-.server-status-link {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    color: #AAAAAA; /* 기본색: 연한 회색 */
-    text-decoration: none;
-    font-family: Arial, sans-serif;
-    font-size: 14px;
-    z-index: 1000;
-}
-
-/* 마우스를 올렸을 때 스타일 */
-.server-status-link:hover {
-    color: #888888; /* 호버색: 조금 더 진한 회색 */
-    text-decoration: underline; /* 밑줄 추가 */
-}
-</style>
-
-<a href="https://statuspage.incident.io/minsugpt" target="_blank" class="server-status-link">
-    MinsuGPT 서버상태
-</a>
 </body>
 </html>
-
-
-
-
-
