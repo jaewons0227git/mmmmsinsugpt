@@ -208,14 +208,29 @@ function toggleResetConfirmModal(show) {
     if (show) toggleSettingsModal(false); 
 }
 
-// 🌟 사이드바 토글 함수
+// 🌟 사이드바 토글 함수 (PC Push 효과 포함)
 function toggleSidebar(show) {
-    if (show === undefined) { sidebarBackdrop.classList.toggle('visible'); }
-    else if (show) { 
-        renderSidebarList(); // 열 때 목록 갱신
-        sidebarBackdrop.classList.add('visible'); 
+    if (show === undefined) { 
+        // 토글 동작
+        const isVisible = sidebarBackdrop.classList.contains('visible');
+        if (isVisible) {
+            sidebarBackdrop.classList.remove('visible');
+            document.body.classList.remove('sidebar-open'); // PC Push용 클래스 제거
+        } else {
+            renderSidebarList();
+            sidebarBackdrop.classList.add('visible');
+            document.body.classList.add('sidebar-open'); // PC Push용 클래스 추가
+        }
     }
-    else { sidebarBackdrop.classList.remove('visible'); }
+    else if (show) { 
+        renderSidebarList(); 
+        sidebarBackdrop.classList.add('visible'); 
+        document.body.classList.add('sidebar-open'); // PC Push용 클래스 추가
+    }
+    else { 
+        sidebarBackdrop.classList.remove('visible'); 
+        document.body.classList.remove('sidebar-open'); // PC Push용 클래스 제거
+    }
 }
 
 // ===========================================
@@ -430,6 +445,7 @@ function scrollToBottom(smooth = true) {
     if (!contentWrapper) return;
     
     // JS 제어로 스크롤
+    // contentWrapper는 이제 유일한 스크롤 컨테이너입니다.
     if (smooth) {
         contentWrapper.scrollTo({ top: contentWrapper.scrollHeight, behavior: 'smooth' });
     } else {
@@ -968,6 +984,7 @@ confirmResetBtn.addEventListener('click', () => {
 resetConfirmModalBackdrop.addEventListener('click', (e) => { if (e.target === resetConfirmModalBackdrop) toggleResetConfirmModal(false); });
 
 // 스크롤 및 스크롤 다운 버튼 로직
+// 🌟 contentWrapper가 이제 실제 스크롤 이벤트를 발생시킵니다.
 contentWrapper.addEventListener('scroll', () => {
     const distanceFromBottom = contentWrapper.scrollHeight - contentWrapper.scrollTop - contentWrapper.clientHeight;
     
@@ -997,7 +1014,7 @@ if(toolAttach) { toolAttach.addEventListener('click', (e) => { e.preventDefault(
 if(toolStudy) { toolStudy.addEventListener('click', () => { toolStudy.classList.toggle('active-blue'); }); }
 
 // 🌟 사이드바 및 새 기능 이벤트 리스너
-menuButton.addEventListener('click', () => toggleSidebar(true));
+menuButton.addEventListener('click', () => toggleSidebar()); // 토글 동작으로 변경
 sidebarClose.addEventListener('click', () => toggleSidebar(false));
 sidebarBackdrop.addEventListener('click', (e) => { if(e.target === sidebarBackdrop) toggleSidebar(false); });
 sidebarNewChat.addEventListener('click', () => startNewChat());
