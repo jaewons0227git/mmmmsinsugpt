@@ -55,6 +55,12 @@ const sidebarExport = document.getElementById('sidebar-export');
 const sidebarImport = document.getElementById('sidebar-import');
 const importFileInput = document.getElementById('import-file-input');
 
+// 🌟 [신규] 미니 사이드바 요소
+const miniSidebarNewChat = document.getElementById('mini-new-chat');
+const miniSidebarSearch = document.getElementById('mini-search');
+const miniSidebarDeleteAll = document.getElementById('mini-delete-all');
+
+
 // 🌟 [신규] 모달 관련 요소 정의
 const renameModalBackdrop = document.getElementById('rename-modal-backdrop');
 const renameInput = document.getElementById('rename-input');
@@ -833,13 +839,14 @@ async function sendMessage(userMessageOverride = null, isRegenerate = false) {
     
     const { botMessageElement, indicatorElement, streamingBlockElement, spinnerElement, indicatorTextElement } = appendBotMessageContainer();
     
-    // 🌟 [수정] 메시지 전송 직후 스크롤을 '사용자 메시지'가 상단(헤더 아래)에 위치하도록 조정
+    // 🌟 [수정] 메세지 전송 시 내가 보낸 메세지가 상단 헤더 바로 아래에 위치하도록 스크롤
     if (userBubbleElement) {
         setTimeout(() => {
-            // 헤더 높이(약 56px) + 약간의 여백(14px) = 70px 정도
-            const offset = userBubbleElement.offsetTop - 70; 
+            const headerHeight = 56; 
+            // 약간의 여유를 두고 스크롤 (헤더 높이 + 10px)
+            const offset = userBubbleElement.offsetTop - headerHeight - 10; 
             contentWrapper.scrollTo({ top: offset, behavior: 'smooth' });
-        }, 10);
+        }, 50);
     } else {
         scrollToBottom(true);
     }
@@ -1007,6 +1014,12 @@ function importChats(e) {
 // ===========================================
 // 6. 이벤트 리스너
 // ===========================================
+
+// 🌟 [신규] 미니 사이드바 이벤트 리스너
+if(miniSidebarNewChat) miniSidebarNewChat.addEventListener('click', () => { startNewChat(); });
+if(miniSidebarSearch) miniSidebarSearch.addEventListener('click', () => { toggleSidebar(true); setTimeout(() => document.getElementById('sidebar-search-input').focus(), 300); });
+if(miniSidebarDeleteAll) miniSidebarDeleteAll.addEventListener('click', resetAllChats);
+
 
 // 🌟 [신규] 모달 이벤트 리스너
 renameCancelBtn.addEventListener('click', closeCustomModals);
