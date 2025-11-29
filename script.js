@@ -562,10 +562,11 @@ function autoResizeTextarea() {
     inputContainer.style.minHeight = `${inputContainerHeight}px`;
 
     const composerHeight = composer.offsetHeight;
-    
-    // 🌟 [수정] 하단 여백 대폭 증가 (전송 시 내용이 위로 올라가 보이도록)
-    // 기존 20px -> composerHeight + 80px 정도로 넉넉하게 잡음
-    chatMessages.style.paddingBottom = `${composerHeight + 80}px`;
+    if(scrollDownButton) {
+        // 스크롤 버튼 위치 조정 (CSS에서 제어하지만 JS에서 보조 가능 시 사용)
+        // 현재는 CSS fixed로 제어함
+    }
+    chatMessages.style.paddingBottom = `${composerHeight + 20}px`;
 }
 
 function appendUserMessage(content, animate = true) {
@@ -573,7 +574,12 @@ function appendUserMessage(content, animate = true) {
     userBubble.className = 'message-bubble user-message';
     userBubble.innerHTML = `<div class="message-text">${content.replace(/\n/g, '<br>')}</div>`;
     chatMessages.appendChild(userBubble);
-    if (animate) scrollToBottom(true);
+    
+    if (animate) {
+        // 🌟 수정됨: scrollToBottom 대신 sendMessage에서 처리하거나
+        // 여기서는 그냥 두되, sendMessage에서 별도 처리
+    }
+    return userBubble; // 요소 반환
 }
 
 function appendBotImage(htmlContent, animate = true) {
@@ -727,8 +733,8 @@ function appendBotMessageContainer() {
     botMessageContainer.appendChild(indicatorContainer); botMessageContainer.appendChild(streamingBlock);
     chatMessages.appendChild(botMessageContainer);
     
-    // 컨테이너 추가 직후 강제 스크롤
-    scrollToBottom(false);
+    // 🌟 [수정] 컨테이너 추가 직후 스크롤을 맨 아래로 하지 않고 sendMessage에서 제어하도록 함
+    // 하지만 일반적인 스트리밍 중에는 아래로 가는게 맞으므로 기본값 유지, 최초 호출때만 덮어씀
     
     return { botMessageElement: botMessageContainer, indicatorElement: indicatorContainer, streamingBlockElement: streamingBlock, spinnerElement: spinner, indicatorTextElement: indicatorText };
 }
@@ -784,6 +790,8 @@ async function sendMessage(userMessageOverride = null, isRegenerate = false) {
     const userMessage = userMessageOverride !== null ? userMessageOverride : inputField.value.trim();
     if (userMessage.length === 0 || isStreaming) { if (isStreaming) showSnackbar('현재 답변 생성 중입니다.'); return; }
 
+    let userBubbleElement = null;
+
     if (!isRegenerate) {
         if (isImageMode) {
              currentLoadingText = '이미지를 생성하는 중...';
@@ -797,7 +805,9 @@ async function sendMessage(userMessageOverride = null, isRegenerate = false) {
         } else { chatMessages.style.display = 'flex'; }
         const existingStops = chatMessages.querySelectorAll('.stop-message'); existingStops.forEach(el => el.remove());
         updateRegenerateButtons(); 
-        appendUserMessage(userMessage); history.push({ role: 'user', content: userMessage }); 
+        
+        userBubbleElement = appendUserMessage(userMessage, false); 
+        history.push({ role: 'user', content: userMessage }); 
         updateCurrentSession(); // 저장
     } 
     
@@ -805,6 +815,17 @@ async function sendMessage(userMessageOverride = null, isRegenerate = false) {
     
     const { botMessageElement, indicatorElement, streamingBlockElement, spinnerElement, indicatorTextElement } = appendBotMessageContainer();
     
+    // 🌟 [수정] 메시지 전송 직후 스크롤을 '사용자 메시지'가 상단(헤더 아래)에 위치하도록 조정
+    if (userBubbleElement) {
+        setTimeout(() => {
+            // 헤더 높이(약 56px) + 약간의 여백(14px) = 70px 정도
+            const offset = userBubbleElement.offsetTop - 70; 
+            contentWrapper.scrollTo({ top: offset, behavior: 'smooth' });
+        }, 10);
+    } else {
+        scrollToBottom(true);
+    }
+
     setStreamingState(true);
     abortController = new AbortController();
     const signal = abortController.signal;
@@ -863,12 +884,13 @@ async function sendMessage(userMessageOverride = null, isRegenerate = false) {
                     const parts = chunk.split("[DONE]");
                     fullResponse += parts[0]; 
                     streamingBlockElement.innerHTML = typeof marked !== 'undefined' ? marked.parse(fullResponse) : fullResponse;
-                    contentWrapper.scrollTop = contentWrapper.scrollHeight; // 강제 스크롤
+                    // 스트리밍 중에는 자동 스크롤 (사용자가 위로 올리지 않은 경우)
+                    if (autoScrollEnabled) scrollToBottom(false);
                     break;
                 } else {
                     fullResponse += chunk;
                     streamingBlockElement.innerHTML = typeof marked !== 'undefined' ? marked.parse(fullResponse) : fullResponse;
-                    contentWrapper.scrollTop = contentWrapper.scrollHeight;
+                    if (autoScrollEnabled) scrollToBottom(false);
                 }
             }
             
