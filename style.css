@@ -161,9 +161,17 @@ body{ margin:0; background:var(--bg-color); color:var(--text-color); min-height:
 .action-btn.orange .material-symbols-rounded{ color:#fd7e14; } 
 
 /* Chat Messages */
-/* 🌟 [수정] 패딩을 늘려 안쪽으로 살짝 당김 */
-.chat-messages{ width: 100%; padding: 10px 24px; padding-top: 10px; display: none; flex-direction: column; justify-content: flex-start; gap: 10px; margin: 0 auto; box-sizing: border-box; }
-@media (min-width: 600px) { .chat-messages { max-width: 800px; padding-left: 24px; padding-right: 24px; } }
+/* 🌟 [수정] 모바일에서는 기본 패딩 (10px 16px) */
+.chat-messages{ width: 100%; padding: 10px 16px; padding-top: 10px; display: none; flex-direction: column; justify-content: flex-start; gap: 10px; margin: 0 auto; box-sizing: border-box; }
+
+/* 🌟 [수정] PC 버전에서만 패딩을 넓게 설정 */
+@media (min-width: 769px) { 
+    .chat-messages { 
+        max-width: 860px; /* PC에서 너무 넓어지지 않도록 최대폭 설정 */
+        padding-left: 60px; 
+        padding-right: 60px; 
+    } 
+}
 
 .message-bubble{ display: flex; max-width: 80%; }
 .message-text{ padding: 10px 14px; border-radius: 20px; line-height: 1.4; font-size: 15px; white-space: pre-wrap; }
@@ -173,14 +181,10 @@ body{ margin:0; background:var(--bg-color); color:var(--text-color); min-height:
 .bot-message{ align-self: flex-start; margin-top: 10px; padding: 0; color: var(--text-color); line-height: 1.4; font-size: 15px; width: 100%; }
 .bot-message .streaming-block { display: block; padding: 0; border-radius: 0; background-color: transparent; max-width: 100%; box-sizing: border-box; white-space: normal; color: var(--text-color); margin-bottom: 8px; }
 
-/* 🌟 [수정] 봇 답변 페이드인 효과: 위로 올라오지 않고 제자리에서 부드럽게 나타나게 변경 */
-@keyframes fadeInUpNode {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
-
-.bot-message .streaming-block > * {
-    animation: fadeInUpNode 0.3s ease forwards;
+/* 🌟 [수정] 깜빡임 방지를 위해 전체 블록 애니메이션 제거, 부드러운 스트리밍 유지 */
+.streaming-block > * {
+    /* 기존의 animation: fadeInUpNode... 제거 */
+    /* 자연스럽게 나타나도록 놔둠 */
 }
 
 .stop-message { color: var(--error-red); font-weight: 600; font-size: 0.9em; margin-top: -5px; margin-bottom: 10px; padding: 0 4px; align-self: flex-start; }
@@ -214,9 +218,9 @@ body{ margin:0; background:var(--bg-color); color:var(--text-color); min-height:
     background-size: 200% 100%; -webkit-background-clip: text; -webkit-text-fill-color: transparent;
     animation: shimmer 1.5s infinite linear;
 }
-.thinking-indicator-text.completed { animation: none; background-position: 50% 0; }
+.thinking-indicator-text.completed { display: none !important; } /* 🌟 완료 시 텍스트 숨김 */
 
-/* 🌟 [수정] 스피너 숨김 */
+/* 🌟 스피너 숨김 */
 .loading-spinner {
     display: none !important; 
 }
