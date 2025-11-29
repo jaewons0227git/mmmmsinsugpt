@@ -1,118 +1,313 @@
-<!DOCTYPE html>
-<html lang="ko">
+<!doctype html>
+<html lang="ko" data-theme="light">
 <head>
-  <meta charset="UTF-8">
-  <title>서버 점검중</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0" />
+  <meta name="theme-color" content="#ffffff" id="meta-theme-color">
+  <title>MinsuGPT</title> 
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Elms+Sans:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+  
+  <link href="https://fonts.googleapis.com/icon?family=Material+Symbols+Rounded" rel="stylesheet">
+  <link rel="icon" type="image/png" href="https://i.postimg.cc/MKBHwqWk/logogogo.png">
+  <link rel="stylesheet" href="style.css"> 
 
-  <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-        "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
-    }
-
-    body {
-      height: 100vh;
-      background: linear-gradient(135deg, #0b74ff, #5fa8ff);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-
-    .maintenance-container {
-      background: white;
-      width: min(420px, 92%);
-      padding: 40px 26px;
-      border-radius: 18px;
-      box-shadow: 0 15px 35px rgba(0,0,0,0.25);
-      text-align: center;
-      animation: fadeIn 0.4s ease;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .logo {
-      width: 120px;
-      margin-bottom: 20px;
-    }
-
-    h1 {
-      font-size: 1.8rem;
-      margin-bottom: 10px;
-      color: #111;
-    }
-
-    p {
-      color: #555;
-      font-size: 1rem;
-      line-height: 1.6;
-      margin-bottom: 26px;
-    }
-
-    /* 반원형 확인 버튼 */
-    .confirm-btn {
-      display: inline-block;
-      width: 160px;
-      padding: 14px 0;
-      border-radius: 9999px; /* 반원 */
-      border: none;
-      background: #0b74ff;
-      color: white;
-      font-size: 1rem;
-      font-weight: 700;
-      cursor: pointer;
-      box-shadow: 0 8px 18px rgba(11,116,255,0.28);
-      transition: transform .12s ease, box-shadow .12s ease;
-    }
-
-    .confirm-btn:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 12px 26px rgba(11,116,255,0.33);
-    }
-
-    .confirm-btn:active {
-      transform: translateY(1px);
-    }
-  </style>
-</head>
-
-<body>
-
-  <div class="maintenance-container">
-    
-    <!-- ✅ 로고 이미지 -->
-    <img 
-      class="logo"
-      src="https://statuspage.incident.io/_next/image?url=https%3A%2F%2Fstorage.googleapis.com%2Fincident-io-status-page-logos%2F01KABR33MD5JQ34S3FAA435TD1%2Fminsugpt%2Fzwrf11r5.png&w=384&q=75&dpl=dpl_FFU2Vc2ftf2bGnmrMJsERNFcQjnH"
-      alt="로고"
-    >
-
-    <h1>서버 점검중</h1>
-    <p>
-      현재 서버 점검및 업데이트로 인해 서버 접속이 제한됩니다.<br>
-      점검일시 2025.11.28 ~ 2025.12.11
-    </p>
-
-    <button class="confirm-btn" id="confirmBtn">확인</button>
-  </div>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
   <script>
-    // ✅ 이동할 주소 (원하는 곳으로 변경 가능)
-    const redirectUrl = "about:blank"; 
-    // 예시:
-    // const redirectUrl = "https://google.com";
-
-    document.getElementById("confirmBtn").addEventListener("click", () => {
-      // 대부분 브라우저에서 탭 닫기는 제한되므로 리다이렉트 사용
-      window.location.href = redirectUrl;
-    });
+    const ALLOWED_REFERRER = 'https://minsugpt.kro.kr/';
+    const REDIRECT_URL = 'https://minsugpt.kro.kr/';
+    const referrer = document.referrer;
+    if (referrer === '' || !referrer.startsWith(ALLOWED_REFERRER)) {
+        // window.location.replace(REDIRECT_URL); // 필요 시 주석 해제
+    }
   </script>
+</head>
+<body>
+  <div class="phone" role="application" aria-label="채팅 UI">
+    
+    <div id="sidebar-backdrop" class="modal-backdrop">
+        <aside id="sidebar" class="sidebar">
+            <div class="sidebar-header">
+                <div class="new-chat-btn" id="sidebar-new-chat">
+                    <span class="material-symbols-rounded">add</span>
+                    새 채팅
+                </div>
+                <div class="sidebar-close" id="sidebar-close">
+                    <span class="material-symbols-rounded">close</span>
+                </div>
+            </div>
+            
+            <div class="sidebar-search">
+                <input type="text" id="sidebar-search-input" placeholder="채팅 검색...">
+                <span class="material-symbols-rounded">search</span>
+            </div>
 
+            <div class="sidebar-list" id="sidebar-list">
+                </div>
+
+            <div class="sidebar-footer">
+                <div class="sidebar-menu-item" id="sidebar-export">
+                    <span class="material-symbols-rounded">upload</span>
+                    내보내기
+                </div>
+                <div class="sidebar-menu-item" id="sidebar-import">
+                    <span class="material-symbols-rounded">download</span>
+                    가져오기
+                </div>
+                <div class="sidebar-menu-item delete-all" id="sidebar-delete-all">
+                    <span class="material-symbols-rounded">delete</span>
+                    전체 삭제
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <header class="header">
+        <div class="header-left-group">
+             <div class="header-icon menu-icon" id="menu-button">
+                <span class="material-symbols-rounded">menu</span>
+            </div>
+            <div class="header-logo">
+                <img src="https://i.postimg.cc/MKBHwqWk/logogogo.png" alt="MinsuGPT 로고">
+            </div>
+            <div class="header-title">MinsuGPT</div>
+            <div class="header-center">
+                <div class="plus-btn">
+                    <span>이 앱은 베타버전 입니다.</span>
+                </div>
+            </div>
+        </div>
+      
+        <div class="header-icon" id="settings-button" aria-label="설정" style="visibility: visible;"> 
+            <span class="material-symbols-rounded">settings</span>
+        </div>
+    </header>
+
+    <div id="scroll-to-bottom-container">
+        <button id="scrollDownButton" class="hidden" aria-label="맨 아래로 스크롤">
+        </button>
+    </div>
+
+    <main id="content-wrapper" class="content-wrapper">
+        
+        <div id="initial-content">
+            <div class="main-question">안녕하세요! 반가워요</div>
+            <div class="quick-actions">
+                <div class="action-btn new-green" data-prompt="텍스트와 함께 대화하기">
+                    <span class="material-symbols-rounded">chat</span>
+                    텍스트와 함께 대화하기
+                </div>
+                <div class="action-btn" data-prompt="브레인스토밍 시작">
+                    <div class="icon-light">💡</div>
+                    브레인스토밍
+                </div>
+                <div class="action-btn new-blue" data-prompt="글 쓰기 예시 요청">
+                    <span class="material-symbols-rounded">edit</span>
+                    글 쓰기
+                </div>
+                <div class="action-btn orange" data-prompt="텍스트 요약 방법 알려주기">
+                    <span class="material-symbols-rounded">description</span>
+                    텍스트 요약
+                </div>
+                <div class="action-btn" data-prompt="도움말">
+                    <div style="font-size:18px;">...</div>
+                    더 보기
+                </div>
+            </div>
+        </div>
+
+        <div id="chat-messages" class="chat-messages"></div>
+        
+        <div id="bottom-spacer" style="height: 20px;"></div>
+    </main>
+
+    <div class="composer-gradient-overlay"></div>
+
+    <div id="composer" class="composer style-default">
+      <div class="composer-inner">
+        <div class="plus" id="plus-button" aria-label="파일 첨부">
+            <span class="material-symbols-rounded">add</span>
+        </div>
+
+        <div class="input-area-wrapper">
+            <div id="image-mode-indicator" class="image-mode-indicator">
+                <span><span class="material-symbols-rounded" style="font-size: 18px;">auto_fix_high</span> 이미지 생성 모드</span>
+                <span class="material-symbols-rounded close-image-mode" id="close-image-mode" style="font-size: 18px;">close</span>
+            </div>
+
+            <div id="input-container" class="input-container">
+              <textarea id="message-input" placeholder="MinsuGPT에게 물어보기" rows="1"></textarea>
+            </div>
+        </div>
+
+        <div class="bottom-controls">
+            <div class="simple-tools">
+                <div class="tool-btn" id="tool-attach">
+                    <span class="material-symbols-rounded">attach_file</span>
+                    첨부
+                </div>
+                <div class="tool-btn" id="tool-image">
+                    <span class="material-symbols-rounded">image</span>
+                    이미지
+                </div>
+                <div class="tool-btn" id="tool-study">
+                    <span class="material-symbols-rounded">auto_stories</span>
+                    학습하기
+                </div>
+            </div>
+            
+            <div class="right-controls">
+                 <div class="mic-voice-container">
+                    <div id="mic-icon" class="mic-icon">
+                        <span class="material-symbols-rounded">mic</span>
+                    </div>
+                    
+                    <div id="action-button-container">
+                        <div id="send-button" class="send-btn">
+                          <span class="material-symbols-rounded">arrow_upward</span>
+                        </div>
+                        <div id="stop-button" class="stop-btn" style="display:none;">
+                            <span class="stop-icon"></span>
+                        </div>
+                    </div>
+                  </div>
+            </div>
+        </div>
+      </div>
+    </div>
+    
+    <div id="snackbar">메시지가 복사되었습니다.</div>
+    
+    <div id="plus-modal-backdrop" class="modal-backdrop">
+        <div id="plus-modal" class="modal">
+            <div class="modal-handle"></div>
+            <div class="modal-grid">
+                <div class="modal-grid-item" data-action="camera">
+                    <div class="modal-grid-icon"><span class="material-symbols-rounded">photo_camera</span></div>
+                    카메라
+                </div>
+                <div class="modal-grid-item" data-action="album">
+                    <div class="modal-grid-icon"><span class="material-symbols-rounded">image</span></div>
+                    앨범
+                </div>
+                <div class="modal-grid-item" data-action="file">
+                    <div class="modal-grid-icon"><span class="material-symbols-rounded">upload_file</span></div>
+                    파일
+                </div>
+            </div>
+            <div class="modal-option" id="menu-create-image">
+                <div class="modal-option-icon"><span class="material-symbols-rounded">auto_fix_high</span></div>
+                이미지 만들기
+            </div>
+            <div class="modal-option" data-action="set-reminder">
+                <div class="modal-option-icon"><span class="material-symbols-rounded">notifications</span></div>
+                리마인더 등록하기
+            </div>
+        </div>
+    </div>
+    
+    <div id="settings-modal-backdrop" class="modal-backdrop">
+        <div id="settings-modal" class="modal">
+            <div class="modal-handle"></div>
+            <h3>설정</h3>
+            
+            <div class="ui-style-selector">
+                <span class="ui-style-label">입력창 스타일</span>
+                <div class="ui-style-options">
+                    <button class="ui-style-btn active" data-style="default">
+                        <span class="material-symbols-rounded preview-icon">check_circle</span>
+                        기본 (둥근형)
+                    </button>
+                    <button class="ui-style-btn" data-style="simple">
+                        <span class="material-symbols-rounded preview-icon">horizontal_rule</span>
+                        심플 (바형)
+                    </button>
+                </div>
+            </div>
+            
+            <div class="ui-style-selector">
+                <span class="ui-style-label">화면 테마</span>
+                <div class="theme-btn-group">
+                    <div class="theme-btn active" data-theme-val="auto">자동</div>
+                    <div class="theme-btn" data-theme-val="light">라이트</div>
+                    <div class="theme-btn" data-theme-val="dark">다크</div>
+                </div>
+            </div>
+
+            <hr class="modal-divider">
+            
+            <div class="modal-option" id="about-button">
+                <div class="modal-option-icon"><span class="material-symbols-rounded">info</span></div>
+                MinsuGPT 정보
+            </div>
+
+            <div class="modal-option" id="reset-chat-button">
+                대화 초기화
+            </div>
+        </div>
+    </div>
+    
+    <div id="reset-confirm-modal-backdrop" class="modal-backdrop">
+        <div id="reset-confirm-modal" class="modal">
+            <h3>대화 초기화</h3>
+            <p>모든 대화 기록이 삭제되며, 이 작업은 되돌릴 수 없습니다.</p>
+            <div class="confirm-actions">
+                <button id="confirm-cancel-btn">취소</button>
+                <button id="confirm-reset-btn">초기화</button>
+            </div>
+        </div>
+    </div>
+
+    <input type="file" id="import-file-input" style="display: none;" accept=".json">
+    
+    <div id="about-modal-backdrop" class="modal-backdrop">
+        <div id="about-modal" class="modal">
+            <div class="modal-handle"></div>
+            <h3>MinsuGPT 정보</h3>
+            
+            <div class="about-info-row">빌드번호: 2539194</div>
+            <div class="about-info-row">최신업데이트 날짜: 25년 11월 27일</div>
+            
+            <div class="creator-section-title">제작자</div>
+            <div class="creator-card">
+                <div class="creator-avatar">👨‍💻</div>
+                <div class="creator-info">
+                    <div class="creator-name">신재원</div>
+                    <div class="creator-role">Creator</div>
+                </div>
+            </div>
+
+            <div class="copyright-text">Copyright 2025. CorerepubliX all rights reserved.</div>
+        </div>
+    </div>
+
+    <div id="rename-modal-backdrop" class="modal-backdrop" style="align-items: center; z-index: 1050;">
+        <div id="rename-modal" class="modal" style="transform: translateY(0); max-width: 320px; border-radius: 12px; padding: 24px;">
+            <h3>이름 변경</h3>
+            <input type="text" id="rename-input" placeholder="새로운 채팅 이름" style="width: 100%; padding: 10px; margin: 10px 0 20px 0; border: 1px solid var(--border-color); border-radius: 8px; background: var(--surface-secondary); color: var(--text-color); outline: none;">
+            <div class="confirm-actions">
+                <button id="rename-cancel-btn">취소</button>
+                <button id="rename-confirm-btn" style="background-color: var(--primary-blue); color: white;">변경</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="delete-modal-backdrop" class="modal-backdrop" style="align-items: center; z-index: 1050;">
+        <div id="delete-modal" class="modal" style="transform: translateY(0); max-width: 320px; border-radius: 12px; padding: 24px;">
+            <h3 id="delete-modal-title">삭제 확인</h3>
+            <p id="delete-modal-desc" style="font-size: 0.95em; color: var(--text-sub); margin-bottom: 24px; text-align: center;">정말로 삭제하시겠습니까?</p>
+            <div class="confirm-actions">
+                <button id="delete-cancel-btn">취소</button>
+                <button id="delete-confirm-btn" style="background-color: var(--error-red); color: white;">삭제</button>
+            </div>
+        </div>
+    </div>
+
+  </div>
+
+  <script src="script.js"></script>
 </body>
 </html>
