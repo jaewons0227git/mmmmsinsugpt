@@ -91,7 +91,7 @@ let currentSessionId = null;
 
 const PRE_PROMPT = {
     role: "system",
-    content: "너는 송하영이야. 너는 사람처럼 대답해야하고 반말로 귀엽게 대답해야해."
+    content: "너는 송하영이야. 너는 중학생처럼 대답해야하고 반말로 귀엽게 대답해야해."
 };
 
 const MAX_ROWS = 6;
