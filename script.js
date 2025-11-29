@@ -316,20 +316,29 @@ function loadSessions() {
             } catch(e) {}
         }
     }
-    
-    // 마지막 세션 혹은 새 세션 로드
-    if (sessions.length > 0) {
-        // 최근 세션을 불러옴
-        if (!currentSessionId) {
-            currentSessionId = sessions[0].id;
-        }
-        loadCurrentSession();
-    } else {
-        startNewChat(false);
-    }
+    // 페이지 로드 시에는 세션을 불러오기만 하고, 선택은 하지 않음.
+    // window.onload에서 startNewChat을 호출하여 강제로 새 채팅 시작.
 }
 
 function startNewChat(skipRender = false) {
+    // 🌟 [수정] 중복 새 채팅 방지 로직
+    // 세션 목록이 있고, 가장 최신(첫번째) 세션이 메시지가 하나도 없는 '새 채팅' 상태라면
+    // 새로 만들지 않고 그 세션을 그대로 사용함.
+    if (sessions.length > 0) {
+        // 정렬을 보장하기 위해 한 번 더 확인 (보통 unshift로 들어가므로 index 0)
+        // 만약 세션 순서가 꼬일 수 있다면 timestamp 정렬 필요할 수 있음
+        const latestSession = sessions[0];
+        if (latestSession.messages.length === 0) {
+            currentSessionId = latestSession.id;
+            if (!skipRender) {
+                loadCurrentSession();
+                if (!isPC()) toggleSidebar(false);
+            }
+            renderSidebarList(); // 확실하게 갱신
+            return; 
+        }
+    }
+
     currentSessionId = generateSessionId();
     history = [];
     const newSession = {
@@ -345,6 +354,7 @@ function startNewChat(skipRender = false) {
         // 모바일일때만 닫음
         if (!isPC()) toggleSidebar(false);
     }
+    renderSidebarList(); // 사이드바 즉시 갱신
 }
 
 function loadCurrentSession() {
@@ -374,14 +384,18 @@ function executeDeleteSession(id) {
     sessions = sessions.filter(s => s.id !== id);
     saveSessions();
     
+    // 현재 보고 있던 채팅을 삭제한 경우 처리
     if (currentSessionId === id) {
         if (sessions.length > 0) {
             currentSessionId = sessions[0].id;
             loadCurrentSession();
         } else {
+            // 모든 채팅이 사라진 경우 강제 새 채팅 (중복 방지 로직 적용됨)
             startNewChat(false);
         }
     }
+    
+    // 🌟 [중요] 삭제 후 사이드바 즉시 갱신
     renderSidebarList();
     if (!isPC()) toggleSidebar(false);
 }
@@ -392,6 +406,7 @@ function executeRenameSession(id, newTitle) {
     if (session && newTitle) {
         session.title = newTitle;
         saveSessions();
+        // 🌟 [중요] 변경 후 사이드바 즉시 갱신
         renderSidebarList();
     }
 }
@@ -403,6 +418,7 @@ function updateCurrentSession() {
         // 첫 메시지로 제목 자동 설정 (제목이 '새로운 채팅'일 경우만)
         if (session.title === '새로운 채팅' && history.length > 0) {
             session.title = history[0].content.substring(0, 30);
+            renderSidebarList(); // 제목 변경 시 사이드바 즉시 갱신
         }
         session.timestamp = Date.now();
         saveSessions();
@@ -414,6 +430,7 @@ function renderSidebarList() {
     sidebarList.innerHTML = '';
     const filter = sidebarSearchInput.value.toLowerCase();
     
+    // 타임스탬프 기준 내림차순 정렬
     const sortedSessions = sessions.sort((a, b) => b.timestamp - a.timestamp);
     
     sortedSessions.forEach(session => {
@@ -438,7 +455,10 @@ function renderSidebarList() {
         el.addEventListener('click', () => {
             currentSessionId = session.id;
             loadCurrentSession();
+            // PC가 아닐 때만 사이드바 닫기
             if (!isPC()) toggleSidebar(false);
+            // 클릭 시 활성 상태 갱신을 위해 다시 렌더링
+            renderSidebarList();
         });
         
         const editBtn = el.querySelector('.edit');
@@ -488,7 +508,7 @@ function resetAllChats() {
 function executeResetAllChats() {
     sessions = [];
     localStorage.removeItem(SESSIONS_STORAGE_KEY);
-    startNewChat();
+    startNewChat(); // 초기화 후 바로 새 채팅 시작
     showSnackbar('모든 대화가 삭제되었습니다.');
     if (!isPC()) toggleSidebar(false);
 }
@@ -562,11 +582,9 @@ function autoResizeTextarea() {
     inputContainer.style.minHeight = `${inputContainerHeight}px`;
 
     const composerHeight = composer.offsetHeight;
-    if(scrollDownButton) {
-        // 스크롤 버튼 위치 조정 (CSS에서 제어하지만 JS에서 보조 가능 시 사용)
-        // 현재는 CSS fixed로 제어함
-    }
-    chatMessages.style.paddingBottom = `${composerHeight + 20}px`;
+    
+    // 🌟 [수정] 채팅창 하단 여백을 대폭 늘려서(80px 추가) 가독성을 높임
+    chatMessages.style.paddingBottom = `${composerHeight + 80}px`;
 }
 
 function appendUserMessage(content, animate = true) {
@@ -961,6 +979,10 @@ function importChats(e) {
                 
                 saveSessions();
                 renderSidebarList();
+                // 가져오기 후 첫 세션 로드 (단, 새 채팅 상태 유지를 원하면 startNewChat 호출 가능)
+                // 사용자가 명시적으로 가져왔으므로 여기서는 최신 내용을 보여주는 것이 자연스러울 수 있음.
+                // 하지만 '항상 새 채팅' 요청에 따라 로드만 하고 화면은 유지하거나,
+                // 여기서는 가져온 파일 내용을 확인해야 하므로 첫 세션으로 이동합니다.
                 if(sessions.length > 0) {
                     currentSessionId = sessions[0].id;
                     loadCurrentSession();
@@ -1140,7 +1162,8 @@ importFileInput.addEventListener('change', importChats);
 window.onload = function() {
     loadTheme();
     loadUIStyle(); 
-    loadSessions(); 
+    loadSessions(); // 세션 목록만 로드
+    startNewChat(false); // 🌟 [수정] 접속 시 항상 새 채팅 시작 (중복 방지 로직 포함됨)
     toggleSendButton();
     autoResizeTextarea();
     
