@@ -173,18 +173,30 @@ body{ margin:0; background:var(--bg-color); color:var(--text-color); min-height:
     } 
 }
 
-.message-bubble{ display: flex; max-width: 80%; }
+/* 🌟🌟🌟 메시지 애니메이션 (Fade In) 🌟🌟🌟 */
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.message-bubble{ 
+    display: flex; max-width: 80%; 
+    animation: fadeInUp 0.4s ease-out forwards; /* 메시지 등장 애니메이션 */
+}
+
 .message-text{ padding: 10px 14px; border-radius: 20px; line-height: 1.4; font-size: 15px; white-space: pre-wrap; }
 .user-message{ justify-content: flex-end; align-self: flex-end; }
 .user-message .message-text{ background-color: var(--surface-secondary); color: var(--text-color); border-bottom-right-radius: 4px; transition: background-color 0.3s, color 0.3s; }
 
-.bot-message{ align-self: flex-start; margin-top: 10px; padding: 0; color: var(--text-color); line-height: 1.4; font-size: 15px; width: 100%; }
+.bot-message{ 
+    align-self: flex-start; margin-top: 10px; padding: 0; color: var(--text-color); line-height: 1.4; font-size: 15px; width: 100%;
+    animation: fadeInUp 0.4s ease-out forwards; /* 봇 메시지 등장 애니메이션 */
+}
 .bot-message .streaming-block { display: block; padding: 0; border-radius: 0; background-color: transparent; max-width: 100%; box-sizing: border-box; white-space: normal; color: var(--text-color); margin-bottom: 8px; }
 
-/* 🌟 [수정] 깜빡임 방지를 위해 전체 블록 애니메이션 제거, 부드러운 스트리밍 유지 */
+/* 🌟 [수정] 부드러운 스트리밍을 위해 내부 요소 애니메이션은 제거 (JS에서 처리) */
 .streaming-block > * {
-    /* 기존의 animation: fadeInUpNode... 제거 */
-    /* 자연스럽게 나타나도록 놔둠 */
+    /* 개별 요소 애니메이션은 제거하여 깜빡임 방지 */
 }
 
 .stop-message { color: var(--error-red); font-weight: 600; font-size: 0.9em; margin-top: -5px; margin-bottom: 10px; padding: 0 4px; align-self: flex-start; }
