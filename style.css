@@ -22,30 +22,6 @@
 
   --font-size: 16px;
   --line-height: 1.4;
-  --line-height-px: 22.4; /* 🌟🌟🌟 CSS 변수 시스템 🌟🌟🌟 */
-:root {
-  --bg-color: #ffffff;
-  --text-color: #111827;
-  --text-sub: #4b5563;
-  --border-color: #e5e8eb;
-  --surface-color: #ffffff; 
-  --surface-secondary: #f1f4f9; 
-  --surface-hover: #f9fafb;
-  
-  --accent-color: #111827;
-  --primary-blue: #1d6fef;
-  --error-red: #ef4444;
-  --image-purple: #8b5cf6;
-
-  --send-button-disabled: #e5e8eb;
-  --send-button-enabled: #111827; 
-  --send-button-icon: #ffffff;
-
-  --composer-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
-  --modal-overlay: rgba(0, 0, 0, 0.5);
-
-  --font-size: 16px;
-  --line-height: 1.4;
   --line-height-px: 22.4; 
   --min-textarea-height: 22.4px; 
   --min-input-container-height: 48px; 
@@ -537,9 +513,6 @@ hr.modal-divider { border: 0; border-top: 1px solid var(--border-color); margin:
 .confirm-actions button:hover { filter: brightness(0.95); }
 [data-theme="dark"] .confirm-actions button:hover { filter: brightness(1.2); }
 
-#confirm-cancel-btn { background-color: var(--border-color); color: var(--text-color); }
-#confirm-reset-btn { background-color: var(--error-red); color: white; border: none; }
-
 /* MinsuGPT 정보 모달 */
 #about-modal-backdrop { align-items: flex-end; justify-content: center; }
 #about-modal { max-width: 768px; padding-top: 24px; padding-bottom: 40px; border-radius: 20px 20px 0 0; transform: translateY(100%); }
@@ -569,6 +542,8 @@ hr.modal-divider { border: 0; border-top: 1px solid var(--border-color); margin:
 }
 .sidebar {
     width: 300px;
+    /* 🌟 [추가] 텍스트 깨짐 방지를 위한 최소 너비 및 텍스트 줄바꿈 방지 */
+    min-width: 300px; 
     max-width: 80%;
     height: 100%;
     background-color: var(--bg-color);
@@ -600,7 +575,8 @@ hr.modal-divider { border: 0; border-top: 1px solid var(--border-color); margin:
     font-size: 14px;
     cursor: pointer;
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    white-space: nowrap; /* 텍스트 줄바꿈 방지 */
+    /* 🌟 [추가] 텍스트 깨짐 방지 */
+    white-space: nowrap; 
 }
 .new-chat-btn .material-symbols-rounded { font-size: 20px; }
 .sidebar-close {
@@ -659,9 +635,12 @@ hr.modal-divider { border: 0; border-top: 1px solid var(--border-color); margin:
 }
 .sidebar-list-item-title {
     font-weight: 500; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    /* 🌟 [추가] 텍스트 깨짐 방지 */
+    white-space: nowrap;
 }
 .sidebar-list-item-date {
     font-size: 11px; color: var(--text-sub); margin-top: 4px;
+    white-space: nowrap;
 }
 .sidebar-item-actions {
     display: none;
@@ -688,7 +667,8 @@ hr.modal-divider { border: 0; border-top: 1px solid var(--border-color); margin:
     font-size: 14px; color: var(--text-color);
     cursor: pointer;
     transition: background-color 0.2s;
-    white-space: nowrap; /* 텍스트 줄바꿈 방지 */
+    /* 🌟 [추가] 텍스트 깨짐 방지 */
+    white-space: nowrap;
 }
 .sidebar-menu-item:hover { background-color: var(--surface-hover); }
 .sidebar-menu-item.delete-all { color: var(--error-red); }
@@ -696,14 +676,14 @@ hr.modal-divider { border: 0; border-top: 1px solid var(--border-color); margin:
 
 
 /* 🌟 [수정] 스크롤 버튼 컨테이너 위치 고정 */
-/* 입력창보다 확실히 위로 이동 */
+/* 중앙 하단으로 이동 (입력창보다 더 위로) */
 #scroll-to-bottom-container {
     position: fixed;
     /* 화면 가로 중앙 */
     left: 50%;
     transform: translateX(-50%);
-    /* 🌟 바닥에서 더 높이 띄움 (입력창 + 그라데이션 위) */
-    bottom: 170px; 
+    /* 🌟 [수정] 입력창 위로 올라가도록 높이 조정 (100px -> 160px) */
+    bottom: 160px; 
     z-index: 95; /* 헤더(100)보다 아래, 컨텐츠보다 위 */
     pointer-events: none; /* 컨테이너 자체는 클릭 통과 */
 }
@@ -760,10 +740,10 @@ hr.modal-divider { border: 0; border-top: 1px solid var(--border-color); margin:
         background-color: transparent !important;
         width: 0;
         transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
-        z-index: 120; /* 헤더보다 위 */
+        z-index: 90;
         position: fixed;
         top: 0; bottom: 0; left: 0;
-        /* 🌟 줄바꿈 버그 수정: 넘치는 내용 숨김 처리 */
+        /* 🌟 [중요] 사이드바 텍스트 깨짐 방지: 넘치는 컨텐츠 숨김 */
         overflow: hidden; 
     }
 
@@ -774,19 +754,13 @@ hr.modal-divider { border: 0; border-top: 1px solid var(--border-color); margin:
 
     /* 사이드바: 기본 숨김 상태에서 시작 */
     .sidebar {
-        transform: translateX(0); /* 이미 backdrop이 숨기므로 transform 불필요 */
+        transform: translateX(-100%);
         border-right: 1px solid var(--border-color);
         box-shadow: none;
-        
-        /* 🌟 줄바꿈 버그 수정: 너비 고정 */
-        width: 300px;
-        min-width: 300px; /* 줄어들지 않도록 강제 */
-        height: 100vh;
     }
     
-    /* 사이드바 열림 */
+    /* 사이드바 열림: 제자리로 이동 */
     .modal-backdrop.visible .sidebar {
-        /* transform 로직 제거 (backdrop width로 제어) */
         transform: translateX(0);
     }
 
