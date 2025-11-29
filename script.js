@@ -792,7 +792,8 @@ function stopResponse() {
             const indicatorText = indicatorContainer.querySelector('.thinking-indicator-text');
             
             if (spinner) spinner.classList.add('reset-spin'); 
-            if (indicatorText) { indicatorText.textContent = '답변 중지됨'; indicatorText.classList.add('completed'); }
+            // 🌟 [수정] 텍스트 변경 대신 숨김
+            if (indicatorText) { indicatorText.style.display = 'none'; indicatorText.classList.add('completed'); }
             indicatorContainer.classList.add('left-aligned'); 
         }
 
@@ -877,7 +878,8 @@ async function sendMessage(userMessageOverride = null, isRegenerate = false) {
                 history.push({ role: 'model', content: fullResponse, feedback: null }); 
                 updateCurrentSession(); // 저장
                 if (spinnerElement) spinnerElement.classList.add('reset-spin'); 
-                if (indicatorTextElement) { indicatorTextElement.textContent = '이미지 생성 완료'; indicatorTextElement.classList.add('completed'); }
+                // 🌟 [수정] 텍스트 숨김
+                if (indicatorTextElement) { indicatorTextElement.style.display = 'none'; indicatorTextElement.classList.add('completed'); }
                 indicatorElement.classList.add('left-aligned');
                 toggleImageMode(false);
             } else {
@@ -924,7 +926,8 @@ async function sendMessage(userMessageOverride = null, isRegenerate = false) {
             updateCurrentSession(); // 저장
             
             if (spinnerElement) spinnerElement.classList.add('reset-spin'); 
-            if (indicatorTextElement) { indicatorTextElement.textContent = '답변 완료됨'; indicatorTextElement.classList.add('completed'); }
+            // 🌟 [수정] 텍스트 숨김
+            if (indicatorTextElement) { indicatorTextElement.style.display = 'none'; indicatorTextElement.classList.add('completed'); }
             indicatorElement.classList.add('left-aligned'); 
             
             const actionContainer = createBotActions(fullResponse, history.length - 1);
