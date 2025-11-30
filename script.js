@@ -73,6 +73,17 @@ const deleteModalDesc = document.getElementById('delete-modal-desc');
 const deleteCancelBtn = document.getElementById('delete-cancel-btn');
 const deleteConfirmBtn = document.getElementById('delete-confirm-btn');
 
+// 🌟 [신규] 첨부파일 관련 요소
+const cameraTrigger = document.getElementById('camera-trigger');
+const fileTrigger = document.getElementById('file-trigger');
+const attachmentPreviewArea = document.getElementById('attachment-preview-area');
+const modalCameraBtn = document.querySelector('.modal-grid-item[data-action="camera"]');
+const modalAlbumBtn = document.querySelector('.modal-grid-item[data-action="album"]');
+const modalFileBtn = document.querySelector('.modal-grid-item[data-action="file"]');
+
+let attachedFiles = []; // 첨부파일 저장용 배열 {name, size, base64}
+
+
 let targetSessionIdForAction = null;
 let deleteActionType = null; // 'single' or 'all'
 
@@ -102,11 +113,6 @@ let abortController = null;
 let currentLoadingText = '답변을 생각하는 중...';
 let autoScrollEnabled = true;
 let isImageMode = false;
-
-// 🌟 부드러운 타이핑 효과를 위한 변수
-let streamQueue = ""; // 네트워크에서 받아온 전체 데이터
-let displayedResponse = ""; // 현재 화면에 표시된 데이터
-let streamInterval = null; // 타이핑 인터벌
 
 // Marked 옵션 설정 (줄바꿈 처리 등)
 if (typeof marked !== 'undefined') {
@@ -333,11 +339,7 @@ function loadSessions() {
 
 function startNewChat(skipRender = false) {
     // 🌟 [수정] 중복 새 채팅 방지 로직
-    // 세션 목록이 있고, 가장 최신(첫번째) 세션이 메시지가 하나도 없는 '새 채팅' 상태라면
-    // 새로 만들지 않고 그 세션을 그대로 사용함.
     if (sessions.length > 0) {
-        // 정렬을 보장하기 위해 한 번 더 확인 (보통 unshift로 들어가므로 index 0)
-        // 만약 세션 순서가 꼬일 수 있다면 timestamp 정렬 필요할 수 있음
         const latestSession = sessions[0];
         if (latestSession.messages.length === 0) {
             currentSessionId = latestSession.id;
@@ -345,7 +347,7 @@ function startNewChat(skipRender = false) {
                 loadCurrentSession();
                 if (!isPC()) toggleSidebar(false);
             }
-            renderSidebarList(); // 확실하게 갱신
+            renderSidebarList(); 
             return; 
         }
     }
@@ -362,16 +364,14 @@ function startNewChat(skipRender = false) {
     saveSessions();
     if (!skipRender) {
         loadCurrentSession();
-        // 모바일일때만 닫음
         if (!isPC()) toggleSidebar(false);
     }
-    renderSidebarList(); // 사이드바 즉시 갱신
+    renderSidebarList(); 
 }
 
 function loadCurrentSession() {
     const session = sessions.find(s => s.id === currentSessionId);
     if (!session) {
-        // 세션이 없으면 새로 생성
         startNewChat();
         return;
     }
@@ -379,7 +379,6 @@ function loadCurrentSession() {
     renderChatMessages();
 }
 
-// 🌟 [수정] 삭제, 이름변경 로직 (모달 사용)
 function deleteSession(id, e) {
     if(e) e.stopPropagation();
     openDeleteModal('single', id);
@@ -390,34 +389,28 @@ function renameSession(id, e) {
     openRenameModal(id);
 }
 
-// 실제 삭제 실행 함수
 function executeDeleteSession(id) {
     sessions = sessions.filter(s => s.id !== id);
     saveSessions();
     
-    // 현재 보고 있던 채팅을 삭제한 경우 처리
     if (currentSessionId === id) {
         if (sessions.length > 0) {
             currentSessionId = sessions[0].id;
             loadCurrentSession();
         } else {
-            // 모든 채팅이 사라진 경우 강제 새 채팅 (중복 방지 로직 적용됨)
             startNewChat(false);
         }
     }
     
-    // 🌟 [중요] 삭제 후 사이드바 즉시 갱신
     renderSidebarList();
     if (!isPC()) toggleSidebar(false);
 }
 
-// 실제 이름 변경 실행 함수
 function executeRenameSession(id, newTitle) {
     const session = sessions.find(s => s.id === id);
     if (session && newTitle) {
         session.title = newTitle;
         saveSessions();
-        // 🌟 [중요] 변경 후 사이드바 즉시 갱신
         renderSidebarList();
     }
 }
@@ -426,22 +419,19 @@ function updateCurrentSession() {
     const session = sessions.find(s => s.id === currentSessionId);
     if (session) {
         session.messages = history;
-        // 첫 메시지로 제목 자동 설정 (제목이 '새로운 채팅'일 경우만)
         if (session.title === '새로운 채팅' && history.length > 0) {
             session.title = history[0].content.substring(0, 30);
-            renderSidebarList(); // 제목 변경 시 사이드바 즉시 갱신
+            renderSidebarList(); 
         }
         session.timestamp = Date.now();
         saveSessions();
     }
 }
 
-// 🌟 [수정] 사이드바 리스트 렌더링 (PC 닫힘 방지)
 function renderSidebarList() {
     sidebarList.innerHTML = '';
     const filter = sidebarSearchInput.value.toLowerCase();
     
-    // 타임스탬프 기준 내림차순 정렬
     const sortedSessions = sessions.sort((a, b) => b.timestamp - a.timestamp);
     
     sortedSessions.forEach(session => {
@@ -466,9 +456,7 @@ function renderSidebarList() {
         el.addEventListener('click', () => {
             currentSessionId = session.id;
             loadCurrentSession();
-            // PC가 아닐 때만 사이드바 닫기
             if (!isPC()) toggleSidebar(false);
-            // 클릭 시 활성 상태 갱신을 위해 다시 렌더링
             renderSidebarList();
         });
         
@@ -490,7 +478,12 @@ function renderChatMessages() {
         initialContent.style.visibility = 'hidden'; 
         chatMessages.style.display = 'flex';
         history.forEach(message => {
-            if (message.role === 'user') { appendUserMessage(message.content, false); } 
+            if (message.role === 'user') { 
+                // 🌟 히스토리 메시지에는 이미지가 없을 수도 있으므로 기본값 처리
+                // 현재 로직상 history에 이미지가 저장되어 있지 않다면 텍스트만 렌더링
+                // (만약 히스토리에도 이미지를 저장하고 싶다면 history 구조 변경 필요)
+                appendUserMessage(message.content, [], false); 
+            } 
             else if (message.role === 'model') { 
                 if (message.content.includes('<img src="data:image')) {
                     appendBotImage(message.content, false);
@@ -507,11 +500,9 @@ function renderChatMessages() {
         initialContent.style.opacity = '1';
     }
     autoResizeTextarea();
-    // 렌더링 직후 스크롤 최하단 이동
     setTimeout(() => scrollToBottom(false), 0);
 }
 
-// 🌟 [수정] 전체 삭제 로직
 function resetAllChats() {
     openDeleteModal('all');
 }
@@ -519,7 +510,7 @@ function resetAllChats() {
 function executeResetAllChats() {
     sessions = [];
     localStorage.removeItem(SESSIONS_STORAGE_KEY);
-    startNewChat(); // 초기화 후 바로 새 채팅 시작
+    startNewChat(); 
     showSnackbar('모든 대화가 삭제되었습니다.');
     if (!isPC()) toggleSidebar(false);
 }
@@ -528,10 +519,6 @@ function executeResetAllChats() {
 // 4. 입력창 및 메시지 UI 관련 함수
 // ===========================================
 
-/**
- * 스크롤을 맨 아래로 이동시키는 함수
- * @param {boolean} smooth - 부드러운 스크롤 여부
- */
 function scrollToBottom(smooth = true) {
     if (!contentWrapper) return;
     
@@ -540,11 +527,9 @@ function scrollToBottom(smooth = true) {
     } else {
         contentWrapper.scrollTop = contentWrapper.scrollHeight;
     }
-    
     toggleScrollButton();
 }
 
-// 스크롤 버튼 표시/숨김을 관리하는 함수
 function toggleScrollButton() {
     if (!contentWrapper || !scrollDownButton) return;
 
@@ -564,7 +549,7 @@ function toggleScrollButton() {
 
 
 function toggleSendButton() {
-    if (inputField.value.trim().length > 0 && !isStreaming) { sendButton.classList.add('active'); } 
+    if ((inputField.value.trim().length > 0 || attachedFiles.length > 0) && !isStreaming) { sendButton.classList.add('active'); } 
     else { sendButton.classList.remove('active'); }
 }
 
@@ -587,28 +572,112 @@ function autoResizeTextarea() {
     if (isImageMode && !composer.classList.contains('style-simple')) {
          contentHeight += 40; 
     }
+    
+    if (attachedFiles.length > 0) {
+        contentHeight += attachmentPreviewArea.offsetHeight + 10;
+    }
 
     const inputContainerHeight = Math.max(contentHeight, minInputContainerHeight);
     
     inputContainer.style.minHeight = `${inputContainerHeight}px`;
 
     const composerHeight = composer.offsetHeight;
-    
-    // 🌟 [수정] 채팅창 하단 여백을 대폭 늘려서(80px 추가) 가독성을 높임
     chatMessages.style.paddingBottom = `${composerHeight + 80}px`;
 }
 
-function appendUserMessage(content, animate = true) {
+// 🌟 [신규] 첨부파일 핸들링 함수들
+function handleFileSelect(e) {
+    const files = Array.from(e.target.files);
+    if (!files.length) return;
+
+    files.forEach(file => {
+        if (!file.type.startsWith('image/')) {
+            showSnackbar('이미지 파일만 업로드 가능합니다.');
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            const base64 = event.target.result;
+            attachedFiles.push({
+                name: file.name,
+                size: formatBytes(file.size),
+                base64: base64
+            });
+            renderAttachments();
+        };
+        reader.readAsDataURL(file);
+    });
+    
+    e.target.value = '';
+    togglePlusModal(false);
+}
+
+function formatBytes(bytes, decimals = 2) {
+    if (!+bytes) return '0 Bytes';
+    const k = 1024;
+    const dm = decimals < 0 ? 0 : decimals;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
+}
+
+function renderAttachments() {
+    attachmentPreviewArea.innerHTML = '';
+    
+    if (attachedFiles.length > 0) {
+        attachmentPreviewArea.style.display = 'flex';
+        
+        attachedFiles.forEach((file, index) => {
+            const chip = document.createElement('div');
+            chip.className = 'attachment-chip';
+            chip.innerHTML = `
+                <span class="material-symbols-rounded" style="font-size: 16px;">image</span>
+                <span class="attachment-chip-name">${file.name}</span>
+                <span class="attachment-chip-size">${file.size}</span>
+                <div class="attachment-chip-delete" data-index="${index}">
+                    <span class="material-symbols-rounded" style="font-size: 16px;">close</span>
+                </div>
+            `;
+            
+            chip.querySelector('.attachment-chip-delete').addEventListener('click', () => {
+                attachedFiles.splice(index, 1);
+                renderAttachments();
+            });
+            
+            attachmentPreviewArea.appendChild(chip);
+        });
+    } else {
+        attachmentPreviewArea.style.display = 'none';
+    }
+    
+    toggleSendButton();
+    autoResizeTextarea();
+}
+
+// 🌟 [수정] 사용자 메시지 버블 생성 시 이미지 표시 지원
+function appendUserMessage(content, images = [], animate = true) {
     const userBubble = document.createElement('div');
     userBubble.className = 'message-bubble user-message';
-    userBubble.innerHTML = `<div class="message-text">${content.replace(/\n/g, '<br>')}</div>`;
+    
+    let imagesHtml = '';
+    if (images && images.length > 0) {
+        imagesHtml = `<div class="message-images">`;
+        images.forEach(imgData => {
+            // imgData가 base64 스트링이라고 가정 (또는 객체라면 .base64)
+            const src = typeof imgData === 'string' ? imgData : imgData.base64;
+            imagesHtml += `<img src="${src}" class="message-content-image" alt="첨부 이미지">`;
+        });
+        imagesHtml += `</div>`;
+    }
+
+    userBubble.innerHTML = `<div class="message-text">${imagesHtml}${content.replace(/\n/g, '<br>')}</div>`;
     chatMessages.appendChild(userBubble);
     
     if (animate) {
-        // 🌟 수정됨: scrollToBottom 대신 sendMessage에서 처리하거나
-        // 여기서는 그냥 두되, sendMessage에서 별도 처리
+        // 애니메이션 필요 시 구현
     }
-    return userBubble; // 요소 반환
+    return userBubble; 
 }
 
 function appendBotImage(htmlContent, animate = true) {
@@ -634,7 +703,6 @@ function appendBotMessage(content, feedbackStatus = null, animate = true) {
     const streamingBlock = document.createElement('div');
     streamingBlock.className = 'streaming-block'; 
     
-    // Markdown 렌더링
     streamingBlock.innerHTML = typeof marked !== 'undefined' ? marked.parse(content) : content;
     
     botMessageContainer.appendChild(streamingBlock);
@@ -689,7 +757,7 @@ function createBotActions(content, messageIndex, feedbackStatus = null) {
         if (!currentMessage || currentMessage.role !== 'model') return;
         const newFeedback = currentMessage.feedback === action ? null : action;
         currentMessage.feedback = newFeedback; history[index].feedback = newFeedback; 
-        updateCurrentSession(); // 저장
+        updateCurrentSession(); 
         const btn = document.querySelector(`.bot-message[data-index="${index}"] .bot-action-btn.${action}`);
         const otherBtn = document.querySelector(`.bot-message[data-index="${index}"] .bot-action-btn.${otherAction}`);
         if (newFeedback) { btn.classList.add('selected'); if (otherBtn) otherBtn.classList.remove('selected'); } 
@@ -728,7 +796,6 @@ function handleRegenerate(messageIndex) {
     }
 
     currentLoadingText = '다시 답변을 생각하는 중...';
-    // 재생성 시작 시 자동 스크롤 활성화 및 버튼 숨김
     autoScrollEnabled = true; scrollDownButton.classList.remove('visible');
     sendMessage(originalPrompt, true); 
 }
@@ -762,9 +829,6 @@ function appendBotMessageContainer() {
     botMessageContainer.appendChild(indicatorContainer); botMessageContainer.appendChild(streamingBlock);
     chatMessages.appendChild(botMessageContainer);
     
-    // 🌟 [수정] 컨테이너 추가 직후 스크롤을 맨 아래로 하지 않고 sendMessage에서 제어하도록 함
-    // 하지만 일반적인 스트리밍 중에는 아래로 가는게 맞으므로 기본값 유지, 최초 호출때만 덮어씀
-    
     return { botMessageElement: botMessageContainer, indicatorElement: indicatorContainer, streamingBlockElement: streamingBlock, spinnerElement: spinner, indicatorTextElement: indicatorText };
 }
 
@@ -772,7 +836,6 @@ function setStreamingState(active) {
     isStreaming = active;
     if (active) {
         sendButton.style.display = 'none'; stopButton.style.display = 'flex'; inputField.setAttribute('readonly', 'true');
-        // 스트리밍 시작 시 강제 스크롤 활성화
         autoScrollEnabled = true; scrollDownButton.classList.remove('visible');
     } else {
         sendButton.style.display = 'flex'; stopButton.style.display = 'none'; inputField.removeAttribute('readonly'); abortController = null;
@@ -780,7 +843,7 @@ function setStreamingState(active) {
     toggleSendButton();
 }
 
-let fullResponse = ""; // 전역 사용을 위해 유지 (복사 기능 등)
+let fullResponse = ""; 
 
 function stopResponse() {
     showSnackbar("답변 중지됨.");
@@ -788,13 +851,6 @@ function stopResponse() {
         abortController.abort();
     }
     
-    // 🌟 [수정] 스트리밍 인터벌 정리
-    if (streamInterval) {
-        clearInterval(streamInterval);
-        streamInterval = null;
-    }
-
-    // 현재 답변 저장 및 마무리
     const lastBotMessageElement = chatMessages.lastElementChild;
     if (lastBotMessageElement) {
         const indicatorContainer = lastBotMessageElement.querySelector('#thinking-indicator');
@@ -803,19 +859,20 @@ function stopResponse() {
             const indicatorText = indicatorContainer.querySelector('.thinking-indicator-text');
             
             if (spinner) spinner.classList.add('reset-spin'); 
-            // 🌟 [수정] 텍스트 변경 대신 숨김
-            if (indicatorText) { indicatorText.style.display = 'none'; indicatorText.classList.add('completed'); }
+            if (indicatorText) { 
+                indicatorText.textContent = '답변 중지됨'; 
+                indicatorText.classList.add('stopped'); 
+            }
             indicatorContainer.classList.add('left-aligned'); 
         }
 
         const stopText = document.createElement('div'); stopText.className = 'stop-message'; stopText.textContent = "답변 중지됨.";
         lastBotMessageElement.insertAdjacentElement('afterend', stopText);
         
-        // 현재까지 표시된 내용(displayedResponse)을 저장
-        history.push({ role: 'model', content: displayedResponse, feedback: null }); 
-        updateCurrentSession(); // 저장
+        history.push({ role: 'model', content: fullResponse, feedback: null }); 
+        updateCurrentSession(); 
         
-        const actionContainer = createBotActions(displayedResponse, history.length - 1);
+        const actionContainer = createBotActions(fullResponse, history.length - 1);
         lastBotMessageElement.appendChild(actionContainer); updateRegenerateButtons();
     }
 
@@ -825,9 +882,13 @@ function stopResponse() {
 
 async function sendMessage(userMessageOverride = null, isRegenerate = false) {
     const userMessage = userMessageOverride !== null ? userMessageOverride : inputField.value.trim();
-    if (userMessage.length === 0 || isStreaming) { if (isStreaming) showSnackbar('현재 답변 생성 중입니다.'); return; }
+    
+    if ((userMessage.length === 0 && attachedFiles.length === 0) || isStreaming) { 
+        if (isStreaming) showSnackbar('현재 답변 생성 중입니다.'); return; 
+    }
 
     let userBubbleElement = null;
+    let imagesToSend = []; // 백엔드 전송용 이미지 배열
 
     if (!isRegenerate) {
         if (isImageMode) {
@@ -843,20 +904,31 @@ async function sendMessage(userMessageOverride = null, isRegenerate = false) {
         const existingStops = chatMessages.querySelectorAll('.stop-message'); existingStops.forEach(el => el.remove());
         updateRegenerateButtons(); 
         
-        userBubbleElement = appendUserMessage(userMessage, false); 
+        // 🌟 첨부 파일이 있는 경우 화면에 표시할 이미지 배열 준비
+        const displayImages = attachedFiles.map(f => f.base64);
+        imagesToSend = [...displayImages]; // 복사해서 전송용으로 사용
+
+        userBubbleElement = appendUserMessage(userMessage, displayImages, false); 
+        
+        // 히스토리에는 텍스트만 저장 (복잡도 감소를 위해) 
+        // 필요하다면 이미지 데이터도 저장 가능하지만 용량 문제 주의
         history.push({ role: 'user', content: userMessage }); 
-        updateCurrentSession(); // 저장
+        updateCurrentSession(); 
     } 
     
-    if (userMessageOverride === null) { inputField.value = ''; inputField.rows = MIN_ROWS; autoResizeTextarea(); }
+    if (userMessageOverride === null) { 
+        inputField.value = ''; 
+        inputField.rows = MIN_ROWS; 
+        attachedFiles = []; // 🌟 전송 후 초기화
+        renderAttachments();
+        autoResizeTextarea(); 
+    }
     
     const { botMessageElement, indicatorElement, streamingBlockElement, spinnerElement, indicatorTextElement } = appendBotMessageContainer();
     
-    // 🌟 [수정] 메세지 전송 시 내가 보낸 메세지가 상단 헤더 바로 아래에 위치하도록 스크롤
     if (userBubbleElement) {
         setTimeout(() => {
             const headerHeight = 56; 
-            // 약간의 여유를 두고 스크롤 (헤더 높이 + 10px)
             const offset = userBubbleElement.offsetTop - headerHeight - 10; 
             contentWrapper.scrollTo({ top: offset, behavior: 'smooth' });
         }, 50);
@@ -868,50 +940,7 @@ async function sendMessage(userMessageOverride = null, isRegenerate = false) {
     abortController = new AbortController();
     const signal = abortController.signal;
     
-    // 🌟 변수 초기화
     fullResponse = ""; 
-    streamQueue = "";      // 네트워크 버퍼 초기화
-    displayedResponse = ""; // 표시된 텍스트 초기화
-    
-    // 🌟 부드러운 타이핑 효과를 위한 인터벌 함수 시작
-    if (streamInterval) clearInterval(streamInterval);
-    
-    streamInterval = setInterval(() => {
-        // streamQueue에 데이터가 있고, 표시된 데이터가 전체 데이터보다 짧을 때
-        if (streamQueue.length > 0) {
-            // 한 번에 가져올 글자 수 (부드러움을 위해 2~3글자)
-            const charsToTake = 2; 
-            
-            // 큐에서 글자 가져오기
-            const chunkToAdd = streamQueue.slice(0, charsToTake);
-            streamQueue = streamQueue.slice(charsToTake); // 큐 업데이트
-            
-            displayedResponse += chunkToAdd;
-            fullResponse = displayedResponse; // 동기화
-            
-            // Markdown 파싱 및 업데이트
-            streamingBlockElement.innerHTML = typeof marked !== 'undefined' ? marked.parse(displayedResponse) : displayedResponse;
-            
-            // 자동 스크롤
-            if (autoScrollEnabled) scrollToBottom(false);
-        } else if (!isStreaming && streamQueue.length === 0) {
-            // 스트리밍이 끝났고 큐도 비었으면 종료
-            clearInterval(streamInterval);
-            streamInterval = null;
-            
-            // 최종 마무리 (저장 및 버튼 표시)
-             history.push({ role: 'model', content: displayedResponse, feedback: null }); 
-            updateCurrentSession(); 
-            
-            if (spinnerElement) spinnerElement.classList.add('reset-spin'); 
-            if (indicatorTextElement) { indicatorTextElement.style.display = 'none'; indicatorTextElement.classList.add('completed'); }
-            indicatorElement.classList.add('left-aligned'); 
-            
-            const actionContainer = createBotActions(displayedResponse, history.length - 1);
-            botMessageElement.appendChild(actionContainer); updateRegenerateButtons();
-            scrollToBottom(true);
-        }
-    }, 15); // 15ms 간격으로 업데이트 (타이핑 속도 조절)
     
     try {
         if (isImageMode) {
@@ -926,18 +955,14 @@ async function sendMessage(userMessageOverride = null, isRegenerate = false) {
             const data = await response.json();
             
             if (data.success && data.image_data) {
-                // 이미지는 스트리밍 큐를 타지 않고 즉시 표시
-                clearInterval(streamInterval); // 텍스트 스트리밍 중지
-                
                 const imgHtml = `<img src="${data.image_data}" alt="Generated Image" style="max-width: 100%; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">`;
                 fullResponse = imgHtml;
                 streamingBlockElement.innerHTML = fullResponse;
-                
                 setStreamingState(false);
                 history.push({ role: 'model', content: fullResponse, feedback: null }); 
-                updateCurrentSession(); // 저장
+                updateCurrentSession(); 
                 if (spinnerElement) spinnerElement.classList.add('reset-spin'); 
-                if (indicatorTextElement) { indicatorTextElement.style.display = 'none'; indicatorTextElement.classList.add('completed'); }
+                if (indicatorTextElement) { indicatorTextElement.textContent = '이미지 생성 완료'; indicatorTextElement.classList.add('completed'); }
                 indicatorElement.classList.add('left-aligned');
                 toggleImageMode(false);
             } else {
@@ -945,12 +970,16 @@ async function sendMessage(userMessageOverride = null, isRegenerate = false) {
             }
 
         } else {
+            // 🌟 [수정] 이미지가 있는 경우 페이로드에 포함
+            const payload = { 
+                message: userMessage, 
+                history: [PRE_PROMPT, ...history],
+                images: imagesToSend // 🌟 백엔드로 이미지 전송
+            };
+            
             const response = await fetch(BACKEND_ENDPOINT, {
                 method: 'POST', headers: { 'Content-Type': 'application/json', },
-                body: JSON.stringify({ 
-                    message: userMessage, 
-                    history: [PRE_PROMPT, ...history],
-                }), 
+                body: JSON.stringify(payload), 
                 signal: signal 
             });
 
@@ -967,24 +996,35 @@ async function sendMessage(userMessageOverride = null, isRegenerate = false) {
                 
                 if (chunk.includes("[DONE]")) {
                     const parts = chunk.split("[DONE]");
-                    // 🌟 큐에 데이터 추가 (직접 렌더링 X)
-                    streamQueue += parts[0]; 
+                    fullResponse += parts[0]; 
+                    streamingBlockElement.innerHTML = typeof marked !== 'undefined' ? marked.parse(fullResponse) : fullResponse;
+                    if (autoScrollEnabled) scrollToBottom(false);
                     break;
                 } else {
-                     // 🌟 큐에 데이터 추가 (직접 렌더링 X)
-                    streamQueue += chunk;
+                    fullResponse += chunk;
+                    streamingBlockElement.innerHTML = typeof marked !== 'undefined' ? marked.parse(fullResponse) : fullResponse;
+                    if (autoScrollEnabled) scrollToBottom(false);
                 }
             }
             
-            // 네트워크 수신 완료, 이제 인터벌이 남은 큐를 처리할 때까지 대기
+            history.push({ role: 'model', content: fullResponse, feedback: null }); 
+            updateCurrentSession(); 
+            
+            if (spinnerElement) spinnerElement.classList.add('reset-spin'); 
+            if (indicatorTextElement) { indicatorTextElement.textContent = '답변 완료됨'; indicatorTextElement.classList.add('completed'); }
+            indicatorElement.classList.add('left-aligned'); 
+            
+            const actionContainer = createBotActions(fullResponse, history.length - 1);
+            botMessageElement.appendChild(actionContainer); updateRegenerateButtons();
+            
             setStreamingState(false);
+            scrollToBottom(true);
         }
     } catch (error) {
         if (error.name === 'AbortError') { 
             console.log('Fetch aborted'); 
         } 
         else {
-            if(streamInterval) clearInterval(streamInterval); // 에러 시 인터벌 중지
             const errorMsg = `⚠️ 오류: ${error.message}`;
             streamingBlockElement.innerHTML = `<p style="color:red;">${errorMsg}</p>`;
             if (spinnerElement) spinnerElement.classList.add('reset-spin');
@@ -995,6 +1035,12 @@ async function sendMessage(userMessageOverride = null, isRegenerate = false) {
         setStreamingState(false); scrollToBottom(true); 
     }
 }
+
+// ... (나머지 이벤트 리스너 및 초기화 코드 유지) ...
+// ===========================================
+// 5. 내보내기 및 가져오기 기능 ~ 7. 초기화 (이전과 동일)
+// ===========================================
+// 중략... (이전 코드 블록의 나머지 부분과 동일합니다)
 
 // ===========================================
 // 5. 내보내기 및 가져오기 기능
@@ -1091,6 +1137,26 @@ deleteConfirmBtn.addEventListener('click', () => {
     closeCustomModals();
 });
 deleteModalBackdrop.addEventListener('click', (e) => { if (e.target === deleteModalBackdrop) closeCustomModals(); });
+
+// 🌟 [신규] 파일 업로드 관련 리스너
+if (modalCameraBtn && cameraTrigger) {
+    modalCameraBtn.addEventListener('click', () => {
+        cameraTrigger.click();
+    });
+}
+if (modalAlbumBtn && fileTrigger) {
+    modalAlbumBtn.addEventListener('click', () => {
+        fileTrigger.click();
+    });
+}
+if (modalFileBtn && fileTrigger) {
+    modalFileBtn.addEventListener('click', () => {
+        fileTrigger.click();
+    });
+}
+
+if (cameraTrigger) cameraTrigger.addEventListener('change', handleFileSelect);
+if (fileTrigger) fileTrigger.addEventListener('change', handleFileSelect);
 
 
 window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
