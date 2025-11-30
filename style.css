@@ -1,3 +1,24 @@
+/* ... (기존 스타일 유지) ... */
+
+/* 🌟 [신규] 메시지 내 이미지 스타일 */
+.message-images {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 6px;
+    justify-content: flex-end; /* 사용자 메시지는 오른쪽 정렬 */
+}
+.user-message .message-images {
+    justify-content: flex-end;
+}
+.message-content-image {
+    max-width: 200px;
+    max-height: 200px;
+    border-radius: 12px;
+    object-fit: cover;
+    border: 1px solid rgba(0,0,0,0.1);
+}
+
 /* 🌟🌟🌟 CSS 변수 시스템 🌟🌟🌟 */
 :root {
   --bg-color: #ffffff;
@@ -161,42 +182,26 @@ body{ margin:0; background:var(--bg-color); color:var(--text-color); min-height:
 .action-btn.orange .material-symbols-rounded{ color:#fd7e14; } 
 
 /* Chat Messages */
-/* 🌟 [수정] 모바일에서는 기본 패딩 (10px 16px) */
-.chat-messages{ width: 100%; padding: 10px 16px; padding-top: 10px; display: none; flex-direction: column; justify-content: flex-start; gap: 10px; margin: 0 auto; box-sizing: border-box; }
+/* 🌟 [수정] 패딩을 늘려 안쪽으로 살짝 당김 */
+.chat-messages{ width: 100%; padding: 10px 24px; padding-top: 10px; display: none; flex-direction: column; justify-content: flex-start; gap: 10px; margin: 0 auto; box-sizing: border-box; }
+@media (min-width: 600px) { .chat-messages { max-width: 800px; padding-left: 24px; padding-right: 24px; } }
 
-/* 🌟 [수정] PC 버전에서만 패딩을 넓게 설정 */
-@media (min-width: 769px) { 
-    .chat-messages { 
-        max-width: 860px; /* PC에서 너무 넓어지지 않도록 최대폭 설정 */
-        padding-left: 30px; 
-        padding-right: 30px; 
-    } 
-}
-
-/* 🌟🌟🌟 메시지 애니메이션 (Fade In) 🌟🌟🌟 */
-@keyframes fadeInUp {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-.message-bubble{ 
-    display: flex; max-width: 80%; 
-    animation: fadeInUp 0.4s ease-out forwards; /* 메시지 등장 애니메이션 */
-}
-
+.message-bubble{ display: flex; max-width: 80%; }
 .message-text{ padding: 10px 14px; border-radius: 20px; line-height: 1.4; font-size: 15px; white-space: pre-wrap; }
 .user-message{ justify-content: flex-end; align-self: flex-end; }
 .user-message .message-text{ background-color: var(--surface-secondary); color: var(--text-color); border-bottom-right-radius: 4px; transition: background-color 0.3s, color 0.3s; }
 
-.bot-message{ 
-    align-self: flex-start; margin-top: 10px; padding: 0; color: var(--text-color); line-height: 1.4; font-size: 15px; width: 100%;
-    animation: fadeInUp 0.4s ease-out forwards; /* 봇 메시지 등장 애니메이션 */
-}
+.bot-message{ align-self: flex-start; margin-top: 10px; padding: 0; color: var(--text-color); line-height: 1.4; font-size: 15px; width: 100%; }
 .bot-message .streaming-block { display: block; padding: 0; border-radius: 0; background-color: transparent; max-width: 100%; box-sizing: border-box; white-space: normal; color: var(--text-color); margin-bottom: 8px; }
 
-/* 🌟 [수정] 부드러운 스트리밍을 위해 내부 요소 애니메이션은 제거 (JS에서 처리) */
-.streaming-block > * {
-    /* 개별 요소 애니메이션은 제거하여 깜빡임 방지 */
+/* 🌟 [수정] 봇 답변 페이드인 효과: 위로 올라오지 않고 제자리에서 부드럽게 나타나게 변경 */
+@keyframes fadeInUpNode {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.bot-message .streaming-block > * {
+    animation: fadeInUpNode 0.3s ease forwards;
 }
 
 .stop-message { color: var(--error-red); font-weight: 600; font-size: 0.9em; margin-top: -5px; margin-bottom: 10px; padding: 0 4px; align-self: flex-start; }
@@ -230,9 +235,14 @@ body{ margin:0; background:var(--bg-color); color:var(--text-color); min-height:
     background-size: 200% 100%; -webkit-background-clip: text; -webkit-text-fill-color: transparent;
     animation: shimmer 1.5s infinite linear;
 }
-.thinking-indicator-text.completed { display: none !important; } /* 🌟 완료 시 텍스트 숨김 */
+.thinking-indicator-text.completed { animation: none; background-position: 50% 0; }
+.thinking-indicator-text.stopped {
+    animation: none;
+    -webkit-text-fill-color: #9ca3af; /* 밝은 회색 */
+    color: #9ca3af;
+}
 
-/* 🌟 스피너 숨김 */
+/* 🌟 [수정] 스피너 숨김 */
 .loading-spinner {
     display: none !important; 
 }
@@ -301,6 +311,51 @@ body{ margin:0; background:var(--bg-color); color:var(--text-color); min-height:
 .close-image-mode { cursor: pointer; opacity: 0.7; display: flex; align-items: center; }
 .close-image-mode:hover { opacity: 1; }
 
+/* 🌟 첨부 파일 미리보기 영역 */
+.attachment-preview-area {
+    display: flex;
+    gap: 8px;
+    padding: 8px 12px 4px 12px;
+    width: 100%;
+    overflow-x: auto;
+    scrollbar-width: none; /* 파이어폭스 */
+}
+.attachment-preview-area::-webkit-scrollbar { display: none; /* 크롬, 사파리 */ }
+
+.attachment-chip {
+    display: flex;
+    align-items: center;
+    background-color: var(--surface-secondary);
+    border: 1px solid var(--border-color);
+    padding: 4px 8px;
+    border-radius: 8px;
+    font-size: 12px;
+    color: var(--text-color);
+    white-space: nowrap;
+    gap: 6px;
+    flex-shrink: 0;
+}
+.attachment-chip-name {
+    max-width: 100px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.attachment-chip-size {
+    color: var(--text-sub);
+    font-size: 10px;
+}
+.attachment-chip-delete {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    color: var(--text-sub);
+    border-radius: 50%;
+}
+.attachment-chip-delete:hover {
+    background-color: rgba(0,0,0,0.1);
+    color: var(--error-red);
+}
+
 .input-container {
     flex: 1; display: flex; align-items: center; gap: 8px; 
     box-sizing: border-box; 
@@ -351,7 +406,7 @@ body{ margin:0; background:var(--bg-color); color:var(--text-color); min-height:
 [data-theme="dark"] .composer.style-simple .composer-inner { box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
 
 .composer.style-simple .input-area-wrapper {
-    flex: 1; width: 100%; display: flex; flex-direction: row; align-items: center; min-width: 0; margin-bottom: 10px;
+    flex: 1; width: 100%; display: flex; flex-direction: column; min-width: 0; margin-bottom: 10px;
 }
 
 .composer.style-simple .input-container {
