@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>MinsuGPT 업데이트 로그</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- ✅ Elms Sans Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Elms+Sans:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Elms Sans', Arial, sans-serif;
+        }
+
+        body {
+            background: #f8fafc;
+            color: #0f172a;
+            min-height: 100vh;
+            padding: 40px 16px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            max-width: 900px;
+            width: 100%;
+        }
+
+        /* ✅ 텍스트 로고 */
+        .brand {
+            text-align: center;
+            margin-bottom: 50px;
+            font-size: 28px;
+            font-weight: 300;
+            letter-spacing: 0.3px;
+        }
+
+        .brand span {
+            font-weight: 500;
+        }
+
+        .brand small {
+            font-weight: 300;
+            opacity: 0.6;
+            margin-left: 6px;
+        }
+
+        /* ✅ 업데이트 카드 */
+        .update-card {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 16px;
+            padding: 26px;
+            margin-bottom: 22px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.05);
+            transition: 0.2s;
+        }
+
+        .update-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 28px rgba(0,0,0,0.08);
+        }
+
+        .update-title {
+            font-size: 20px;
+            font-weight: 500;
+            margin-bottom: 6px;
+        }
+
+        .update-date {
+            font-size: 13px;
+            color: #64748b;
+            margin-bottom: 16px;
+        }
+
+        /* ✅ CSS 모던 체크 리스트 */
+        .update-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            font-size: 15px;
+            color: #1e293b;
+        }
+
+        .update-list li {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            line-height: 1.6;
+        }
+
+        .update-list li::before {
+            content: "";
+            width: 16px;
+            height: 16px;
+            border-radius: 6px;
+            background: linear-gradient(135deg, #2563eb, #38bdf8);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='white' d='M13.485 1.929a1 1 0 0 1 0 1.414l-7.071 7.071a1 1 0 0 1-1.414 0L2.515 7.93a1 1 0 1 1 1.414-1.414l1.768 1.768 6.364-6.354a1 1 0 0 1 1.414 0z'/%3E%3C/svg%3E") center / contain no-repeat;
+        }
+
+        /* ✅ 푸터 */
+        .footer {
+            text-align: center;
+            margin-top: 50px;
+            color: #94a3b8;
+            font-size: 13px;
+            font-weight: 300;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <!-- ✅ 텍스트 브랜드 -->
+    <div class="brand">
+        <span>MinsuGPT</span><small>ㅣCorerepubliX</small>
+    </div>
+
+    <!-- ✅ 업데이트 카드 1 -->
+    <div class="update-card">
+        <div class="update-title">v1.2.0 업데이트</div>
+        <div class="update-date">2025.11.30</div>
+        <ul class="update-list">
+            <li>AI 응답 속도 대폭 개선</li>
+            <li>이미지 생성 기능 추가</li>
+            <li>모바일 UI 최적화</li>
+            <li>시스템 안정성 강화</li>
+        </ul>
+    </div>
+
+    <!-- ✅ 업데이트 카드 2 -->
+    <div class="update-card">
+        <div class="update-title">v1.1.0 업데이트</div>
+        <div class="update-date">2025.11.20</div>
+        <ul class="update-list">
+            <li>대화 저장 기능 추가</li>
+            <li>사용자 인터페이스 개선</li>
+            <li>속도 최적화 작업</li>
+        </ul>
+    </div>
+
+    <!-- ✅ 업데이트 카드 3 -->
+    <div class="update-card">
+        <div class="update-title">v1.0.0 정식 출시</div>
+        <div class="update-date">2025.11.10</div>
+        <ul class="update-list">
+            <li>MinsuGPT 서비스 오픈</li>
+            <li>기본 AI 채팅 기능 제공</li>
+            <li>웹 기반 인터페이스 지원</li>
+        </ul>
+    </div>
+
+    <!-- ✅ 푸터 -->
+    <div class="footer">
+        © 2025 MinsuGPT · CorerepubliX. All rights reserved.
+    </div>
+
+</div>
+
+</body>
+</html>
