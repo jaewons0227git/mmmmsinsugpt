@@ -185,8 +185,16 @@ body{ margin:0; background:var(--bg-color); color:var(--text-color); min-height:
 }
 
 .message-text{ padding: 10px 14px; border-radius: 20px; line-height: 1.4; font-size: 15px; white-space: pre-wrap; }
-.user-message{ justify-content: flex-end; align-self: flex-end; }
+.user-message{ justify-content: flex-end; align-self: flex-end; flex-direction: column; align-items: flex-end; }
 .user-message .message-text{ background-color: var(--surface-secondary); color: var(--text-color); border-bottom-right-radius: 4px; transition: background-color 0.3s, color 0.3s; }
+
+/* 🌟 [신규] 사용자 이미지 스타일 */
+.user-message-image {
+    max-width: 200px;
+    border-radius: 12px;
+    margin-bottom: 8px;
+    display: block;
+}
 
 .bot-message{ 
     align-self: flex-start; margin-top: 10px; padding: 0; color: var(--text-color); line-height: 1.4; font-size: 15px; width: 100%;
@@ -231,6 +239,13 @@ body{ margin:0; background:var(--bg-color); color:var(--text-color); min-height:
     animation: shimmer 1.5s infinite linear;
 }
 .thinking-indicator-text.completed { display: none !important; } /* 🌟 완료 시 텍스트 숨김 */
+/* 🌟 [신규] 답변 중지됨 스타일 */
+.thinking-indicator-text.stopped {
+    background-image: none;
+    -webkit-text-fill-color: #9ca3af; /* 밝은 회색 */
+    color: #9ca3af;
+    animation: none;
+}
 
 /* 🌟 스피너 숨김 */
 .loading-spinner {
@@ -283,7 +298,13 @@ body{ margin:0; background:var(--bg-color); color:var(--text-color); min-height:
     z-index: 21;
 }
 
-.input-area-wrapper { flex: 1; margin-bottom: 0; display:flex; flex-direction:column; width:100%; }
+/* 🌟 [수정] 입력 영역 래퍼: 항상 세로 정렬 */
+.input-area-wrapper { 
+    flex: 1; margin-bottom: 0; 
+    display: flex; flex-direction: column; /* 무조건 컬럼 */
+    width: 100%; 
+    min-width: 0; /* Flexbox 축소 방지 */
+}
 
 .image-mode-indicator {
     display: none; 
@@ -301,12 +322,63 @@ body{ margin:0; background:var(--bg-color); color:var(--text-color); min-height:
 .close-image-mode { cursor: pointer; opacity: 0.7; display: flex; align-items: center; }
 .close-image-mode:hover { opacity: 1; }
 
+/* 🌟 [신규] 파일 미리보기 영역 */
+.attachment-area {
+    display: none; /* JS에서 flex로 변경됨 */
+    padding: 8px 4px;
+    margin-bottom: 4px;
+    width: 100%;
+}
+.attachment-preview-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    width: 100%;
+}
+.file-chip {
+    display: flex;
+    align-items: center;
+    background-color: var(--surface-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 6px 8px;
+    font-size: 13px;
+    max-width: 100%;
+}
+.file-info {
+    display: flex;
+    flex-direction: column;
+    margin-right: 8px;
+    max-width: 150px;
+}
+.file-name {
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--text-color);
+}
+.file-size {
+    font-size: 11px;
+    color: var(--text-sub);
+}
+.file-delete {
+    cursor: pointer;
+    color: var(--text-sub);
+    display: flex;
+    align-items: center;
+}
+.file-delete:hover {
+    color: var(--error-red);
+}
+
 .input-container {
     flex: 1; display: flex; align-items: center; gap: 8px; 
     box-sizing: border-box; 
     min-height: var(--min-input-container-height); 
     overflow: hidden;
     transition: all 0.3s ease;
+    width: 100%;
 }
 
 .input-container textarea {
@@ -347,11 +419,14 @@ body{ margin:0; background:var(--bg-color); color:var(--text-color); min-height:
     flex-direction: column; 
     align-items: flex-start; 
     position: relative;
+    /* 🌟 높이 애니메이션 추가 */
+    transition: height 0.3s ease, padding 0.3s ease; 
 }
 [data-theme="dark"] .composer.style-simple .composer-inner { box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
 
+/* 🌟 [수정] 심플 모드에서도 input-area-wrapper는 그대로 (세로 정렬 유지) */
 .composer.style-simple .input-area-wrapper {
-    flex: 1; width: 100%; display: flex; flex-direction: row; align-items: center; min-width: 0; margin-bottom: 10px;
+    margin-bottom: 10px;
 }
 
 .composer.style-simple .input-container {
