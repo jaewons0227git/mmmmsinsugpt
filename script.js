@@ -73,6 +73,15 @@ const deleteModalDesc = document.getElementById('delete-modal-desc');
 const deleteCancelBtn = document.getElementById('delete-cancel-btn');
 const deleteConfirmBtn = document.getElementById('delete-confirm-btn');
 
+// 🌟 [신규] 파일 첨부 관련 요소
+const hiddenCameraInput = document.getElementById('hidden-camera-input');
+const hiddenFileInput = document.getElementById('hidden-file-input');
+const attachmentArea = document.getElementById('attachment-area');
+const attachmentPreviewList = document.getElementById('attachment-preview-list');
+const btnCamera = document.querySelector('[data-action="camera"]');
+const btnAlbum = document.querySelector('[data-action="album"]');
+const btnFile = document.querySelector('[data-action="file"]');
+
 let targetSessionIdForAction = null;
 let deleteActionType = null; // 'single' or 'all'
 
@@ -107,6 +116,10 @@ let isImageMode = false;
 let streamQueue = ""; // 네트워크에서 받아온 전체 데이터
 let displayedResponse = ""; // 현재 화면에 표시된 데이터
 let streamInterval = null; // 타이핑 인터벌
+let isNetworkFinished = false; // 네트워크 요청 완료 여부
+
+// 🌟 첨부 파일 관리 변수
+let currentAttachments = []; // { name, size, data(base64), type }
 
 // Marked 옵션 설정 (줄바꿈 처리 등)
 if (typeof marked !== 'undefined') {
@@ -308,7 +321,6 @@ function loadSessions() {
     if (storedSessions) {
         sessions = JSON.parse(storedSessions);
     } else {
-        // 기존 단일 히스토리 마이그레이션
         const oldHistory = localStorage.getItem(HISTORY_STORAGE_KEY);
         if (oldHistory) {
             try {
@@ -327,17 +339,10 @@ function loadSessions() {
             } catch(e) {}
         }
     }
-    // 페이지 로드 시에는 세션을 불러오기만 하고, 선택은 하지 않음.
-    // window.onload에서 startNewChat을 호출하여 강제로 새 채팅 시작.
 }
 
 function startNewChat(skipRender = false) {
-    // 🌟 [수정] 중복 새 채팅 방지 로직
-    // 세션 목록이 있고, 가장 최신(첫번째) 세션이 메시지가 하나도 없는 '새 채팅' 상태라면
-    // 새로 만들지 않고 그 세션을 그대로 사용함.
     if (sessions.length > 0) {
-        // 정렬을 보장하기 위해 한 번 더 확인 (보통 unshift로 들어가므로 index 0)
-        // 만약 세션 순서가 꼬일 수 있다면 timestamp 정렬 필요할 수 있음
         const latestSession = sessions[0];
         if (latestSession.messages.length === 0) {
             currentSessionId = latestSession.id;
@@ -345,13 +350,16 @@ function startNewChat(skipRender = false) {
                 loadCurrentSession();
                 if (!isPC()) toggleSidebar(false);
             }
-            renderSidebarList(); // 확실하게 갱신
+            renderSidebarList(); 
             return; 
         }
     }
 
     currentSessionId = generateSessionId();
     history = [];
+    currentAttachments = []; // 새 채팅 시 첨부파일 초기화
+    renderAttachments(); // UI 초기화
+    
     const newSession = {
         id: currentSessionId,
         title: '새로운 채팅',
@@ -362,16 +370,14 @@ function startNewChat(skipRender = false) {
     saveSessions();
     if (!skipRender) {
         loadCurrentSession();
-        // 모바일일때만 닫음
         if (!isPC()) toggleSidebar(false);
     }
-    renderSidebarList(); // 사이드바 즉시 갱신
+    renderSidebarList(); 
 }
 
 function loadCurrentSession() {
     const session = sessions.find(s => s.id === currentSessionId);
     if (!session) {
-        // 세션이 없으면 새로 생성
         startNewChat();
         return;
     }
@@ -379,7 +385,6 @@ function loadCurrentSession() {
     renderChatMessages();
 }
 
-// 🌟 [수정] 삭제, 이름변경 로직 (모달 사용)
 function deleteSession(id, e) {
     if(e) e.stopPropagation();
     openDeleteModal('single', id);
@@ -390,34 +395,28 @@ function renameSession(id, e) {
     openRenameModal(id);
 }
 
-// 실제 삭제 실행 함수
 function executeDeleteSession(id) {
     sessions = sessions.filter(s => s.id !== id);
     saveSessions();
     
-    // 현재 보고 있던 채팅을 삭제한 경우 처리
     if (currentSessionId === id) {
         if (sessions.length > 0) {
             currentSessionId = sessions[0].id;
             loadCurrentSession();
         } else {
-            // 모든 채팅이 사라진 경우 강제 새 채팅 (중복 방지 로직 적용됨)
             startNewChat(false);
         }
     }
     
-    // 🌟 [중요] 삭제 후 사이드바 즉시 갱신
     renderSidebarList();
     if (!isPC()) toggleSidebar(false);
 }
 
-// 실제 이름 변경 실행 함수
 function executeRenameSession(id, newTitle) {
     const session = sessions.find(s => s.id === id);
     if (session && newTitle) {
         session.title = newTitle;
         saveSessions();
-        // 🌟 [중요] 변경 후 사이드바 즉시 갱신
         renderSidebarList();
     }
 }
@@ -426,22 +425,22 @@ function updateCurrentSession() {
     const session = sessions.find(s => s.id === currentSessionId);
     if (session) {
         session.messages = history;
-        // 첫 메시지로 제목 자동 설정 (제목이 '새로운 채팅'일 경우만)
         if (session.title === '새로운 채팅' && history.length > 0) {
-            session.title = history[0].content.substring(0, 30);
-            renderSidebarList(); // 제목 변경 시 사이드바 즉시 갱신
+            const firstMsg = history.find(m => m.role === 'user');
+            if (firstMsg) {
+                session.title = firstMsg.content.substring(0, 30);
+                renderSidebarList();
+            }
         }
         session.timestamp = Date.now();
         saveSessions();
     }
 }
 
-// 🌟 [수정] 사이드바 리스트 렌더링 (PC 닫힘 방지)
 function renderSidebarList() {
     sidebarList.innerHTML = '';
     const filter = sidebarSearchInput.value.toLowerCase();
     
-    // 타임스탬프 기준 내림차순 정렬
     const sortedSessions = sessions.sort((a, b) => b.timestamp - a.timestamp);
     
     sortedSessions.forEach(session => {
@@ -466,9 +465,7 @@ function renderSidebarList() {
         el.addEventListener('click', () => {
             currentSessionId = session.id;
             loadCurrentSession();
-            // PC가 아닐 때만 사이드바 닫기
             if (!isPC()) toggleSidebar(false);
-            // 클릭 시 활성 상태 갱신을 위해 다시 렌더링
             renderSidebarList();
         });
         
@@ -490,7 +487,9 @@ function renderChatMessages() {
         initialContent.style.visibility = 'hidden'; 
         chatMessages.style.display = 'flex';
         history.forEach(message => {
-            if (message.role === 'user') { appendUserMessage(message.content, false); } 
+            if (message.role === 'user') { 
+                appendUserMessage(message.content, message.images || [], false); 
+            } 
             else if (message.role === 'model') { 
                 if (message.content.includes('<img src="data:image')) {
                     appendBotImage(message.content, false);
@@ -507,11 +506,9 @@ function renderChatMessages() {
         initialContent.style.opacity = '1';
     }
     autoResizeTextarea();
-    // 렌더링 직후 스크롤 최하단 이동
     setTimeout(() => scrollToBottom(false), 0);
 }
 
-// 🌟 [수정] 전체 삭제 로직
 function resetAllChats() {
     openDeleteModal('all');
 }
@@ -519,7 +516,7 @@ function resetAllChats() {
 function executeResetAllChats() {
     sessions = [];
     localStorage.removeItem(SESSIONS_STORAGE_KEY);
-    startNewChat(); // 초기화 후 바로 새 채팅 시작
+    startNewChat(); 
     showSnackbar('모든 대화가 삭제되었습니다.');
     if (!isPC()) toggleSidebar(false);
 }
@@ -528,10 +525,6 @@ function executeResetAllChats() {
 // 4. 입력창 및 메시지 UI 관련 함수
 // ===========================================
 
-/**
- * 스크롤을 맨 아래로 이동시키는 함수
- * @param {boolean} smooth - 부드러운 스크롤 여부
- */
 function scrollToBottom(smooth = true) {
     if (!contentWrapper) return;
     
@@ -544,7 +537,6 @@ function scrollToBottom(smooth = true) {
     toggleScrollButton();
 }
 
-// 스크롤 버튼 표시/숨김을 관리하는 함수
 function toggleScrollButton() {
     if (!contentWrapper || !scrollDownButton) return;
 
@@ -562,53 +554,136 @@ function toggleScrollButton() {
     }
 }
 
-
 function toggleSendButton() {
-    if (inputField.value.trim().length > 0 && !isStreaming) { sendButton.classList.add('active'); } 
-    else { sendButton.classList.remove('active'); }
+    const hasText = inputField.value.trim().length > 0;
+    if (hasText && !isStreaming) { 
+        sendButton.classList.add('active'); 
+    } else { 
+        sendButton.classList.remove('active'); 
+    }
 }
 
+// 🌟 [수정] 높이 계산 로직 수정: 첨부파일 영역 높이 분리
 function autoResizeTextarea() {
     const style = getComputedStyle(inputField);
     const line_height_px = parseFloat(style.getPropertyValue('--line-height-px')) || 22.4; 
     const minInputContainerHeight = parseFloat(style.getPropertyValue('--min-input-container-height')) || 48; 
 
+    // 1. 텍스트박스 높이 계산 (순수 텍스트만 고려)
     inputField.rows = MIN_ROWS;
     inputField.style.height = 'auto'; 
+    
     let scrollH = inputField.scrollHeight;
     let newRows = Math.round(scrollH / line_height_px);
     newRows = Math.max(MIN_ROWS, Math.min(MAX_ROWS, newRows));
+    
     inputField.rows = newRows;
-    inputField.style.height = 'auto';
+    inputField.style.height = 'auto'; // 높이 자동 조절
     
+    // 2. 입력 컨테이너 최소 높이 설정 (첨부파일 높이 제외)
+    // 텍스트박스가 담긴 컨테이너만 조절하고, 전체 래퍼는 CSS Flex가 처리
     const finalTextareaHeight = inputField.offsetHeight; 
-    let contentHeight = finalTextareaHeight + 8; 
-    
-    if (isImageMode && !composer.classList.contains('style-simple')) {
-         contentHeight += 40; 
-    }
-
-    const inputContainerHeight = Math.max(contentHeight, minInputContainerHeight);
+    const inputContainerHeight = Math.max(finalTextareaHeight + 8, minInputContainerHeight);
     
     inputContainer.style.minHeight = `${inputContainerHeight}px`;
 
+    // 3. 채팅창 하단 여백 확보
     const composerHeight = composer.offsetHeight;
-    
-    // 🌟 [수정] 채팅창 하단 여백을 대폭 늘려서(80px 추가) 가독성을 높임
     chatMessages.style.paddingBottom = `${composerHeight + 80}px`;
 }
 
-function appendUserMessage(content, animate = true) {
+// 🌟 [수정] 파일 처리 함수들
+function handleFileSelect(e) {
+    const files = Array.from(e.target.files);
+    if (files.length === 0) return;
+    
+    togglePlusModal(false);
+
+    files.forEach(file => {
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            const base64Data = event.target.result;
+            let sizeStr = "";
+            if (file.size < 1024 * 1024) {
+                sizeStr = (file.size / 1024).toFixed(1) + " KB";
+            } else {
+                sizeStr = (file.size / (1024 * 1024)).toFixed(1) + " MB";
+            }
+
+            currentAttachments.push({
+                name: file.name,
+                size: sizeStr,
+                data: base64Data,
+                type: file.type
+            });
+            renderAttachments();
+        };
+        reader.readAsDataURL(file);
+    });
+
+    e.target.value = '';
+}
+
+// 🌟 [수정] 첨부파일 렌더링 로직
+function renderAttachments() {
+    attachmentPreviewList.innerHTML = '';
+    
+    if (currentAttachments.length === 0) {
+        attachmentArea.style.display = 'none'; // 숨김
+    } else {
+        attachmentArea.style.display = 'flex'; // 보임 (CSS Flex로 처리)
+        
+        currentAttachments.forEach((file, index) => {
+            const chip = document.createElement('div');
+            chip.className = 'file-chip';
+            chip.innerHTML = `
+                <div class="file-info">
+                    <span class="file-name">${file.name}</span>
+                    <span class="file-size">${file.size}</span>
+                </div>
+                <div class="file-delete" data-index="${index}">
+                    <span class="material-symbols-rounded">close</span>
+                </div>
+            `;
+            
+            chip.querySelector('.file-delete').addEventListener('click', (e) => {
+                e.stopPropagation();
+                removeAttachment(index);
+            });
+            
+            attachmentPreviewList.appendChild(chip);
+        });
+    }
+    
+    // 렌더링 후 높이 재계산 (래퍼 높이 자연스럽게 증가)
+    setTimeout(autoResizeTextarea, 0);
+}
+
+function removeAttachment(index) {
+    currentAttachments.splice(index, 1);
+    renderAttachments();
+}
+
+
+// 🌟 [수정] 유저 메시지에 이미지 표시 기능 추가
+function appendUserMessage(content, images = [], animate = true) {
     const userBubble = document.createElement('div');
     userBubble.className = 'message-bubble user-message';
-    userBubble.innerHTML = `<div class="message-text">${content.replace(/\n/g, '<br>')}</div>`;
-    chatMessages.appendChild(userBubble);
     
-    if (animate) {
-        // 🌟 수정됨: scrollToBottom 대신 sendMessage에서 처리하거나
-        // 여기서는 그냥 두되, sendMessage에서 별도 처리
+    let htmlContent = `<div class="message-text">`;
+    
+    // 이미지가 있으면 텍스트 위에 표시
+    if (images && images.length > 0) {
+        images.forEach(imgData => {
+            htmlContent += `<img src="${imgData}" class="user-message-image" alt="첨부 이미지"><br>`;
+        });
     }
-    return userBubble; // 요소 반환
+    
+    htmlContent += `${content.replace(/\n/g, '<br>')}</div>`;
+    userBubble.innerHTML = htmlContent;
+    
+    chatMessages.appendChild(userBubble);
+    return userBubble; 
 }
 
 function appendBotImage(htmlContent, animate = true) {
@@ -634,7 +709,6 @@ function appendBotMessage(content, feedbackStatus = null, animate = true) {
     const streamingBlock = document.createElement('div');
     streamingBlock.className = 'streaming-block'; 
     
-    // Markdown 렌더링
     streamingBlock.innerHTML = typeof marked !== 'undefined' ? marked.parse(content) : content;
     
     botMessageContainer.appendChild(streamingBlock);
@@ -689,7 +763,7 @@ function createBotActions(content, messageIndex, feedbackStatus = null) {
         if (!currentMessage || currentMessage.role !== 'model') return;
         const newFeedback = currentMessage.feedback === action ? null : action;
         currentMessage.feedback = newFeedback; history[index].feedback = newFeedback; 
-        updateCurrentSession(); // 저장
+        updateCurrentSession(); 
         const btn = document.querySelector(`.bot-message[data-index="${index}"] .bot-action-btn.${action}`);
         const otherBtn = document.querySelector(`.bot-message[data-index="${index}"] .bot-action-btn.${otherAction}`);
         if (newFeedback) { btn.classList.add('selected'); if (otherBtn) otherBtn.classList.remove('selected'); } 
@@ -714,6 +788,8 @@ function handleRegenerate(messageIndex) {
     if (userMessageIndex === -1) { showSnackbar('재생성할 사용자 질문을 찾을 수 없습니다.'); return; }
     
     const originalPrompt = history[userMessageIndex].content;
+    const originalImages = history[userMessageIndex].images || []; 
+
     history.splice(modelMessageIndex, history.length - modelMessageIndex);
     updateCurrentSession();
     
@@ -728,8 +804,8 @@ function handleRegenerate(messageIndex) {
     }
 
     currentLoadingText = '다시 답변을 생각하는 중...';
-    // 재생성 시작 시 자동 스크롤 활성화 및 버튼 숨김
     autoScrollEnabled = true; scrollDownButton.classList.remove('visible');
+    
     sendMessage(originalPrompt, true); 
 }
 
@@ -762,9 +838,6 @@ function appendBotMessageContainer() {
     botMessageContainer.appendChild(indicatorContainer); botMessageContainer.appendChild(streamingBlock);
     chatMessages.appendChild(botMessageContainer);
     
-    // 🌟 [수정] 컨테이너 추가 직후 스크롤을 맨 아래로 하지 않고 sendMessage에서 제어하도록 함
-    // 하지만 일반적인 스트리밍 중에는 아래로 가는게 맞으므로 기본값 유지, 최초 호출때만 덮어씀
-    
     return { botMessageElement: botMessageContainer, indicatorElement: indicatorContainer, streamingBlockElement: streamingBlock, spinnerElement: spinner, indicatorTextElement: indicatorText };
 }
 
@@ -772,7 +845,6 @@ function setStreamingState(active) {
     isStreaming = active;
     if (active) {
         sendButton.style.display = 'none'; stopButton.style.display = 'flex'; inputField.setAttribute('readonly', 'true');
-        // 스트리밍 시작 시 강제 스크롤 활성화
         autoScrollEnabled = true; scrollDownButton.classList.remove('visible');
     } else {
         sendButton.style.display = 'flex'; stopButton.style.display = 'none'; inputField.removeAttribute('readonly'); abortController = null;
@@ -780,52 +852,50 @@ function setStreamingState(active) {
     toggleSendButton();
 }
 
-let fullResponse = ""; // 전역 사용을 위해 유지 (복사 기능 등)
+let fullResponse = ""; 
 
 function stopResponse() {
-    showSnackbar("답변 중지됨.");
     if (abortController) {
         abortController.abort();
+        abortController = null;
     }
     
-    // 🌟 [수정] 스트리밍 인터벌 정리
     if (streamInterval) {
         clearInterval(streamInterval);
         streamInterval = null;
     }
-
-    // 현재 답변 저장 및 마무리
+    
     const lastBotMessageElement = chatMessages.lastElementChild;
     if (lastBotMessageElement) {
         const indicatorContainer = lastBotMessageElement.querySelector('#thinking-indicator');
         if (indicatorContainer) {
-            const spinner = indicatorContainer.querySelector('.loading-spinner');
             const indicatorText = indicatorContainer.querySelector('.thinking-indicator-text');
-            
-            if (spinner) spinner.classList.add('reset-spin'); 
-            // 🌟 [수정] 텍스트 변경 대신 숨김
-            if (indicatorText) { indicatorText.style.display = 'none'; indicatorText.classList.add('completed'); }
-            indicatorContainer.classList.add('left-aligned'); 
+            if (indicatorText) { 
+                indicatorText.textContent = "답변 중지됨";
+                indicatorText.classList.add('stopped'); 
+            }
         }
 
-        const stopText = document.createElement('div'); stopText.className = 'stop-message'; stopText.textContent = "답변 중지됨.";
-        lastBotMessageElement.insertAdjacentElement('afterend', stopText);
-        
-        // 현재까지 표시된 내용(displayedResponse)을 저장
         history.push({ role: 'model', content: displayedResponse, feedback: null }); 
-        updateCurrentSession(); // 저장
+        updateCurrentSession(); 
         
         const actionContainer = createBotActions(displayedResponse, history.length - 1);
         lastBotMessageElement.appendChild(actionContainer); updateRegenerateButtons();
     }
-
-    setStreamingState(false); scrollToBottom(true);
+    
+    showSnackbar("답변 중지됨.");
+    setStreamingState(false); 
+    scrollToBottom(true);
 }
 
 
 async function sendMessage(userMessageOverride = null, isRegenerate = false) {
     const userMessage = userMessageOverride !== null ? userMessageOverride : inputField.value.trim();
-    if (userMessage.length === 0 || isStreaming) { if (isStreaming) showSnackbar('현재 답변 생성 중입니다.'); return; }
+    
+    if (userMessage.length === 0 || isStreaming) { 
+        if (isStreaming) showSnackbar('현재 답변 생성 중입니다.'); 
+        return; 
+    }
 
     let userBubbleElement = null;
 
@@ -843,20 +913,23 @@ async function sendMessage(userMessageOverride = null, isRegenerate = false) {
         const existingStops = chatMessages.querySelectorAll('.stop-message'); existingStops.forEach(el => el.remove());
         updateRegenerateButtons(); 
         
-        userBubbleElement = appendUserMessage(userMessage, false); 
-        history.push({ role: 'user', content: userMessage }); 
-        updateCurrentSession(); // 저장
+        const imagePayload = currentAttachments.map(f => f.data);
+        userBubbleElement = appendUserMessage(userMessage, imagePayload, false); 
+        
+        history.push({ role: 'user', content: userMessage, images: imagePayload }); 
+        updateCurrentSession(); 
+        
+        currentAttachments = [];
+        renderAttachments();
     } 
     
     if (userMessageOverride === null) { inputField.value = ''; inputField.rows = MIN_ROWS; autoResizeTextarea(); }
     
     const { botMessageElement, indicatorElement, streamingBlockElement, spinnerElement, indicatorTextElement } = appendBotMessageContainer();
     
-    // 🌟 [수정] 메세지 전송 시 내가 보낸 메세지가 상단 헤더 바로 아래에 위치하도록 스크롤
     if (userBubbleElement) {
         setTimeout(() => {
             const headerHeight = 56; 
-            // 약간의 여유를 두고 스크롤 (헤더 높이 + 10px)
             const offset = userBubbleElement.offsetTop - headerHeight - 10; 
             contentWrapper.scrollTo({ top: offset, behavior: 'smooth' });
         }, 50);
@@ -868,38 +941,29 @@ async function sendMessage(userMessageOverride = null, isRegenerate = false) {
     abortController = new AbortController();
     const signal = abortController.signal;
     
-    // 🌟 변수 초기화
     fullResponse = ""; 
-    streamQueue = "";      // 네트워크 버퍼 초기화
-    displayedResponse = ""; // 표시된 텍스트 초기화
+    streamQueue = "";      
+    displayedResponse = ""; 
+    isNetworkFinished = false; 
     
-    // 🌟 부드러운 타이핑 효과를 위한 인터벌 함수 시작
     if (streamInterval) clearInterval(streamInterval);
     
     streamInterval = setInterval(() => {
-        // streamQueue에 데이터가 있고, 표시된 데이터가 전체 데이터보다 짧을 때
         if (streamQueue.length > 0) {
-            // 한 번에 가져올 글자 수 (부드러움을 위해 2~3글자)
             const charsToTake = 2; 
-            
-            // 큐에서 글자 가져오기
             const chunkToAdd = streamQueue.slice(0, charsToTake);
-            streamQueue = streamQueue.slice(charsToTake); // 큐 업데이트
+            streamQueue = streamQueue.slice(charsToTake); 
             
             displayedResponse += chunkToAdd;
-            fullResponse = displayedResponse; // 동기화
+            fullResponse = displayedResponse; 
             
-            // Markdown 파싱 및 업데이트
             streamingBlockElement.innerHTML = typeof marked !== 'undefined' ? marked.parse(displayedResponse) : displayedResponse;
             
-            // 자동 스크롤
             if (autoScrollEnabled) scrollToBottom(false);
-        } else if (!isStreaming && streamQueue.length === 0) {
-            // 스트리밍이 끝났고 큐도 비었으면 종료
+        } else if (isNetworkFinished && streamQueue.length === 0) {
             clearInterval(streamInterval);
             streamInterval = null;
             
-            // 최종 마무리 (저장 및 버튼 표시)
              history.push({ role: 'model', content: displayedResponse, feedback: null }); 
             updateCurrentSession(); 
             
@@ -910,8 +974,10 @@ async function sendMessage(userMessageOverride = null, isRegenerate = false) {
             const actionContainer = createBotActions(displayedResponse, history.length - 1);
             botMessageElement.appendChild(actionContainer); updateRegenerateButtons();
             scrollToBottom(true);
+            
+            setStreamingState(false);
         }
-    }, 15); // 15ms 간격으로 업데이트 (타이핑 속도 조절)
+    }, 15); 
     
     try {
         if (isImageMode) {
@@ -926,8 +992,7 @@ async function sendMessage(userMessageOverride = null, isRegenerate = false) {
             const data = await response.json();
             
             if (data.success && data.image_data) {
-                // 이미지는 스트리밍 큐를 타지 않고 즉시 표시
-                clearInterval(streamInterval); // 텍스트 스트리밍 중지
+                clearInterval(streamInterval); 
                 
                 const imgHtml = `<img src="${data.image_data}" alt="Generated Image" style="max-width: 100%; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">`;
                 fullResponse = imgHtml;
@@ -935,7 +1000,7 @@ async function sendMessage(userMessageOverride = null, isRegenerate = false) {
                 
                 setStreamingState(false);
                 history.push({ role: 'model', content: fullResponse, feedback: null }); 
-                updateCurrentSession(); // 저장
+                updateCurrentSession(); 
                 if (spinnerElement) spinnerElement.classList.add('reset-spin'); 
                 if (indicatorTextElement) { indicatorTextElement.style.display = 'none'; indicatorTextElement.classList.add('completed'); }
                 indicatorElement.classList.add('left-aligned');
@@ -945,12 +1010,19 @@ async function sendMessage(userMessageOverride = null, isRegenerate = false) {
             }
 
         } else {
+            const requestBody = { 
+                message: userMessage, 
+                history: [PRE_PROMPT, ...history],
+            };
+            
+            const lastUserMsg = history[history.length - 1];
+            if(lastUserMsg && lastUserMsg.images && lastUserMsg.images.length > 0) {
+                requestBody.images = lastUserMsg.images;
+            }
+
             const response = await fetch(BACKEND_ENDPOINT, {
                 method: 'POST', headers: { 'Content-Type': 'application/json', },
-                body: JSON.stringify({ 
-                    message: userMessage, 
-                    history: [PRE_PROMPT, ...history],
-                }), 
+                body: JSON.stringify(requestBody), 
                 signal: signal 
             });
 
@@ -967,32 +1039,30 @@ async function sendMessage(userMessageOverride = null, isRegenerate = false) {
                 
                 if (chunk.includes("[DONE]")) {
                     const parts = chunk.split("[DONE]");
-                    // 🌟 큐에 데이터 추가 (직접 렌더링 X)
                     streamQueue += parts[0]; 
                     break;
                 } else {
-                     // 🌟 큐에 데이터 추가 (직접 렌더링 X)
                     streamQueue += chunk;
                 }
             }
             
-            // 네트워크 수신 완료, 이제 인터벌이 남은 큐를 처리할 때까지 대기
-            setStreamingState(false);
+            isNetworkFinished = true;
         }
     } catch (error) {
         if (error.name === 'AbortError') { 
             console.log('Fetch aborted'); 
         } 
         else {
-            if(streamInterval) clearInterval(streamInterval); // 에러 시 인터벌 중지
+            if(streamInterval) clearInterval(streamInterval); 
             const errorMsg = `⚠️ 오류: ${error.message}`;
             streamingBlockElement.innerHTML = `<p style="color:red;">${errorMsg}</p>`;
             if (spinnerElement) spinnerElement.classList.add('reset-spin');
             if (indicatorTextElement) { indicatorTextElement.textContent = '응답 오류'; indicatorTextElement.classList.add('completed'); }
             if (history.length > 0 && history[history.length - 1].role === 'user') { history.pop(); updateCurrentSession(); }
             updateRegenerateButtons();
+            setStreamingState(false); 
+            scrollToBottom(true); 
         }
-        setStreamingState(false); scrollToBottom(true); 
     }
 }
 
@@ -1019,10 +1089,8 @@ function importChats(e) {
         try {
             const importedSessions = JSON.parse(event.target.result);
             if (Array.isArray(importedSessions)) {
-                // 기존 세션에 병합하거나 덮어쓰기 선택 가능하지만 여기선 병합
                 sessions = [...importedSessions, ...sessions];
                 
-                // 중복 ID 제거 (단순 병합 시 발생 가능)
                 const uniqueSessions = [];
                 const map = new Map();
                 for (const item of sessions) {
@@ -1035,17 +1103,12 @@ function importChats(e) {
                 
                 saveSessions();
                 renderSidebarList();
-                // 가져오기 후 첫 세션 로드 (단, 새 채팅 상태 유지를 원하면 startNewChat 호출 가능)
-                // 사용자가 명시적으로 가져왔으므로 여기서는 최신 내용을 보여주는 것이 자연스러울 수 있음.
-                // 하지만 '항상 새 채팅' 요청에 따라 로드만 하고 화면은 유지하거나,
-                // 여기서는 가져온 파일 내용을 확인해야 하므로 첫 세션으로 이동합니다.
                 if(sessions.length > 0) {
                     currentSessionId = sessions[0].id;
                     loadCurrentSession();
                 }
                 showSnackbar('채팅 내역을 불러왔습니다.');
                 
-                // 🌟 PC가 아닐 때만 닫기
                 if (!isPC()) toggleSidebar(false);
 
             } else {
@@ -1056,7 +1119,7 @@ function importChats(e) {
         }
     };
     reader.readAsText(file);
-    e.target.value = ''; // 초기화
+    e.target.value = ''; 
 }
 
 
@@ -1064,13 +1127,18 @@ function importChats(e) {
 // 6. 이벤트 리스너
 // ===========================================
 
-// 🌟 [신규] 미니 사이드바 이벤트 리스너
+if (btnCamera) btnCamera.addEventListener('click', () => { hiddenCameraInput.click(); });
+if (btnAlbum) btnAlbum.addEventListener('click', () => { hiddenFileInput.click(); });
+if (btnFile) btnFile.addEventListener('click', () => { hiddenFileInput.click(); });
+
+if (hiddenCameraInput) hiddenCameraInput.addEventListener('change', handleFileSelect);
+if (hiddenFileInput) hiddenFileInput.addEventListener('change', handleFileSelect);
+
 if(miniSidebarNewChat) miniSidebarNewChat.addEventListener('click', () => { startNewChat(); });
 if(miniSidebarSearch) miniSidebarSearch.addEventListener('click', () => { toggleSidebar(true); setTimeout(() => document.getElementById('sidebar-search-input').focus(), 300); });
 if(miniSidebarDeleteAll) miniSidebarDeleteAll.addEventListener('click', resetAllChats);
 
 
-// 🌟 [신규] 모달 이벤트 리스너
 renameCancelBtn.addEventListener('click', closeCustomModals);
 renameConfirmBtn.addEventListener('click', () => {
     const newTitle = renameInput.value.trim();
@@ -1162,8 +1230,9 @@ aboutModalBackdrop.addEventListener('click', (e) => { if (e.target === aboutModa
 resetChatButton.addEventListener('click', (e) => { e.preventDefault(); toggleResetConfirmModal(true); });
 confirmCancelBtn.addEventListener('click', () => toggleResetConfirmModal(false));
 confirmResetBtn.addEventListener('click', () => {
-    // 현재 세션만 초기화
     history = [];
+    currentAttachments = [];
+    renderAttachments();
     updateCurrentSession();
     renderChatMessages();
     toggleResetConfirmModal(false);
@@ -1171,7 +1240,6 @@ confirmResetBtn.addEventListener('click', () => {
 });
 resetConfirmModalBackdrop.addEventListener('click', (e) => { if (e.target === resetConfirmModalBackdrop) toggleResetConfirmModal(false); });
 
-// 스크롤 및 스크롤 다운 버튼 로직
 contentWrapper.addEventListener('scroll', () => {
     const distanceFromBottom = contentWrapper.scrollHeight - contentWrapper.scrollTop - contentWrapper.clientHeight;
     
@@ -1200,15 +1268,13 @@ if(toolAttach) { toolAttach.addEventListener('click', (e) => { e.preventDefault(
 
 if(toolStudy) { toolStudy.addEventListener('click', () => { toolStudy.classList.toggle('active-blue'); }); }
 
-// 🌟 사이드바 및 새 기능 이벤트 리스너
-menuButton.addEventListener('click', () => toggleSidebar()); // 토글 동작
+menuButton.addEventListener('click', () => toggleSidebar()); 
 sidebarClose.addEventListener('click', () => toggleSidebar(false));
 sidebarBackdrop.addEventListener('click', (e) => { if(e.target === sidebarBackdrop) toggleSidebar(false); });
 sidebarNewChat.addEventListener('click', () => startNewChat());
 sidebarSearchInput.addEventListener('input', renderSidebarList);
 sidebarDeleteAll.addEventListener('click', resetAllChats);
 
-// 🌟 [수정] 내보내기/가져오기 리스너 (PC 닫힘 방지)
 sidebarExport.addEventListener('click', () => {
     exportChats();
     if (!isPC()) toggleSidebar(false);
@@ -1224,12 +1290,11 @@ importFileInput.addEventListener('change', importChats);
 window.onload = function() {
     loadTheme();
     loadUIStyle(); 
-    loadSessions(); // 세션 목록만 로드
-    startNewChat(false); // 🌟 [수정] 접속 시 항상 새 채팅 시작 (중복 방지 로직 포함됨)
+    loadSessions(); 
+    startNewChat(false); 
     toggleSendButton();
     autoResizeTextarea();
     
-    // 🌟 [추가] PC일 경우 기본적으로 사이드바 열기
     if (isPC()) {
         setTimeout(() => {
             toggleSidebar(true);
