@@ -26,6 +26,150 @@
   </script>
 </head>
 <body>
+
+
+
+<!-- === 홈페이지 눈 효과 시작 === -->
+<style>
+  #snow-canvas {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 9999;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    #snow-canvas { display: none; }
+  }
+</style>
+<canvas id="snow-canvas" aria-hidden="true"></canvas>
+
+<script>
+(() => {
+  const canvas = document.getElementById('snow-canvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d', { alpha: true });
+  let flakes = [];
+  let w = 0, h = 0;
+  let lastTime = performance.now();
+  let wind = 0;
+  const MAX_FLAKES = 5; // 눈송이 수
+
+  const DPR = Math.max(1, window.devicePixelRatio || 1);
+
+  function resize() {
+    w = canvas.clientWidth;
+    h = canvas.clientHeight;
+    canvas.width = Math.floor(w * DPR);
+    canvas.height = Math.floor(h * DPR);
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  }
+
+  function createFlake() {
+    const size = Math.random() * 2 + 2; // 2~4px
+    return {
+      x: Math.random() * w,
+      y: -10 - Math.random() * h * 0.3,
+      vx: (Math.random() - 0.5) * 0.4,
+      vy: 0.5 + Math.random() * 0.7,
+      size,
+      tilt: Math.random() * Math.PI * 2,
+      tiltSpeed: (Math.random() - 0.5) * 0.02,
+      opacity: 0.5 + Math.random() * 0.5,
+      color: `rgba(${50+Math.random()*50}, ${150+Math.random()*80}, 255, ${0.5 + Math.random()*0.5})`
+    };
+  }
+
+  function initFlakes(count = MAX_FLAKES) {
+    flakes = [];
+    for (let i = 0; i < count; i++) {
+      const f = createFlake();
+      f.y = Math.random() * h;
+      flakes.push(f);
+    }
+  }
+
+  function updateWind(dt) {
+    if (Math.random() < 0.002) wind += (Math.random() - 0.5) * 0.1;
+    wind *= 0.99;
+  }
+
+  function drawFlake(f) {
+    ctx.save();
+    ctx.globalAlpha = f.opacity;
+    ctx.translate(f.x, f.y);
+    ctx.rotate(Math.sin(f.tilt) * 0.2);
+    ctx.fillStyle = f.color;
+    ctx.beginPath();
+    ctx.arc(0, 0, f.size, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  function step(now) {
+    const dt = now - lastTime;
+    lastTime = now;
+    updateWind(dt);
+
+    ctx.clearRect(0, 0, w, h);
+
+    for (let i = 0; i < flakes.length; i++) {
+      const f = flakes[i];
+      f.vx += wind * 0.02;
+      f.x += f.vx * (dt * 0.06);
+      f.y += f.vy * (dt * 0.06);
+      f.tilt += f.tiltSpeed * (dt * 0.06);
+
+      if (f.y - f.size > h) {
+        flakes[i] = createFlake();
+        flakes[i].x = Math.random() * w;
+        flakes[i].y = -5;
+      } else {
+        if (f.x < -50) f.x = w + 50;
+        if (f.x > w + 50) f.x = -50;
+        drawFlake(f);
+      }
+    }
+
+    requestAnimationFrame(step);
+  }
+
+  function setup() {
+    resize();
+    initFlakes();
+    requestAnimationFrame(step);
+  }
+
+  window.addEventListener('resize', () => {
+    setTimeout(() => {
+      resize();
+      const area = w*h;
+      const target = Math.round(Math.min(100, Math.max(10, (area/(1280*720)) * MAX_FLAKES)));
+      if (flakes.length < target) {
+        for (let i = flakes.length; i < target; i++) flakes.push(createFlake());
+      } else flakes.length = target;
+    }, 100);
+  });
+
+  const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+  function handleReducedMotion() {
+    if (mq.matches) ctx.clearRect(0,0,w,h);
+    else setup();
+  }
+  mq.addEventListener ? mq.addEventListener('change', handleReducedMotion) : mq.addListener(handleReducedMotion);
+
+  setup();
+})();
+</script>
+<!-- === 홈페이지 눈 효과 끝 === -->
+
+
+
+
+
+
+  
   <div class="phone" role="application" aria-label="채팅 UI">
     
     <aside class="mini-sidebar">
