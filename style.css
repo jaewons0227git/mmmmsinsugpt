@@ -181,12 +181,35 @@ body{ margin:0; background:var(--bg-color); color:var(--text-color); min-height:
 }
 .content-wrapper.loaded { opacity: 1; transform: translateY(0); }
 
+/* 🌟 [수정] 초기 콘텐츠 중앙 정렬 및 스타일 변경 */
 #initial-content{
-  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 100%; max-width: 400px; display:flex; flex-direction:column; align-items:center; text-align:center; padding: 0 16px; transition: opacity 0.5s ease-in-out, visibility 0.5s ease-in-out;
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); 
+  width: 100%; max-width: 400px; 
+  display:flex; flex-direction:column; align-items:center; justify-content: center; /* 완전 중앙 정렬 */
+  text-align:center; padding: 0 16px; 
+  transition: opacity 0.5s ease-in-out, visibility 0.5s ease-in-out;
 }
-.main-question{ font-size:22px; font-weight:600; margin-bottom:40px; color:var(--text-color); }
 
-.quick-actions{ display:flex; flex-wrap:wrap; justify-content:center; gap:8px; max-width:400px; }
+/* 🌟 [수정] 메인 텍스트 그라데이션 적용 */
+.main-question{ 
+    font-size:26px; font-weight:700; margin-bottom: 10px;
+    background: linear-gradient(135deg, #1d6fef, #60a5fa); 
+    -webkit-background-clip: text; 
+    -webkit-text-fill-color: transparent; 
+    color: transparent; /* fallback */
+    line-height: 1.3;
+}
+
+/* 🌟 [신규] 서브 브랜드 텍스트 */
+.sub-brand {
+    font-size: 14px;
+    color: var(--text-sub);
+    font-weight: 500;
+    opacity: 0.8;
+}
+
+/* 🌟 [수정] 퀵 액션 숨김 (요청사항) */
+.quick-actions{ display: none; }
 .action-btn{
   display:flex; align-items:center; justify-content:center; padding:10px 16px; 
   border:1px solid var(--border-color); background-color: var(--surface-color);
@@ -442,7 +465,8 @@ body{ margin:0; background:var(--bg-color); color:var(--text-color); min-height:
 .mic-icon { width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: #9ca3af; }
 .mic-icon .material-symbols-rounded { font-size: 20px; }
 
-/* 📌 스타일 1: 심플 (Simple) */
+
+/* 🌟🌟🌟 [수정] 스타일 1: 심플 (Simple) - 스크린샷과 동일하게 변경 */
 .composer.style-simple {
     background: var(--bg-color);
     padding: 0 16px 24px 16px;
@@ -452,66 +476,103 @@ body{ margin:0; background:var(--bg-color); color:var(--text-color); min-height:
 
 .composer.style-simple .composer-inner {
     max-width: 768px;
-    border-radius: 28px;       
-    padding: 12px 16px 12px 20px; 
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    border-radius: 50px; /* 완전 둥근 형태 */
+    padding: 6px 6px 6px 12px; 
+    /* 스크린샷의 다크 배경 색상 적용 (어두운 회색/검정) */
+    background-color: #2f2f2f; 
+    border: none;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
     display: flex;
-    flex-direction: column; 
-    align-items: flex-start; 
+    flex-direction: row; /* 가로 배치 */
+    align-items: center; /* 중앙 정렬 */
     position: relative;
-    /* 🌟 높이 애니메이션 추가 */
     transition: height 0.3s ease, padding 0.3s ease; 
 }
-[data-theme="dark"] .composer.style-simple .composer-inner { box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+/* 다크모드 대응 */
+[data-theme="dark"] .composer.style-simple .composer-inner { background-color: #2f2f2f; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
 
-/* 🌟 [수정] 심플 모드에서도 input-area-wrapper는 그대로 (세로 정렬 유지) */
+
+/* 심플 모드 레이아웃 */
 .composer.style-simple .input-area-wrapper {
-    margin-bottom: 10px;
+    flex: 1;
+    margin-bottom: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 
 .composer.style-simple .input-container {
-    border: none; background: transparent; padding: 0; border-radius: 0; max-height: 150px; min-height: 24px; width: 100%;
+    border: none; background: transparent; padding: 0 10px; border-radius: 0; max-height: 150px; min-height: 24px; width: 100%;
 }
 
-.composer.style-simple .input-container textarea { font-size: 17px; padding: 0; }
+.composer.style-simple .input-container textarea { 
+    font-size: 16px; 
+    padding: 12px 0; 
+    color: #e5e5e5; /* 텍스트는 밝게 */
+    caret-color: #fff;
+}
+.composer.style-simple .input-container textarea::placeholder { color: #9ca3af; }
+
 .composer.style-simple .plus { display: none; }
 
+/* 하단 컨트롤 영역이 아닌, 왼쪽 칩 영역으로 사용 */
 .composer.style-simple .bottom-controls {
-    width: 100%; display: flex; justify-content: space-between; align-items: center;
+    display: contents; /* flex 아이템으로 만들기 위해 contents 사용 */
 }
 
-.simple-tools { display: flex; gap: 8px; margin-top: 0; flex-shrink: 0; }
+/* 툴 버튼 (칩 스타일) */
+.composer.style-simple .simple-tools { 
+    display: flex; 
+    gap: 6px; 
+    margin-top: 0; 
+    flex-shrink: 0;
+    align-items: center;
+}
 
-.tool-btn {
+.composer.style-simple .tool-btn {
     display: flex; align-items: center; justify-content: center; gap: 4px;
-    padding: 4px 10px 4px 8px; 
-    background-color: var(--surface-color);
-    border: 1px solid var(--border-color);
-    border-radius: 20px;
-    font-size: 13px; font-weight: 500; color: var(--text-sub);
+    padding: 8px 14px; 
+    /* 스크린샷과 유사한 어두운 칩 배경 */
+    background-color: #424242; 
+    border: none;
+    border-radius: 50px;
+    font-size: 13px; font-weight: 500; 
+    color: #e5e5e5;
     cursor: pointer;
-    transition: background-color 0.2s, border-color 0.2s, color 0.2s;
+    transition: background-color 0.2s, transform 0.1s;
     white-space: nowrap; line-height: 1.2;
 }
-.tool-btn:hover { background-color: var(--surface-hover); }
-.tool-btn .material-symbols-rounded { font-size: 18px; color: #6b7280; }
+.composer.style-simple .tool-btn:hover { background-color: #525252; }
+.composer.style-simple .tool-btn .material-symbols-rounded { font-size: 16px; color: #e5e5e5; }
 
-.tool-btn.active-blue {
-    border-color: var(--primary-blue); background-color: rgba(59, 130, 246, 0.1); color: var(--primary-blue);
+/* 오른쪽 컨트롤 (마이크/전송) */
+.composer.style-simple .right-controls { 
+    display: flex; align-items: center; margin-left: 4px; margin-bottom: 0; 
+    padding-right: 2px;
 }
-.tool-btn.active-blue .material-symbols-rounded { color: var(--primary-blue); }
 
-.tool-btn.active-purple {
-    border-color: var(--image-purple); background-color: rgba(139, 92, 246, 0.1); color: var(--image-purple);
+/* 심플 모드에서는 마이크가 기본적으로 보임 */
+.composer.style-simple .mic-icon { 
+    display: flex; 
+    width: 44px; height: 44px;
+    background-color: #424242;
+    border-radius: 50%;
+    color: #e5e5e5;
+    margin-right: 0;
+    cursor: pointer;
+} 
+.composer.style-simple .mic-icon:hover { background-color: #525252; }
+
+/* 전송 버튼 스타일 조정 (심플 모드용) */
+.composer.style-simple .send-btn { 
+    width: 44px; height: 44px;
+    background-color: #e5e5e5; 
+    margin-right: 0; 
+    align-self: center; 
+    color: #121212;
 }
-.tool-btn.active-purple .material-symbols-rounded { color: var(--image-purple); }
-
-.composer.style-simple .right-controls { display: flex; align-items: center; margin-left: 8px; margin-bottom: 0; }
-.composer.style-simple .mic-icon { display: none; } 
-
-.composer.style-simple .send-btn { background-color: var(--send-button-enabled); margin-right: 0; align-self: center; }
-.composer.style-simple .send-btn .material-symbols-rounded { color: var(--send-button-icon); }
-.composer.style-simple .send-btn:not(.active) { background-color: var(--send-button-disabled); }
+.composer.style-simple .send-btn .material-symbols-rounded { color: #121212; }
+.composer.style-simple .send-btn:not(.active) { background-color: #424242; color: #777; }
 
 
 /* 📌 스타일 2: 기본 (Default) */
@@ -971,4 +1032,4 @@ hr.modal-divider { border: 0; border-top: 1px solid var(--border-color); margin:
         /* 사이드바(300)의 절반(150) 만큼 이동 */
         left: calc(50% + 150px);
     }
-}
+                                                               }
