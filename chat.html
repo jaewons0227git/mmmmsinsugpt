@@ -29,7 +29,6 @@
 
 
 
-<!-- === 홈페이지 눈 효과 시작 === -->
 <style>
   #snow-canvas {
     position: fixed;
@@ -162,15 +161,7 @@
   setup();
 })();
 </script>
-<!-- === 홈페이지 눈 효과 끝 === -->
-
-
-
-
-
-
-  
-  <div class="phone" role="application" aria-label="채팅 UI">
+<div class="phone" role="application" aria-label="채팅 UI">
     
     <aside class="mini-sidebar">
         <div class="mini-sidebar-icon" id="mini-new-chat" title="새 채팅">
@@ -248,6 +239,8 @@
         
         <div id="initial-content">
             <div class="main-question">안녕하세요! 반가워요</div>
+            <div class="sub-brand">MinsuGPT</div>
+            
             <div class="quick-actions">
                 <div class="action-btn new-green" data-prompt="텍스트와 함께 대화하기">
                     <span class="material-symbols-rounded">chat</span>
@@ -279,10 +272,27 @@
 
     <div class="composer-gradient-overlay"></div>
 
-    <div id="composer" class="composer style-default">
+    <div id="composer" class="composer style-simple">
       <div class="composer-inner">
         <div class="plus" id="plus-button" aria-label="파일 첨부">
             <span class="material-symbols-rounded">add</span>
+        </div>
+
+        <div class="bottom-controls">
+            <div class="simple-tools">
+                <div class="tool-btn" id="tool-attach">
+                    <span class="material-symbols-rounded">attach_file</span>
+                    첨부
+                </div>
+                <div class="tool-btn" id="tool-image">
+                    <span class="material-symbols-rounded">language</span>
+                    검색
+                </div>
+                <div class="tool-btn" id="tool-study">
+                    <span class="material-symbols-rounded">auto_stories</span>
+                    학습하기
+                </div>
+            </div>
         </div>
 
         <div class="input-area-wrapper">
@@ -296,43 +306,27 @@
             </div>
 
             <div id="input-container" class="input-container">
-              <textarea id="message-input" placeholder="MinsuGPT에게 물어보기" rows="1"></textarea>
+              <textarea id="message-input" placeholder="무엇이든 물어보세요" rows="1"></textarea>
             </div>
         </div>
 
-        <div class="bottom-controls">
-            <div class="simple-tools">
-                <div class="tool-btn" id="tool-attach">
-                    <span class="material-symbols-rounded">attach_file</span>
-                    첨부
+        <div class="bottom-controls right-controls">
+             <div class="mic-voice-container">
+                <div id="mic-icon" class="mic-icon">
+                    <span class="material-symbols-rounded">graphic_eq</span>
                 </div>
-                <div class="tool-btn" id="tool-image">
-                    <span class="material-symbols-rounded">image</span>
-                    이미지
-                </div>
-                <div class="tool-btn" id="tool-study">
-                    <span class="material-symbols-rounded">auto_stories</span>
-                    학습하기
-                </div>
-            </div>
-            
-            <div class="right-controls">
-                 <div class="mic-voice-container">
-                    <div id="mic-icon" class="mic-icon">
-                        <span class="material-symbols-rounded">mic</span>
+                
+                <div id="action-button-container">
+                    <div id="send-button" class="send-btn">
+                      <span class="material-symbols-rounded">arrow_upward</span>
                     </div>
-                    
-                    <div id="action-button-container">
-                        <div id="send-button" class="send-btn">
-                          <span class="material-symbols-rounded">arrow_upward</span>
-                        </div>
-                        <div id="stop-button" class="stop-btn" style="display:none;">
-                            <span class="stop-icon"></span>
-                        </div>
+                    <div id="stop-button" class="stop-btn" style="display:none;">
+                        <span class="stop-icon"></span>
                     </div>
-                  </div>
-            </div>
+                </div>
+              </div>
         </div>
+
       </div>
     </div>
     
@@ -374,11 +368,11 @@
             <div class="ui-style-selector">
                 <span class="ui-style-label">입력창 스타일</span>
                 <div class="ui-style-options">
-                    <button class="ui-style-btn active" data-style="default">
+                    <button class="ui-style-btn" data-style="default">
                         <span class="material-symbols-rounded preview-icon">check_circle</span>
                         기본 (둥근형)
                     </button>
-                    <button class="ui-style-btn" data-style="simple">
+                    <button class="ui-style-btn active" data-style="simple">
                         <span class="material-symbols-rounded preview-icon">horizontal_rule</span>
                         심플 (바형)
                     </button>
