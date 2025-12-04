@@ -182,31 +182,9 @@ body{ margin:0; background:var(--bg-color); color:var(--text-color); min-height:
 .content-wrapper.loaded { opacity: 1; transform: translateY(0); }
 
 #initial-content{
-  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); 
-  width: 100%; max-width: 400px; 
-  display:flex; flex-direction:column; align-items:center; justify-content: center; /* 🌟 완전 중앙 정렬 */
-  text-align:center; padding: 0 16px; 
-  transition: opacity 0.5s ease-in-out, visibility 0.5s ease-in-out;
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 100%; max-width: 400px; display:flex; flex-direction:column; align-items:center; text-align:center; padding: 0 16px; transition: opacity 0.5s ease-in-out, visibility 0.5s ease-in-out;
 }
-
-/* 🌟 [수정] 메인 질문 텍스트 그라데이션 및 중앙 정렬 */
-.main-question{ 
-    font-size: 24px; 
-    font-weight: 700; 
-    margin-bottom: 8px; 
-    background: linear-gradient(135deg, #1d6fef 0%, #60a5fa 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    text-align: center;
-}
-
-/* 🌟 [신규] 서브 브랜딩 텍스트 */
-.sub-branding {
-    font-size: 14px;
-    color: var(--text-sub);
-    font-weight: 500;
-    opacity: 0.8;
-}
+.main-question{ font-size:22px; font-weight:600; margin-bottom:40px; color:var(--text-color); }
 
 .quick-actions{ display:flex; flex-wrap:wrap; justify-content:center; gap:8px; max-width:400px; }
 .action-btn{
@@ -461,10 +439,10 @@ body{ margin:0; background:var(--bg-color); color:var(--text-color); min-height:
 .send-btn.active { background-color: var(--send-button-enabled); pointer-events: auto; }
 .send-btn .material-symbols-rounded { color: var(--send-button-icon); font-size: 20px; }
 
-.mic-icon { width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: #9ca3af; cursor: pointer; }
-.mic-icon .material-symbols-rounded { font-size: 24px; }
+.mic-icon { width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: #9ca3af; }
+.mic-icon .material-symbols-rounded { font-size: 20px; }
 
-/* 📌 스타일 1: 심플 (Simple) - 이제 기본 바(Bar) 스타일 */
+/* 📌 스타일 1: 심플 (Simple) */
 .composer.style-simple {
     background: var(--bg-color);
     padding: 0 16px 24px 16px;
@@ -474,73 +452,75 @@ body{ margin:0; background:var(--bg-color); color:var(--text-color); min-height:
 
 .composer.style-simple .composer-inner {
     max-width: 768px;
-    border-radius: 35px; /* 완전히 둥근 캡슐 형태 */
-    padding: 6px 8px 6px 16px; 
+    border-radius: 28px;       
+    padding: 12px 16px 12px 20px; 
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
     display: flex;
-    flex-direction: row; /* 가로 정렬 */
-    align-items: center; /* 수직 중앙 */
+    flex-direction: column; 
+    align-items: flex-start; 
     position: relative;
-    transition: all 0.3s ease;
+    /* 🌟 높이 애니메이션 추가 */
+    transition: height 0.3s ease, padding 0.3s ease; 
 }
 [data-theme="dark"] .composer.style-simple .composer-inner { box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
 
-/* 입력 영역 */
+/* 🌟 [수정] 심플 모드에서도 input-area-wrapper는 그대로 (세로 정렬 유지) */
 .composer.style-simple .input-area-wrapper {
-    flex: 1; 
-    margin-bottom: 0;
+    margin-bottom: 10px;
 }
 
-/* 텍스트 입력 컨테이너 */
 .composer.style-simple .input-container {
-    border: none; background: transparent; padding: 0; border-radius: 0; 
-    max-height: 150px; min-height: 24px; width: 100%;
-    margin-right: 8px;
+    border: none; background: transparent; padding: 0; border-radius: 0; max-height: 150px; min-height: 24px; width: 100%;
 }
 
-.composer.style-simple .input-container textarea { font-size: 16px; padding: 0; }
+.composer.style-simple .input-container textarea { font-size: 17px; padding: 0; }
+.composer.style-simple .plus { display: none; }
 
-/* 기존 tools 숨기기 (사진처럼 깔끔하게) */
-.composer.style-simple .simple-tools { display: none; }
-
-/* 하단 컨트롤 영역 (오른쪽 버튼들) */
 .composer.style-simple .bottom-controls {
-    display: flex; align-items: flex-end; justify-content: flex-end; width: auto;
+    width: 100%; display: flex; justify-content: space-between; align-items: center;
 }
-.composer.style-simple .right-controls { display: flex; align-items: center; margin: 0; }
 
-/* 🌟 [핵심] Simple 모드에서 음성/전송 버튼 스왑 로직 (JS와 연동) */
-/* 기본적으로 둘 다 flex일 수 있으나 JS에서 display를 제어함. CSS에서는 기본값만 설정 */
-.composer.style-simple .mic-icon { 
-    display: flex; /* 기본 보임 */
-    color: var(--text-color);
+.simple-tools { display: flex; gap: 8px; margin-top: 0; flex-shrink: 0; }
+
+.tool-btn {
+    display: flex; align-items: center; justify-content: center; gap: 4px;
+    padding: 4px 10px 4px 8px; 
+    background-color: var(--surface-color);
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    font-size: 13px; font-weight: 500; color: var(--text-sub);
+    cursor: pointer;
+    transition: background-color 0.2s, border-color 0.2s, color 0.2s;
+    white-space: nowrap; line-height: 1.2;
 }
-.composer.style-simple .send-btn { 
-    /* 기본적으로 숨김, JS가 active 클래스와 함께 display를 flex로 바꿀 것임 */
-    display: none; 
-    background-color: var(--send-button-enabled); 
-    margin-right: 0; 
+.tool-btn:hover { background-color: var(--surface-hover); }
+.tool-btn .material-symbols-rounded { font-size: 18px; color: #6b7280; }
+
+.tool-btn.active-blue {
+    border-color: var(--primary-blue); background-color: rgba(59, 130, 246, 0.1); color: var(--primary-blue);
 }
+.tool-btn.active-blue .material-symbols-rounded { color: var(--primary-blue); }
+
+.tool-btn.active-purple {
+    border-color: var(--image-purple); background-color: rgba(139, 92, 246, 0.1); color: var(--image-purple);
+}
+.tool-btn.active-purple .material-symbols-rounded { color: var(--image-purple); }
+
+.composer.style-simple .right-controls { display: flex; align-items: center; margin-left: 8px; margin-bottom: 0; }
+.composer.style-simple .mic-icon { display: none; } 
+
+.composer.style-simple .send-btn { background-color: var(--send-button-enabled); margin-right: 0; align-self: center; }
 .composer.style-simple .send-btn .material-symbols-rounded { color: var(--send-button-icon); }
-
-/* + 버튼 */
-.composer.style-simple .plus {
-    width: 32px; height: 32px; border-radius: 50%;
-    background: var(--surface-secondary);
-    border: none;
-    display: flex; align-items: center; justify-content: center; flex-shrink: 0; 
-    margin-right: 8px;
-    cursor: pointer; color: var(--text-sub);
-}
+.composer.style-simple .send-btn:not(.active) { background-color: var(--send-button-disabled); }
 
 
-/* 📌 스타일 2: 기본 (Default) -> 이제 보조 옵션 */
+/* 📌 스타일 2: 기본 (Default) */
 .composer.style-default {
     background: var(--bg-color); padding: 0 16px 24px 16px; border: none;
 }
 .composer.style-default .composer-inner {
     max-width: 768px;
-    border-radius: 24px;
+    border-radius: 35px;
     padding: 8px 9px 8px 8px; 
     box-shadow: var(--composer-shadow);
     gap: 4px; flex-direction: row;
@@ -558,7 +538,7 @@ body{ margin:0; background:var(--bg-color); color:var(--text-color); min-height:
     display: flex; align-items: center;
     min-height: 38px; 
 }
-.composer.style-default .mic-icon { display: none !important; } /* Default 모드에선 마이크 숨김 (기존 유지) */
+.composer.style-default .mic-icon { display: none; }
 
 .composer.style-default .plus {
     width: 36px; height: 36px; border-radius: 50%;
@@ -578,7 +558,6 @@ body{ margin:0; background:var(--bg-color); color:var(--text-color); min-height:
     display: flex; 
     align-items: center;
 }
-.composer.style-default .send-btn { display: flex !important; }
 
 /* ============================================ */
 
@@ -992,4 +971,4 @@ hr.modal-divider { border: 0; border-top: 1px solid var(--border-color); margin:
         /* 사이드바(300)의 절반(150) 만큼 이동 */
         left: calc(50% + 150px);
     }
-      }
+}
