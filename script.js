@@ -41,7 +41,6 @@ const toolImage = document.getElementById('tool-image');
 const menuCreateImage = document.getElementById('menu-create-image');
 const imageModeIndicator = document.getElementById('image-mode-indicator');
 const closeImageModeBtn = document.getElementById('close-image-mode');
-const micIcon = document.getElementById('mic-icon'); // 🌟 마이크 아이콘 선택자 추가
 
 // 🌟 사이드바 관련 요소
 const sidebarBackdrop = document.getElementById('sidebar-backdrop');
@@ -173,8 +172,7 @@ function applyTheme(theme) {
 }
 
 function loadUIStyle() {
-    // 🌟 기본 스타일을 'simple'로 변경
-    const savedStyle = localStorage.getItem(UI_STYLE_KEY) || 'simple'; 
+    const savedStyle = localStorage.getItem(UI_STYLE_KEY) || 'default'; 
     applyUIStyle(savedStyle);
 }
 
@@ -561,19 +559,10 @@ function toggleScrollButton() {
 
 function toggleSendButton() {
     const hasText = inputField.value.trim().length > 0;
-    
-    // 🌟 [수정] 텍스트가 있으면 전송 버튼, 없으면 마이크 버튼 표시 (Simple 모드 등에서 중요)
     if (hasText && !isStreaming) { 
-        sendButton.style.display = 'flex';
         sendButton.classList.add('active'); 
-        if (micIcon) micIcon.style.display = 'none';
     } else { 
-        // 텍스트가 없을 때 스트리밍 중이 아니면 마이크 표시
-        if(!isStreaming) {
-             sendButton.style.display = 'none';
-             sendButton.classList.remove('active');
-             if (micIcon) micIcon.style.display = 'flex';
-        }
+        sendButton.classList.remove('active'); 
     }
 }
 
@@ -860,14 +849,10 @@ function setStreamingState(active) {
     if (active) {
         sendButton.style.display = 'none'; stopButton.style.display = 'flex'; inputField.setAttribute('readonly', 'true');
         autoScrollEnabled = true; scrollDownButton.classList.remove('visible');
-        if(micIcon) micIcon.style.display = 'none'; // 스트리밍 중 마이크 숨김
     } else {
-        // 🌟 [수정] 스트리밍 끝난 후 버튼 상태 복구 로직 수정
-        stopButton.style.display = 'none'; 
-        inputField.removeAttribute('readonly'); 
-        abortController = null;
-        toggleSendButton(); // 입력창 내용에 따라 마이크/전송 버튼 결정
+        sendButton.style.display = 'flex'; stopButton.style.display = 'none'; inputField.removeAttribute('readonly'); abortController = null;
     }
+    toggleSendButton();
 }
 
 let fullResponse = ""; 
@@ -942,7 +927,6 @@ async function sendMessage(userMessageOverride = null, isRegenerate = false) {
     } 
     
     if (userMessageOverride === null) { inputField.value = ''; inputField.rows = MIN_ROWS; autoResizeTextarea(); }
-    toggleSendButton(); // 🌟 전송 후 버튼 상태 업데이트 (마이크 아이콘 다시 표시)
     
     const { botMessageElement, indicatorElement, streamingBlockElement, spinnerElement, indicatorTextElement } = appendBotMessageContainer();
     
