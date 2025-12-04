@@ -27,6 +27,9 @@
 </head>
 <body>
 
+
+
+<!-- === 홈페이지 눈 효과 시작 === -->
 <style>
   #snow-canvas {
     position: fixed;
@@ -159,7 +162,15 @@
   setup();
 })();
 </script>
-<div class="phone" role="application" aria-label="채팅 UI">
+<!-- === 홈페이지 눈 효과 끝 === -->
+
+
+
+
+
+
+  
+  <div class="phone" role="application" aria-label="채팅 UI">
     
     <aside class="mini-sidebar">
         <div class="mini-sidebar-icon" id="mini-new-chat" title="새 채팅">
@@ -237,8 +248,29 @@
         
         <div id="initial-content">
             <div class="main-question">안녕하세요! 반가워요</div>
-            <div class="sub-branding">MinsuGPT</div>
+            <div class="quick-actions">
+                <div class="action-btn new-green" data-prompt="텍스트와 함께 대화하기">
+                    <span class="material-symbols-rounded">chat</span>
+                    텍스트와 함께 대화하기
+                </div>
+                <div class="action-btn" data-prompt="브레인스토밍 시작">
+                    <div class="icon-light">💡</div>
+                    브레인스토밍
+                </div>
+                <div class="action-btn new-blue" data-prompt="글 쓰기 예시 요청">
+                    <span class="material-symbols-rounded">edit</span>
+                    글 쓰기
+                </div>
+                <div class="action-btn orange" data-prompt="텍스트 요약 방법 알려주기">
+                    <span class="material-symbols-rounded">description</span>
+                    텍스트 요약
+                </div>
+                <div class="action-btn" data-prompt="도움말">
+                    <div style="font-size:18px;">...</div>
+                    더 보기
+                </div>
             </div>
+        </div>
 
         <div id="chat-messages" class="chat-messages"></div>
         
@@ -247,7 +279,7 @@
 
     <div class="composer-gradient-overlay"></div>
 
-    <div id="composer" class="composer style-simple">
+    <div id="composer" class="composer style-default">
       <div class="composer-inner">
         <div class="plus" id="plus-button" aria-label="파일 첨부">
             <span class="material-symbols-rounded">add</span>
@@ -342,13 +374,13 @@
             <div class="ui-style-selector">
                 <span class="ui-style-label">입력창 스타일</span>
                 <div class="ui-style-options">
-                     <button class="ui-style-btn active" data-style="simple">
-                        <span class="material-symbols-rounded preview-icon">horizontal_rule</span>
-                        심플 (바형)
-                    </button>
-                    <button class="ui-style-btn" data-style="default">
+                    <button class="ui-style-btn active" data-style="default">
                         <span class="material-symbols-rounded preview-icon">check_circle</span>
                         기본 (둥근형)
+                    </button>
+                    <button class="ui-style-btn" data-style="simple">
+                        <span class="material-symbols-rounded preview-icon">horizontal_rule</span>
+                        심플 (바형)
                     </button>
                 </div>
             </div>
