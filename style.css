@@ -1011,20 +1011,32 @@ hr.modal-divider { border: 0; border-top: 1px solid var(--border-color); margin:
 }
 
 
+/* style.css 파일의 @media (max-width: 768px) 블록 안에 추가/수정 */
+
 @media (max-width: 768px) {
-    /* 1. 툴 버튼과 전송 버튼 간 겹침 방지 (툴 버튼 그룹에 오른쪽 여백 추가) */
-    /* .simple-tools는 첨부, 이미지, 학습 버튼을 포함하는 컨테이너입니다. */
-    .composer.style-simple .simple-tools {
-        margin-right: 12px !important; 
-        /* 전송 버튼과의 간격을 확보 (기존 flex-shrink: 1 설정과 함께 작동) */
-        /* !important를 사용하여 이전 설정(없을 수 있음)을 확실하게 덮어씁니다. */
+    /* 1. 툴 버튼 크기 축소 및 간격 조절 (겹침 방지 핵심) */
+    .tool-btn {
+        /* 버튼 높이는 유지하되, 좌우 패딩을 대폭 줄여서 버튼 너비를 줄입니다. */
+        padding: 0 8px !important; /* 이전 (0 14px 0 10px)에서 크게 줄임 */
+        font-size: 12px !important; /* 텍스트 크기도 줄여서 공간 확보 */
+        height: 36px !important; /* 모바일에서 높이도 살짝 줄여볼 수 있습니다. (선택적) */
     }
 
-    /* 2. 전송 버튼 위치 조정 (오른쪽으로 조금 이동) */
-    /* .send-btn 자체에 오른쪽 마진을 주어 컨테이너 대비 오른쪽으로 밀어냅니다. */
+    /* 2. 툴 버튼 그룹과 전송 버튼 간의 간격 확보 (겹침 방지 보강) */
+    .composer.style-simple .bottom-controls {
+        /* 두 버튼 그룹(.simple-tools와 .right-controls) 사이의 최소 간격을 줍니다. */
+        gap: 8px; /* 두 그룹 사이에 8px의 간격 확보 */
+    }
+    
+    /* 3. 전송 버튼 위치 조정 (오른쪽으로 확실히 이동) */
+    /* .send-btn에 오른쪽 마진을 더 크게 주어 확실히 안으로 들어오게 합니다. */
     .composer.style-simple .send-btn {
-        margin-right: 4px !important; 
-        /* 이전 .send-btn에 margin-right: 0;을 설정했기 때문에, !important로 덮어쓰거나, 
-           기존 margin-right: 0; 설정을 이 @media 쿼리 밖에서 제거하는 것도 좋습니다. */
+        margin-right: 8px !important; /* 4px보다 큰 8px로 설정 */
+    }
+    
+    /* 4. (선택적) 전송 버튼 그룹의 축소 방지 */
+    /* 전송 버튼 그룹이 공간 부족으로 축소되는 것을 방지합니다. */
+    .composer.style-simple .right-controls {
+        flex-shrink: 0; 
     }
 }
