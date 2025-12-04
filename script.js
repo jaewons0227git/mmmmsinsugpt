@@ -132,6 +132,58 @@ if (typeof marked !== 'undefined') {
     });
 }
 
+// script.js 파일 상단 (1. DOM 요소 및 상수 정의 섹션)
+
+const accessModalBackdrop = document.getElementById('access-modal-backdrop');
+const accessInput = document.getElementById('access-input');
+const accessConfirmBtn = document.getElementById('access-confirm-btn');
+const accessError = document.getElementById('access-error');
+
+// 접근 코드 확인 처리 함수
+async function handleAccessCheck() {
+    const inputCode = accessInput.value.trim();
+    if (!inputCode) {
+        accessError.textContent = "코드를 입력해 주세요.";
+        accessError.style.display = 'block';
+        return;
+    }
+    
+    accessConfirmBtn.disabled = true;
+    accessConfirmBtn.textContent = '확인 중...';
+
+    try {
+        const response = await fetch('/check-access', { // 백엔드 라우트 호출
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ code: inputCode })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            // ✅ 접근 성공: 모달 숨기고 서비스 활성화
+            accessModalBackdrop.style.display = 'none';
+            // 모달이 사라진 후 입력 필드에 포커스
+            inputField.focus(); 
+            console.log("서비스 접근 성공!");
+        } else {
+            // ❌ 접근 실패
+            accessError.textContent = result.message || "잘못된 접근 코드입니다.";
+            accessError.style.display = 'block';
+            accessInput.value = '';
+            accessInput.focus();
+        }
+
+    } catch (error) {
+        console.error('접근 확인 중 오류 발생:', error);
+        accessError.textContent = "네트워크 오류가 발생했습니다. 다시 시도해 주세요.";
+        accessError.style.display = 'block';
+    } finally {
+        accessConfirmBtn.disabled = false;
+        accessConfirmBtn.textContent = '확인';
+    }
+}
+
 // ===========================================
 // 2. UI 및 설정 (테마, 스타일, 모달) 관련 함수
 // ===========================================
@@ -1299,8 +1351,28 @@ importFileInput.addEventListener('change', importChats);
 // ===========================================
 // 7. 초기화
 // ===========================================
+// script.js 파일 하단 (7. 초기화 섹션)
 
 window.onload = function() {
+    
+    // ✅ 모달 이벤트 리스너 설정
+    // 페이지 로드 시 모달이 보이므로, 바로 이벤트 리스너를 추가합니다.
+    accessConfirmBtn.addEventListener('click', handleAccessCheck);
+    
+    // Enter 키로도 작동하도록 설정
+    accessInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            handleAccessCheck();
+        }
+    });
+    
+    // 모달을 숨기는 코드가 없으므로, 기본적으로 HTML에 설정된 display: flex 상태를 유지합니다.
+    
+    loadTheme();
+    loadUIStyle(); 
+    loadSessions(); 
+    // ... 나머지 기존 코드 ...
     loadTheme();
     loadUIStyle(); 
     loadSessions(); 
