@@ -1031,7 +1031,7 @@ hr.modal-divider { border: 0; border-top: 1px solid var(--border-color); margin:
     /* 3. 전송 버튼 위치 조정 (오른쪽으로 확실히 이동) */
     /* .send-btn에 오른쪽 마진을 더 크게 주어 확실히 안으로 들어오게 합니다. */
     .composer.style-simple .send-btn {
-        margin-left: 7px !important; /* 4px보다 큰 8px로 설정 */
+        margin-left: 8px !important; /* 4px보다 큰 8px로 설정 */
     }
     
     /* 4. (선택적) 전송 버튼 그룹의 축소 방지 */
