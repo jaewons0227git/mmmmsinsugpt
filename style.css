@@ -1046,14 +1046,46 @@ hr.modal-divider { border: 0; border-top: 1px solid var(--border-color); margin:
 
 
 /* =========================================== */
-/* 9. 로그인 모달 스타일 수정 */
+/* 9. 로그인 모달 스타일 수정 (위치, 블러 및 디자인 통합) */
 /* =========================================== */
 
-/* 모달 컨테이너 기본 스타일 */
+/* 1. Backdrop (배경) 스타일: 화면 전체를 덮고 중앙 정렬 및 블러 적용 */
+.login-modal-backdrop {
+    /* 기존 modal-backdrop 기본 속성 유지 */
+    position: fixed;
+    inset: 0;
+    z-index: 99999; /* 다른 요소보다 최상위에 위치 */
+    background-color: var(--modal-overlay);
+    
+    /* 화면 중앙 정렬 */
+    display: flex !important; 
+    align-items: center;
+    justify-content: center;
+    
+    /* 블러 효과 적용 */
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    
+    /* 강제 표시 및 애니메이션을 위한 속성 */
+    visibility: visible !important;
+    opacity: 1 !important;
+    transition: opacity 0.5s ease, visibility 0.5s ease;
+}
+
+
+/* 2. Modal Content (로그인 창 본체) 스타일 */
 .login-modal-content {
+    /* 모달 자체의 크기와 모양 */
+    max-width: 320px;
+    width: 90%; /* 모바일 최적화를 위해 너비 90% 설정 */
+    background: var(--surface-color);
     border-radius: 12px !important;
     padding: 24px !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    
+    /* 중앙에서 부드럽게 나타나는 효과 (transform: translateY(0)) */
     transform: translateY(0) !important;
+    transition: transform 0.3s ease-out;
 }
 
 /* 로고 스타일 */
@@ -1062,30 +1094,26 @@ hr.modal-divider { border: 0; border-top: 1px solid var(--border-color); margin:
     width: 150px;
     height: auto;
     margin: 0 auto;
-    /* 다크 모드일 때 색상 반전 */
     filter: none;
     transition: filter 0.3s ease;
 }
 
 /* 다크 모드 로고 반전 */
 [data-theme="dark"] .login-logo {
-    /* hue-rotate는 색상을 유지하면서 반전시키는 데 유용합니다. */
-    filter: invert(1) hue-rotate(180deg); 
+    filter: invert(1) hue-rotate(180deg); 
 }
 
 /* 접속하기 버튼 스타일 */
 .login-confirm-btn {
-    width: 100%; 
+    width: 100%; 
     height: 48px;
-    /* 검은색 배경, 흰색 텍스트 */
-    background: #000000 !important; 
-    color: #ffffff !important; 
+    background: #000000 !important; 
+    color: #ffffff !important; 
     font-size: 16px;
     font-weight: 600;
     cursor: pointer;
     border: none;
-    /* 양쪽 끝을 반원으로 */
-    border-radius: 9999px !important; 
+    border-radius: 9999px !important; 
     padding: 0 24px;
     transition: background-color 0.3s;
 }
@@ -1096,9 +1124,9 @@ hr.modal-divider { border: 0; border-top: 1px solid var(--border-color); margin:
 
 /* 에러 메시지 스타일 */
 .access-error {
-    color: var(--error-red); 
-    font-size: 0.9em; 
-    text-align: center; 
+    color: var(--error-red); 
+    font-size: 0.9em; 
+    text-align: center; 
     margin-bottom: 10px;
 }
 
@@ -1113,9 +1141,8 @@ hr.modal-divider { border: 0; border-top: 1px solid var(--border-color); margin:
 /* 텍스트박스 스타일 */
 .floating-input {
     width: 100%;
-    padding: 18px 12px 6px 12px; /* 위쪽 패딩을 늘려 라벨 공간 확보 */
-    /* 배경 제거 */
-    background: transparent; 
+    padding: 18px 12px 6px 12px;
+    background: transparent; 
     border: 1px solid var(--border-color);
     border-radius: 8px;
     outline: none;
@@ -1137,26 +1164,23 @@ hr.modal-divider { border: 0; border-top: 1px solid var(--border-color); margin:
     transform: translateY(-50%);
     color: var(--text-sub);
     pointer-events: none;
-    transition: 
-        top 0.2s ease, 
-        font-size 0.2s ease, 
+    transition: 
+        top 0.2s ease, 
+        font-size 0.2s ease, 
         color 0.2s ease,
         transform 0.2s ease;
 }
 
 /* 포커스되거나 내용이 있을 때 라벨 스타일 (위로 올라감) */
 .floating-input:focus + .floating-label,
-.floating-input:not(:placeholder-shown) + .floating-label,
-/* required 속성을 사용하여 초기 상태를 처리합니다. */
-.floating-input:valid + .floating-label {
-    top: 4px; /* 테두리 상단으로 이동 */
+.floating-input:not(:placeholder-shown) + .floating-label {
+    top: 4px;
     font-size: 12px;
     color: var(--primary-blue);
     transform: translateY(0);
-    /* 배경이 투명하므로, 라벨 뒤에 흰색 배경을 넣어 테두리를 덮습니다. */
-    background: var(--surface-color); 
+    background: var(--surface-color); 
     padding: 0 4px;
-    margin-left: -4px; /* 덮는 배경을 라벨 글자 영역에 맞춥니다. */
+    margin-left: -4px;
 }
 
 /* --- 모바일 최적화 (Max-width 360px 이하) --- */
