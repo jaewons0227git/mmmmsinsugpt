@@ -8,7 +8,73 @@ document.onkeydown = function(e) {
 // ===========================================
 // 1. DOM 요소 및 상수 정의
 // ===========================================
- 
+
+
+
+
+// script.js 파일 상단 (1. DOM 요소 및 상수 정의 섹션) 수정/교체
+
+const accessModalBackdrop = document.getElementById('access-modal-backdrop');
+const accessIdInput = document.getElementById('access-id-input'); 
+const accessPwInput = document.getElementById('access-pw-input'); 
+const accessConfirmBtn = document.getElementById('access-confirm-btn');
+const accessError = document.getElementById('access-error');
+
+// 로그인 처리 함수
+async function handleLoginCheck() { 
+    const inputId = accessIdInput.value.trim();
+    const inputPw = accessPwInput.value.trim(); 
+    
+    if (!inputId || !inputPw) {
+        accessError.textContent = "아이디와 비밀번호를 모두 입력해 주세요.";
+        accessError.style.display = 'block';
+        return;
+    }
+    
+    accessConfirmBtn.disabled = true;
+    accessConfirmBtn.textContent = '로그인 중...';
+
+    try {
+        const response = await fetch('/check-access', { 
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: inputId, password: inputPw }) // ID와 PW 전송
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            // ✅ 로그인 성공
+            accessModalBackdrop.style.display = 'none';
+            inputField.focus(); 
+            console.log("서비스 로그인 성공!");
+        } else {
+            // ❌ 로그인 실패
+            accessError.textContent = result.message || "아이디 또는 비밀번호가 잘못되었습니다.";
+            accessError.style.display = 'block';
+            accessPwInput.value = ''; // 비밀번호 필드 초기화
+            accessIdInput.focus(); 
+        }
+
+    } catch (error) {
+        console.error('로그인 확인 중 오류 발생:', error);
+        accessError.textContent = "네트워크 오류가 발생했습니다. 다시 시도해 주세요.";
+        accessError.style.display = 'block';
+    } finally {
+        accessConfirmBtn.disabled = false;
+        accessConfirmBtn.textContent = '로그인';
+    }
+}
+
+
+
+
+
+
+
+
+
+
 const phone = document.querySelector('.phone');
 const contentWrapper = document.getElementById('content-wrapper');
 const inputField = document.getElementById('message-input');
@@ -132,57 +198,7 @@ if (typeof marked !== 'undefined') {
     });
 }
 
-// script.js 파일 상단 (1. DOM 요소 및 상수 정의 섹션)
 
-const accessModalBackdrop = document.getElementById('access-modal-backdrop');
-const accessInput = document.getElementById('access-input');
-const accessConfirmBtn = document.getElementById('access-confirm-btn');
-const accessError = document.getElementById('access-error');
-
-// 접근 코드 확인 처리 함수
-async function handleAccessCheck() {
-    const inputCode = accessInput.value.trim();
-    if (!inputCode) {
-        accessError.textContent = "코드를 입력해 주세요.";
-        accessError.style.display = 'block';
-        return;
-    }
-    
-    accessConfirmBtn.disabled = true;
-    accessConfirmBtn.textContent = '확인 중...';
-
-    try {
-        const response = await fetch('/check-access', { // 백엔드 라우트 호출
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ code: inputCode })
-        });
-
-        const result = await response.json();
-
-        if (result.success) {
-            // ✅ 접근 성공: 모달 숨기고 서비스 활성화
-            accessModalBackdrop.style.display = 'none';
-            // 모달이 사라진 후 입력 필드에 포커스
-            inputField.focus(); 
-            console.log("서비스 접근 성공!");
-        } else {
-            // ❌ 접근 실패
-            accessError.textContent = result.message || "잘못된 접근 코드입니다.";
-            accessError.style.display = 'block';
-            accessInput.value = '';
-            accessInput.focus();
-        }
-
-    } catch (error) {
-        console.error('접근 확인 중 오류 발생:', error);
-        accessError.textContent = "네트워크 오류가 발생했습니다. 다시 시도해 주세요.";
-        accessError.style.display = 'block';
-    } finally {
-        accessConfirmBtn.disabled = false;
-        accessConfirmBtn.textContent = '확인';
-    }
-}
 
 // ===========================================
 // 2. UI 및 설정 (테마, 스타일, 모달) 관련 함수
@@ -1353,21 +1369,28 @@ importFileInput.addEventListener('change', importChats);
 // ===========================================
 // script.js 파일 하단 (7. 초기화 섹션)
 
+// script.js 파일 하단 (7. 초기화 섹션) 내 window.onload 함수 내부 수정/교체
+
 window.onload = function() {
     
-    // ✅ 모달 이벤트 리스너 설정
-    // 페이지 로드 시 모달이 보이므로, 바로 이벤트 리스너를 추가합니다.
-    accessConfirmBtn.addEventListener('click', handleAccessCheck);
+    // ✅ 로그인 이벤트 리스너 설정
+    accessConfirmBtn.addEventListener('click', handleLoginCheck);
     
-    // Enter 키로도 작동하도록 설정
-    accessInput.addEventListener('keypress', (e) => {
+    // Enter 키로 작동하도록 설정
+    accessIdInput.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') {
             e.preventDefault();
-            handleAccessCheck();
+            handleLoginCheck();
+        }
+    });
+    accessPwInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            handleLoginCheck();
         }
     });
     
-    // 모달을 숨기는 코드가 없으므로, 기본적으로 HTML에 설정된 display: flex 상태를 유지합니다.
+    // ... 나머지 기존 초기화 코드 ...
     
     loadTheme();
     loadUIStyle(); 
