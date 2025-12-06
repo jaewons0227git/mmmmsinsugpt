@@ -39,8 +39,8 @@ async function handleLoginCheck() {
 
     try {
         // 백엔드로 요청 전송 (경로는 실제 서버 주소에 맞게 수정 필요)
-        // 예: https://jaewondev.pythonanywhere.com/check-access
-        const response = await fetch('https://jaewondev2.pythonanywhere.com/check-access', { 
+        // 예: [https://jaewondev.pythonanywhere.com/check-access](https://jaewondev.pythonanywhere.com/check-access)
+        const response = await fetch('[https://jaewondev2.pythonanywhere.com/check-access](https://jaewondev2.pythonanywhere.com/check-access)', { 
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ id: inputId, password: inputPw }) 
@@ -51,9 +51,10 @@ async function handleLoginCheck() {
         if (result.success) {
             // ✅ 로그인 성공
             accessModalBackdrop.style.opacity = '0'; // 부드럽게 사라지기 효과
+            accessModalBackdrop.style.visibility = 'hidden';
             setTimeout(() => {
                 accessModalBackdrop.style.display = 'none';
-            }, 300);
+            }, 500);
             
             // 입력창 초기화 및 포커스 이동
             accessIdInput.value = '';
@@ -167,8 +168,8 @@ let targetSessionIdForAction = null;
 let deleteActionType = null; // 'single' or 'all'
 
 // 🎯 백엔드 엔드포인트
-const BACKEND_ENDPOINT = "https://jaewondev.pythonanywhere.com/ask"; 
-const IMAGE_ENDPOINT = "https://jaewondev.pythonanywhere.com/generate-image"; 
+const BACKEND_ENDPOINT = "[https://jaewondev.pythonanywhere.com/ask](https://jaewondev.pythonanywhere.com/ask)"; 
+const IMAGE_ENDPOINT = "[https://jaewondev.pythonanywhere.com/generate-image](https://jaewondev.pythonanywhere.com/generate-image)"; 
 
 const HISTORY_STORAGE_KEY = 'minsugpt_chat_history'; // Deprecated for single session
 const SESSIONS_STORAGE_KEY = 'minsugpt_sessions'; // New key for multiple sessions
@@ -1227,7 +1228,7 @@ if(headerNewChat) {
 }
 if(headerUpdateLink) {
     headerUpdateLink.addEventListener('click', () => {
-        window.open('https://minsugpt.kro.kr/app/update', '_blank');
+        window.open('[https://minsugpt.kro.kr/app/update](https://minsugpt.kro.kr/app/update)', '_blank');
     });
 }
 
@@ -1403,6 +1404,11 @@ window.onload = function() {
         };
         accessIdInput.addEventListener('keypress', handleEnter);
         accessPwInput.addEventListener('keypress', handleEnter);
+        
+        // 페이지 로드 시 ID 입력창에 포커스 (로그인이 우선이므로)
+        setTimeout(() => {
+            accessIdInput.focus();
+        }, 300);
     }
 
     // ... 나머지 초기화 코드들 ...
