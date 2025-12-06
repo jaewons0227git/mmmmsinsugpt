@@ -466,13 +466,19 @@
         </div>
     </div>
 
-    <div id="access-modal-backdrop" class="modal-backdrop" style="align-items: center; z-index: 9999; display: flex;">
+    <div id="access-modal-backdrop" class="modal-backdrop login-modal-backdrop" style="align-items: center; z-index: 9999; display: flex;">
     <div id="access-modal" class="modal" style="max-width: 320px; border-radius: 12px; padding: 24px;">
-        <h3 style="text-align: center; margin-bottom: 20px;">서비스 접근 코드 입력</h3>
-        <p id="access-error" style="color: var(--error-red); font-size: 0.9em; text-align: center; margin-bottom: 10px; display: none;">잘못된 코드입니다. 다시 시도해 주세요.</p>
-        <input type="password" id="access-input" placeholder="접근 코드" style="width: 100%; padding: 12px; margin-bottom: 20px; border: 1px solid var(--border-color); border-radius: 8px; background: var(--surface-secondary); color: var(--text-color); outline: none; text-align: center;">
+        <h3 style="text-align: center; margin-bottom: 20px;">서비스 로그인</h3>
+        <p id="access-error" style="color: var(--error-red); font-size: 0.9em; text-align: center; margin-bottom: 10px; display: none;">아이디 또는 비밀번호가 잘못되었습니다.</p>
+        
+        <input type="text" id="access-id-input" placeholder="아이디 (admin)" 
+               style="width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid var(--border-color); border-radius: 8px; background: var(--surface-secondary); color: var(--text-color); outline: none; text-align: center;">
+               
+        <input type="password" id="access-pw-input" placeholder="비밀번호 (minsu0227)" 
+               style="width: 100%; padding: 12px; margin-bottom: 20px; border: 1px solid var(--border-color); border-radius: 8px; background: var(--surface-secondary); color: var(--text-color); outline: none; text-align: center;">
+               
         <div class="confirm-actions">
-            <button id="access-confirm-btn" style="width: 100%; background-color: var(--primary-blue); color: white; border: none; padding: 10px; border-radius: 8px; font-weight: 600;">확인</button>
+            <button id="access-confirm-btn" style="width: 100%; background-color: var(--primary-blue); color: white; border: none; padding: 10px; border-radius: 8px; font-weight: 600;">로그인</button>
         </div>
     </div>
 </div>
