@@ -457,30 +457,35 @@
         </div>
     </div>
 
-    <div id="access-modal-backdrop" class="modal-backdrop login-modal-backdrop" style="align-items: center; z-index: 99999; display: flex; opacity: 1; visibility: visible;">
-        <div id="access-modal" class="modal" style="transform: translateY(0);">
-            <div class="login-header">
-                <div class="login-icon">🔐</div>
-                <h3>서비스 로그인</h3>
-            </div>
-            
-            <p id="access-error" class="login-error-msg">
-                아이디 또는 비밀번호가 잘못되었습니다.
-            </p>
-            
-            <div class="input-group">
-                <input type="text" id="access-id-input" placeholder="아이디" autocomplete="username">
-            </div>
-                   
-            <div class="input-group">
-                <input type="password" id="access-pw-input" placeholder="비밀번호" autocomplete="current-password">
-            </div>
-                   
-            <button id="access-confirm-btn" class="login-btn">
-                로그인
-            </button>
+    <div id="access-modal-backdrop" class="modal-backdrop login-modal-backdrop"
+     style="display: flex !important; visibility: visible !important; opacity: 1 !important;">
+    
+    <div id="access-modal" class="modal login-modal-content" style="max-width: 320px;">
+        
+        <img src="https://statuspage.incident.io/_next/image?url=https%3A%2F%2Fstorage.googleapis.com%2Fincident-io-status-page-logos%2F01KABR33MD5JQ34S3FAA435TD1%2Fminsugpt%2Fzwrf11r5.png&w=384&q=75&dpl=dpl_CX8yVuXom3PXF9oeMkdLHJM1UxpP" 
+             alt="MinsuGPT Logo" id="login-logo" class="login-logo">
+
+        <h3 style="text-align: center; margin-bottom: 30px; margin-top: 10px;">MinsuGPT에 접속</h3>
+        
+        <p id="access-error" class="access-error" style="display: none;">
+            아이디 또는 비밀번호가 잘못되었습니다.
+        </p>
+        
+        <div class="input-group">
+            <input type="text" id="access-id-input" class="floating-input" required autocomplete="username">
+            <label for="access-id-input" class="floating-label">아이디</label>
+        </div>
+        
+        <div class="input-group" style="margin-bottom: 30px;">
+            <input type="password" id="access-pw-input" class="floating-input" required autocomplete="current-password">
+            <label for="access-pw-input" class="floating-label">비밀번호</label>
+        </div>
+               
+        <div class="confirm-actions">
+            <button id="access-confirm-btn" class="login-confirm-btn">접속하기</button>
         </div>
     </div>
+</div>
 
   </div>
 
