@@ -29,7 +29,6 @@
 
 
 
-<!-- === 홈페이지 눈 효과 시작 === -->
 <style>
   #snow-canvas {
     position: fixed;
@@ -162,15 +161,7 @@
   setup();
 })();
 </script>
-<!-- === 홈페이지 눈 효과 끝 === -->
-
-
-
-
-
-
-  
-  <div class="phone" role="application" aria-label="채팅 UI">
+<div class="phone" role="application" aria-label="채팅 UI">
     
     <aside class="mini-sidebar">
         <div class="mini-sidebar-icon" id="mini-new-chat" title="새 채팅">
@@ -466,30 +457,34 @@
         </div>
     </div>
 
-    <div id="access-modal-backdrop" class="modal-backdrop login-modal-backdrop" style="align-items: center; z-index: 9999; display: flex;">
-    <div id="access-modal" class="modal" style="max-width: 320px; border-radius: 12px; padding: 24px; transform: translateY(0);">
-        <h3 style="text-align: center; margin-bottom: 20px; margin-top:0;">서비스 로그인</h3>
-        
-        <p id="access-error" style="color: var(--error-red); font-size: 0.9em; text-align: center; margin-bottom: 10px; display: none;">
-            아이디 또는 비밀번호가 잘못되었습니다.
-        </p>
-        
-        <input type="text" id="access-id-input" placeholder="아이디" autocomplete="username"
-               style="width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid var(--border-color); border-radius: 8px; background: var(--surface-secondary); color: var(--text-color); outline: none; text-align: center;">
-               
-        <input type="password" id="access-pw-input" placeholder="비밀번호" autocomplete="current-password"
-               style="width: 100%; padding: 12px; margin-bottom: 20px; border: 1px solid var(--border-color); border-radius: 8px; background: var(--surface-secondary); color: var(--text-color); outline: none; text-align: center;">
-               
-        <div class="confirm-actions">
-            <button id="access-confirm-btn" style="width: 100%; background-color: var(--primary-blue); color: white; border: none; padding: 12px; border-radius: 8px; font-weight: 600; font-size: 15px; cursor: pointer;">
+    <div id="access-modal-backdrop" class="modal-backdrop login-modal-backdrop" style="align-items: center; z-index: 99999; display: flex; opacity: 1; visibility: visible;">
+        <div id="access-modal" class="modal" style="transform: translateY(0);">
+            <div class="login-header">
+                <div class="login-icon">🔐</div>
+                <h3>서비스 로그인</h3>
+            </div>
+            
+            <p id="access-error" class="login-error-msg">
+                아이디 또는 비밀번호가 잘못되었습니다.
+            </p>
+            
+            <div class="input-group">
+                <input type="text" id="access-id-input" placeholder="아이디" autocomplete="username">
+            </div>
+                   
+            <div class="input-group">
+                <input type="password" id="access-pw-input" placeholder="비밀번호" autocomplete="current-password">
+            </div>
+                   
+            <button id="access-confirm-btn" class="login-btn">
                 로그인
             </button>
         </div>
     </div>
-</div>
 
   </div>
 
   <script src="script.js"></script>
 </body>
 </html>
+
