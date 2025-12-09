@@ -27,197 +27,190 @@
 </head>
 <body>
 
-
-
-
-
-
-
 <style>
-    /* 모달 전체 배경 및 애니메이션 */
-    .cheer-modal-backdrop {
+    /* 모달 전체 배경 */
+    #cheerModal.modal-backdrop {
         position: fixed;
         top: 0;
         left: 0;
         width: 100%;
         height: 100%;
-        background-color: transparent;
-        display: flex;
+        background-color: rgba(0, 0, 0, 0.4); /* 배경 살짝 어둡게 처리하여 가독성 확보 */
+        display: none; /* 기본 숨김 */
         justify-content: center;
         align-items: center;
-        z-index: 9999; /* 다른 요소보다 항상 위에 있도록 설정 */
+        z-index: 10001; /* 눈 효과(9999)보다 높게 설정 */
         
         opacity: 0;
-        transform: scale(0.8);
-        transition: opacity 0.4s ease-out, transform 0.4s ease-out; 
+        transition: opacity 0.3s ease-out; 
+    }
+
+    /* 화면에 보일 때 클래스 */
+    #cheerModal.modal-backdrop.is-visible {
+        opacity: 1;
     }
 
     /* 알림창 내용 컨테이너 */
-    .cheer-modal-content {
+    #cheerModal .modal-content {
         background-color: #ffffff;
-        padding: 5vw 5vw 4vw; 
-        border-radius: 50px; 
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-        max-width: 300px;
-        width: 90%; 
-        
+        padding: 25px; 
+        border-radius: 24px; /* 너무 둥근 50px에서 24px로 조정 */
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+        max-width: 320px;
+        width: 85%; 
         text-align: left; 
         color: #000000;
+        transform: scale(0.9);
+        transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* 팝업 효과 */
+    }
+
+    #cheerModal.modal-backdrop.is-visible .modal-content {
+        transform: scale(1);
     }
 
     /* 텍스트 스타일 */
-    .cheer-message {
+    #cheerModal .cheer-message {
         color: #000000;
-        margin-bottom: 5px;
-        font-size: 1.4em;
-        font-weight: 600;
+        margin: 0 0 10px 0;
+        font-size: 1.3em;
+        font-weight: 700;
+        line-height: 1.4;
     }
     
-    .cheer-modal-content p {
-        color: #000000;
+    #cheerModal .modal-content p {
+        color: #444;
         font-size: 0.95em;
-        margin-top: 0;
-        margin-bottom: 0;
+        margin: 0;
+        line-height: 1.5;
     }
     
-    /* 팁 메시지 스타일 및 애니메이션 */
-    .tip-content {
+    /* 팁 메시지 스타일 */
+    #cheerModal .tip-content {
         margin-top: 15px;
-        padding: 0 15px; 
         background-color: #f7f7f7;
-        border-radius: 15px;
-        color: #000000;
+        border-radius: 12px;
+        color: #333;
         font-size: 0.9em;
-        text-align: left;
+        line-height: 1.5;
         
         max-height: 0; 
         opacity: 0; 
         overflow: hidden; 
-        padding-top: 0;
-        padding-bottom: 0;
+        padding: 0 15px;
         
-        transition: max-height 0.4s ease-out, opacity 0.4s ease-out, padding 0.4s ease-out;
+        transition: all 0.3s ease;
     }
     
-    .tip-content.is-shown {
-        max-height: 200px; 
+    #cheerModal .tip-content.is-shown {
+        max-height: 300px; 
         opacity: 1;
-        padding-top: 10px; 
-        padding-bottom: 10px;
-        margin-bottom: 15px; 
+        padding: 15px;
+        margin-bottom: 5px;
     }
 
-    /* 버튼 그룹 */
-    .button-group {
+    /* 버튼 그룹 (Flexbox로 변경하여 깨짐 방지) */
+    #cheerModal .button-group {
         margin-top: 20px; 
-        overflow: hidden; 
+        display: flex;
+        gap: 10px;
+        width: 100%;
     }
 
     /* 버튼 공통 스타일 */
-    .confirm-button, .tip-button {
-        padding: 10px 0;
+    #cheerModal .confirm-button, 
+    #cheerModal .tip-button {
+        flex: 1; /* 동일한 너비 가짐 */
+        padding: 12px 0;
         font-size: 0.95em;
+        font-weight: 600;
         cursor: pointer;
-        transition: background-color 0.2s, border-color 0.2s, opacity 0.2s; 
-        outline: none;
-        border-radius: 50px;
-        width: 48%; 
+        border-radius: 12px;
+        border: none;
         -webkit-tap-highlight-color: transparent;
+        transition: transform 0.1s;
     }
     
-    .confirm-button {
-        float: left;
+    #cheerModal .confirm-button {
         background-color: #000000;
         color: #ffffff;
-        border: 1px solid #000000;
     }
     
-    .tip-button {
-        float: right;
-        background-color: #ffffff;
-        color: #000000;
-        border: 1px solid #000000;
-    }
-
-    .confirm-button:hover {
-        opacity: 0.85;
-    }
-    
-    .tip-button:hover {
+    #cheerModal .tip-button {
         background-color: #f0f0f0;
+        color: #000000;
     }
 
-    .cheer-modal-backdrop.is-visible {
-        opacity: 1;
-        transform: scale(1);
+    #cheerModal .confirm-button:active, 
+    #cheerModal .tip-button:active {
+        transform: scale(0.96);
     }
 </style>
 
 <div id="cheerModal" class="modal-backdrop">
     <div class="modal-content">
-        <h2 class="cheer-message">기말고사를 응원합니다!</h2>
-        <p>마지막까지 집중하세요. 모두 잘 될 거예요!</p>
+        <h2 class="cheer-message">기말고사를 응원합니다! 🍀</h2>
+        <p>마지막까지 집중하세요. 노력한 만큼 좋은 결과가 있을 거예요.</p>
         
         <div id="tipContent" class="tip-content">
-            <span style="font-weight: 600;">시험 잘 보는 팁:</span><br>
-            1. 시험 전 10분, 빠르게 목차를 훑으며 전체 내용을 <span style="font-weight: 600;">구조화</span>하세요.<br>
-            2. 아는 문제부터 풀고, 막히는 문제는 표시 후 나중에 다시 보세요.<br>
-            3. 답안을 제출하기 전, <span style="font-weight: 600;">검토 시간</span>을 확보해 실수한 곳이 없는지 확인하세요.
+            <span style="font-weight: 700;">💡 시험 잘 보는 팁</span><br><br>
+            1. 시험 시작 전 목차를 훑으며 내용을 <span style="font-weight: 700;">구조화</span>하세요.<br>
+            2. 모르는 문제는 과감히 넘기고 아는 것부터 푸세요.<br>
+            3. 답안 제출 전, 반드시 <span style="font-weight: 700;">마킹 실수</span>를 확인하세요.
         </div>
 
         <div class="button-group">
             <button id="closeButton" class="confirm-button">닫기</button>
-            <button id="tipButton" class="tip-button">시험 잘 보는 팁</button>
+            <button id="tipButton" class="tip-button">꿀팁 보기</button>
         </div>
     </div>
 </div>
 
 <script>
     document.addEventListener('DOMContentLoaded', () => {
+        // [설정] 여기서 true/false를 변경하여 모달을 켜고 끌 수 있습니다.
+        const SHOW_EXAM_CHEER = true; 
+
         const modal = document.getElementById('cheerModal');
         const closeButton = document.getElementById('closeButton');
         const tipButton = document.getElementById('tipButton');
         const tipContent = document.getElementById('tipContent');
 
-        // 페이지 로드 후 100ms 뒤에 알림창 표시
-        setTimeout(() => {
-            modal.classList.add('is-visible');
-        }, 100); 
-
-        // '확인' 버튼 클릭 시 알림창 닫기
-        closeButton.addEventListener('click', () => {
-            modal.style.opacity = '0';
-            modal.style.transform = 'scale(0.8)'; 
+        if (SHOW_EXAM_CHEER) {
+            // 모달 표시 로직
+            modal.style.display = 'flex'; // 먼저 공간을 차지하게 함
             
-            setTimeout(() => {
-                modal.style.display = 'none';
-            }, 400); 
-        });
+            // 애니메이션을 위해 약간의 지연 후 클래스 추가
+            requestAnimationFrame(() => {
+                setTimeout(() => {
+                    modal.classList.add('is-visible');
+                }, 50);
+            });
 
-        // '시험 잘 보는 팁' 버튼 클릭 시 팁 내용 표시/숨기기
-        tipButton.addEventListener('click', () => {
-            const isShown = tipContent.classList.contains('is-shown');
-            
-            if (isShown) {
-                tipContent.classList.remove('is-shown');
-                tipButton.textContent = '시험 잘 보는 팁';
-            } else {
-                tipContent.classList.add('is-shown');
-                tipButton.textContent = '팁 숨기기';
-            }
-        });
+            // '확인' 버튼 클릭 시
+            closeButton.addEventListener('click', () => {
+                modal.classList.remove('is-visible');
+                setTimeout(() => {
+                    modal.style.display = 'none';
+                }, 300); // transition 시간과 맞춤
+            });
+
+            // '꿀팁 보기' 버튼 클릭 시
+            tipButton.addEventListener('click', () => {
+                const isShown = tipContent.classList.contains('is-shown');
+                if (isShown) {
+                    tipContent.classList.remove('is-shown');
+                    tipButton.textContent = '꿀팁 보기';
+                } else {
+                    tipContent.classList.add('is-shown');
+                    tipButton.textContent = '팁 접기';
+                }
+            });
+        } else {
+            // 설정이 꺼져있으면 아예 숨김
+            modal.style.display = 'none';
+        }
     });
 </script>
-
-
-
-
-
-
-
-
-  
-
 <style>
   #snow-canvas {
     position: fixed;
@@ -653,4 +646,3 @@
   <script src="script.js"></script>
 </body>
 </html>
-
