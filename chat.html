@@ -29,6 +29,195 @@
 
 
 
+
+
+
+
+<style>
+    /* 모달 전체 배경 및 애니메이션 */
+    .modal-backdrop {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: transparent;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999; /* 다른 요소보다 항상 위에 있도록 설정 */
+        
+        opacity: 0;
+        transform: scale(0.8);
+        transition: opacity 0.4s ease-out, transform 0.4s ease-out; 
+    }
+
+    /* 알림창 내용 컨테이너 */
+    .modal-content {
+        background-color: #ffffff;
+        padding: 5vw 5vw 4vw; 
+        border-radius: 50px; 
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        max-width: 300px;
+        width: 90%; 
+        
+        text-align: left; 
+        color: #000000;
+    }
+
+    /* 텍스트 스타일 */
+    .cheer-message {
+        color: #000000;
+        margin-bottom: 5px;
+        font-size: 1.4em;
+        font-weight: 600;
+    }
+    
+    .modal-content p {
+        color: #000000;
+        font-size: 0.95em;
+        margin-top: 0;
+        margin-bottom: 0;
+    }
+    
+    /* 팁 메시지 스타일 및 애니메이션 */
+    .tip-content {
+        margin-top: 15px;
+        padding: 0 15px; 
+        background-color: #f7f7f7;
+        border-radius: 15px;
+        color: #000000;
+        font-size: 0.9em;
+        text-align: left;
+        
+        max-height: 0; 
+        opacity: 0; 
+        overflow: hidden; 
+        padding-top: 0;
+        padding-bottom: 0;
+        
+        transition: max-height 0.4s ease-out, opacity 0.4s ease-out, padding 0.4s ease-out;
+    }
+    
+    .tip-content.is-shown {
+        max-height: 200px; 
+        opacity: 1;
+        padding-top: 10px; 
+        padding-bottom: 10px;
+        margin-bottom: 15px; 
+    }
+
+    /* 버튼 그룹 */
+    .button-group {
+        margin-top: 20px; 
+        overflow: hidden; 
+    }
+
+    /* 버튼 공통 스타일 */
+    .confirm-button, .tip-button {
+        padding: 10px 0;
+        font-size: 0.95em;
+        cursor: pointer;
+        transition: background-color 0.2s, border-color 0.2s, opacity 0.2s; 
+        outline: none;
+        border-radius: 50px;
+        width: 48%; 
+        -webkit-tap-highlight-color: transparent;
+    }
+    
+    .confirm-button {
+        float: left;
+        background-color: #000000;
+        color: #ffffff;
+        border: 1px solid #000000;
+    }
+    
+    .tip-button {
+        float: right;
+        background-color: #ffffff;
+        color: #000000;
+        border: 1px solid #000000;
+    }
+
+    .confirm-button:hover {
+        opacity: 0.85;
+    }
+    
+    .tip-button:hover {
+        background-color: #f0f0f0;
+    }
+
+    .modal-backdrop.is-visible {
+        opacity: 1;
+        transform: scale(1);
+    }
+</style>
+
+<div id="cheerModal" class="modal-backdrop">
+    <div class="modal-content">
+        <h2 class="cheer-message">기말고사를 응원합니다!</h2>
+        <p>마지막까지 집중하세요. 모두 잘 될 거예요!</p>
+        
+        <div id="tipContent" class="tip-content">
+            <span style="font-weight: 600;">시험 잘 보는 팁:</span><br>
+            1. 시험 전 10분, 빠르게 목차를 훑으며 전체 내용을 <span style="font-weight: 600;">구조화</span>하세요.<br>
+            2. 아는 문제부터 풀고, 막히는 문제는 표시 후 나중에 다시 보세요.<br>
+            3. 답안을 제출하기 전, <span style="font-weight: 600;">검토 시간</span>을 확보해 실수한 곳이 없는지 확인하세요.
+        </div>
+
+        <div class="button-group">
+            <button id="closeButton" class="confirm-button">닫기</button>
+            <button id="tipButton" class="tip-button">시험 잘 보는 팁</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const modal = document.getElementById('cheerModal');
+        const closeButton = document.getElementById('closeButton');
+        const tipButton = document.getElementById('tipButton');
+        const tipContent = document.getElementById('tipContent');
+
+        // 페이지 로드 후 100ms 뒤에 알림창 표시
+        setTimeout(() => {
+            modal.classList.add('is-visible');
+        }, 100); 
+
+        // '확인' 버튼 클릭 시 알림창 닫기
+        closeButton.addEventListener('click', () => {
+            modal.style.opacity = '0';
+            modal.style.transform = 'scale(0.8)'; 
+            
+            setTimeout(() => {
+                modal.style.display = 'none';
+            }, 400); 
+        });
+
+        // '시험 잘 보는 팁' 버튼 클릭 시 팁 내용 표시/숨기기
+        tipButton.addEventListener('click', () => {
+            const isShown = tipContent.classList.contains('is-shown');
+            
+            if (isShown) {
+                tipContent.classList.remove('is-shown');
+                tipButton.textContent = '시험 잘 보는 팁';
+            } else {
+                tipContent.classList.add('is-shown');
+                tipButton.textContent = '팁 숨기기';
+            }
+        });
+    });
+</script>
+
+
+
+
+
+
+
+
+  
+
 <style>
   #snow-canvas {
     position: fixed;
