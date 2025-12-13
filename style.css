@@ -333,7 +333,7 @@ body{ margin:0; background:var(--bg-color); color:var(--text-color); min-height:
 .composer-gradient-overlay {
     position: fixed;
     bottom: 0; left: 0; right: 0;
-    height: 160px; /* 그라데이션 높이 */
+    height: 200px; /* 그라데이션 높이 */
     background: linear-gradient(to top, var(--bg-color) 20%, rgba(255,255,255,0) 100%);
     z-index: 15; /* 콘텐츠 위, 컴포저 아래 */
     pointer-events: none; /* 클릭 통과 */
