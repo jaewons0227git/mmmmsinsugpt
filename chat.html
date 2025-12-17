@@ -16,14 +16,22 @@
 
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
-  <script>
-    const ALLOWED_REFERRER = 'https://minsugpt.kro.kr/';
-    const REDIRECT_URL = 'https://minsugpt.kro.kr/';
+ <script>
+    // 허용할 도메인 리스트
+    const ALLOWED_REFERRERS = [
+        'https://ai.minsugpt.kro.kr/',
+        'https://user.minsugpt.kro.kr/'
+    ];
+    const REDIRECT_URL = 'https://minsugpt.kro.kr';
     const referrer = document.referrer;
-    if (referrer === '' || !referrer.startsWith(ALLOWED_REFERRER)) {
-        // window.location.replace(REDIRECT_URL); // 필요 시 주석 해제
+
+    // some() 함수를 사용하여 현재 referrer가 허용 리스트 중 하나로 시작하는지 확인합니다.
+    const isAllowed = ALLOWED_REFERRERS.some(url => referrer.startsWith(url));
+
+    if (referrer === '' || !isAllowed) {
+        window.location.replace(REDIRECT_URL);
     }
-  </script>
+</script>
 </head>
 <body>
 
@@ -419,8 +427,10 @@
 
     <main id="content-wrapper" class="content-wrapper">
         
-       <div id="initial-content">
-            <img src="https://i.postimg.cc/RV51q6B7/vdas.png" alt="MinsuGPT 시작" style="width: 400px; height: 85px; opacity: 0.8; border-radius: 20px;">
+       <div id="initial-content" style="width: 100%; display: flex; justify-content: center;">
+    <img src="https://i.postimg.cc/RV51q6B7/vdas.png" 
+         alt="MinsuGPT 시작" 
+         style="width: 90%; max-width: 400px; height: auto; opacity: 0.8; border-radius: 20px;">
         </div>
 
         <div id="chat-messages" class="chat-messages"></div>
