@@ -9,19 +9,50 @@ document.onkeydown = function(e) {
 // 1. DOM 요소 및 상수 정의
 // ===========================================
 
-function parseSpecialTags(text) {
+function formatMessageContent(text) {
+    if (!text) return "";
     let html = text;
 
-    // 1. [THOUGHT] 태그 -> 회색 박스
-    html = html.replace(/\[THOUGHT\](.*?)(?=\[THOUGHT\]|\[TOOL\]|$)/gs, function(match, p1) {
-        return p1.trim() ? `<div class="thought-process">${p1.trim()}</div>` : '';
-    });
+    // 1. [THOUGHT] 태그 추출 및 통합 (여러 번 끊겨 들어와도 하나로 합침)
+    // 정규표현식으로 모든 [THOUGHT]...[/THOUGHT] 구간을 찾습니다.
+    const thoughtMatches = html.match(/\[THOUGHT\]([\s\S]*?)\[\/THOUGHT\]/g);
+    let combinedThought = "";
+    let finalAnswerText = html;
 
-    // 2. [TOOL] 태그 -> 출처 카드
-    // 백엔드에서 [TOOL]web_search: {"title": "...", "url": "..."} 형태로 보낸다고 가정
+    if (thoughtMatches) {
+        // 모든 생각 조각에서 태그를 떼고, 내부 줄바꿈을 공백으로 치환하여 합칩니다.
+        combinedThought = thoughtMatches
+            .map(m => m.replace(/\[\/?THOUGHT\]/g, '').trim())
+            .join(' ')
+            .replace(/\n/g, ' '); 
+        
+        // 원본 텍스트에서 [THOUGHT] 태그가 포함된 모든 구간을 삭제하여 답변만 남깁니다.
+        finalAnswerText = html.replace(/\[THOUGHT\]([\s\S]*?)\[\/THOUGHT\]/g, '');
+    }
+
+    // 2. 마크다운 변환 (답변 텍스트만 변환)
+    let renderedHtml = typeof marked !== 'undefined' ? marked.parse(finalAnswerText) : finalAnswerText;
+
+    // 3. 통합된 생각 박스를 HTML 상단에 배치 (새로고침 시에도 동일하게 렌더링)
+    if (combinedThought) {
+        const thoughtHtml = `
+            <details class="thought-dropdown" open>
+                <summary>
+                    <span class="material-symbols-rounded dropdown-icon">chevron_right</span>
+                    추론 과정 (생각 보기)
+                </summary>
+                <div class="thought-process" style="white-space: normal !important; display: block !important; word-break: break-all;">
+                    ${combinedThought}
+                </div>
+            </details>
+        `;
+        renderedHtml = thoughtHtml + renderedHtml;
+    }
+
+    // 4. [TOOL] 태그 처리 (웹 검색 출처 카드)
     const toolRegex = /\[TOOL\]web_search: (\{.*?\})/g;
     const cards = [];
-    html = html.replace(toolRegex, function(match, p1) {
+    renderedHtml = renderedHtml.replace(toolRegex, function(match, p1) {
         try {
             const data = JSON.parse(p1);
             cards.push(`
@@ -29,17 +60,15 @@ function parseSpecialTags(text) {
                     <div class="citation-title">${data.title}</div>
                     <div class="citation-url">${new URL(data.url).hostname}</div>
                 </div>`);
-            return ''; // 본문에서는 제거하고 나중에 한꺼번에 표시
+            return ''; 
         } catch (e) { return ''; }
     });
 
     if (cards.length > 0) {
-        html += `<div class="citation-container">${cards.join('')}</div>`;
+        renderedHtml += `<div class="citation-container">${cards.join('')}</div>`;
     }
 
-    // 3. 생 URL -> 버튼 형태 (마크다운 링크는 제외하고 텍스트로만 온 링크)
-    // 이 처리는 마크다운 렌더링 후에 하는 것이 안전합니다.
-    return html;
+    return renderedHtml;
 }
 
 
@@ -623,28 +652,74 @@ function renderChatMessages() {
     chatMessages.innerHTML = '';
     
     if (history.length > 0) {
+        // 대화가 있으면 초기 화면 숨김
         initialContent.style.opacity = '0';
         initialContent.style.visibility = 'hidden'; 
         chatMessages.style.display = 'flex';
-        history.forEach(message => {
+
+        history.forEach((message, index) => {
             if (message.role === 'user') { 
+                // 사용자 메시지 출력 (기존 함수 유지)
                 appendUserMessage(message.content, message.images || [], false); 
             } 
             else if (message.role === 'model') { 
+                // 모델 메시지 출력
                 if (message.content.includes('<img src="data:image')) {
                     appendBotImage(message.content, false);
                 } else {
-                    appendBotMessage(message.content, message.feedback, false); 
+                    // ✅ 저장된 대화 기록(history)을 불러올 때도 
+                    // formatMessageContent 함수를 거쳐서 HTML로 변환 후 삽입
+                    const botMessageContainer = document.createElement('div');
+                    botMessageContainer.className = 'bot-message';
+                    botMessageContainer.setAttribute('data-index', index);
+
+                    const streamingBlock = document.createElement('div');
+                    streamingBlock.className = 'streaming-block'; 
+                    
+                    // 여기서 변환 함수를 호출하여 [THOUGHT] 태그 등을 처리합니다.
+                    streamingBlock.innerHTML = formatMessageContent(message.content);
+                    
+                    botMessageContainer.appendChild(streamingBlock);
+
+                    // 피드백 버튼 등 액션 아이콘 추가
+                    const actionContainer = createBotActions(message.content, index, message.feedback);
+                    botMessageContainer.appendChild(actionContainer);
+                    
+                    chatMessages.appendChild(botMessageContainer);
                 }
             }
         });
+        
+        // 재생성 버튼 상태 업데이트 및 스크롤 조절
         updateRegenerateButtons(); 
+        scrollToBottom(true);
     } else {
-        chatMessages.style.display = 'none';
-        initialContent.style.visibility = 'visible'; 
-        initialContent.style.display = 'flex';
+        // 대화가 없으면 초기 화면 표시
         initialContent.style.opacity = '1';
+        initialContent.style.visibility = 'visible';
+        chatMessages.style.display = 'none';
     }
+}
+
+function appendBotMessageFromHistory(content, feedbackStatus = null) {
+    const botMessageContainer = document.createElement('div');
+    botMessageContainer.className = 'bot-message';
+    
+    const streamingBlock = document.createElement('div');
+    streamingBlock.className = 'streaming-block'; 
+    
+    // 🛠️ 여기서 아까 만든 변환 함수를 사용하여 깨짐 방지!
+    streamingBlock.innerHTML = formatMessageContent(content);
+    
+    botMessageContainer.appendChild(streamingBlock);
+    botMessageContainer.appendChild(createBotActions(content, history.indexOf(content), feedbackStatus));
+    chatMessages.appendChild(botMessageContainer);
+}
+
+
+
+
+
     autoResizeTextarea();
     setTimeout(() => scrollToBottom(false), 0);
 }
@@ -1091,73 +1166,24 @@ async function sendMessage(userMessageOverride = null, isRegenerate = false) {
     // --- streamInterval 부분 교체 시작 ---
 streamInterval = setInterval(() => {
     if (streamQueue.length > 0) {
-        // 끊김 방지를 위해 한 번에 12글자씩 처리
+        // 끊김 없는 출력을 위해 한 번에 처리할 글자 수 조절
         const charsToTake = 12; 
         const chunkToAdd = streamQueue.slice(0, charsToTake);
         streamQueue = streamQueue.slice(charsToTake); 
         
         displayedResponse += chunkToAdd;
         fullResponse = displayedResponse; 
-        
-        // 1. 추론 과정(THOUGHT) 통합 처리 로직
-        // [THOUGHT]...[/THOUGHT] 패턴을 모두 찾아 내용을 하나로 합칩니다.
-        const thoughtMatches = displayedResponse.match(/\[THOUGHT\]([\s\S]*?)\[\/THOUGHT\]/g);
-        let combinedThought = "";
-        let finalAnswerText = displayedResponse;
 
-        if (thoughtMatches) {
-            // 태그 안의 텍스트만 추출해서 공백으로 연결
-            combinedThought = thoughtMatches.map(m => m.replace(/\[\/?THOUGHT\]/g, '').trim()).join(' ');
-            // 원본 텍스트에서는 태그 부분을 제거하여 답변만 남김
-            finalAnswerText = displayedResponse.replace(/\[THOUGHT\]([\s\S]*?)\[\/THOUGHT\]/g, '');
-        }
+        // 💡 [핵심 수정] 모든 복잡한 정규식 로직을 공통 함수 하나로 대체
+        // 이렇게 해야 새로고침 시와 실시간 출력 시 UI가 동일해집니다.
+        streamingBlockElement.innerHTML = formatMessageContent(displayedResponse);
 
-        // 2. 마크다운 변환 (답변 텍스트만 변환)
-        let htmlContent = typeof marked !== 'undefined' ? marked.parse(finalAnswerText) : finalAnswerText;
-        
-        // 3. 통합된 추론 박스를 HTML 상단에 추가
-        if (combinedThought) {
-            const thoughtHtml = `
-                <details class="thought-dropdown" open>
-                    <summary>
-                        <span class="material-symbols-rounded dropdown-icon">chevron_right</span>
-                        추론 과정 (생각 보기)
-                    </summary>
-                    <div class="thought-process" style="white-space: normal !important; display: block !important;">
-                        ${combinedThought}
-                    </div>
-                </details>
-            `;
-            htmlContent = thoughtHtml + htmlContent;
-        }
-
-        // 4. [TOOL] 태그 처리 (웹 검색 카드)
-        const toolRegex = /\[TOOL\]web_search: (\{.*?\})/g;
-        const cards = [];
-        htmlContent = htmlContent.replace(toolRegex, function(match, p1) {
-            try {
-                const data = JSON.parse(p1);
-                cards.push(`
-                    <div class="citation-card" onclick="window.open('${data.url}', '_blank')">
-                        <div class="citation-title">${data.title}</div>
-                        <div class="citation-url">${new URL(data.url).hostname}</div>
-                    </div>`);
-                return ''; 
-            } catch (e) { return ''; }
-        });
-
-        if (cards.length > 0) {
-            htmlContent += `<div class="citation-container">${cards.join('')}</div>`;
-        }
-
-        // 5. 화면 렌더링 및 링크 버튼 처리
-        streamingBlockElement.innerHTML = htmlContent;
-
+        // 링크 버튼 처리 (기존 로직 유지)
         const links = streamingBlockElement.querySelectorAll('p > a, li > a');
         links.forEach(link => {
             if (link.innerText.trim().startsWith('http') || link.innerText.trim() === link.href.trim()) {
                 link.classList.add('link-button');
-                link.innerHTML = `<span>🔗 링크 접속하기</span>`;
+                link.innerHTML = `<span>링크 접속하기</span>`;
                 link.target = '_blank';
             }
         });
@@ -1169,9 +1195,16 @@ streamInterval = setInterval(() => {
         clearInterval(streamInterval);
         streamInterval = null;
         
-        history.push({ role: 'model', content: displayedResponse, feedback: null }); 
+        // 원본 텍스트(태그 포함)를 히스토리에 저장
+        history.push({ 
+            role: 'model', 
+            content: displayedResponse, 
+            feedback: null 
+        }); 
+        
         updateCurrentSession(); 
         
+        // UI 상태 복구
         if (spinnerElement) spinnerElement.classList.add('reset-spin'); 
         if (indicatorTextElement) { 
             indicatorTextElement.style.display = 'none'; 
@@ -1179,8 +1212,10 @@ streamInterval = setInterval(() => {
         }
         indicatorElement.classList.add('left-aligned'); 
         
+        // 하단 액션 버튼 추가
         const actionContainer = createBotActions(displayedResponse, history.length - 1);
         botMessageElement.appendChild(actionContainer); 
+        
         updateRegenerateButtons();
         scrollToBottom(true);
         setStreamingState(false);
