@@ -1091,23 +1091,32 @@ async function sendMessage(userMessageOverride = null, isRegenerate = false) {
     // --- streamInterval 부분 교체 시작 ---
 streamInterval = setInterval(() => {
     if (streamQueue.length > 0) {
-        // 한 번에 2글자씩 타이핑 효과
-        const charsToTake = 2; 
+        // 끊김 현상 해결을 위해 한 번에 10글자씩 처리
+        const charsToTake = 10; 
         const chunkToAdd = streamQueue.slice(0, charsToTake);
         streamQueue = streamQueue.slice(charsToTake); 
         
         displayedResponse += chunkToAdd;
         fullResponse = displayedResponse; 
         
-        // 1. 마크다운 변환
+        // 1. 기본 마크다운 파싱
         let htmlContent = typeof marked !== 'undefined' ? marked.parse(displayedResponse) : displayedResponse;
         
-        // 2. [THOUGHT] 태그 처리: 회색 박스 디자인 적용
-        htmlContent = htmlContent.replace(/\[THOUGHT\](.*?)(?=\[THOUGHT\]|\[TOOL\]|$)/gs, function(match, p1) {
-            return p1.trim() ? `<div class="thought-process">${p1.trim()}</div>` : '';
+        // 2. [THOUGHT] 태그 처리: 깔끔한 꼬리 없는 화살표 아이콘이 포함된 드롭다운
+        htmlContent = htmlContent.replace(/\[THOUGHT\]([\s\S]*?)(?=\[THOUGHT\]|\[TOOL\]|$)/g, function(match, p1) {
+            if (!p1.trim()) return '';
+            return `
+                <details class="thought-dropdown" open>
+                    <summary>
+                        <span class="material-symbols-rounded dropdown-icon">chevron_right</span>
+                        추론 과정 (생각 보기)
+                    </summary>
+                    <div class="thought-process">${p1.trim()}</div>
+                </details>
+            `;
         });
 
-        // 3. [TOOL] 태그 처리: 가로 스크롤 출처 카드 생성
+        // 3. [TOOL] 태그 처리: 가로 스크롤 출처 카드
         const toolRegex = /\[TOOL\]web_search: (\{.*?\})/g;
         const cards = [];
         htmlContent = htmlContent.replace(toolRegex, function(match, p1) {
@@ -1118,7 +1127,7 @@ streamInterval = setInterval(() => {
                         <div class="citation-title">${data.title}</div>
                         <div class="citation-url">${new URL(data.url).hostname}</div>
                     </div>`);
-                return ''; // 본문에서는 제거
+                return ''; 
             } catch (e) { return ''; }
         });
 
@@ -1126,13 +1135,12 @@ streamInterval = setInterval(() => {
             htmlContent += `<div class="citation-container">${cards.join('')}</div>`;
         }
 
-        // 4. 화면 반영
+        // 4. 화면 업데이트
         streamingBlockElement.innerHTML = htmlContent;
 
-        // 5. 텍스트 내 생 링크(URL)를 버튼으로 변환
+        // 5. 일반 URL 링크 버튼 처리
         const links = streamingBlockElement.querySelectorAll('p > a, li > a');
         links.forEach(link => {
-            // 마크다운이 아닌 생 주소로 들어온 경우 버튼화
             if (link.innerText.trim().startsWith('http') || link.innerText.trim() === link.href.trim()) {
                 link.classList.add('link-button');
                 link.innerHTML = `<span>🔗 링크 접속하기</span>`;
@@ -1143,7 +1151,7 @@ streamInterval = setInterval(() => {
         if (autoScrollEnabled) scrollToBottom(false);
 
     } else if (isNetworkFinished && streamQueue.length === 0) {
-        // 스트리밍 종료 처리
+        // 스트리밍 종료 후 처리 로직
         clearInterval(streamInterval);
         streamInterval = null;
         
@@ -1161,10 +1169,9 @@ streamInterval = setInterval(() => {
         botMessageElement.appendChild(actionContainer); 
         updateRegenerateButtons();
         scrollToBottom(true);
-        
         setStreamingState(false);
     }
-}, 15); 
+}, 10);
 // --- streamInterval 부분 교체 종료 ---
     
     try {
