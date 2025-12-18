@@ -1429,3 +1429,133 @@ hr.modal-divider { border: 0; border-top: 1px solid var(--border-color); margin:
 [data-theme="dark"] .thought-dropdown {
     background-color: #1e1e1e;
 }
+
+
+
+
+
+
+
+
+
+/* style-1-1.css 파일 가장 하단에 추가 */
+
+/* ========================================= */
+/* 🌟 [신규] 모델 선택기 관련 스타일 추가 */
+/* ========================================= */
+
+/* 1. 헤더 모델 선택 알약 스타일 */
+.header-model-pill {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 10px 6px 12px;
+    background-color: transparent;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-color);
+    cursor: pointer;
+    transition: background-color 0.2s;
+    margin-right: 4px;
+    user-select: none;
+}
+.header-model-pill:hover {
+    background-color: rgba(0,0,0,0.05);
+}
+[data-theme="dark"] .header-model-pill:hover {
+    background-color: rgba(255,255,255,0.1);
+}
+.header-model-pill .material-symbols-rounded {
+    font-size: 20px;
+    color: var(--text-sub);
+}
+
+/* 2. 공통 드롭다운 메뉴 스타일 */
+.model-dropdown-menu {
+    position: absolute;
+    background-color: var(--surface-color); /* 배경색 변수 사용 */
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 6px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    z-index: 1000;
+    min-width: 140px;
+    
+    display: none; /* 기본 숨김 */
+    flex-direction: column;
+    gap: 2px;
+    
+    /* 애니메이션용 초기값 */
+    opacity: 0;
+    transform: scale(0.95);
+    transition: opacity 0.2s, transform 0.2s;
+}
+
+/* 활성화 클래스 */
+.model-dropdown-menu.show {
+    display: flex;
+    opacity: 1;
+    transform: scale(1);
+}
+
+/* 드롭다운 아이템 스타일 */
+.model-option-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-color);
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+.model-option-item:hover {
+    background-color: var(--surface-hover);
+}
+/* 선택된 아이템 강조 */
+.model-option-item.selected {
+    color: var(--primary-blue);
+    background-color: rgba(29, 111, 239, 0.08);
+}
+/* 체크 아이콘 */
+.model-option-item .check-icon {
+    font-size: 18px;
+    opacity: 0; 
+}
+.model-option-item.selected .check-icon {
+    opacity: 1;
+}
+
+/* 3. 위치별 스타일 지정 */
+
+/* (A) 헤더용: 아래로 펼쳐짐 */
+.model-dropdown-menu.header-style {
+    top: 100%;
+    left: 0;
+    margin-top: 8px;
+}
+
+/* (B) 심플툴바용: 위로 펼쳐짐 */
+.model-dropdown-menu.simple-style {
+    bottom: 100%;
+    left: 0;
+    margin-bottom: 8px;
+    min-width: 130px;
+}
+
+/* 4. 모드에 따른 표시 제어 (중요!) */
+
+/* Default 모드일 때: 헤더 알약 보임 / 하단 툴바는 원래 구조상 숨겨짐 */
+/* Simple 모드일 때: 헤더 알약 숨김 (하단에 있으므로) */
+.composer.style-simple ~ .header .header-model-wrapper {
+    display: none;
+}
+
+/* Simple 모드에서 버튼 텍스트 스타일 보정 */
+#tool-model-selector {
+    min-width: 80px; /* 텍스트 공간 확보 */
+    justify-content: space-between; /* 아이콘과 텍스트 분리 */
+}
