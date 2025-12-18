@@ -720,10 +720,6 @@ function appendBotMessageFromHistory(content, feedbackStatus = null) {
 
 
 
-    autoResizeTextarea();
-    setTimeout(() => scrollToBottom(false), 0);
-}
-
 function resetAllChats() {
     openDeleteModal('all');
 }
