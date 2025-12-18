@@ -9,6 +9,44 @@ document.onkeydown = function(e) {
 // 1. DOM 요소 및 상수 정의
 // ===========================================
 
+function parseSpecialTags(text) {
+    let html = text;
+
+    // 1. [THOUGHT] 태그 -> 회색 박스
+    html = html.replace(/\[THOUGHT\](.*?)(?=\[THOUGHT\]|\[TOOL\]|$)/gs, function(match, p1) {
+        return p1.trim() ? `<div class="thought-process">${p1.trim()}</div>` : '';
+    });
+
+    // 2. [TOOL] 태그 -> 출처 카드
+    // 백엔드에서 [TOOL]web_search: {"title": "...", "url": "..."} 형태로 보낸다고 가정
+    const toolRegex = /\[TOOL\]web_search: (\{.*?\})/g;
+    const cards = [];
+    html = html.replace(toolRegex, function(match, p1) {
+        try {
+            const data = JSON.parse(p1);
+            cards.push(`
+                <div class="citation-card" onclick="window.open('${data.url}', '_blank')">
+                    <div class="citation-title">${data.title}</div>
+                    <div class="citation-url">${new URL(data.url).hostname}</div>
+                </div>`);
+            return ''; // 본문에서는 제거하고 나중에 한꺼번에 표시
+        } catch (e) { return ''; }
+    });
+
+    if (cards.length > 0) {
+        html += `<div class="citation-container">${cards.join('')}</div>`;
+    }
+
+    // 3. 생 URL -> 버튼 형태 (마크다운 링크는 제외하고 텍스트로만 온 링크)
+    // 이 처리는 마크다운 렌더링 후에 하는 것이 안전합니다.
+    return html;
+}
+
+
+
+
+
+
 
 
 
@@ -1050,36 +1088,84 @@ async function sendMessage(userMessageOverride = null, isRegenerate = false) {
     
     if (streamInterval) clearInterval(streamInterval);
     
-    streamInterval = setInterval(() => {
-        if (streamQueue.length > 0) {
-            const charsToTake = 2; 
-            const chunkToAdd = streamQueue.slice(0, charsToTake);
-            streamQueue = streamQueue.slice(charsToTake); 
-            
-            displayedResponse += chunkToAdd;
-            fullResponse = displayedResponse; 
-            
-            streamingBlockElement.innerHTML = typeof marked !== 'undefined' ? marked.parse(displayedResponse) : displayedResponse;
-            
-            if (autoScrollEnabled) scrollToBottom(false);
-        } else if (isNetworkFinished && streamQueue.length === 0) {
-            clearInterval(streamInterval);
-            streamInterval = null;
-            
-             history.push({ role: 'model', content: displayedResponse, feedback: null }); 
-            updateCurrentSession(); 
-            
-            if (spinnerElement) spinnerElement.classList.add('reset-spin'); 
-            if (indicatorTextElement) { indicatorTextElement.style.display = 'none'; indicatorTextElement.classList.add('completed'); }
-            indicatorElement.classList.add('left-aligned'); 
-            
-            const actionContainer = createBotActions(displayedResponse, history.length - 1);
-            botMessageElement.appendChild(actionContainer); updateRegenerateButtons();
-            scrollToBottom(true);
-            
-            setStreamingState(false);
+    // --- streamInterval 부분 교체 시작 ---
+streamInterval = setInterval(() => {
+    if (streamQueue.length > 0) {
+        // 한 번에 2글자씩 타이핑 효과
+        const charsToTake = 2; 
+        const chunkToAdd = streamQueue.slice(0, charsToTake);
+        streamQueue = streamQueue.slice(charsToTake); 
+        
+        displayedResponse += chunkToAdd;
+        fullResponse = displayedResponse; 
+        
+        // 1. 마크다운 변환
+        let htmlContent = typeof marked !== 'undefined' ? marked.parse(displayedResponse) : displayedResponse;
+        
+        // 2. [THOUGHT] 태그 처리: 회색 박스 디자인 적용
+        htmlContent = htmlContent.replace(/\[THOUGHT\](.*?)(?=\[THOUGHT\]|\[TOOL\]|$)/gs, function(match, p1) {
+            return p1.trim() ? `<div class="thought-process">${p1.trim()}</div>` : '';
+        });
+
+        // 3. [TOOL] 태그 처리: 가로 스크롤 출처 카드 생성
+        const toolRegex = /\[TOOL\]web_search: (\{.*?\})/g;
+        const cards = [];
+        htmlContent = htmlContent.replace(toolRegex, function(match, p1) {
+            try {
+                const data = JSON.parse(p1);
+                cards.push(`
+                    <div class="citation-card" onclick="window.open('${data.url}', '_blank')">
+                        <div class="citation-title">${data.title}</div>
+                        <div class="citation-url">${new URL(data.url).hostname}</div>
+                    </div>`);
+                return ''; // 본문에서는 제거
+            } catch (e) { return ''; }
+        });
+
+        if (cards.length > 0) {
+            htmlContent += `<div class="citation-container">${cards.join('')}</div>`;
         }
-    }, 15); 
+
+        // 4. 화면 반영
+        streamingBlockElement.innerHTML = htmlContent;
+
+        // 5. 텍스트 내 생 링크(URL)를 버튼으로 변환
+        const links = streamingBlockElement.querySelectorAll('p > a, li > a');
+        links.forEach(link => {
+            // 마크다운이 아닌 생 주소로 들어온 경우 버튼화
+            if (link.innerText.trim().startsWith('http') || link.innerText.trim() === link.href.trim()) {
+                link.classList.add('link-button');
+                link.innerHTML = `<span>🔗 링크 접속하기</span>`;
+                link.target = '_blank';
+            }
+        });
+        
+        if (autoScrollEnabled) scrollToBottom(false);
+
+    } else if (isNetworkFinished && streamQueue.length === 0) {
+        // 스트리밍 종료 처리
+        clearInterval(streamInterval);
+        streamInterval = null;
+        
+        history.push({ role: 'model', content: displayedResponse, feedback: null }); 
+        updateCurrentSession(); 
+        
+        if (spinnerElement) spinnerElement.classList.add('reset-spin'); 
+        if (indicatorTextElement) { 
+            indicatorTextElement.style.display = 'none'; 
+            indicatorTextElement.classList.add('completed'); 
+        }
+        indicatorElement.classList.add('left-aligned'); 
+        
+        const actionContainer = createBotActions(displayedResponse, history.length - 1);
+        botMessageElement.appendChild(actionContainer); 
+        updateRegenerateButtons();
+        scrollToBottom(true);
+        
+        setStreamingState(false);
+    }
+}, 15); 
+// --- streamInterval 부분 교체 종료 ---
     
     try {
         if (isImageMode) {
