@@ -667,6 +667,7 @@ function renderChatMessages() {
                 if (message.content.includes('<img src="data:image')) {
                     appendBotImage(message.content, false);
                 } else {
+                    initialContent.style.display = 'flex';
                     // ✅ 저장된 대화 기록(history)을 불러올 때도 
                     // formatMessageContent 함수를 거쳐서 HTML로 변환 후 삽입
                     const botMessageContainer = document.createElement('div');
