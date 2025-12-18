@@ -1091,32 +1091,47 @@ async function sendMessage(userMessageOverride = null, isRegenerate = false) {
     // --- streamInterval 부분 교체 시작 ---
 streamInterval = setInterval(() => {
     if (streamQueue.length > 0) {
-        // 끊김 현상 해결을 위해 한 번에 10글자씩 처리
-        const charsToTake = 10; 
+        // 끊김 방지를 위해 한 번에 12글자씩 처리
+        const charsToTake = 12; 
         const chunkToAdd = streamQueue.slice(0, charsToTake);
         streamQueue = streamQueue.slice(charsToTake); 
         
         displayedResponse += chunkToAdd;
         fullResponse = displayedResponse; 
         
-        // 1. 기본 마크다운 파싱
-        let htmlContent = typeof marked !== 'undefined' ? marked.parse(displayedResponse) : displayedResponse;
+        // 1. 추론 과정(THOUGHT) 통합 처리 로직
+        // [THOUGHT]...[/THOUGHT] 패턴을 모두 찾아 내용을 하나로 합칩니다.
+        const thoughtMatches = displayedResponse.match(/\[THOUGHT\]([\s\S]*?)\[\/THOUGHT\]/g);
+        let combinedThought = "";
+        let finalAnswerText = displayedResponse;
+
+        if (thoughtMatches) {
+            // 태그 안의 텍스트만 추출해서 공백으로 연결
+            combinedThought = thoughtMatches.map(m => m.replace(/\[\/?THOUGHT\]/g, '').trim()).join(' ');
+            // 원본 텍스트에서는 태그 부분을 제거하여 답변만 남김
+            finalAnswerText = displayedResponse.replace(/\[THOUGHT\]([\s\S]*?)\[\/THOUGHT\]/g, '');
+        }
+
+        // 2. 마크다운 변환 (답변 텍스트만 변환)
+        let htmlContent = typeof marked !== 'undefined' ? marked.parse(finalAnswerText) : finalAnswerText;
         
-        // 2. [THOUGHT] 태그 처리: 깔끔한 꼬리 없는 화살표 아이콘이 포함된 드롭다운
-        htmlContent = htmlContent.replace(/\[THOUGHT\]([\s\S]*?)(?=\[THOUGHT\]|\[TOOL\]|$)/g, function(match, p1) {
-            if (!p1.trim()) return '';
-            return `
+        // 3. 통합된 추론 박스를 HTML 상단에 추가
+        if (combinedThought) {
+            const thoughtHtml = `
                 <details class="thought-dropdown" open>
                     <summary>
                         <span class="material-symbols-rounded dropdown-icon">chevron_right</span>
                         추론 과정 (생각 보기)
                     </summary>
-                    <div class="thought-process">${p1.trim()}</div>
+                    <div class="thought-process" style="white-space: normal !important; display: block !important;">
+                        ${combinedThought}
+                    </div>
                 </details>
             `;
-        });
+            htmlContent = thoughtHtml + htmlContent;
+        }
 
-        // 3. [TOOL] 태그 처리: 가로 스크롤 출처 카드
+        // 4. [TOOL] 태그 처리 (웹 검색 카드)
         const toolRegex = /\[TOOL\]web_search: (\{.*?\})/g;
         const cards = [];
         htmlContent = htmlContent.replace(toolRegex, function(match, p1) {
@@ -1135,10 +1150,9 @@ streamInterval = setInterval(() => {
             htmlContent += `<div class="citation-container">${cards.join('')}</div>`;
         }
 
-        // 4. 화면 업데이트
+        // 5. 화면 렌더링 및 링크 버튼 처리
         streamingBlockElement.innerHTML = htmlContent;
 
-        // 5. 일반 URL 링크 버튼 처리
         const links = streamingBlockElement.querySelectorAll('p > a, li > a');
         links.forEach(link => {
             if (link.innerText.trim().startsWith('http') || link.innerText.trim() === link.href.trim()) {
@@ -1151,7 +1165,7 @@ streamInterval = setInterval(() => {
         if (autoScrollEnabled) scrollToBottom(false);
 
     } else if (isNetworkFinished && streamQueue.length === 0) {
-        // 스트리밍 종료 후 처리 로직
+        // 스트리밍 종료 처리
         clearInterval(streamInterval);
         streamInterval = null;
         
