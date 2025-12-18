@@ -1372,3 +1372,60 @@ hr.modal-divider { border: 0; border-top: 1px solid var(--border-color); margin:
     background-color: #007bff;
     color: white;
 }
+
+
+/* 생각 과정 드롭다운 전체 외관 */
+.thought-dropdown {
+    margin: 12px 0;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    background-color: var(--surface-secondary);
+    overflow: hidden;
+}
+
+/* 제목 부분 (Summary) */
+.thought-dropdown summary {
+    padding: 10px 14px;
+    font-size: 0.85rem;
+    color: var(--text-sub);
+    cursor: pointer;
+    background: var(--surface-hover);
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    list-style: none; /* 기본 화살표 제거 */
+    user-select: none;
+}
+
+/* 브라우저 기본 화살표 숨기기 */
+.thought-dropdown summary::-webkit-details-marker {
+    display: none;
+}
+
+/* 꼬리 없는 화살표 아이콘 (Material Symbols) */
+.dropdown-icon {
+    font-size: 1.2rem !important;
+    transition: transform 0.2s ease;
+    margin-right: 6px;
+    color: var(--text-sub);
+}
+
+/* 드롭다운이 열렸을 때 화살표 회전 */
+.thought-dropdown[open] .dropdown-icon {
+    transform: rotate(90deg);
+}
+
+/* 기존에 가지고 계신 .thought-process를 드롭다운 안에서 최적화 */
+.thought-dropdown .thought-process {
+    margin: 0;
+    border: none;
+    border-top: 1px solid var(--border-color);
+    border-radius: 0;
+    background: transparent;
+    padding: 14px;
+}
+
+/* 다크모드 미세 조정 */
+[data-theme="dark"] .thought-dropdown {
+    background-color: #1e1e1e;
+}
