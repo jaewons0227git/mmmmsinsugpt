@@ -1626,42 +1626,58 @@ hr.modal-divider { border: 0; border-top: 1px solid var(--border-color); margin:
 }
 
 /* --- 3. PC버전 입력창 위치 및 사이드바 연동 --- */
+/* --- 3. PC버전 입력창 위치 및 사이드바 연동 (수정됨) --- */
 @media (min-width: 769px) {
-    /* 초기 상태: 텍스트 바로 아래 위치 */
+    /* 1. 사이드바가 '닫힌' 기본 상태 */
     body:not(.chat-started) .composer {
         position: absolute;
-        
-        /* ▼ [PC 변경] 텍스트 위치(25dvh)에 맞춰 입력창 위치도 조정 */
-        top: calc(25dvh + 95px); 
+        /* 텍스트(25dvh) + 높이 등을 고려한 상단 위치 */
+        top: calc(25dvh + 95px);
         bottom: auto;
 
-        /* ▼ [PC 변경] 중앙 정렬 해제하고 텍스트 시작점(10%)과 맞춤 */
-        left: 10%; 
-        transform: none; /* 기존 translateX(-50%) 제거 */
+        /* 다시 정중앙 정렬로 복귀 (쏠림 현상 해결) */
+        left: 50%;
+        transform: translateX(-50%);
         
-        /* 오른쪽 여백도 10%를 남겨 균형 맞춤 (100% - 10% - 10% = 80%) */
-        width: 80%; 
+        width: 70%; /* 너무 넓으면 쏠려 보이므로 적당히 조절 */
         max-width: 800px;
         
-        transition: left 0.3s ease, width 0.3s ease, top 0.3s ease;
+        transition: left 0.3s ease, width 0.3s ease, top 0.3s ease, transform 0.3s ease;
+        z-index: 10; /* 메뉴보다 위 혹은 아래 적절히 배치 */
     }
 
-    /* 대화 시작 후: 하단 고정 (기존 중앙 정렬 유지) */
+    /* 2. 대화 시작 후 (하단 고정) */
     body.chat-started .composer {
         position: fixed;
         bottom: 24px;
         top: auto;
+        
+        /* 기본 중앙 정렬 */
         left: 50%;
         transform: translateX(-50%);
-        width: 85%; /* 대화 중에는 다시 넓게 */
+        width: 80%;
+        max-width: 900px;
     }
 
-    /* 사이드바 열림: 초기 상태에서도 밀리지 않도록 조정하거나, 필요 시 수정 */
-    body.sidebar-open .composer {
-        /* 사이드바가 열려도 왼쪽 기준점 유지 혹은 사이드바 너비만큼 밀기 */
-        /* 여기서는 심플하게 유지하되, 필요하면 left: calc(10% + var(--sidebar-width)); 로 변경 가능 */
-        left: 10%; 
-        width: 80%;
+    /* 3. ⭐ [핵심] 사이드바(메뉴)가 열렸을 때 입력창 밀어주기 */
+    /* 사이드바 너비를 260px로 가정했습니다. 실제 너비에 맞춰 숫자(130px)를 조정하세요 */
+    
+    /* (1) 초기 화면에서 사이드바 열림 */
+    body.sidebar-open:not(.chat-started) .composer {
+        /* 화면 중앙(50%)에서 사이드바 너비의 절반(130px)만큼 오른쪽으로 이동 */
+        left: calc(50% + 130px); 
+        transform: translateX(-50%);
+        
+        /* 입력창이 화면 밖으로 나가지 않도록 너비 약간 축소 */
+        width: calc(70% - 100px); 
+    }
+
+    /* (2) 대화 중(하단)에서 사이드바 열림 */
+    body.sidebar-open.chat-started .composer {
+        /* 마찬가지로 오른쪽으로 밀어줌 */
+        left: calc(50% + 130px);
+        transform: translateX(-50%);
+        width: calc(80% - 100px);
     }
 }
 
