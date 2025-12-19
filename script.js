@@ -264,8 +264,9 @@ let deleteActionType = null; // 'single' or 'all'
 // 🎯 백엔드 엔드포인트
 const BACKEND_ENDPOINT = "https://jaewondev.pythonanywhere.com/ask"; // 기본 (G-5 Pro)
 const BACKEND_ENDPOINT_G4 = "https://jaewondev.pythonanywhere.com/g4ask"; // [신규] G-4용
+const BACKEND_ENDPOINT_FAST = "https://jaewondev.pythonanywhere.com/askfast"; // [신규] G-Fast용
 
-let currentModel = 'g5-pro'; // [신규] 현재 모델 상태 ('g5-pro' or 'g4')
+let currentModel = 'g-fast'; // [신규] 현재 모델 상태 ('g5-pro' or 'g4')
 
 const IMAGE_ENDPOINT = "https://jaewondev.pythonanywhere.com/generate-image"; 
 
@@ -1318,7 +1319,15 @@ streamInterval = setInterval(() => {
             }
 
         } else {
-           const targetUrl = (currentModel === 'g4') ? BACKEND_ENDPOINT_G4 : BACKEND_ENDPOINT;
+           // [수정 후]
+let targetUrl;
+if (currentModel === 'g4') {
+    targetUrl = BACKEND_ENDPOINT_G4;
+} else if (currentModel === 'g-fast') {
+    targetUrl = BACKEND_ENDPOINT_FAST;
+} else {
+    targetUrl = BACKEND_ENDPOINT; // g5-pro
+}
 
 
 
@@ -1688,7 +1697,11 @@ function closeAllDropdowns() {
 // 모델 변경 처리 함수
 function setModel(model) {
     currentModel = model;
-    const displayText = (model === 'g4') ? 'G-4' : 'G-5 Pro';
+    
+    // ✨ G-Fast 텍스트 처리 추가
+    let displayText = 'G-5 Pro';
+    if (model === 'g4') displayText = 'G-4 beta';
+    else if (model === 'g-fast') displayText = 'G-Fast';
 
     // 1. 텍스트 업데이트 (헤더 & 심플툴바 모두)
     if(headerModelText) headerModelText.textContent = displayText;
