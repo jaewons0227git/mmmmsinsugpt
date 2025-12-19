@@ -1574,108 +1574,98 @@ hr.modal-divider { border: 0; border-top: 1px solid var(--border-color); margin:
 
 
 
-/* style-8.css 맨 아래에 추가 */
-
-/* 1. 화면 전체 높이 고정 및 스크롤 방지 (모바일 대응) */
-html, body {
-    height: 100dvh; /* 모바일 브라우저 주소창 고려 */
-    overflow: hidden; /* 전체 페이지 스크롤 막기 */
-    margin: 0;
+/* --- 1. 상단 메시지 가려짐 해결 및 레이아웃 고정 --- */
+#content-wrapper {
+    height: 100dvh;
+    overflow-y: auto;
+    padding-top: 80px !important; /* 상단바(Header) 아래 여백 확보 */
+    display: flex;
+    flex-direction: column;
 }
 
-.phone, #content-wrapper {
-    height: 100%;
-    overflow: hidden;
-}
-
-#chat-messages {
-    height: 100%;
-    overflow-y: auto; /* 메시지 영역만 스크롤 */
-    padding-bottom: 150px; /* 입력창 가림 방지 */
-}
-
-/* 2. 초기 텍스트 스타일 */
+/* --- 2. 초기 화면 텍스트 디자인 및 위치 (모바일/PC 공통) --- */
 #initial-content {
-    /* 기존 중앙 정렬 해제 및 왼쪽 정렬 설정 */
     display: flex !important;
     flex-direction: column !important;
-    justify-content: center !important;
-    align-items: flex-start !important; /* 왼쪽 정렬 */
+    justify-content: flex-start !important;
+    align-items: flex-start !important;
     text-align: left !important;
-    
+    padding-left: 10%;
     position: absolute;
-    top: 0; left: 0;
+    top: 20dvh; /* 위에서부터의 위치 */
+    left: 0;
     width: 100%;
-    height: 100%;
-    padding-left: 10%; /* 왼쪽에서 살짝 띄우기 */
-    padding-bottom: 100px; /* 입력창 공간 확보 */
-    z-index: 10;
-    background: var(--bg-color); /* 배경색 지정 */
-    transform: none !important; /* 기존 중앙 정렬 transform 제거 */
+    z-index: 5;
+    transform: none !important;
+}
+
+.intro-text-container {
+    display: flex;
+    flex-direction: column;
+    gap: 2px; /* 텍스트 간격 좁힘 */
 }
 
 .intro-hello {
-    font-size: 24px;
+    font-size: 22px;
     font-weight: 500;
     color: var(--text-color);
-    margin-bottom: 10px;
     opacity: 0.8;
 }
 
 .intro-ask {
-    font-size: 36px; /* 더 큰 글씨 */
+    font-size: 34px;
     font-weight: 700;
     color: var(--text-color);
+    letter-spacing: -0.5px;
 }
 
-/* 대화가 시작되면 초기 화면 숨김 */
-body.chat-started #initial-content {
-    display: none !important;
-}
-
-
-/* 3. 입력창(Composer) 위치 제어 */
-
-/* (A) PC 화면: 대화 시작 전 -> 중앙 위치 */
+/* --- 3. PC버전 입력창 위치 및 사이드바 연동 --- */
 @media (min-width: 769px) {
+    /* 초기 상태: 텍스트 바로 아래 위치 */
     body:not(.chat-started) .composer {
         position: absolute;
-        top: 60%; /* 텍스트 아래 위치 */
+        top: calc(20dvh + 95px); /* 텍스트 위치(20dvh) + 텍스트 높이 + 아주 약간의 간격 */
         bottom: auto;
         left: 50%;
-        transform: translate(-50%, 0); /* 가로 중앙 정렬 */
-        width: 80%;
+        transform: translateX(-50%);
+        width: 85%;
         max-width: 800px;
-        transition: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
-        opacity: 1;
+        transition: left 0.3s ease, width 0.3s ease, top 0.3s ease;
     }
 
-    /* (B) PC 화면: 대화 시작 후 -> 하단 고정 (기존 스타일로 복귀) */
+    /* 대화 시작 후: 하단 고정 */
     body.chat-started .composer {
         position: fixed;
-        bottom: 0;
+        bottom: 24px;
         top: auto;
-        left: 50%; /* 만약 사이드바가 있다면 JS나 다른 CSS가 left값 조정함 */
-        transform: translateX(-50%); /* 중앙 정렬 유지 */
+        left: 50%;
+        transform: translateX(-50%);
+    }
+
+    /* ⭐ 사이드바가 열렸을 때 입력창을 오른쪽으로 밀기 (가려짐 방지) */
+    body.sidebar-open .composer {
+        left: calc(50% + (var(--sidebar-width) / 2));
+        width: calc(85% - var(--sidebar-width));
     }
 }
 
-/* (C) 모바일 화면: 항상 하단 고정 */
+/* --- 4. 모바일 세부 조정 --- */
 @media (max-width: 768px) {
+    #initial-content {
+        top: 12dvh; /* 모바일에서 위치를 더 위로 올림 */
+        padding-left: 24px;
+    }
+    
+    .intro-ask { font-size: 26px; }
+
+    /* 모바일은 처음부터 하단 고정 */
     .composer {
         position: fixed !important;
-        bottom: 0 !important;
+        bottom: 15px !important;
         top: auto !important;
         left: 0 !important;
         width: 100% !important;
+        padding: 0 15px !important;
         transform: none !important;
     }
-    
-    /* 모바일에서 초기 텍스트 위치 약간 조정 */
-    #initial-content {
-        justify-content: flex-start;
-        padding-top: 150px;
-        padding-left: 24px;
-    }
-    .intro-ask { font-size: 28px; }
 }
