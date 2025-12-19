@@ -1559,3 +1559,126 @@ hr.modal-divider { border: 0; border-top: 1px solid var(--border-color); margin:
     min-width: 80px; /* 텍스트 공간 확보 */
     justify-content: space-between; /* 아이콘과 텍스트 분리 */
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================
+   1. 초기 화면 텍스트 디자인 (initial-content)
+   ========================================= */
+#initial-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* 화면 수직 중앙 정렬 */
+    align-items: flex-start; /* 왼쪽 정렬 */
+    height: 100%;
+    padding-left: 10%; /* 왼쪽 벽에서 10% 정도 띄움 */
+    transition: opacity 0.3s ease;
+}
+
+/* "안녕하세요" */
+.intro-sub {
+    font-size: 1.5rem;
+    color: var(--text-sub); /* 회색 톤 */
+    margin-bottom: 10px;
+    font-weight: 500;
+}
+
+/* "무엇을 도와드릴까요?" */
+.intro-main {
+    font-size: 2.5rem; /* 큰 글씨 */
+    color: var(--text-color);
+    font-weight: 700;
+}
+
+/* 채팅이 시작되면 초기 화면 숨기기 */
+body.chat-started #initial-content {
+    display: none;
+}
+
+/* =========================================
+   2. 입력창 위치 제어 (PC 버전)
+   ========================================= */
+
+/* 채팅 시작 전: 텍스트 아래쪽에 위치 */
+body:not(.chat-started) #input-container {
+    position: absolute;
+    top: 60%; /* 텍스트보다 약간 아래 */
+    left: 50%;
+    transform: translateX(-50%); /* 가로 중앙 정렬 */
+    width: 80%;
+    max-width: 800px;
+    transition: all 0.4s ease; /* 부드러운 이동 효과 */
+    z-index: 100;
+}
+
+/* 채팅 시작 후: 원래대로 하단 고정 */
+body.chat-started #input-container {
+    position: fixed; /* 또는 absolute */
+    bottom: 0;
+    left: var(--sidebar-width, 260px); /* 사이드바 너비 고려 */
+    width: calc(100% - var(--sidebar-width, 260px));
+    transform: none;
+    transition: all 0.4s ease;
+}
+
+/* =========================================
+   3. 모바일 최적화 (반응형)
+   ========================================= */
+@media (max-width: 768px) {
+    /* 모바일에서는 입력창 무조건 하단 고정 */
+    body:not(.chat-started) #input-container,
+    body.chat-started #input-container {
+        position: fixed !important;
+        top: auto !important;
+        bottom: 0 !important;
+        left: 0 !important;
+        width: 100% !important;
+        transform: none !important;
+        padding: 10px; /* 여백 조금 줌 */
+    }
+
+    /* 초기 텍스트 위치 모바일 조정 */
+    #initial-content {
+        justify-content: flex-start; /* 위쪽부터 시작 */
+        padding-top: 30vh; /* 위에서 30% 지점에 위치 */
+        padding-left: 20px; /* 왼쪽 여백 줄임 */
+    }
+    
+    .intro-main {
+        font-size: 2rem; /* 모바일에서 글자 조금 작게 */
+    }
+}
+
+/* =========================================
+   4. 화면 크기 및 스크롤 설정
+   ========================================= */
+html, body {
+    height: 100%;
+    overflow: hidden; /* 전체 스크롤 방지 */
+}
+
+#main-content {
+    height: 100dvh; /* 모바일 주소창 대응 */
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+#chat-log {
+    flex: 1;
+    overflow-y: auto;
+    padding-bottom: 120px; /* 입력창 가림 방지 */
+    width: 100%;
+    max-width: 900px; /* 채팅 내용 너무 퍼지지 않게 */
+    margin: 0 auto;
+}
