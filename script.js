@@ -1281,49 +1281,7 @@ streamInterval = setInterval(() => {
 // --- streamInterval 부분 교체 종료 ---
     
 
-if (targetUrl.includes("/generate-image")) {
 
-    // 🔹 fake streaming 시작
-    let idx = 0;
-    streamQueue = "";
-    isNetworkFinished = false;
-
-    streamInterval = setInterval(() => {
-        if (isNetworkFinished) {
-            clearInterval(streamInterval);
-            return;
-        }
-        streamQueue += fakeImageProgress[idx % fakeImageProgress.length] + "\n";
-        idx++;
-    }, 700);
-
-    // 🔹 실제 요청
-    const response = await fetch(targetUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(requestBody),
-        signal
-    });
-
-    if (!response.ok) {
-        clearInterval(streamInterval);
-        throw new Error(`HTTP ${response.status}`);
-    }
-
-    const data = await response.json(); // ⭐ 여기 중요
-
-    // 🔹 fake streaming 종료
-    isNetworkFinished = true;
-    clearInterval(streamInterval);
-
-    // 🔹 텍스트 영역 정리
-    streamQueue += "\n[이미지 생성 완료]\n";
-
-    // 🔹 이미지 표시
-    imageElement.src = data.image_base64;
-
-    return;
-}
 
 
 
