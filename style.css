@@ -1794,34 +1794,54 @@ hr.modal-divider { border: 0; border-top: 1px solid var(--border-color); margin:
 /* --- 모바일 화면 고정 및 주소창 꿀렁임 방지 최종 코드 --- */
 
 /* --- 채팅창 크기를 입력창 바로 위까지만 설정하는 코드 --- */
+/* --- 모바일 전용: 화면 고정 및 입력창 가림 방지 (style.css 맨 아래 추가) --- */
 
 @media (max-width: 768px) {
-    /* 1. 전체 화면 고정 및 주소창 꿀렁임 방지 */
+    /* 1. 전체 스크롤 차단 (삼성 인터넷 주소창 고정) */
     html, body {
         overflow: hidden !important;
         position: fixed;
         width: 100%;
         height: 100%;
+        margin: 0;
+        padding: 0;
     }
 
-    /* 2. 전체 컨테이너를 Flex 구조로 변경 */
+    /* 2. 전체 컨테이너를 화면 크기에 딱 맞춤 */
     .phone {
+        height: 100vh;
         height: 100dvh; 
         display: flex;
         flex-direction: column;
+        position: relative;
         overflow: hidden;
     }
 
-    /* 3. 채팅 영역: 여백 대신 실제 높이를 입력창 제외 나머지로 설정 */
+    /* 3. 메시지 영역: 입력창에 가려지지 않도록 하단 여백 추가 */
     .content-wrapper {
-        flex: 1; /* 헤더와 입력창을 제외한 중간의 모든 공간 차지 */
+        flex: 1;
         overflow-y: auto !important;
-        position: relative;
-        padding-top: 64px; /* 상단 헤더 공간 */
-        padding-bottom: 0 !important; /* 아래 여백 제거 */
-        margin-bottom: 0;
+        -webkit-overflow-scrolling: touch;
+        
+        /* 헤더 높이만큼 상단 여백 */
+        padding-top: 64px; 
+        
+        /* [중요] 입력창 높이만큼 하단 여백을 주어 마지막 메시지가 보이게 함 */
+        /* 기본 80px + 여유공간 20px = 100px 정도가 적당합니다 */
+        padding-bottom: 100px !important; 
+        
+        box-sizing: border-box;
     }
 
-    /* 4. 입력창: 채팅 영역 아래에 위치하도록 설정 */
+    /* 4. 입력창 하단 고정 */
     
+
+    /* 5. 가로폭 넘침 방지 */
+    .chat-messages {
+        width: 100%;
+        max-width: 100%;
+        padding-left: 10px;
+        padding-right: 10px;
+        box-sizing: border-box;
+    }
 }
