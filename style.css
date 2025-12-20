@@ -1737,7 +1737,7 @@ hr.modal-divider { border: 0; border-top: 1px solid var(--border-color); margin:
 
 /* 이미지 스타일: 둥근 모서리, 반응형 크기 제한 */
 .chat-img-wrapper img {
-    max-width: 100%;       /* 가로폭 꽉 차게 */
+    max-width: 60%;       /* 가로폭 꽉 차게 */
     height: auto;          /* 비율 유지 */
     border-radius: 12px;   /* 모서리 둥글게 */
     border: 1px solid var(--border-color);
@@ -1769,3 +1769,63 @@ hr.modal-divider { border: 0; border-top: 1px solid var(--border-color); margin:
     font-size: 16px; /* 아이콘 크기 */
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* 모바일 화면 최적화: 채팅창이 화면 밖으로 나가지 않게 설정 */
+@media (max-width: 768px) {
+    /* 1. 전체 높이를 모바일 화면에 딱 맞게 고정 */
+    .phone {
+        height: 100vh;
+        height: 100dvh; /* 주소창 제외 실제 높이 적용 */
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* 2. 헤더와 입력창 사이의 메시지 영역이 남은 공간을 차지하도록 설정 */
+    .content-wrapper {
+        flex: 1;
+        overflow-y: auto; /* 이 영역 안에서만 스크롤 발생 */
+        padding-top: 64px; /* 헤더 높이만큼 여백 */
+        /* 입력창 스타일(Simple/Default)에 따라 하단 여백 조절 */
+        padding-bottom: 90px; 
+        -webkit-overflow-scrolling: touch; /* iOS 부드러운 스크롤 */
+    }
+
+    /* 3. 입력창이 항상 화면 하단에 위치하도록 보정 */
+    .composer {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background-color: var(--bg-color); /* 배경을 불투명하게 하여 메시지가 겹쳐 보이지 않게 함 */
+        z-index: 100;
+    }
+
+    /* 4. 메시지 박스가 너무 커서 화면을 뚫고 나가는 현상 방지 */
+    .chat-messages {
+        padding-bottom: 20px;
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+}
