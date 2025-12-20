@@ -1820,6 +1820,7 @@ html, body {
     -webkit-overflow-scrolling: touch; /* 부드러운 스크롤 */
     
     /* 입력창 높이만큼 하단에 여백을 주어 메시지가 안 가려지게 함 */
+    padding-top: 64px; padding-bottom: 100px; 
   
 }
 
