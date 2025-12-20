@@ -316,37 +316,64 @@ if (typeof marked !== 'undefined') {
 // ===========================================
 // Marked 라이브러리 커스텀 설정 (링크버튼, 이미지 다운로드)
 // ===========================================
-const renderer = new marked.Renderer();
 
-// 1. 링크([Text](URL))를 버튼으로 변환
-renderer.link = function(href, title, text) {
-    return `<a href="${href}" class="chat-link-btn" target="_blank" title="${title || ''}">${text}</a>`;
+// 이미지 확장자 판별용 정규식
+const imageExtensions = /\.(png|jpg|jpeg|gif|webp|svg|bmp|tiff)$/i;
+
+const renderer = {
+    // 1. 링크 처리 ([텍스트](URL) 또는 일반 URL)
+    link(obj) {
+        // marked 버전에 따라 인자가 객체 {href, title, text}로 들어오거나 순서대로 들어올 수 있음
+        // 안전하게 처리하기 위해 인자 확인
+        const href = (typeof obj === 'object' && obj.href) ? obj.href : arguments[0];
+        const title = (typeof obj === 'object' && obj.title) ? obj.title : arguments[1];
+        const text = (typeof obj === 'object' && obj.text) ? obj.text : arguments[2];
+
+        if (!href) return text;
+
+        // ★ 핵심: 링크가 이미지 파일(.png, .jpg 등)이면 이미지로 렌더링 강제 전환
+        if (imageExtensions.test(href)) {
+            return renderer.image(href, title || text, text);
+        }
+
+        // 일반 링크는 버튼 스타일로 반환
+        return `<a href="${href}" class="chat-link-btn" target="_blank" title="${title || ''}">
+                    <span class="material-symbols-rounded" style="font-size:14px; vertical-align:middle; margin-right:2px;">link</span>
+                    ${text}
+                </a>`;
+    },
+
+    // 2. 이미지 처리 (![텍스트](URL))
+    image(obj) {
+        const href = (typeof obj === 'object' && obj.href) ? obj.href : arguments[0];
+        const title = (typeof obj === 'object' && obj.title) ? obj.title : arguments[1];
+        const text = (typeof obj === 'object' && obj.text) ? obj.text : arguments[2];
+
+        const fileName = text || 'image';
+
+        // 이미지 HTML + 다운로드 버튼 생성
+        return `
+            <div class="chat-img-wrapper">
+                <img src="${href}" alt="${text}" loading="lazy" onerror="this.style.display='none'; this.parentElement.innerHTML='<span style=\'color:red\'>이미지 로드 실패</span>'">
+                <button class="img-download-btn" onclick="downloadImage('${href}', '${fileName}')" title="이미지 다운로드">
+                    <span class="material-symbols-rounded">download</span> 다운로드
+                </button>
+            </div>
+        `;
+    }
 };
 
-// 2. 이미지를 둥글게 + 크기제한 + 다운로드 버튼 추가
-renderer.image = function(href, title, text) {
-    // 이미지 다운로드를 위한 고유 ID 생성 (선택 사항이나 안전을 위해)
-    const fileName = text || 'downloaded-image';
-    
-    // HTML 구조 반환: 이미지 + 다운로드 버튼
-    return `
-        <div class="chat-img-wrapper">
-            <img src="${href}" alt="${text}" loading="lazy">
-            <button class="img-download-btn" onclick="downloadImage('${href}', '${fileName}')">
-                <span class="material-symbols-rounded">download</span> 다운로드
-            </button>
-        </div>
-    `;
-};
+// Marked에 렌더러 적용
+marked.use({ renderer });
 
-// Marked에 설정 적용
+// 줄바꿈 허용 옵션
 marked.setOptions({
-    renderer: renderer,
-    breaks: true // 줄바꿈 허용
+    breaks: true
 });
 
 // 이미지 다운로드 헬퍼 함수
-function downloadImage(url, fileName) {
+window.downloadImage = function(url, fileName) {
+    // 다운로드 중임을 표시 (버튼 텍스트 변경 등 가능)
     fetch(url)
         .then(response => response.blob())
         .then(blob => {
@@ -355,19 +382,25 @@ function downloadImage(url, fileName) {
             a.style.display = 'none';
             a.href = blobUrl;
             // 확장자가 없으면 .png 기본값
-            a.download = fileName.includes('.') ? fileName : `${fileName}.png`; 
+            let downloadName = fileName;
+            if (!downloadName.includes('.')) {
+                // URL에서 확장자 추출 시도
+                const extMatch = url.match(/\.(png|jpg|jpeg|gif|webp)/i);
+                const ext = extMatch ? extMatch[0] : '.png';
+                downloadName += ext;
+            }
+            a.download = downloadName;
             document.body.appendChild(a);
             a.click();
             window.URL.revokeObjectURL(blobUrl);
             document.body.removeChild(a);
         })
         .catch(err => {
-            console.error('이미지 다운로드 실패:', err);
-            // CORS 등으로 fetch 실패 시 새 창 띄우기로 대체
+            console.error('이미지 다운로드 실패 (CORS 문제일 수 있음):', err);
+            // 실패 시 새 창으로 열기
             window.open(url, '_blank');
         });
-}
-
+};
 
 
 // ===========================================
