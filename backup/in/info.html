@@ -1,0 +1,129 @@
+/* <style>
+    :root {
+        --notif-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(245, 255, 245, 0.8) 50%, rgba(255, 245, 245, 0.85) 100%);
+        --notif-shadow: 0 0 25px 5px rgba(0, 0, 0, 0.08), 0 10px 40px rgba(0, 0, 0, 0.1);
+    }
+
+    #web-xmas-notif {
+        position: fixed;
+        top: 80px;
+        right: -550px; 
+        width: 380px; 
+        max-width: 92vw; 
+        display: flex;
+        align-items: center;
+        /* 오른쪽 패딩을 40px로 늘려 버튼과 텍스트 간격 확보 */
+        padding: 18px 40px 18px 15px; 
+        background: var(--notif-bg);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.6);
+        border-left: 6px solid #e74c3c;
+        border-radius: 20px;
+        box-shadow: var(--notif-shadow);
+        z-index: 999999;
+        transition: right 0.7s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+        box-sizing: border-box;
+    }
+
+    #web-xmas-notif.is-active {
+        right: 20px;
+    }
+
+    #web-xmas-notif .xmas-img {
+        width: 60px;
+        height: auto;
+        margin-right: 15px;
+        flex-shrink: 0;
+    }
+
+    #web-xmas-notif .xmas-content {
+        flex: 1;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    #web-xmas-notif .xmas-title {
+        margin: 0 0 2px 0;
+        color: #c0392b;
+        /* 폰트 크기 범위를 더 세밀하게 조정 (최소 13px) */
+        font-size: clamp(13px, 4vw, 18px); 
+        font-weight: 800;
+        display: block;
+        white-space: nowrap;
+        letter-spacing: -0.8px;
+    }
+
+    #web-xmas-notif .xmas-desc {
+        margin: 0;
+        font-size: clamp(11px, 3.2vw, 13px);
+        color: #2c3e50;
+        line-height: 1.4;
+        font-weight: 500;
+        word-break: keep-all;
+    }
+
+    /* 닫기 버튼: 우측 상단 고정으로 변경하여 텍스트 흐름에서 제외 */
+    #xmas-close-btn {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: rgba(0, 0, 0, 0.05);
+        border: none;
+        color: #888;
+        cursor: pointer;
+        font-size: 18px;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s ease;
+    }
+
+    #xmas-close-btn:hover {
+        background: #e74c3c;
+        color: white;
+    }
+
+    @media (max-width: 480px) {
+        #web-xmas-notif {
+            width: 88vw;
+            padding: 15px 35px 15px 12px; /* 모바일에서도 우측 여백 유지 */
+        }
+        #web-xmas-notif .xmas-img {
+            width: 45px;
+            margin-right: 10px;
+        }
+    }
+</style>
+
+<div id="web-xmas-notif">
+    <img src="https://i.postimg.cc/kg01fcVG/logop.png" class="xmas-img" alt="Xmas">
+    <div class="xmas-content">
+        <span class="xmas-title">벌써 크리스마스라니, 놀랍네요</span>
+        <p class="xmas-desc">행복하고 따뜻한<br>성탄절 보내세요!</p>
+    </div>
+    <button id="xmas-close-btn" aria-label="닫기">&times;</button>
+</div>
+
+<script>
+    (function() {
+        const notif = document.getElementById('web-xmas-notif');
+        const closeBtn = document.getElementById('xmas-close-btn');
+
+        window.addEventListener('load', function() {
+            setTimeout(function() {
+                notif.classList.add('is-active');
+            }, 1000);
+        });
+
+        closeBtn.addEventListener('click', function() {
+            notif.classList.remove('is-active');
+        });
+    })();
+</script> */
