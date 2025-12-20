@@ -1863,25 +1863,46 @@ document.addEventListener('click', () => {
 // ===========================================
 // [추가] 랜덤 환영 문구 및 애니메이션 로직
 // ===========================================
-const greetingMessages = [
-    "오늘은 기분이 어떠신가요?",
-    "무엇을 도와드릴까요?",
-    "오늘도 힘내세요",
-    "어디서부터 시작할까요?"
-];
+const greetingMessages = ["오늘은 기분이 어떠신가요?", "무엇을 도와드릴까요?", "오늘도 힘내세요", "어디서부터 시작할까요?"];
 
 function playIntroAnimation() {
     const container = document.getElementById('initial-content');
     const textElement = document.getElementById('random-greeting');
+    const particles = document.querySelectorAll('.glow-particle');
 
     if (container && textElement) {
-        // 1. 랜덤 멘트 설정
-        const randomIndex = Math.floor(Math.random() * greetingMessages.length);
-        textElement.textContent = greetingMessages[randomIndex];
+        // 1. 텍스트 랜덤 변경
+        textElement.textContent = greetingMessages[Math.floor(Math.random() * greetingMessages.length)];
 
-        // 2. 애니메이션 리셋 및 재실행 (클래스 뺐다 끼우기)
+        // 2. 애니메이션 클래스 리셋
         container.classList.remove('start-anim');
-        void container.offsetWidth; // 브라우저가 변경을 인식하도록 강제 리플로우
+        void container.offsetWidth; 
+
+        // 3. 글로우 파티클마다 랜덤 위치/움직임 부여
+        particles.forEach((p, index) => {
+            // 중앙(50%, 50%)을 기준으로 -20% ~ +20% 랜덤 위치
+            const randomX = Math.floor(Math.random() * 40) + 30 + "%"; 
+            const randomY = Math.floor(Math.random() * 40) + 30 + "%";
+            
+            // 이동할 방향 랜덤 결정 (-100px ~ 100px)
+            const moveX = (Math.random() * 200 - 100) + "px";
+            const moveY = (Math.random() * 200 - 100) + "px";
+            
+            // 크기 랜덤 (400px ~ 700px)
+            const size = (Math.floor(Math.random() * 300) + 400) + "px";
+
+            p.style.left = randomX;
+            p.style.top = randomY;
+            p.style.width = size;
+            p.style.height = size;
+            p.style.setProperty('--move-x', moveX);
+            p.style.setProperty('--move-y', moveY);
+            
+            // 애니메이션 속성 직접 주입 (지연 시간 다르게)
+            p.style.animation = `glowMovement ${5 + index}s ease-in-out forwards`;
+            p.style.animationDelay = `${index * 0.4}s`;
+        });
+
         container.classList.add('start-anim');
     }
 }
