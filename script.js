@@ -643,6 +643,10 @@ function startNewChat(skipRender = false) {
         initialContent.style.display = 'flex';     // 초기 화면 보이기
         initialContent.style.opacity = '1';
         initialContent.style.visibility = 'visible';
+
+
+        playIntroAnimation();
+      
     }
 
 
@@ -1746,7 +1750,7 @@ window.onload = function() {
             accessIdInput.focus();
         }, 300);
     }
-
+    playIntroAnimation();
     // ... 나머지 초기화 코드들 ...
     // ... 나머지 기존 코드 ...
     loadTheme();
@@ -1847,3 +1851,37 @@ document.querySelectorAll('.model-option-item').forEach(item => {
 document.addEventListener('click', () => {
     closeAllDropdowns();
 });
+
+
+
+
+
+
+
+
+
+// ===========================================
+// [추가] 랜덤 환영 문구 및 애니메이션 로직
+// ===========================================
+const greetingMessages = [
+    "오늘은 기분이 어떠신가요?",
+    "무엇을 도와드릴까요?",
+    "오늘도 힘내세요",
+    "어디서부터 시작할까요?"
+];
+
+function playIntroAnimation() {
+    const container = document.getElementById('initial-content');
+    const textElement = document.getElementById('random-greeting');
+
+    if (container && textElement) {
+        // 1. 랜덤 멘트 설정
+        const randomIndex = Math.floor(Math.random() * greetingMessages.length);
+        textElement.textContent = greetingMessages[randomIndex];
+
+        // 2. 애니메이션 리셋 및 재실행 (클래스 뺐다 끼우기)
+        container.classList.remove('start-anim');
+        void container.offsetWidth; // 브라우저가 변경을 인식하도록 강제 리플로우
+        container.classList.add('start-anim');
+    }
+}
