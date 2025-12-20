@@ -1861,52 +1861,85 @@ hr.modal-divider { border: 0; border-top: 1px solid var(--border-color); margin:
    추가 기능: 인트로 애니메이션 & 스크롤바
    ========================================= */
 
-/* 1. 위로 올라오는 애니메이션 */
-@keyframes fadeInUpIntro {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
+/* =========================================
+   최종 수정: 인트로 애니메이션 & 텍스트 효과 & 글로우
+   ========================================= */
+
+/* 1. 위로 올라오는 부드러운 애니메이션 (시간 연장) */
+@keyframes fadeInUpLong {
+    0% { opacity: 0; transform: translateY(40px); }
+    100% { opacity: 1; transform: translateY(0); }
 }
 
-/* 2. 텍스트 그라데이션이 오른쪽으로 이동하는 애니메이션 */
-@keyframes textGradientMove {
-    0% { background-position: -200% center; }
-    100% { background-position: 200% center; }
+/* 2. 텍스트 그라데이션 이동 (오른쪽 -> 왼쪽 방향 반전) */
+@keyframes textShimmer {
+    0% { background-position: 200% center; }
+    100% { background-position: -200% center; }
 }
 
-/* 3. 배경 핑크광 애니메이션 (부드럽게 나타났다 사라짐) */
-@keyframes pinkGlowEffect {
-    0%, 100% { background: transparent; }
-    50% { background: radial-gradient(circle at center, rgba(255, 182, 193, 0.2) 0%, transparent 70%); }
+/* 3. 배경 중앙 글로우 효과 (부드러운 전환) */
+@keyframes centerGlowEffect {
+    0% { opacity: 0; filter: blur(40px); transform: scale(0.8); }
+    40%, 60% { opacity: 1; filter: blur(60px); transform: scale(1.1); }
+    100% { opacity: 0; filter: blur(40px); transform: scale(1); }
 }
 
-/* 기본 상태: 텍스트에 그라데이션 설정 */
+/* 초기 상태 설정 (깜빡임 방지) */
+#initial-content {
+    position: relative;
+    overflow: hidden;
+}
+
+/* 텍스트 그라데이션 및 색상 (핑크 & 보라) */
 .greeting-main {
-    background: linear-gradient(90deg, #111827 0%, #ff8ab3 50%, #111827 100%);
+    background: linear-gradient(90deg, #ff7eb3 0%, #8b5cf6 50%, #ff7eb3 100%);
     background-size: 200% auto;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+    display: inline-block;
+    opacity: 0; /* 애니메이션 전 숨김 */
 }
 
-/* 애니메이션 실행 클래스 */
-.start-anim {
-    animation: pinkGlowEffect 2.5s ease-in-out forwards;
+/* 배경 글로우를 위한 가상 요소 */
+#initial-content::before {
+    content: '';
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, rgba(255, 126, 179, 0.3) 0%, rgba(139, 92, 246, 0.1) 50%, transparent 70%);
+    border-radius: 50%;
+    z-index: -1;
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* 애니메이션 실행 시 */
+.start-anim::before {
+    animation: centerGlowEffect 3.5s ease-in-out forwards;
 }
 
 .start-anim .greeting-icon,
 .start-anim .greeting-sub {
-    animation: fadeInUpIntro 1.2s ease forwards;
+    animation: fadeInUpLong 1.5s cubic-bezier(0.25, 1, 0.5, 1) forwards;
 }
 
 .start-anim .greeting-main {
-    /* 위로 올라오는 효과와 그라데이션 이동 효과 동시 적용 */
-    animation: fadeInUpIntro 1.2s ease forwards, textGradientMove 2s linear forwards;
-    animation-delay: 0.3s;
+    /* 올라오는 효과와 그라데이션 쉬머 동시 적용 */
+    animation: 
+        fadeInUpLong 1.5s cubic-bezier(0.25, 1, 0.5, 1) forwards, 
+        textShimmer 3s linear infinite; /* 무한 반복하여 더 고급스럽게 */
+    animation-delay: 0.2s;
 }
 
-/* 다크모드 스크롤바 (검은색 배경/회색 막대) */
+/* 다크모드 전용 스크롤바 */
 [data-theme="dark"] ::-webkit-scrollbar { width: 10px; }
 [data-theme="dark"] ::-webkit-scrollbar-track { background: #000000; }
 [data-theme="dark"] ::-webkit-scrollbar-thumb { 
-    background: #444444; border-radius: 5px; border: 2px solid #000000; 
+    background: #333333; 
+    border-radius: 10px; 
+    border: 2px solid #000000; 
 }
+[data-theme="dark"] ::-webkit-scrollbar-thumb:hover { background: #444444; }
