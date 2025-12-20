@@ -1099,6 +1099,11 @@ function createBotActions(content, messageIndex, feedbackStatus = null) {
     const dislikeBtn = createActionButton('dislike', '싫어요', feedbackStatus, 'thumb_down');
     const copyBtn = createActionButton('copy', '복사', null, 'content_copy');
     copyBtn.addEventListener('click', () => {
+      let textToCopy = msg.content || ""; // msg는 해당 메시지 객체
+
+    // 2. [THOUGHT]...[/THOUGHT] 제거 정규식
+    // 대소문자 무시(i), 여러 줄 포함([\s\S]), 탐욕적이지 않게(*?)
+    textToCopy = textToCopy.replace(/\[THOUGHT\][\s\S]*?\[\/THOUGHT\]/gi, "").trim();
         navigator.clipboard.writeText(content).then(() => { showSnackbar('메시지가 복사되었습니다.'); })
         .catch(err => { showSnackbar('복사에 실패했습니다.'); });
     });
