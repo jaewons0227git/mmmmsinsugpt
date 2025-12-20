@@ -1845,3 +1845,65 @@ hr.modal-divider { border: 0; border-top: 1px solid var(--border-color); margin:
         box-sizing: border-box;
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================
+   추가 기능: 인트로 애니메이션 & 스크롤바
+   ========================================= */
+
+/* 1. 위로 부드럽게 올라오는 효과 */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* 2. 핑크빛 그라데이션 효과 */
+@keyframes pinkGlow {
+    0% { background: radial-gradient(circle at center, rgba(255, 192, 203, 0) 0%, transparent 70%); }
+    50% { background: radial-gradient(circle at center, rgba(255, 105, 180, 0.15) 0%, transparent 70%); }
+    100% { background: radial-gradient(circle at center, rgba(255, 192, 203, 0) 0%, transparent 70%); }
+}
+
+/* 애니메이션이 켜졌을 때 적용될 스타일 */
+.start-anim .greeting-icon,
+.start-anim .greeting-sub,
+.start-anim .greeting-main {
+    animation: fadeInUp 1.2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    opacity: 0; /* 애니메이션 시작 전 숨김 처리 */
+}
+
+/* 약간의 시차를 주어 더 자연스럽게 (아이콘 -> 텍스트 순서) */
+.start-anim .greeting-icon { animation-delay: 0.1s; }
+.start-anim .greeting-sub { animation-delay: 0.2s; }
+.start-anim .greeting-main { animation-delay: 0.3s; }
+
+/* 배경 핑크 그라데이션 적용 대상 */
+.start-anim {
+    animation: pinkGlow 2.5s ease-in-out forwards;
+}
+
+/* 3. 다크모드 스크롤바 커스터마이징 */
+[data-theme="dark"] ::-webkit-scrollbar { width: 10px; height: 10px; }
+[data-theme="dark"] ::-webkit-scrollbar-track { background: #1a1a1a; }
+[data-theme="dark"] ::-webkit-scrollbar-thumb { 
+    background: #555; 
+    border-radius: 5px; 
+    border: 2px solid #1a1a1a; 
+}
+[data-theme="dark"] ::-webkit-scrollbar-thumb:hover { background: #777; }
