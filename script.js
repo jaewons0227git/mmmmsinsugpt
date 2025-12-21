@@ -887,83 +887,9 @@ function executeResetAllChats() {
 // 4. 입력창 및 메시지 UI 관련 함수
 // ===========================================
 
-
-
-function toggleSendButton() {
-    const hasText = inputField.value.trim().length > 0;
-    if (hasText && !isStreaming) { 
-        sendButton.classList.add('active'); 
-    } else { 
-        sendButton.classList.remove('active'); 
-    }
-}
-
-// 🌟 [수정] 높이 계산 로직 수정: 첨부파일 영역 높이 분리
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// ===========================================
-// [수정] 스크롤 및 입력창 크기 조절 함수 교체
-// ===========================================
-
 function scrollToBottom(smooth = true) {
     if (!contentWrapper) return;
     
-    // 🌟 수정: window가 아니라 contentWrapper 내부를 스크롤합니다.
     if (smooth) {
         contentWrapper.scrollTo({ top: contentWrapper.scrollHeight, behavior: 'smooth' });
     } else {
@@ -976,12 +902,12 @@ function scrollToBottom(smooth = true) {
 function toggleScrollButton() {
     if (!contentWrapper || !scrollDownButton) return;
 
-    // 🌟 수정: contentWrapper의 스크롤 위치를 기준으로 계산합니다.
     const currentScroll = contentWrapper.scrollTop;
     const maxScroll = contentWrapper.scrollHeight - contentWrapper.clientHeight;
     
-    // 바닥에서 100px 이상 떨어지면 버튼 표시
-    if (maxScroll - currentScroll > 100) {
+    const distanceFromBottom = maxScroll - currentScroll; 
+
+    if (distanceFromBottom > 100) {
         scrollDownButton.classList.add('visible');
         scrollDownButton.classList.remove('hidden');
     } else {
@@ -990,12 +916,24 @@ function toggleScrollButton() {
     }
 }
 
+function toggleSendButton() {
+    const hasText = inputField.value.trim().length > 0;
+    if (hasText && !isStreaming) { 
+        sendButton.classList.add('active'); 
+    } else { 
+        sendButton.classList.remove('active'); 
+    }
+}
+
+// 🌟 [수정] 높이 계산 로직 수정: 첨부파일 영역 높이 분리
+// script.js 내부 함수 수정
+
 function autoResizeTextarea() {
     const style = getComputedStyle(inputField);
     const line_height_px = parseFloat(style.getPropertyValue('--line-height-px')) || 22.4; 
     const minInputContainerHeight = parseFloat(style.getPropertyValue('--min-input-container-height')) || 48; 
 
-    // 1. 텍스트박스 줄 수 계산
+    // 1. 텍스트박스 높이 계산
     inputField.rows = MIN_ROWS;
     inputField.style.height = 'auto'; 
     
@@ -1004,59 +942,12 @@ function autoResizeTextarea() {
     newRows = Math.max(MIN_ROWS, Math.min(MAX_ROWS, newRows));
     
     inputField.rows = newRows;
-    inputField.style.height = 'auto'; 
+    inputField.style.height = 'auto'; // 높이 적용
     
-    // 2. 입력 컨테이너 최소 높이 설정
-    const finalTextareaHeight = inputField.offsetHeight; 
-    const inputContainerHeight = Math.max(finalTextareaHeight + 8, minInputContainerHeight);
-    
-    inputContainer.style.minHeight = `${inputContainerHeight}px`;
-
-    // 🌟 핵심 수정: Composer(입력창 전체) 높이를 계산해서 채팅창(contentWrapper)의 바닥 위치(bottom)를 조절
-    requestAnimationFrame(() => {
-        if (composer && contentWrapper) {
-            const composerHeight = composer.offsetHeight;
-            // 채팅창의 바닥을 입력창 높이만큼 들어 올림
-            contentWrapper.style.bottom = `${composerHeight}px`;
-        }
-    });
+    // 2. 컨테이너 높이 맞춤 (Flex 구조라 전체 레이아웃이 알아서 밀려 올라감)
+    // ⚠️ 기존의 chatMessages.style.paddingBottom 코드는 삭제합니다.
+    // 구조적 레이아웃에서는 입력창이 커지면 채팅창 영역이 자동으로 줄어듭니다.
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 // 🌟 [수정] 파일 처리 함수들
 function handleFileSelect(e) {
