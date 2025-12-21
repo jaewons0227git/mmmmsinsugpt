@@ -236,7 +236,7 @@ body{ margin:0; background:var(--bg-color); color:var(--text-color); min-height:
 
     /* 🌟 [상단 여백] */
     /* 헤더 높이(64px) + 추가 여백(26px) = 90px */
-    padding-top: 70px;
+    padding-top: 80px;
 
     /* 🌟 [하단 여백] */
     /* 입력창 기본 높이 + 추가 여백 (JS가 동적으로 조절하지만 기본값 설정) */
@@ -255,7 +255,7 @@ body{ margin:0; background:var(--bg-color); color:var(--text-color); min-height:
         padding-right: 16px;
         
         /* 상단 여백은 동일하게 유지하거나 필요 시 조정 */
-        padding-top: 84px; 
+        padding-top: 90px; 
     }
 }
 
