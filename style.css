@@ -195,7 +195,7 @@ body{ margin:0; background:var(--bg-color); color:var(--text-color); min-height:
     flex-grow:1; display:flex; flex-direction:column; 
     overflow-y: auto; 
     padding-bottom: 0; position: relative;
-    padding-top: 0px; /* Header Height 증가에 따른 수정 이거기언ㅁㅇㅁㄴ우ㅏ머아이거언머아누아머나무마ㅓ우마어ㅜㅏ어마앙우이거이거이거이거이거*/
+    padding-top: 70px; /* Header Height 증가에 따른 수정 이거기언ㅁㅇㅁㄴ우ㅏ머아이거언머아누아머나무마ㅓ우마어ㅜㅏ어마앙우이거이거이거이거이거*/
     opacity: 0; transform: translateY(20px); 
     transition: opacity 0.5s ease-out, transform 0.5s ease-out, margin-left 0.3s ease; 
     scroll-behavior: auto; 
@@ -1968,7 +1968,7 @@ hr.modal-divider { border: 0; border-top: 1px solid var(--border-color); margin:
     /* 2. 채팅 메시지 영역 모바일 최적화 */
     .chat-messages {
         width: 100% !important;
-        padding: 100px 12px 240px 12px !important; /* 하단 여백(100px)을 충분히 주어 입력창에 가려지지 않게 함 */
+        padding: 1px 12px 240px 12px !important; /* 하단 여백(100px)을 충분히 주어 입력창에 가려지지 않게 함 */
         box-sizing: border-box;
         display: flex;
         flex-direction: column;
