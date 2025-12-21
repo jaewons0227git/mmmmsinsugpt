@@ -2274,3 +2274,37 @@ hr.modal-divider { border: 0; border-top: 1px solid var(--border-color); margin:
     width: 100%;
     pointer-events: none; /* 클릭 통과 */
 }
+
+
+
+
+/* --- 삼성 인터넷 및 모바일 툴바 가림 방지 최종 보정 --- */
+@media (max-width: 768px) {
+    /* 1. 하단 안전 영역 확보 */
+    .composer {
+        /* 하단 고정 위치 강제 */
+        position: fixed !important;
+        bottom: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        
+        /* 툴바 및 홈바(Safe Area) 높이만큼 여백 추가 */
+        /* env(safe-area-inset-bottom)은 모바일 브라우저의 가변 영역을 감지합니다 */
+        padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 12px) !important;
+        
+        background-color: var(--bg-color);
+        z-index: 999;
+    }
+
+    /* 2. 입력창이 떠서 메시지를 가리지 않도록 목록 하단 여백 충분히 확보 */
+    .chat-messages {
+        /* 입력창 높이만큼 하단에 여백을 주어 마지막 메시지가 가려지지 않게 합니다 */
+        padding-bottom: 120px !important; 
+    }
+
+    /* 3. 사이드바가 열려있을 때 입력창이 밀리지 않도록 고정 */
+    body.sidebar-open .composer {
+        left: 0 !important;
+        width: 100% !important;
+    }
+}
