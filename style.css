@@ -1701,7 +1701,7 @@ hr.modal-divider { border: 0; border-top: 1px solid var(--border-color); margin:
     top: 50%;        /* 화면 정중앙 */
     left: 50%;
     /* 텍스트+입력창 전체 덩어리의 높이 절반만큼 위로 올려 정중앙 맞춤 */
-    transform: translate(-52%, -80%); 
+    transform: translate(-52%, -60%); 
     
     width: 100%;
     max-width: 768px; 
