@@ -1937,3 +1937,68 @@ hr.modal-divider { border: 0; border-top: 1px solid var(--border-color); margin:
 [data-theme="dark"] ::-webkit-scrollbar-thumb { 
     background: #333; border-radius: 10px; border: 2px solid #000; 
 }
+
+
+
+
+/* ============================================ */
+/* 📱 모바일 가로 스크롤 방지 및 레이아웃 최적화 */
+/* ============================================ */
+
+/* 1. 메시지 텍스트 가로 삐져나감 방지 */
+.message-text, .streaming-block, .streaming-block * {
+    word-break: break-word !important; /* 긴 영문, URL 강제 줄바꿈 */
+    overflow-wrap: break-word !important;
+    white-space: pre-wrap !important; /* 줄바꿈 유지하되 너비 초과 시 자동 줄바꿈 */
+}
+
+/* 2. 코드 블록 가로 스크롤 허용 (전체 화면 밀림 방지) */
+.streaming-block pre {
+    max-width: 100% !important;
+    overflow-x: auto !important;
+    white-space: pre !important;
+}
+
+/* 3. 상단바 끝부터 입력창 시작까지 채팅창 너비로 고정 */
+.phone {
+    display: flex;
+    flex-direction: column;
+    height: 100dvh; /* 모바일 주소창 고려한 동적 높이 */
+    overflow: hidden; /* 전체 페이지 가로 스크롤 원천 차단 */
+}
+
+.content-wrapper {
+    flex: 1; /* 상단바와 입력창 사이의 남은 공간을 모두 차지 */
+    display: flex;
+    flex-direction: column;
+    overflow: hidden; /* 내부 레이아웃 이탈 방지 */
+    padding-top: 64px; /* 헤더 높이만큼 확보 */
+}
+
+.chat-messages {
+    flex: 1; /* 메시지 창이 가득 차도록 설정 */
+    overflow-y: auto; /* 세로 스크롤만 활성화 */
+    overflow-x: hidden; /* 가로 스크롤 절대 방지 */
+    width: 100%;
+    max-width: 100% !important; /* 부모 너비를 넘지 않음 */
+    box-sizing: border-box;
+}
+
+/* 4. 모바일 미세 조정 */
+@media (max-width: 768px) {
+    .chat-messages {
+        padding: 10px 12px; /* 좌우 여백 최적화 */
+    }
+    
+    .message-bubble {
+        max-width: 90%; /* 모바일에서 말풍선 너비 확대 */
+    }
+
+    /* 가로 스크롤 주범인 요소들 강제 제어 */
+    body, html {
+        overflow-x: hidden;
+        position: relative;
+        width: 100%;
+    }
+}
+
