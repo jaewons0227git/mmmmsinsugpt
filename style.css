@@ -2278,33 +2278,53 @@ hr.modal-divider { border: 0; border-top: 1px solid var(--border-color); margin:
 
 
 
-/* --- 삼성 인터넷 및 모바일 툴바 가림 방지 최종 보정 --- */
+
+
+/* --- 모바일 레이아웃 최종 보정 (입력창 가림 및 초기화면 위치) --- */
 @media (max-width: 768px) {
-    /* 1. 하단 안전 영역 확보 */
+    /* 1. 초기 화면(로고/환영문구) 위치 조정 */
+    #initial-content {
+        /* 모바일에서는 정중앙보다 약간 위(40%)에 배치하여 키보드/입력창 간섭 최소화 */
+        top: 40% !important; 
+        transform: translate(-50%, -40%) !important;
+        padding: 0 20px;
+        box-sizing: border-box;
+    }
+
+    #initial-content img {
+        width: 60px !important; /* 모바일 전용 로고 크기 조절 */
+        margin-bottom: 10px !important;
+    }
+
+    #random-greeting {
+        font-size: 1.2rem !important; /* 글자 크기 최적화 */
+    }
+
+    /* 2. 입력창 툴바 가림 방지 (아까 드린 코드 포함) */
+    .phone {
+        padding-left: 0 !important;
+        height: 100dvh !important;
+    }
+
+    body.sidebar-open .phone {
+        padding-left: 0 !important;
+    }
+
     .composer {
-        /* 하단 고정 위치 강제 */
         position: fixed !important;
         bottom: 0 !important;
         left: 0 !important;
         right: 0 !important;
-        
-        /* 툴바 및 홈바(Safe Area) 높이만큼 여백 추가 */
-        /* env(safe-area-inset-bottom)은 모바일 브라우저의 가변 영역을 감지합니다 */
-        padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 12px) !important;
-        
-        background-color: var(--bg-color);
-        z-index: 999;
-    }
-
-    /* 2. 입력창이 떠서 메시지를 가리지 않도록 목록 하단 여백 충분히 확보 */
-    .chat-messages {
-        /* 입력창 높이만큼 하단에 여백을 주어 마지막 메시지가 가려지지 않게 합니다 */
-        padding-bottom: 120px !important; 
-    }
-
-    /* 3. 사이드바가 열려있을 때 입력창이 밀리지 않도록 고정 */
-    body.sidebar-open .composer {
-        left: 0 !important;
         width: 100% !important;
+        margin: 0 !important;
+        z-index: 1000;
+        background: var(--bg-color);
+        /* 삼성 인터넷 툴바 대응 */
+        padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 12px) !important;
+        border-top: 1px solid var(--border-color);
+    }
+
+    .chat-messages {
+        padding-bottom: 140px !important; 
     }
 }
