@@ -639,8 +639,7 @@ function startNewChat(skipRender = false) {
     if (chatMessages) {
         chatMessages.innerHTML = ''; // 메시지창 비우기
         chatMessages.style.display = 'none'; // 메시지창 숨김
-        // 🌟 핵심: 새 채팅 모드 클래스 추가 (padding-top: 84px 적용)
-        chatMessages.classList.add('new-chat-mode');
+        chatMessages.classList.add('new-chat-mode'); // 🌟 [신규] 새 채팅 모드 클래스 추가 (여백 2배)
     }
     
     if (initialContent) {
