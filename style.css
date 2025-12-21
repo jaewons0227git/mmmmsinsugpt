@@ -664,7 +664,7 @@ body{ margin:0; background:var(--bg-color); color:var(--text-color); min-height:
 
 .composer.style-default .composer-inner {
     max-width: 768px;
-    border-radius: 23px;   /* 이거여이거 */
+    border-radius: 20px;   /* 이거여이거 */
     
     /* 패딩 설정 */
     padding: 0 4px 0 16px !important;
