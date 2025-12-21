@@ -636,8 +636,11 @@ function startNewChat(skipRender = false) {
 
 
     // ✨ [추가] 새 채팅 시 화면 초기화 로직
-    if (chatMessages) chatMessages.innerHTML = ''; // 메시지창 비우기
-    if (chatMessages) chatMessages.style.display = 'none'; // 메시지창 숨김
+    if (chatMessages) {
+        chatMessages.innerHTML = ''; // 메시지창 비우기
+        chatMessages.style.display = 'none'; // 메시지창 숨김
+        chatMessages.classList.add('new-chat-mode'); // 🌟 [신규] 새 채팅 모드 클래스 추가 (여백 2배)
+    }
     
     if (initialContent) {
         initialContent.style.display = 'flex';     // 초기 화면 보이기
@@ -776,6 +779,8 @@ function renderChatMessages() {
     chatMessages.innerHTML = '';
     
     if (history.length > 0) {
+        // 🌟 [신규] 기존 대화가 있으면 새 채팅 모드(넓은 여백) 제거
+        chatMessages.classList.remove('new-chat-mode');
         // 대화가 있으면 초기 화면 숨김
         initialContent.style.opacity = '0';
         initialContent.style.visibility = 'hidden'; 
