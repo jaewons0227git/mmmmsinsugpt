@@ -195,7 +195,7 @@ body{ margin:0; background:var(--bg-color); color:var(--text-color); min-height:
     flex-grow:1; display:flex; flex-direction:column; 
     overflow-y: auto; 
     padding-bottom: 0; position: relative;
-    padding-top: 1px; /* Header Height 증가에 따른 수정 이거기언ㅁㅇㅁㄴ우ㅏ머아이거언머아누아머나무마ㅓ우마어ㅜㅏ어마앙우이거이거이거이거이거*/
+    padding-top: 0px; /* Header Height 증가에 따른 수정 이거기언ㅁㅇㅁㄴ우ㅏ머아이거언머아누아머나무마ㅓ우마어ㅜㅏ어마앙우이거이거이거이거이거*/
     opacity: 0; transform: translateY(20px); 
     transition: opacity 0.5s ease-out, transform 0.5s ease-out, margin-left 0.3s ease; 
     scroll-behavior: auto; 
