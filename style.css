@@ -2291,14 +2291,7 @@ hr.modal-divider { border: 0; border-top: 1px solid var(--border-color); margin:
         box-sizing: border-box;
     }
 
-    #initial-content img {
-        width: 60px !important; /* 모바일 전용 로고 크기 조절 */
-        margin-bottom: 10px !important;
-    }
-
-    #random-greeting {
-        font-size: 1.2rem !important; /* 글자 크기 최적화 */
-    }
+    
 
     /* 2. 입력창 툴바 가림 방지 (아까 드린 코드 포함) */
     .phone {
