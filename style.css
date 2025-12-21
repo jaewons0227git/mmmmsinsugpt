@@ -2112,7 +2112,7 @@ hr.modal-divider { border: 0; border-top: 1px solid var(--border-color); margin:
 
 /* 새 채팅일 때만 적용되는 여백 (헤더 64px + 여유 20px = 84px) */
 .chat-messages.new-chat-mode {
-    padding-top: 84px !important; 
+    padding-top: 168px !important; 
 }
 
 /* 모바일에서도 동일하게 84px 적용 (필요 시 조정 가능) */
