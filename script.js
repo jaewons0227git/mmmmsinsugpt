@@ -1895,14 +1895,29 @@ function playIntroAnimation() {
 
 
 
+// [필수] 모바일 브라우저 툴바 및 키보드 가림 완벽 대응
+function syncHeight() {
+    const phone = document.querySelector('.phone');
+    if (phone && window.visualViewport) {
+        // 실제 가시 화면 높이(툴바/주소창 제외)를 가져옴
+        const visibleHeight = window.visualViewport.height;
+        phone.style.height = `${visibleHeight}px`;
+    }
+}
+
 if (window.visualViewport) {
-    window.visualViewport.addEventListener('resize', () => {
-        // 키보드가 올라와서 가시 영역이 줄어들면, 
-        // .phone의 높이를 그만큼 줄여서 입력창을 강제로 끌어올립니다.
-        const phone = document.querySelector('.phone');
-        if (phone) {
-            phone.style.height = `${window.visualViewport.height}px`;
-        }
-        window.scrollTo(0, 0);
+    // 툴바가 생기거나 사라질 때, 키보드가 올라올 때 모두 실행
+    window.visualViewport.addEventListener('resize', syncHeight);
+    window.visualViewport.addEventListener('scroll', syncHeight);
+}
+
+// 초기 로드 시 실행
+window.addEventListener('load', syncHeight);
+
+// [추가] 텍스트 입력 시 항상 마지막 줄이 보이도록 스크롤 유지
+const ta = document.querySelector('.input-container textarea');
+if (ta) {
+    ta.addEventListener('input', function() {
+        this.scrollTop = this.scrollHeight;
     });
 }
