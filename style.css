@@ -2280,105 +2280,91 @@ hr.modal-divider { border: 0; border-top: 1px solid var(--border-color); margin:
 
 
 
-/* --- 모바일 레이아웃 최종 보정 (입력창 가림 및 초기화면 위치) --- */
-/* ============================================================ */
-/* 📱 모바일 최적화: 툴바 가림 방지 및 채팅창 유동 높이 조절 */
-/* ============================================================ */
+
+
+
+
+
+
+
+
 @media (max-width: 768px) {
-    /* 1. 사이드바(메뉴탭): 화면 최상단 고정 */
+    /* 1. 사이드바(메뉴탭): 화면 최상단 고정 (가장 높은 z-index) */
     .sidebar {
         z-index: 9999 !important;
         position: fixed !important;
         width: var(--sidebar-width) !important;
         height: 100% !important;
+        left: 0;
+        top: 0;
     }
 
-    /* 2. 본문 컨테이너: 
-       하단 툴바에 가려지지 않도록 fixed로 잡고 height를 유동적으로 설정 */
+    /* 2. 본문 컨테이너: fixed를 해제하고 Flex 구조로 변경 */
     .phone {
         display: flex !important;
-        flex-direction: column !important;
-        position: fixed !important; 
-        top: 0 !important;
-        left: 0 !important;
-        right: 0 !important;
-        bottom: 0 !important;
-        
-        /* 💡 dvh는 툴바 상태에 따라 변하는 동적 높이입니다. */
-        height: 100dvh !important; 
+        flex-direction: column !important; /* 위에서 아래로 순차 배치 */
+        position: relative !important; /* 고정(fixed) 해제 */
+        height: 100dvh !important; /* 툴바 제외 실제 가시 높이 전체 사용 */
         width: 100% !important;
         padding-left: 0 !important;
-        overflow: hidden !important;
+        margin: 0 !important;
+        overflow: hidden !important; /* 전체 스크롤 방지 (내부 채팅창만 스크롤) */
         z-index: 1;
         background: var(--bg-color);
     }
 
-    /* 3. 상단바: 높이 고정 및 공간 확보 */
+    /* 3. 상단바: 높이 고정 및 공간 차지 */
     .header {
-        position: relative !important;
-        flex-shrink: 0 !important;
+        position: relative !important; /* 순서대로 배치 */
+        flex-shrink: 0 !important; /* 높이 압축 방지 */
         z-index: 10;
         height: 56px !important;
+        width: 100% !important;
+        left: 0 !important;
     }
 
-    /* 4. 채팅창 (메시지 영역): 
-       flex: 1을 통해 입력창이 올라오는 만큼 '자신'이 줄어듭니다. */
+    /* 4. 채팅창 (메시지 영역): 핵심 로직 */
     .chat-messages {
-        flex: 1 1 0% !important; /* 남는 공간을 차지하되 최우선으로 줄어듦 */
-        min-height: 0 !important; /* 중요: flex 안에서 줄어들 수 있게 함 */
-        overflow-y: auto !important; 
+        flex: 1 1 auto !important; /* 상단바와 입력창 사이 남는 모든 공간 차지 */
+        min-height: 0 !important; /* flex 안에서 유동적으로 줄어들게 함 */
+        overflow-y: auto !important; /* 채팅창 내부에서만 스크롤 발생 */
         display: flex;
         flex-direction: column;
-        padding-bottom: 15px !important;
+        padding-bottom: 20px !important;
         -webkit-overflow-scrolling: touch;
     }
 
-    /* 5. 입력창 (Composer): 툴바 바로 위에 배치 */
+    /* 5. 입력창 (Composer): 고정(fixed) 해제 */
     .composer {
-        position: relative !important;
-        bottom: 0 !important;
-        flex-shrink: 0 !important; /* 입력창 높이는 보존 */
+        position: relative !important; /* 문서 흐름에 따라 채팅창 바로 아래 위치 */
+        bottom: auto !important; /* fixed용 속성 제거 */
+        flex-shrink: 0 !important; /* 입력창 높이 보존 */
+        width: 100% !important;
+        left: 0 !important;
         background: var(--bg-color);
         border-top: 1px solid var(--border-color);
         z-index: 10;
         
-        /* 삼성 인터넷 하단 툴바 및 아이폰 홈바 영역 확보 */
+        /* 삼성 인터넷 툴바 및 홈바 영역 확보 */
         padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 12px) !important;
     }
 
-    /* 6. 텍스트 박스: 내용 많아지면 내부 스크롤 (요청사항) */
-    .input-container textarea {
-        overflow-y: auto !important; 
-        max-height: 150px !important; /* 이 높이 이후로는 위아래 스크롤 */
-        scrollbar-width: thin;
-        -ms-overflow-style: auto;
-    }
-    
-    /* 텍스트박스 스크롤바 디자인 */
-    .input-container textarea::-webkit-scrollbar {
-        width: 4px;
-    }
-    .input-container textarea::-webkit-scrollbar-thumb {
-        background: var(--border-color);
-        border-radius: 10px;
-    }
-
-    /* 사이드바 오픈 시 배경 암전 */
-    body.sidebar-open .phone::after {
-        content: "";
-        position: absolute;
-        top: 0; left: 0; right: 0; bottom: 0;
-        background: rgba(0,0,0,0.3);
-        z-index: 50;
-    }
-    
-    /* 초기화면 로고/인사말 위치 */
+    /* 6. 초기화면 로고: 절대 위치 유지하되 기준점 보정 */
     #initial-content {
         position: absolute !important;
         top: 48% !important;
         left: 50% !important;
         transform: translate(-50%, -50%) !important;
         width: 100%;
-        text-align: center;
+        pointer-events: none;
+    }
+
+    /* 7. 사이드바 오픈 시 배경 암전 (입력창 포함 전체 덮기) */
+    body.sidebar-open .phone::after {
+        content: "";
+        position: absolute;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(0,0,0,0.4);
+        z-index: 50;
     }
 }
