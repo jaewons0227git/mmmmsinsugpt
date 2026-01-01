@@ -7,7 +7,8 @@
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Elms+Sans:ital,wght@0,100..900;1,100..900&family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Elms+Sans:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
@@ -23,7 +24,8 @@
             --user-msg-bg: #f2f2f2; 
             --thought-bg: #f9f9f9;
             --thought-border: #eee;
-            --font-en: "Elms Sans", "Open Sans";
+            --font-en: "Outfit", sans-serif; 
+            --font-logo: "Elms Sans", sans-serif;
             --font-ko: -apple-system, BlinkMacSystemFont, sans-serif;
             --code-bg: #f6f8fa;
             --mint-point: #20c997;
@@ -49,9 +51,18 @@
             display: flex; align-items: center; justify-content: space-between;
             border-bottom: 1px solid var(--input-border); background: white; flex-shrink: 0; z-index: 10;
         }
-        .header-left { display: flex; align-items: baseline; gap: 8px; }
-        .logo-main { font-size: 1.1rem; font-weight: 300; letter-spacing: -0.03em; }
-        .logo-sub { font-size: 0.75rem; color: var(--text-gray); font-weight: 200; }
+        .header-left { display: flex; align-items: baseline; gap: 6px; }
+        
+        .logo-main { 
+            font-family: var(--font-logo); 
+            font-size: 1.1rem; font-weight: 300; letter-spacing: -0.03em; 
+        }
+        .logo-sub { 
+            font-family: var(--font-logo); 
+            font-size: 1.1rem; 
+            color: var(--text-gray); 
+            font-weight: 400; 
+        }
 
         .header-right { display: flex; gap: 8px; }
         
@@ -74,9 +85,74 @@
 
         #welcomeContainer {
             position: absolute; top: 45%; left: 50%; transform: translate(-50%, -50%);
-            width: 90%; text-align: center; transition: opacity 0.3s ease; z-index: 5; pointer-events: none;
+            width: 92%; max-width: 720px; 
+            text-align: left; 
+            transition: opacity 0.3s ease; z-index: 5; 
         }
-        .welcome-text { font-size: clamp(1.5rem, 7vw, 2.2rem); font-weight: 300; letter-spacing: -0.03em; color: #1a1a1a; }
+        .welcome-text { 
+            font-size: clamp(1.5rem, 5vw, 2.0rem); 
+            font-weight: 500; 
+            letter-spacing: -0.03em; 
+            color: #1a1a1a; 
+            margin-bottom: 20px;
+            margin-left: 4px;
+        }
+
+        /* 🌟 [수정됨] 스크롤 제거 및 꽉 찬 레이아웃 (Fit Layout) */
+        .suggestion-container {
+            display: flex;
+            width: 100%;
+            gap: 6px; /* 버튼 사이 간격 최소화 */
+            justify-content: space-between;
+            flex-wrap: nowrap; /* 줄바꿈 절대 금지 */
+        }
+
+        .suggestion-btn {
+            background-color: white;
+            border: 1px solid var(--input-border);
+            border-radius: 16px; /* 둥근 정도 약간 조정 */
+            
+            /* 🌟 [핵심 수정] 무조건 한 줄에 맞추기 */
+            flex: 1; /* 1:1:1 비율로 공간 차지 */
+            min-width: 0; /* 내용이 길어도 강제로 줄어들게 설정 */
+            
+            /* 패딩을 좌우 2px로 줄여서 작은 화면에서 글자 공간 확보 */
+            padding: 12px 2px; 
+            
+            /* 화면 너비(vw)에 따라 글자 크기 자동 조절 (최소 11px ~ 최대 15px) */
+            font-size: clamp(11px, 3.2vw, 15px); 
+            
+            color: var(--text-main);
+            cursor: pointer;
+            white-space: nowrap; /* 줄바꿈 금지 */
+            transition: all 0.2s ease;
+            font-family: var(--font-ko);
+            letter-spacing: -0.05em; /* 자간을 좁혀서 더 많이 들어가게 */
+            
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px; /* 아이콘과 텍스트 간격 좁힘 */
+            overflow: hidden; /* 넘치는 내용 숨김 (안전장치) */
+        }
+
+        .suggestion-btn:hover {
+            background-color: var(--btn-bg-soft);
+            border-color: #d0d0d0;
+        }
+
+        /* 🌟 [수정됨] 아이콘 크기도 화면에 맞춰 축소 */
+        .suggestion-btn .material-symbols-rounded {
+            font-size: clamp(16px, 4.5vw, 20px); 
+            font-variation-settings: 'wght' 500;
+            flex-shrink: 0; /* 아이콘은 찌그러지지 않게 */
+        }
+
+        /* 아이콘 색상 */
+        .icon-joke { color: #2563eb; } /* Blue */
+        .icon-talk { color: #9333ea; } /* Purple */
+        .icon-write { color: #ef4444; } /* Red */
+
 
         /* --- Chat Window --- */
         .chat-window { flex: 1; overflow-y: auto; display: flex; flex-direction: column; align-items: center; padding-bottom: 20px; -webkit-overflow-scrolling: touch; }
@@ -131,17 +207,15 @@
             width: 92%; max-width: 720px;
             display: flex; align-items: flex-end;
             border: 1px solid var(--input-border); border-radius: 24px;
-            /* 🌟 [수정됨] 패딩을 대폭 줄여서 전체 높이를 슬림하게 만듦 */
             padding: 8px 8px 8px 16px; 
             box-sizing: border-box;
             background: white;
-            min-height: 48px; /* 최소 높이 조정 */
+            min-height: 48px;
         }
         
         #userInput { 
             flex: 1; border: none; outline: none; 
             padding: 0; 
-            /* 🌟 [수정됨] 1줄일 때 버튼(32px)과 수직 중앙 정렬을 맞추기 위한 마진 */
             margin-bottom: 4px; 
             font-size: 0.95rem; 
             font-family: var(--font-ko);
@@ -149,8 +223,8 @@
             max-height: 150px; 
             overflow-y: hidden; 
             background: transparent;
-            line-height: 24px; /* 줄 높이 고정 */
-            height: 24px; /* 초기 높이 고정 */
+            line-height: 24px; 
+            height: 24px; 
             box-sizing: border-box;
         }
 
@@ -166,7 +240,6 @@
         .thinking-indicator { 
             color: var(--text-gray); font-size: 0.85rem; margin-bottom: 8px; display: flex; align-items: center; gap: 10px; height: 32px;
         }
-        /* Galaxy Loader CSS */
         .ui-load-glx { width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; }
         .ui-load-glx > .gbx { width: 18px; height: 18px; position: relative; transform: scale(1.0); }
         .ui-load-glx > .gbx .bx { position: absolute; width: 100%; height: 100%; animation: rotateFull 1.0s linear infinite; }
@@ -190,30 +263,73 @@
             100% { transform: rotate(360deg); }
         }
 
-        /* Modal Styles */
+        /* --- Modal Styles --- */
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.5); z-index: 100; display: none;
             align-items: center; justify-content: center; opacity: 0; transition: opacity 0.2s;
         }
         .modal-overlay.open { display: flex; opacity: 1; }
+        
         .modal-box {
             background: white; width: 90%; max-width: 400px; max-height: 80%;
             border-radius: 16px; padding: 20px; display: flex; flex-direction: column;
             box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            position: relative;
         }
+        
+        /* Confirm Modal Specific */
+        .modal-box.small-box { max-width: 320px; height: auto; padding: 24px; text-align: center; }
+        .confirm-title { font-size: 1.1rem; font-weight: 600; margin-bottom: 8px; }
+        .confirm-msg { font-size: 0.95rem; color: #666; margin-bottom: 24px; line-height: 1.5; }
+        .modal-actions { display: flex; gap: 10px; justify-content: center; width: 100%; }
+        .modal-btn {
+            flex: 1; padding: 12px; border-radius: 12px; font-size: 0.95rem; font-weight: 500; cursor: pointer; border: none;
+        }
+        .btn-cancel { background: #f0f0f0; color: #333; }
+        .btn-delete { background: var(--error-red); color: white; }
+
+        @media (max-width: 600px) {
+            .modal-overlay:not(#confirmModal) { align-items: flex-end; }
+            .modal-box:not(.small-box) {
+                width: 100%; max-width: 100%; border-radius: 24px 24px 0 0; 
+                margin: 0; max-height: 85vh; animation: slideUp 0.3s ease-out;
+            }
+            @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+        }
+
         .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         .modal-title { font-weight: 600; font-size: 1.1rem; }
         .close-modal-btn { background: none; border: none; cursor: pointer; padding: 4px; }
+        
+        /* 전체 삭제 버튼 */
+        .clear-all-btn {
+            font-size: 0.85rem; color: var(--error-red); background: none; border: none;
+            font-weight: 500; cursor: pointer; padding: 4px 8px; border-radius: 6px;
+        }
+        .clear-all-btn:hover { background: #fee2e2; }
+
         .history-list { overflow-y: auto; flex: 1; list-style: none; padding: 0; margin: 0; }
+        
+        /* 개별 기록 아이템 스타일 */
         .history-item {
-            padding: 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: background 0.2s;
+            padding: 12px; border-bottom: 1px solid #eee; transition: background 0.2s;
             border-radius: 8px; margin-bottom: 4px;
+            display: flex; justify-content: space-between; align-items: center;
         }
         .history-item:hover { background: #f9f9f9; }
-        .history-item:last-child { border-bottom: none; }
+        .history-info { flex: 1; overflow: hidden; cursor: pointer; }
         .h-title { font-size: 0.95rem; font-weight: 500; margin-bottom: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .h-date { font-size: 0.75rem; color: #aaa; }
+        
+        .delete-chat-btn {
+            background: none; border: none; padding: 8px; cursor: pointer; color: #ccc;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 50%;
+        }
+        .delete-chat-btn:hover { color: var(--error-red); background: #fff0f0; }
+        .delete-chat-btn .material-symbols-rounded { font-size: 20px; }
+
         .empty-history { text-align: center; color: #aaa; padding: 20px; font-size: 0.9rem; }
 
     </style>
@@ -224,7 +340,7 @@
     <header>
         <div class="header-left">
             <span class="logo-main">MinsuGPT</span>
-            <span class="logo-sub">with mintalk</span>
+            <span class="logo-sub">for mintalk</span>
         </div>
         <div class="header-right">
             <button class="icon-btn" id="newChatBtn" title="새 채팅">
@@ -236,7 +352,23 @@
         </div>
     </header>
 
-    <div id="welcomeContainer"><div class="welcome-text">무엇을 도와드릴까요?</div></div>
+    <div id="welcomeContainer">
+        <div class="welcome-text">무엇을 도와드릴까요?</div>
+        <div class="suggestion-container">
+            <button class="suggestion-btn" onclick="sendMessage('농담해줘')">
+                <span class="material-symbols-rounded icon-joke">sentiment_very_satisfied</span>
+                농담하기
+            </button>
+            <button class="suggestion-btn" onclick="sendMessage('같이 이야기하자')">
+                <span class="material-symbols-rounded icon-talk">chat_bubble</span>
+                함께 이야기 하기
+            </button>
+            <button class="suggestion-btn" onclick="prepareWriteMode()">
+                <span class="material-symbols-rounded icon-write">edit_note</span>
+                글쓰기
+            </button>
+        </div>
+    </div>
 
     <div class="chat-window" id="chatWindow">
         <div class="messages-container" id="chatMessages"></div>
@@ -256,9 +388,23 @@
     <div class="modal-box">
         <div class="modal-header">
             <span class="modal-title">채팅 기록</span>
-            <button class="close-modal-btn" id="closeModalBtn"><span class="material-symbols-rounded">close</span></button>
+            <div style="display:flex; align-items:center; gap:8px;">
+                <button class="clear-all-btn" id="clearAllBtn">전체 삭제</button>
+                <button class="close-modal-btn" id="closeModalBtn"><span class="material-symbols-rounded">close</span></button>
+            </div>
         </div>
         <ul class="history-list" id="historyList"></ul>
+    </div>
+</div>
+
+<div class="modal-overlay" id="confirmModal">
+    <div class="modal-box small-box">
+        <div class="confirm-title" id="confirmTitle">삭제 하시겠습니까?</div>
+        <div class="confirm-msg" id="confirmMessage">이 작업은 되돌릴 수 없습니다.</div>
+        <div class="modal-actions">
+            <button class="modal-btn btn-cancel" id="confirmCancelBtn">취소</button>
+            <button class="modal-btn btn-delete" id="confirmOkBtn">삭제</button>
+        </div>
     </div>
 </div>
 
@@ -285,6 +431,14 @@
     const historyModal = document.getElementById('historyModal');
     const closeModalBtn = document.getElementById('closeModalBtn');
     const historyList = document.getElementById('historyList');
+    const clearAllBtn = document.getElementById('clearAllBtn');
+
+    // Confirm Modal Elements
+    const confirmModal = document.getElementById('confirmModal');
+    const confirmTitle = document.getElementById('confirmTitle');
+    const confirmMessage = document.getElementById('confirmMessage');
+    const confirmCancelBtn = document.getElementById('confirmCancelBtn');
+    const confirmOkBtn = document.getElementById('confirmOkBtn');
 
     // --- State ---
     let history = []; 
@@ -292,31 +446,21 @@
     let isStreaming = false;
     let abortController = null;
     let isMobile = /Mobi|Android/i.test(navigator.userAgent);
+    let confirmCallback = null; 
 
     marked.setOptions({ breaks: true, gfm: true });
 
-    // --- 🌟 Input Auto-Resize Logic (Improved) 🌟 ---
+    // --- Input Logic ---
     const BASE_HEIGHT = '24px'; 
-
     function resizeInput() {
-        // 기준 높이로 초기화
         userInput.style.height = BASE_HEIGHT; 
-        
-        if (userInput.value === '') {
-            userInput.style.overflowY = 'hidden';
-            return;
-        }
-
+        if (userInput.value === '') { userInput.style.overflowY = 'hidden'; return; }
         const scrollHeight = userInput.scrollHeight;
-        
-        // 기준 높이 + 약간의 오차(2px)보다 클 때만 높이를 늘림
         if (scrollHeight > parseInt(BASE_HEIGHT) + 2) {
              const newHeight = Math.min(scrollHeight, 150);
              userInput.style.height = newHeight + 'px';
              userInput.style.overflowY = newHeight >= 150 ? 'auto' : 'hidden';
-        } else {
-            userInput.style.overflowY = 'hidden';
-        }
+        } else { userInput.style.overflowY = 'hidden'; }
     }
 
     userInput.addEventListener('input', () => {
@@ -328,9 +472,7 @@
         if (e.key === 'Enter') {
             if (!isMobile && !e.shiftKey) {
                 e.preventDefault(); 
-                if(userInput.value.trim() !== "" && !isStreaming) {
-                    sendMessage();
-                }
+                if(userInput.value.trim() !== "" && !isStreaming) sendMessage();
             }
         }
     });
@@ -340,19 +482,50 @@
         else sendMessage();
     });
 
-    // --- Other Event Listeners ---
+    // --- Chat Logic ---
     newChatBtn.addEventListener('click', startNewChat);
+    
+    // History Modal Events
     historyBtn.addEventListener('click', openHistoryModal);
     closeModalBtn.addEventListener('click', closeHistoryModal);
     historyModal.addEventListener('click', (e) => {
         if (e.target === historyModal) closeHistoryModal();
     });
+    
+    // 전체 삭제 버튼 이벤트
+    clearAllBtn.addEventListener('click', () => {
+        showConfirmModal("전체 삭제", "모든 채팅 기록을 삭제하시겠습니까?<br>이 작업은 되돌릴 수 없습니다.", () => {
+            localStorage.removeItem(STORAGE_KEY);
+            renderHistoryList();
+            startNewChat();
+        });
+    });
 
-    // --- Functions ---
+    // Confirm Modal Logic
+    function showConfirmModal(title, msg, onConfirm) {
+        confirmTitle.innerText = title;
+        confirmMessage.innerHTML = msg;
+        confirmCallback = onConfirm;
+        confirmModal.classList.add('open');
+    }
+
+    function closeConfirmModal() {
+        confirmModal.classList.remove('open');
+        confirmCallback = null;
+    }
+
+    confirmCancelBtn.addEventListener('click', closeConfirmModal);
+    confirmOkBtn.addEventListener('click', () => {
+        if (confirmCallback) confirmCallback();
+        closeConfirmModal();
+    });
+    confirmModal.addEventListener('click', (e) => {
+        if (e.target === confirmModal) closeConfirmModal();
+    });
+
 
     function startNewChat() {
         if (isStreaming) stopResponse();
-        
         currentChatId = null;
         history = [];
         chatMessages.innerHTML = '';
@@ -362,6 +535,14 @@
         resizeInput(); 
         sendBtn.classList.remove('active');
         userInput.focus();
+    }
+
+    function prepareWriteMode() {
+        const text = "아래 내용대로 글을 써줘\n";
+        userInput.value = text;
+        resizeInput(); 
+        userInput.focus(); 
+        sendBtn.classList.add('active'); 
     }
 
     function openHistoryModal() {
@@ -379,32 +560,15 @@
     }
 
     function saveChatToLocal() {
-        if (!currentChatId) {
-            currentChatId = Date.now().toString();
-        }
-
+        if (!currentChatId) currentChatId = Date.now().toString();
         let chats = getSavedChats();
         const existingIndex = chats.findIndex(c => c.id === currentChatId);
-
         const firstUserMsg = history.find(m => m.role === 'user');
         let title = "새로운 채팅";
-        if (firstUserMsg) {
-            title = firstUserMsg.content.length > 20 ? firstUserMsg.content.substring(0, 20) + "..." : firstUserMsg.content;
-        }
-
-        const chatData = {
-            id: currentChatId,
-            title: existingIndex !== -1 ? chats[existingIndex].title : title, 
-            messages: history, 
-            timestamp: Date.now()
-        };
-
-        if (existingIndex !== -1) {
-            chats[existingIndex] = chatData;
-        } else {
-            chats.unshift(chatData); 
-        }
-
+        if (firstUserMsg) title = firstUserMsg.content.length > 20 ? firstUserMsg.content.substring(0, 20) + "..." : firstUserMsg.content;
+        const chatData = { id: currentChatId, title: existingIndex !== -1 ? chats[existingIndex].title : title, messages: history, timestamp: Date.now() };
+        if (existingIndex !== -1) chats[existingIndex] = chatData;
+        else chats.unshift(chatData); 
         localStorage.setItem(STORAGE_KEY, JSON.stringify(chats));
     }
 
@@ -412,66 +576,82 @@
         const chats = getSavedChats();
         const chat = chats.find(c => c.id === id);
         if (!chat) return;
-
         startNewChat(); 
         welcomeContainer.style.display = 'none';
         welcomeContainer.style.opacity = '0';
-        
         currentChatId = chat.id;
         history = chat.messages; 
-
         history.forEach(msg => {
-            if (msg.role === 'user') {
-                renderMessage(msg.content, 'user');
-            } else if (msg.role === 'model') {
+            if (msg.role === 'user') renderMessage(msg.content, 'user');
+            else if (msg.role === 'model') {
                 const msgDiv = renderMessage(msg.content, 'bot');
                 appendActionButtons(msgDiv, msg.content); 
             }
         });
-        
         closeHistoryModal();
         setTimeout(scrollToBottom, 100);
     }
 
+    // 개별 삭제 기능 포함한 렌더링
     function renderHistoryList() {
         const chats = getSavedChats();
         historyList.innerHTML = '';
-
         if (chats.length === 0) {
             historyList.innerHTML = '<li class="empty-history">기록된 채팅이 없습니다.</li>';
+            clearAllBtn.style.display = 'none'; 
             return;
         }
+        clearAllBtn.style.display = 'block'; 
 
         chats.forEach(chat => {
-            const date = new Date(chat.timestamp).toLocaleDateString() + " " + new Date(chat.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            const date = new Date(chat.timestamp).toLocaleDateString();
             const li = document.createElement('li');
             li.className = 'history-item';
+            
             li.innerHTML = `
-                <div class="h-title">${chat.title}</div>
-                <div class="h-date">${date}</div>
+                <div class="history-info">
+                    <div class="h-title">${chat.title}</div>
+                    <div class="h-date">${date}</div>
+                </div>
+                <button class="delete-chat-btn" title="삭제">
+                    <span class="material-symbols-rounded">delete</span>
+                </button>
             `;
-            li.addEventListener('click', () => loadChat(chat.id));
+            
+            li.querySelector('.history-info').addEventListener('click', () => loadChat(chat.id));
+            li.querySelector('.delete-chat-btn').addEventListener('click', (e) => {
+                e.stopPropagation(); 
+                showConfirmModal("기록 삭제", "이 채팅 기록을 삭제하시겠습니까?", () => {
+                    deleteChat(chat.id);
+                });
+            });
             historyList.appendChild(li);
         });
+    }
+
+    function deleteChat(id) {
+        let chats = getSavedChats();
+        chats = chats.filter(c => c.id !== id);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(chats));
+        renderHistoryList(); 
+        
+        if (currentChatId === id) {
+            startNewChat();
+        }
     }
 
     function formatMessageContent(text) {
         if (!text) return "";
         let html = text;
-
         const thoughtMatches = html.match(/\[THOUGHT\]([\s\S]*?)\[\/THOUGHT\]/g);
         let combinedThought = "";
         let finalAnswerText = html;
-
         if (thoughtMatches) {
             combinedThought = thoughtMatches.map(m => m.replace(/\[\/?THOUGHT\]/g, '').trim()).join(' ').replace(/\n/g, ' '); 
             finalAnswerText = html.replace(/\[THOUGHT\]([\s\S]*?)\[\/THOUGHT\]/g, '');
         }
-
         let renderedHtml = marked.parse(finalAnswerText);
-        if (combinedThought) {
-            renderedHtml = `<div class="thought-box">${combinedThought}</div>` + renderedHtml;
-        }
+        if (combinedThought) renderedHtml = `<div class="thought-box">${combinedThought}</div>` + renderedHtml;
         return renderedHtml;
     }
 
@@ -486,33 +666,23 @@
     async function sendMessage(userMessageOverride = null, isRegenerate = false) {
         const text = userMessageOverride !== null ? userMessageOverride : userInput.value.trim();
         if (!text && !isRegenerate) return;
-
         if (welcomeContainer.style.display !== 'none') {
             welcomeContainer.style.opacity = '0';
             setTimeout(() => welcomeContainer.style.display = 'none', 500);
         }
-
         if (!isRegenerate) {
             renderMessage(text, 'user');
             history.push({ role: "user", content: text });
-            
-            userInput.value = '';
-            resizeInput(); 
-            setStreamingState(true); 
-            saveChatToLocal();
+            userInput.value = ''; resizeInput(); setStreamingState(true); saveChatToLocal();
         }
-
         scrollToBottom();
-
         const botMsgDiv = renderMessage('', 'bot', true); 
         const contentDiv = botMsgDiv.querySelector('.bot-content');
-
         setTimeout(scrollToBottom, 50);
-
         abortController = new AbortController();
         const signal = abortController.signal;
-        let fullResponse = "";
         
+        let fullResponseBuffer = ""; let displayedResponse = ""; let typingInterval = null;   
         try {
             const response = await fetch(BACKEND_ENDPOINT, {
                 method: 'POST',
@@ -520,46 +690,43 @@
                 body: JSON.stringify({ message: text, history: [PRE_PROMPT, ...history] }),
                 signal: signal
             });
-
             const reader = response.body.getReader();
             const decoder = new TextDecoder('utf-8');
-
+            typingInterval = setInterval(() => {
+                if (displayedResponse.length < fullResponseBuffer.length) {
+                    const chunkParams = 3; 
+                    const nextChunk = fullResponseBuffer.substring(displayedResponse.length, displayedResponse.length + chunkParams);
+                    displayedResponse += nextChunk;
+                    contentDiv.innerHTML = formatMessageContent(displayedResponse);
+                    scrollToBottom();
+                }
+            }, 20); 
             while (true) {
                 const { done, value } = await reader.read();
                 if (done) break;
                 const chunk = decoder.decode(value, { stream: true });
-                
-                if (chunk.includes("[DONE]")) {
-                    fullResponse += chunk.replace("[DONE]", "");
-                    break;
+                if (chunk.includes("[DONE]")) { fullResponseBuffer += chunk.replace("[DONE]", ""); break; }
+                fullResponseBuffer += chunk;
+            }
+            const checkDoneInterval = setInterval(() => {
+                if (displayedResponse.length >= fullResponseBuffer.length) {
+                    clearInterval(checkDoneInterval); clearInterval(typingInterval); finalizeMessage(botMsgDiv, fullResponseBuffer);
                 }
-
-                fullResponse += chunk;
-                contentDiv.innerHTML = formatMessageContent(fullResponse);
-                scrollToBottom();
-            }
-            finalizeMessage(botMsgDiv, fullResponse); 
+            }, 50);
         } catch (error) {
-            if (error.name === 'AbortError') finalizeMessage(botMsgDiv, fullResponse);
-            else {
-                contentDiv.innerHTML = `<span style="color:var(--error-red);">연결 오류가 발생했습니다.</span>`;
-                setStreamingState(false);
-                scrollToBottom();
-            }
+            clearInterval(typingInterval);
+            if (error.name === 'AbortError') finalizeMessage(botMsgDiv, displayedResponse);
+            else { contentDiv.innerHTML = `<span style="color:var(--error-red);">연결 오류가 발생했습니다.</span>`; setStreamingState(false); scrollToBottom(); }
         }
     }
 
     function renderMessage(content, role, isLoading = false) {
         const msgDiv = document.createElement('div');
         msgDiv.className = `msg ${role}`;
-        
-        if (role === 'user') {
-            msgDiv.innerHTML = `<div class="user-bubble">${content}</div>`;
-        } else {
+        if (role === 'user') msgDiv.innerHTML = `<div class="user-bubble">${content}</div>`;
+        else {
             let innerHTML = '';
-            if (isLoading) {
-                innerHTML += `<div class="thinking-indicator"><div class="ui-load-glx"><div class="gbx"><div class="bx"><i></i><i></i><i></i><i></i></div></div></div>생각 중...</div>`;
-            }
+            if (isLoading) innerHTML += `<div class="thinking-indicator"><div class="ui-load-glx"><div class="gbx"><div class="bx"><i></i><i></i><i></i><i></i></div></div></div>생각 중...</div>`;
             innerHTML += `<div class="bot-content">${formatMessageContent(content)}</div>`;
             msgDiv.innerHTML = innerHTML;
         }
@@ -571,12 +738,10 @@
         setStreamingState(false);
         const indicator = msgDiv.querySelector('.thinking-indicator');
         if (indicator) indicator.remove();
-        
+        msgDiv.querySelector('.bot-content').innerHTML = formatMessageContent(content);
         history.push({ role: "model", content: content });
         saveChatToLocal(); 
-
         appendActionButtons(msgDiv, content); 
-        
         setTimeout(scrollToBottom, 10);
     }
 
@@ -592,31 +757,21 @@
         `;
         msgDiv.appendChild(actionsDiv);
         updateRegenerateButtons();
-        msgDiv.querySelector('.bot-content').innerHTML = formatMessageContent(content);
     }
 
     function setStreamingState(active) {
         isStreaming = active;
         if (active) {
-            sendBtn.classList.add('active'); 
-            sendIcon.textContent = 'stop'; 
-            sendIcon.style.fontVariationSettings = "'FILL' 1"; 
-            userInput.disabled = true;
+            sendBtn.classList.add('active'); sendIcon.textContent = 'stop'; sendIcon.style.fontVariationSettings = "'FILL' 1"; userInput.disabled = true;
         } else {
-            sendBtn.classList.remove('active');
-            sendIcon.textContent = 'arrow_upward';
-            sendIcon.style.fontVariationSettings = "'FILL' 0";
-            userInput.disabled = false;
-            userInput.focus();
+            sendBtn.classList.remove('active'); sendIcon.textContent = 'arrow_upward'; sendIcon.style.fontVariationSettings = "'FILL' 0"; userInput.disabled = false; userInput.focus();
         }
     }
 
     function stopResponse() { if (abortController) abortController.abort(); }
     
     function scrollToBottom() { 
-        requestAnimationFrame(() => {
-            chatWindow.scrollTop = chatWindow.scrollHeight; 
-        });
+        requestAnimationFrame(() => { chatWindow.scrollTop = chatWindow.scrollHeight; });
     }
 
     function updateRegenerateButtons() {
@@ -627,7 +782,6 @@
     window.copyText = function(btn) {
         const msgDiv = btn.closest('.msg');
         const txt = getCleanText(msgDiv); 
-        
         navigator.clipboard.writeText(txt).then(() => {
             const icon = btn.innerHTML; btn.innerHTML = '<span class="material-symbols-rounded" style="color:var(--mint-point)">check</span>';
             setTimeout(() => btn.innerHTML = icon, 1500);
@@ -649,18 +803,12 @@
     window.shareContent = function(btn) {
         const msgDiv = btn.closest('.msg');
         const txt = getCleanText(msgDiv); 
-        
         if (navigator.share) navigator.share({ text: txt });
-        else {
-            navigator.clipboard.writeText(txt).then(() => alert('텍스트가 복사되었습니다.'));
-        }
+        else { navigator.clipboard.writeText(txt).then(() => alert('텍스트가 복사되었습니다.')); }
     };
 
     function adjustLayout() {
-        if (window.visualViewport) {
-            appContainer.style.height = `${window.visualViewport.height}px`;
-            scrollToBottom();
-        }
+        if (window.visualViewport) { appContainer.style.height = `${window.visualViewport.height}px`; scrollToBottom(); }
     }
     if (window.visualViewport) {
         window.visualViewport.addEventListener('resize', adjustLayout);
