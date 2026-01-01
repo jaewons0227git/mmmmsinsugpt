@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>MinsuGPT with mintalk</title>
+    <title>MinsuGPT</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -55,21 +55,13 @@
 
         .header-right { display: flex; gap: 8px; }
         
-        /* 🌟 버튼 스타일 변경: 둥근 정사각형 🌟 */
         .icon-btn {
             background-color: var(--btn-bg-soft); 
             border: 1px solid transparent; 
             cursor: pointer; 
             color: var(--text-main);
-            
-            /* 정사각형 크기 고정 */
-            width: 38px; 
-            height: 38px;
-            padding: 0; /* 패딩 제거하여 아이콘 중앙 정렬 */
-            
-            /* 둥근 모서리 (원형 아님) */
+            width: 38px; height: 38px; padding: 0; 
             border-radius: 12px; 
-            
             display: flex; align-items: center; justify-content: center;
             transition: all 0.2s ease;
         }
@@ -86,23 +78,20 @@
         }
         .welcome-text { font-size: clamp(1.5rem, 7vw, 2.2rem); font-weight: 300; letter-spacing: -0.03em; color: #1a1a1a; }
 
-        /* --- Chat Window & Alignment --- */
+        /* --- Chat Window --- */
         .chat-window { flex: 1; overflow-y: auto; display: flex; flex-direction: column; align-items: center; padding-bottom: 20px; -webkit-overflow-scrolling: touch; }
         
-        /* 🌟 너비 일치를 위한 설정 🌟 */
         .messages-container { 
-            width: 92%; /* 모바일 대응 */
-            max-width: 720px; /* 최대 너비 제한 */
+            width: 92%; max-width: 720px; 
             display: flex; flex-direction: column; gap: 32px; 
-            padding: 20px 0; /* 좌우 패딩 제거하여 정확한 너비 맞춤 */
-            box-sizing: border-box; 
+            padding: 20px 0; box-sizing: border-box; 
         }
 
         .msg { display: flex; flex-direction: column; width: 100%; }
         .msg.bot { align-items: flex-start; }
         
         .bot-content { 
-            width: 100%; font-size: 1rem; line-height: 1.7; word-break: break-word; 
+            width: 100%; font-size: 1rem; line-height: 1.6; word-break: break-word; 
             display: block; min-height: 1.2em;
             font-family: var(--font-ko); 
         }
@@ -122,6 +111,7 @@
             background-color: var(--user-msg-bg); color: var(--text-main); font-size: 0.95rem;
             white-space: pre-wrap;
             font-family: var(--font-ko);
+            line-height: 1.5;
         }
 
         .action-buttons { display: flex; gap: 6px; margin-top: 6px; opacity: 1; }
@@ -132,31 +122,43 @@
         }
         .action-btn:hover { color: var(--text-main); }
         .action-btn.disabled { opacity: 0.2; pointer-events: none; }
-        .action-btn .material-symbols-rounded { 
-            font-size: 19px; 
-            font-variation-settings: 'wght' 300; 
-        }
+        .action-btn .material-symbols-rounded { font-size: 19px; font-variation-settings: 'wght' 300; }
 
-        /* --- Input Area Alignment --- */
+        /* --- Input Area --- */
         .input-container { width: 100%; display: flex; justify-content: center; padding: 10px 0 25px 0; background: white; flex-shrink: 0; }
         
         .input-wrapper {
-            /* 🌟 위 messages-container와 동일한 너비 규칙 적용 🌟 */
-            width: 92%; 
-            max-width: 720px;
-            
-            display: flex; align-items: center;
-            border: 1px solid var(--input-border); border-radius: 30px; padding: 5px 8px 5px 16px;
-            box-sizing: border-box; /* 패딩 포함 너비 계산 */
+            width: 92%; max-width: 720px;
+            display: flex; align-items: flex-end;
+            border: 1px solid var(--input-border); border-radius: 24px;
+            /* 🌟 [수정됨] 패딩을 대폭 줄여서 전체 높이를 슬림하게 만듦 */
+            padding: 8px 8px 8px 16px; 
+            box-sizing: border-box;
+            background: white;
+            min-height: 48px; /* 최소 높이 조정 */
         }
+        
         #userInput { 
-            flex: 1; border: none; outline: none; padding: 8px 0; font-size: 0.95rem; 
-            font-family: var(--font-ko); 
+            flex: 1; border: none; outline: none; 
+            padding: 0; 
+            /* 🌟 [수정됨] 1줄일 때 버튼(32px)과 수직 중앙 정렬을 맞추기 위한 마진 */
+            margin-bottom: 4px; 
+            font-size: 0.95rem; 
+            font-family: var(--font-ko);
+            resize: none; 
+            max-height: 150px; 
+            overflow-y: hidden; 
+            background: transparent;
+            line-height: 24px; /* 줄 높이 고정 */
+            height: 24px; /* 초기 높이 고정 */
+            box-sizing: border-box;
         }
+
         .send-btn {
             background-color: var(--btn-disabled); color: var(--btn-disabled-icon); border: none; border-radius: 50%;
             width: 32px; height: 32px; display: flex; justify-content: center; align-items: center;
             cursor: default; transition: all 0.2s ease; pointer-events: none;
+            flex-shrink: 0; margin-left: 8px; margin-bottom: 0px; 
         }
         .send-btn.active { background-color: var(--btn-active); color: #ffffff; cursor: pointer; pointer-events: auto; }
         .material-symbols-rounded.send-icon { font-variation-settings: 'wght' 300; font-size: 22px; }
@@ -188,7 +190,7 @@
             100% { transform: rotate(360deg); }
         }
 
-        /* --- Modal Styles --- */
+        /* Modal Styles */
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.5); z-index: 100; display: none;
@@ -242,7 +244,7 @@
 
     <div class="input-container">
         <div class="input-wrapper">
-            <input type="text" id="userInput" placeholder="메시지 입력..." autocomplete="off">
+            <textarea id="userInput" rows="1" placeholder="메시지 입력..." autocomplete="off"></textarea>
             <button class="send-btn" id="sendBtn">
                 <span class="material-symbols-rounded send-icon" id="sendIcon">arrow_upward</span>
             </button>
@@ -256,8 +258,7 @@
             <span class="modal-title">채팅 기록</span>
             <button class="close-modal-btn" id="closeModalBtn"><span class="material-symbols-rounded">close</span></button>
         </div>
-        <ul class="history-list" id="historyList">
-            </ul>
+        <ul class="history-list" id="historyList"></ul>
     </div>
 </div>
 
@@ -279,7 +280,6 @@
     const welcomeContainer = document.getElementById('welcomeContainer');
     const appContainer = document.getElementById('app');
     
-    // Header & Modal Elements
     const newChatBtn = document.getElementById('newChatBtn');
     const historyBtn = document.getElementById('historyBtn');
     const historyModal = document.getElementById('historyModal');
@@ -291,16 +291,48 @@
     let currentChatId = null; 
     let isStreaming = false;
     let abortController = null;
+    let isMobile = /Mobi|Android/i.test(navigator.userAgent);
 
     marked.setOptions({ breaks: true, gfm: true });
 
-    // --- Event Listeners ---
+    // --- 🌟 Input Auto-Resize Logic (Improved) 🌟 ---
+    const BASE_HEIGHT = '24px'; 
+
+    function resizeInput() {
+        // 기준 높이로 초기화
+        userInput.style.height = BASE_HEIGHT; 
+        
+        if (userInput.value === '') {
+            userInput.style.overflowY = 'hidden';
+            return;
+        }
+
+        const scrollHeight = userInput.scrollHeight;
+        
+        // 기준 높이 + 약간의 오차(2px)보다 클 때만 높이를 늘림
+        if (scrollHeight > parseInt(BASE_HEIGHT) + 2) {
+             const newHeight = Math.min(scrollHeight, 150);
+             userInput.style.height = newHeight + 'px';
+             userInput.style.overflowY = newHeight >= 150 ? 'auto' : 'hidden';
+        } else {
+            userInput.style.overflowY = 'hidden';
+        }
+    }
+
     userInput.addEventListener('input', () => {
+        resizeInput();
         if (!isStreaming) sendBtn.classList.toggle('active', userInput.value.trim() !== "");
     });
 
-    userInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter' && userInput.value.trim() !== "" && !isStreaming) sendMessage();
+    userInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            if (!isMobile && !e.shiftKey) {
+                e.preventDefault(); 
+                if(userInput.value.trim() !== "" && !isStreaming) {
+                    sendMessage();
+                }
+            }
+        }
     });
 
     sendBtn.addEventListener('click', () => {
@@ -308,13 +340,15 @@
         else sendMessage();
     });
 
+    // --- Other Event Listeners ---
     newChatBtn.addEventListener('click', startNewChat);
-
     historyBtn.addEventListener('click', openHistoryModal);
     closeModalBtn.addEventListener('click', closeHistoryModal);
     historyModal.addEventListener('click', (e) => {
         if (e.target === historyModal) closeHistoryModal();
     });
+
+    // --- Functions ---
 
     function startNewChat() {
         if (isStreaming) stopResponse();
@@ -325,6 +359,7 @@
         welcomeContainer.style.display = 'block';
         setTimeout(() => welcomeContainer.style.opacity = '1', 10);
         userInput.value = '';
+        resizeInput(); 
         sendBtn.classList.remove('active');
         userInput.focus();
     }
@@ -338,7 +373,6 @@
         historyModal.classList.remove('open');
     }
 
-    // --- Local Storage Logic ---
     function getSavedChats() {
         const data = localStorage.getItem(STORAGE_KEY);
         return data ? JSON.parse(data) : [];
@@ -361,7 +395,7 @@
         const chatData = {
             id: currentChatId,
             title: existingIndex !== -1 ? chats[existingIndex].title : title, 
-            messages: history,
+            messages: history, 
             timestamp: Date.now()
         };
 
@@ -384,14 +418,14 @@
         welcomeContainer.style.opacity = '0';
         
         currentChatId = chat.id;
-        history = chat.messages;
+        history = chat.messages; 
 
         history.forEach(msg => {
             if (msg.role === 'user') {
                 renderMessage(msg.content, 'user');
             } else if (msg.role === 'model') {
                 const msgDiv = renderMessage(msg.content, 'bot');
-                finalizeMessage(msgDiv, msg.content, false); 
+                appendActionButtons(msgDiv, msg.content); 
             }
         });
         
@@ -421,8 +455,6 @@
         });
     }
 
-    // --- Core Chat Logic ---
-
     function formatMessageContent(text) {
         if (!text) return "";
         let html = text;
@@ -443,6 +475,14 @@
         return renderedHtml;
     }
 
+    function getCleanText(msgDiv) {
+        const contentDiv = msgDiv.querySelector('.bot-content');
+        const clone = contentDiv.cloneNode(true);
+        const thoughts = clone.querySelectorAll('.thought-box');
+        thoughts.forEach(t => t.remove()); 
+        return clone.innerText.trim();
+    }
+
     async function sendMessage(userMessageOverride = null, isRegenerate = false) {
         const text = userMessageOverride !== null ? userMessageOverride : userInput.value.trim();
         if (!text && !isRegenerate) return;
@@ -455,7 +495,9 @@
         if (!isRegenerate) {
             renderMessage(text, 'user');
             history.push({ role: "user", content: text });
+            
             userInput.value = '';
+            resizeInput(); 
             setStreamingState(true); 
             saveChatToLocal();
         }
@@ -496,7 +538,7 @@
                 contentDiv.innerHTML = formatMessageContent(fullResponse);
                 scrollToBottom();
             }
-            finalizeMessage(botMsgDiv, fullResponse);
+            finalizeMessage(botMsgDiv, fullResponse); 
         } catch (error) {
             if (error.name === 'AbortError') finalizeMessage(botMsgDiv, fullResponse);
             else {
@@ -525,16 +567,20 @@
         return msgDiv;
     }
 
-    function finalizeMessage(msgDiv, content, doSave = true) {
+    function finalizeMessage(msgDiv, content) {
         setStreamingState(false);
         const indicator = msgDiv.querySelector('.thinking-indicator');
         if (indicator) indicator.remove();
         
-        if(doSave) {
-            history.push({ role: "model", content: content });
-            saveChatToLocal(); 
-        }
+        history.push({ role: "model", content: content });
+        saveChatToLocal(); 
 
+        appendActionButtons(msgDiv, content); 
+        
+        setTimeout(scrollToBottom, 10);
+    }
+
+    function appendActionButtons(msgDiv, content) {
         const actionsDiv = document.createElement('div');
         actionsDiv.className = 'action-buttons';
         actionsDiv.innerHTML = `
@@ -547,8 +593,6 @@
         msgDiv.appendChild(actionsDiv);
         updateRegenerateButtons();
         msgDiv.querySelector('.bot-content').innerHTML = formatMessageContent(content);
-        
-        setTimeout(scrollToBottom, 10);
     }
 
     function setStreamingState(active) {
@@ -581,7 +625,9 @@
     }
 
     window.copyText = function(btn) {
-        const txt = btn.closest('.msg').querySelector('.bot-content').innerText;
+        const msgDiv = btn.closest('.msg');
+        const txt = getCleanText(msgDiv); 
+        
         navigator.clipboard.writeText(txt).then(() => {
             const icon = btn.innerHTML; btn.innerHTML = '<span class="material-symbols-rounded" style="color:var(--mint-point)">check</span>';
             setTimeout(() => btn.innerHTML = icon, 1500);
@@ -599,10 +645,15 @@
 
     window.handleLike = function(btn) { btn.style.color = 'var(--mint-point)'; };
     window.handleDislike = function(btn) { btn.style.color = 'var(--error-red)'; };
+    
     window.shareContent = function(btn) {
-        const txt = btn.closest('.msg').querySelector('.bot-content').innerText;
+        const msgDiv = btn.closest('.msg');
+        const txt = getCleanText(msgDiv); 
+        
         if (navigator.share) navigator.share({ text: txt });
-        else alert('텍스트가 복사되었습니다.');
+        else {
+            navigator.clipboard.writeText(txt).then(() => alert('텍스트가 복사되었습니다.'));
+        }
     };
 
     function adjustLayout() {
