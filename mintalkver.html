@@ -32,23 +32,15 @@
 
         html, body {
             margin: 0; padding: 0; 
-            width: 100%; 
-            height: 100%; 
-            /* 모바일 브라우저 주소창 대응을 위한 dvh 우선 적용 */
+            width: 100%; height: 100%; 
             height: 100dvh; 
-            overflow: hidden; /* 전체 스크롤 방지 */
+            overflow: hidden; 
             font-family: var(--font-en), var(--font-ko);
             background-color: var(--bg-main); color: var(--text-main);
             -webkit-font-smoothing: antialiased;
         }
 
-        #app { 
-            display: flex; 
-            flex-direction: column; 
-            height: 100%; 
-            height: 100dvh; /* JS로 덮어씌워질 수 있음 */
-            position: relative; 
-        }
+        #app { display: flex; flex-direction: column; height: 100%; position: relative; }
 
         header {
             padding: 12px 25px; display: flex; align-items: baseline; gap: 8px;
@@ -61,13 +53,7 @@
             position: absolute; top: 45%; left: 50%; transform: translate(-50%, -50%);
             width: 90%; text-align: center; transition: opacity 0.5s ease; z-index: 5; pointer-events: none;
         }
-        .welcome-text { 
-            font-size: clamp(1.5rem, 7vw, 2.2rem); 
-            font-weight: 300; 
-            white-space: nowrap; 
-            letter-spacing: -0.03em;
-            color: #1a1a1a;
-        }
+        .welcome-text { font-size: clamp(1.5rem, 7vw, 2.2rem); font-weight: 300; letter-spacing: -0.03em; color: #1a1a1a; }
 
         .chat-window { flex: 1; overflow-y: auto; display: flex; flex-direction: column; align-items: center; padding-bottom: 20px; -webkit-overflow-scrolling: touch; }
         .messages-container { width: 100%; max-width: 720px; display: flex; flex-direction: column; gap: 32px; padding: 20px; box-sizing: border-box; }
@@ -75,124 +61,85 @@
         .msg { display: flex; flex-direction: column; width: 100%; }
         .msg.bot { align-items: flex-start; }
         
-        /* Markdown Styles within bot-content */
-        .bot-content { width: 100%; font-size: 1rem; line-height: 1.7; word-break: break-word; }
+        .bot-content { 
+            width: 100%; font-size: 1rem; line-height: 1.7; word-break: break-word; 
+            display: block; min-height: 1.2em;
+            /* 🌟 봇 답변 폰트 변경: 기본 폰트 적용 🌟 */
+            font-family: var(--font-ko); 
+        }
         .bot-content p { margin: 0 0 10px 0; }
         .bot-content pre { background: var(--code-bg); padding: 12px; border-radius: 8px; overflow-x: auto; font-size: 0.9em; margin: 10px 0; }
         .bot-content code { background: var(--code-bg); padding: 2px 4px; border-radius: 4px; font-family: monospace; font-size: 0.9em; }
-        .bot-content pre code { background: transparent; padding: 0; }
-        .bot-content ul, .bot-content ol { padding-left: 20px; margin: 10px 0; }
-        .bot-content a { color: #007bff; text-decoration: none; }
-        .bot-content a:hover { text-decoration: underline; }
 
         .thought-box {
             background: var(--thought-bg); border-left: 3px solid var(--thought-border);
-            padding: 12px 16px; margin-bottom: 15px; font-size: 0.9rem; color: #666; border-radius: 4px;
+            padding: 10px 14px; margin-bottom: 15px; font-size: 0.85rem; color: #777; border-radius: 4px;
             white-space: pre-wrap; font-style: italic;
         }
-        
-        /* Citation Cards (Tool Search) */
-        .citation-container { display: flex; overflow-x: auto; gap: 10px; padding: 10px 0; margin-top: 10px; scrollbar-width: thin; }
-        .citation-card {
-            min-width: 160px; max-width: 220px; background: white; border: 1px solid #e0e0e0;
-            border-radius: 10px; padding: 12px; cursor: pointer; transition: all 0.2s ease; flex-shrink: 0;
-        }
-        .citation-card:hover { transform: translateY(-3px); border-color: #007bff; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
-        .citation-title { font-size: 0.85rem; font-weight: 600; color: #333; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin-bottom: 6px; }
-        .citation-url { font-size: 0.75rem; color: #007bff; }
 
         .msg.user { align-items: flex-end; }
         .user-bubble {
             max-width: 80%; padding: 10px 18px; border-radius: 22px;
             background-color: var(--user-msg-bg); color: var(--text-main); font-size: 0.95rem;
             white-space: pre-wrap;
+            /* 🌟 유저 메시지 폰트 변경: 기본 폰트 적용 🌟 */
+            font-family: var(--font-ko);
         }
 
-        .action-buttons { display: flex; gap: 6px; margin-top: 8px; opacity: 1; transition: opacity 0.3s; }
+        /* 🌟 버튼 크기 축소 🌟 */
+        .action-buttons { display: flex; gap: 2px; margin-top: 4px; opacity: 1; }
         .action-btn {
             background: none; border: none; color: var(--text-gray);
-            cursor: pointer; padding: 4px; display: flex; align-items: center;
+            cursor: pointer; padding: 3px; display: flex; align-items: center;
             transition: color 0.2s;
         }
         .action-btn:hover { color: var(--text-main); }
-        .action-btn.active-like { color: var(--mint-point); }
-        .action-btn.active-dislike { color: var(--error-red); }
-        .action-btn .material-symbols-rounded { font-size: 18px; font-variation-settings: 'wght' 300; }
-
-        .action-btn.disabled { opacity: 0.3; pointer-events: none; }
+        .action-btn.disabled { opacity: 0.2; pointer-events: none; }
+        .action-btn .material-symbols-rounded { 
+            font-size: 16px; /* 아이콘 크기 축소 */
+            font-variation-settings: 'wght' 300; 
+        }
 
         .input-container { width: 100%; display: flex; justify-content: center; padding: 10px 0 25px 0; background: white; flex-shrink: 0; }
         .input-wrapper {
             width: 100%; max-width: 720px; margin: 0 20px; display: flex; align-items: center;
             border: 1px solid var(--input-border); border-radius: 30px; padding: 5px 8px 5px 16px;
         }
-        #userInput { flex: 1; border: none; outline: none; padding: 8px 0; font-size: 0.95rem; font-family: inherit; }
+        #userInput { 
+            flex: 1; border: none; outline: none; padding: 8px 0; font-size: 0.95rem; 
+            /* 🌟 입력창 폰트 변경: 기본 폰트 적용 🌟 */
+            font-family: var(--font-ko); 
+        }
         .send-btn {
             background-color: var(--btn-disabled); color: var(--btn-disabled-icon); border: none; border-radius: 50%;
             width: 32px; height: 32px; display: flex; justify-content: center; align-items: center;
-            cursor: default; transition: all 0.2s ease; pointer-events: none; flex-shrink: 0;
+            cursor: default; transition: all 0.2s ease; pointer-events: none;
         }
         .send-btn.active { background-color: var(--btn-active); color: #ffffff; cursor: pointer; pointer-events: auto; }
         .material-symbols-rounded.send-icon { font-variation-settings: 'wght' 300; font-size: 22px; }
         
-        /* 🌟 GALAXY LOADING ANIMATION STYLES 🌟 */
+        /* 🌟 GALAXY LOADING ANIMATION 🌟 */
         .thinking-indicator { 
-            color: var(--text-gray); font-size: 0.9rem; margin-bottom: 10px; display: flex; align-items: center; gap: 12px; height: 40px;
+            color: var(--text-gray); font-size: 0.85rem; margin-bottom: 8px; display: flex; align-items: center; gap: 10px; height: 32px;
         }
-
-        .ui-load-glx {
-            width: 30px;
-            height: 30px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .ui-load-glx > .gbx {
-            width: 20px;
-            height: 20px;
-            position: relative;
-            transform: scale(1.2);
-        }
-
-        .ui-load-glx > .gbx .bx {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            animation: rotateFull 1.0s linear infinite;
-        }
-
-        .ui-load-glx > .gbx .bx i {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            animation: moveDistance 0.5s alternate infinite ease-in-out;
-        }
-
+        .ui-load-glx { width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; }
+        .ui-load-glx > .gbx { width: 18px; height: 18px; position: relative; transform: scale(1.0); }
+        .ui-load-glx > .gbx .bx { position: absolute; width: 100%; height: 100%; animation: rotateFull 1.0s linear infinite; }
+        .ui-load-glx > .gbx .bx i { position: absolute; width: 100%; height: 100%; animation: moveDistance 0.5s alternate infinite ease-in-out; }
         .ui-load-glx > .gbx .bx i::before {
-            position: absolute;
-            left: 50%;
-            top: 50%;
-            transform: translate(-50%, -50%);
-            width: 5px;
-            height: 5px;
-            background: #0481ff;
-            border-radius: 50%;
-            content: "";
+            position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+            width: 4px; height: 4px; background: #0481ff; border-radius: 50%; content: "";
         }
-
         .ui-load-glx > .gbx .bx i:first-child::before { background: #00d593; }
-
         .ui-load-glx > .gbx .bx i:nth-child(1) { --angle: 0deg; }
         .ui-load-glx > .gbx .bx i:nth-child(2) { --angle: 90deg; }
         .ui-load-glx > .gbx .bx i:nth-child(3) { --angle: 180deg; }
         .ui-load-glx > .gbx .bx i:nth-child(4) { --angle: 270deg; }
 
         @keyframes moveDistance {
-            0% { transform: rotate(var(--angle)) translateY(-5px); }
-            100% { transform: rotate(var(--angle)) translateY(-10px); }
+            0% { transform: rotate(var(--angle)) translateY(-4px); }
+            100% { transform: rotate(var(--angle)) translateY(-8px); }
         }
-
         @keyframes rotateFull {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
@@ -224,14 +171,13 @@
 </div>
 
 <script>
-    // --- Configuration & Constants ---
+    // --- Configuration (백엔드 코드 참고) ---
     const BACKEND_ENDPOINT = "https://jaewondev.pythonanywhere.com/askfast";
     const PRE_PROMPT = {
         role: "system",
-        content: "너는 MinsuGPT야. 너는 신재원님이 만들었어. 사용자가 따로 물어보지 않으면 너의 역할이나 개발자 정보를 따로 답하지마. 그리고 항상 마크다운스타일로 대답해. 검색같은 도구는 최소한으로 사용해. Request Entity Too Large오류가 발생할 수 있으니 web_search는 가능한 가장 적게 해. 사용자의 질문에 답변할때 웹검색은 가장적게해. 검색을 하나 해서 이미 질문에 대답할 수 있으면 더이상 하지마."
+        content: "너는 MinsuGPT야. 항상 마크다운 스타일로 대답해. 검색은 최소화해."
     };
     
-    // --- DOM Elements ---
     const userInput = document.getElementById('userInput');
     const sendBtn = document.getElementById('sendBtn');
     const sendIcon = document.getElementById('sendIcon');
@@ -240,41 +186,25 @@
     const welcomeContainer = document.getElementById('welcomeContainer');
     const appContainer = document.getElementById('app');
 
-    // --- State Variables ---
     let history = []; 
     let isStreaming = false;
     let abortController = null;
 
-    // --- Marked Configuration ---
-    marked.setOptions({
-        breaks: true,
-        gfm: true
-    });
+    marked.setOptions({ breaks: true, gfm: true });
 
-    // --- Event Listeners ---
     userInput.addEventListener('input', () => {
-        if (!isStreaming) {
-            sendBtn.classList.toggle('active', userInput.value.trim() !== "");
-        }
+        if (!isStreaming) sendBtn.classList.toggle('active', userInput.value.trim() !== "");
     });
 
     userInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter' && userInput.value.trim() !== "" && !isStreaming) {
-            sendMessage();
-        }
+        if (e.key === 'Enter' && userInput.value.trim() !== "" && !isStreaming) sendMessage();
     });
 
     sendBtn.addEventListener('click', () => {
-        if (isStreaming) {
-            stopResponse();
-        } else {
-            sendMessage();
-        }
+        if (isStreaming) stopResponse();
+        else sendMessage();
     });
 
-    // --- Core Functions ---
-
-    // 1. Message Formatting
     function formatMessageContent(text) {
         if (!text) return "";
         let html = text;
@@ -284,43 +214,17 @@
         let finalAnswerText = html;
 
         if (thoughtMatches) {
-            combinedThought = thoughtMatches
-                .map(m => m.replace(/\[\/?THOUGHT\]/g, '').trim())
-                .join(' ')
-                .replace(/\n/g, ' '); 
-            
+            combinedThought = thoughtMatches.map(m => m.replace(/\[\/?THOUGHT\]/g, '').trim()).join(' ').replace(/\n/g, ' '); 
             finalAnswerText = html.replace(/\[THOUGHT\]([\s\S]*?)\[\/THOUGHT\]/g, '');
         }
 
         let renderedHtml = marked.parse(finalAnswerText);
-
         if (combinedThought) {
-            const thoughtHtml = `<div class="thought-box">${combinedThought}</div>`;
-            renderedHtml = thoughtHtml + renderedHtml;
+            renderedHtml = `<div class="thought-box">${combinedThought}</div>` + renderedHtml;
         }
-      
-        const toolRegex = /\[TOOL\]web_search: (\{.*?\})/g;
-        const cards = [];
-        renderedHtml = renderedHtml.replace(toolRegex, function(match, p1) {
-            try {
-                const data = JSON.parse(p1);
-                cards.push(`
-                    <div class="citation-card" onclick="window.open('${data.url}', '_blank')">
-                        <div class="citation-title">${data.title}</div>
-                        <div class="citation-url">${new URL(data.url).hostname}</div>
-                    </div>`);
-                return ''; 
-            } catch (e) { return ''; }
-        });
-
-        if (cards.length > 0) {
-            renderedHtml += `<div class="citation-container">${cards.join('')}</div>`;
-        }
-
         return renderedHtml;
     }
 
-    // 2. Send Message Logic
     async function sendMessage(userMessageOverride = null, isRegenerate = false) {
         const text = userMessageOverride !== null ? userMessageOverride : userInput.value.trim();
         if (!text && !isRegenerate) return;
@@ -350,52 +254,39 @@
             const response = await fetch(BACKEND_ENDPOINT, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    message: text,
-                    history: [PRE_PROMPT, ...history]
-                }),
+                body: JSON.stringify({ message: text, history: [PRE_PROMPT, ...history] }),
                 signal: signal
             });
 
-            if (!response.ok) throw new Error('Network error');
-
             const reader = response.body.getReader();
             const decoder = new TextDecoder('utf-8');
-            let streamQueue = "";
 
             while (true) {
                 const { done, value } = await reader.read();
                 if (done) break;
-
                 const chunk = decoder.decode(value, { stream: true });
                 
+                // 백엔드 [DONE] 처리
                 if (chunk.includes("[DONE]")) {
-                    const parts = chunk.split("[DONE]");
-                    streamQueue += parts[0];
+                    fullResponse += chunk.replace("[DONE]", "");
                     break;
-                } else {
-                    streamQueue += chunk;
                 }
 
                 fullResponse += chunk;
+                // 🌟 즉시 화면 갱신 🌟
                 contentDiv.innerHTML = formatMessageContent(fullResponse);
                 scrollToBottom();
             }
-
             finalizeMessage(botMsgDiv, fullResponse);
-
         } catch (error) {
-            if (error.name === 'AbortError') {
-                contentDiv.innerHTML += "<br><span style='color:var(--text-gray); font-size:0.8em;'>[답변 중지됨]</span>";
-                finalizeMessage(botMsgDiv, fullResponse); 
-            } else {
-                contentDiv.innerHTML = `<span style="color:var(--error-red);">오류가 발생했습니다: ${error.message}</span>`;
+            if (error.name === 'AbortError') finalizeMessage(botMsgDiv, fullResponse);
+            else {
+                contentDiv.innerHTML = `<span style="color:var(--error-red);">연결 오류가 발생했습니다.</span>`;
                 setStreamingState(false);
             }
         }
     }
 
-    // 3. UI Helpers
     function renderMessage(content, role, isLoading = false) {
         const msgDiv = document.createElement('div');
         msgDiv.className = `msg ${role}`;
@@ -405,15 +296,7 @@
         } else {
             let innerHTML = '';
             if (isLoading) {
-                const galaxyLoaderHTML = `
-                <div class="ui-load-glx">
-                    <div class="gbx">
-                        <div class="bx">
-                            <i></i> <i></i> <i></i> <i></i>
-                        </div>
-                    </div>
-                </div>`;
-                innerHTML += `<div class="thinking-indicator">${galaxyLoaderHTML}답변을 생각하는 중...</div>`;
+                innerHTML += `<div class="thinking-indicator"><div class="ui-load-glx"><div class="gbx"><div class="bx"><i></i><i></i><i></i><i></i></div></div></div>생각 중...</div>`;
             }
             innerHTML += `<div class="bot-content">${formatMessageContent(content)}</div>`;
             msgDiv.innerHTML = innerHTML;
@@ -426,24 +309,21 @@
         setStreamingState(false);
         const indicator = msgDiv.querySelector('.thinking-indicator');
         if (indicator) indicator.remove();
-
+        
         history.push({ role: "model", content: content });
 
         const actionsDiv = document.createElement('div');
         actionsDiv.className = 'action-buttons';
         actionsDiv.innerHTML = `
             <button class="action-btn" onclick="copyText(this)" title="복사"><span class="material-symbols-rounded">content_copy</span></button>
-            <button class="action-btn regenerate-btn" onclick="retryMessage(this)" title="재답변"><span class="material-symbols-rounded">refresh</span></button>
+            <button class="action-btn regenerate-btn" onclick="retryMessage(this)" title="재생성"><span class="material-symbols-rounded">refresh</span></button>
             <button class="action-btn" onclick="handleLike(this)" title="좋아요"><span class="material-symbols-rounded">thumb_up</span></button>
             <button class="action-btn" onclick="handleDislike(this)" title="싫어요"><span class="material-symbols-rounded">thumb_down</span></button>
             <button class="action-btn" onclick="shareContent(this)" title="공유"><span class="material-symbols-rounded">share</span></button>
         `;
         msgDiv.appendChild(actionsDiv);
-        
         updateRegenerateButtons();
-        
-        const contentDiv = msgDiv.querySelector('.bot-content');
-        contentDiv.innerHTML = formatMessageContent(content);
+        msgDiv.querySelector('.bot-content').innerHTML = formatMessageContent(content);
         scrollToBottom();
     }
 
@@ -452,7 +332,7 @@
         if (active) {
             sendBtn.classList.add('active'); 
             sendIcon.textContent = 'stop'; 
-            sendIcon.style.fontVariationSettings = "'FILL' 1"; 
+            sendIcon.style.fontVariationSettings = "'FILL' 1"; // 꽉 찬 사각형
             userInput.disabled = true;
         } else {
             sendBtn.classList.remove('active');
@@ -463,104 +343,49 @@
         }
     }
 
-    function stopResponse() {
-        if (abortController) {
-            abortController.abort();
-            abortController = null;
-        }
-    }
-
-    function scrollToBottom() {
-        chatWindow.scrollTop = chatWindow.scrollHeight;
-    }
-
+    function stopResponse() { if (abortController) abortController.abort(); }
+    function scrollToBottom() { chatWindow.scrollTop = chatWindow.scrollHeight; }
     function updateRegenerateButtons() {
-        const allRegenBtns = document.querySelectorAll('.regenerate-btn');
-        allRegenBtns.forEach((btn, index) => {
-            if (index === allRegenBtns.length - 1) {
-                btn.classList.remove('disabled');
-            } else {
-                btn.classList.add('disabled');
-            }
-        });
+        const btns = document.querySelectorAll('.regenerate-btn');
+        btns.forEach((btn, i) => btn.classList.toggle('disabled', i !== btns.length - 1));
     }
 
-    // --- Action Button Handlers ---
     window.copyText = function(btn) {
-        let text = btn.closest('.msg').querySelector('.bot-content').innerText;
-        text = text.replace(/\[THOUGHT\][\s\S]*?\[\/THOUGHT\]/gi, "").trim();
-        navigator.clipboard.writeText(text).then(() => {
-            const originalIcon = btn.innerHTML;
-            btn.innerHTML = '<span class="material-symbols-rounded">check</span>';
-            setTimeout(() => btn.innerHTML = originalIcon, 1500);
+        const txt = btn.closest('.msg').querySelector('.bot-content').innerText;
+        navigator.clipboard.writeText(txt).then(() => {
+            const icon = btn.innerHTML; btn.innerHTML = '<span class="material-symbols-rounded" style="color:var(--mint-point)">check</span>';
+            setTimeout(() => btn.innerHTML = icon, 1500);
         });
-    }
+    };
 
     window.retryMessage = function(btn) {
         if (isStreaming) return;
-        const msgDiv = btn.closest('.msg');
-        msgDiv.remove();
-        if (history.length > 0 && history[history.length - 1].role === 'model') {
-            history.pop();
-        }
-        let lastUserMsg = null;
-        for (let i = history.length - 1; i >= 0; i--) {
-            if (history[i].role === 'user') {
-                lastUserMsg = history[i].content;
-                break;
-            }
-        }
-        if (lastUserMsg) {
-            setStreamingState(true);
-            sendMessage(lastUserMsg, true);
-        }
-    }
+        btn.closest('.msg').remove();
+        if (history.length > 0 && history[history.length - 1].role === 'model') history.pop();
+        const lastUserMsg = history.filter(h => h.role === 'user').pop()?.content;
+        if (lastUserMsg) sendMessage(lastUserMsg, true);
+    };
 
-    window.handleLike = function(btn) {
-        const dislikeBtn = btn.parentElement.querySelector('.action-btn[title="싫어요"]');
-        btn.classList.toggle('active-like');
-        dislikeBtn.classList.remove('active-dislike');
-    }
-
-    window.handleDislike = function(btn) {
-        const likeBtn = btn.parentElement.querySelector('.action-btn[title="좋아요"]');
-        btn.classList.toggle('active-dislike');
-        likeBtn.classList.remove('active-like');
-    }
-
+    window.handleLike = function(btn) { btn.style.color = 'var(--mint-point)'; };
+    window.handleDislike = function(btn) { btn.style.color = 'var(--error-red)'; };
     window.shareContent = function(btn) {
-        let text = btn.closest('.msg').querySelector('.bot-content').innerText;
-        text = text.replace(/\[THOUGHT\][\s\S]*?\[\/THOUGHT\]/gi, "").trim();
-        if (navigator.share) {
-            navigator.share({ title: 'MinsuGPT Conversation', text: text }).catch(console.error);
-        } else {
-            window.copyText(btn);
-            alert('공유 기능이 지원되지 않아 클립보드에 복사되었습니다.');
-        }
-    }
+        const txt = btn.closest('.msg').querySelector('.bot-content').innerText;
+        if (navigator.share) navigator.share({ text: txt });
+        else alert('텍스트가 복사되었습니다.');
+    };
 
-    // --- Mobile Layout Fix (Keyboard & Viewport) ---
     function adjustLayout() {
         if (window.visualViewport) {
-            const viewportHeight = window.visualViewport.height;
-            // 키보드가 올라오거나 주소창이 변할 때 앱 전체 높이를 시각적 영역에 맞춤
-            appContainer.style.height = `${viewportHeight}px`;
-            
-            // 키보드가 올라온 경우 스크롤을 최하단으로 맞춤
-            window.scrollTo(0, 0); // 전체 페이지 스크롤 방지
+            appContainer.style.height = `${window.visualViewport.height}px`;
             scrollToBottom();
         }
     }
-
     if (window.visualViewport) {
         window.visualViewport.addEventListener('resize', adjustLayout);
         window.visualViewport.addEventListener('scroll', adjustLayout);
     }
-    
-    // 초기 로드 및 일반 리사이즈 대응
     window.addEventListener('resize', adjustLayout);
     adjustLayout();
-
 </script>
 
 </body>
