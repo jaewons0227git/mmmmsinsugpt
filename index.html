@@ -13,23 +13,7 @@
     <link rel="icon" type="image/png" href="https://i.postimg.cc/kg01fcVG/logop.png">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
-    <script>
-    // 허용할 도메인 리스트
-    const ALLOWED_REFERRERS = [
-        'https://ai.minsugpt.kro.kr/',
-        'https://user.minsugpt.kro.kr/'
-    ];
-    const REDIRECT_URL = 'https://status.minsugpt.kro.kr';
-    const referrer = document.referrer;
-
-    // some() 함수를 사용하여 현재 referrer가 허용 리스트 중 하나로 시작하는지 확인합니다.
-    const isAllowed = ALLOWED_REFERRERS.some(url => referrer.startsWith(url));
-
-    if (referrer === '' || !isAllowed) {
-      window.location.replace(REDIRECT_URL);
-    }
-</script>
-
+    
     <style>
         :root {
             --bg-main: #ffffff;
@@ -119,17 +103,34 @@
         }
 
         .sidebar-search-box {
-            background-color: var(--surface-secondary);
-            border-radius: 8px;
-            padding: 8px 12px;
-            display: flex; align-items: center; gap: 8px;
-            margin-bottom: 8px;
-        }
-        .sidebar-search-input {
-            border: none; background: transparent; width: 100%; outline: none;
-            font-family: var(--font-ko); font-size: 0.9rem; color: var(--text-main);
-        }
-        .sidebar-search-input::placeholder { color: #aaa; }
+    background-color: var(--surface-secondary);
+    /* 8px에서 30px(알약 모양)로 변경 */
+    border-radius: 30px; 
+    /* 상하 여백을 헤더와 비슷하게 조절 */
+    padding: 10px 16px; 
+    display: flex; 
+    align-items: center; 
+    gap: 10px;
+    margin-bottom: 12px;
+    border: 1px solid transparent;
+    transition: border 0.2s ease;
+}
+
+/* 마우스 클릭(포커스) 시 시각적 효과 추가 (선택 사항) */
+.sidebar-search-box:focus-within {
+    border: 1px solid var(--input-border);
+    background-color: #fff;
+}
+
+.sidebar-search-input {
+    border: none; 
+    background: transparent; 
+    width: 100%; 
+    outline: none;
+    font-family: var(--font-ko); 
+    font-size: 0.9rem; 
+    color: var(--text-main);
+}
 
         .sidebar-nav-item {
             display: flex; align-items: center; gap: 10px;
@@ -177,34 +178,41 @@
 
         /* --- Header Styles (Modified for Left Pill & No Border) --- */
         header {
-            padding: 8px 20px; 
-            display: flex; align-items: center; justify-content: space-between;
-            background: white; flex-shrink: 0; z-index: 10;
-            border-bottom: none; /* Removed Border */
-        }
-        
-        /* 1. 왼쪽 알약 (메뉴+MinsuGPT) 수정 */
+    /* 상하 패딩을 12px, 좌우 패딩을 16px로 고정하여 기준점을 잡습니다. */
+    padding: 12px 12px; 
+    display: flex; 
+    align-items: center; 
+    justify-content: space-between;
+    background: white; 
+    flex-shrink: 0; 
+    z-index: 10;
+    border-bottom: none;
+    box-sizing: border-box; /* 패딩이 높이에 영향을 주지 않도록 설정 */
+}
+
+/* 2. 왼쪽 알약 (메뉴 + MinsuGPT) */
 .header-left-pill {
     display: flex;
     align-items: center;
     gap: 4px;
     background-color: var(--header-btn-bg);
     border-radius: 30px;
-    /* 높이를 명시적으로 지정하여 오른쪽과 통일 (보통 40px~44px가 적당합니다) */
-    height: 40px; 
-    padding: 0 14px 0 4px; /* 상하 패딩을 0으로 하고 height와 flex로 중앙 정렬 */
+    height: 50px; /* 오른쪽과 높이 통일 */
+    padding: 0 14px 0 6px; /* 내부 여백 최적화 */
+    margin: 0; /* 불필요한 마진 제거 */
     box-sizing: border-box;
 }
 
-/* 2. 오른쪽 알약 그룹 수정 (높이 통일) */
+/* 3. 오른쪽 알약 그룹 (모델선택 + 새채팅) */
 .header-pill-group {
     display: flex;
     align-items: center;
+    gap: 2px;
     background-color: var(--header-btn-bg);
     border-radius: 30px;
-    height: 40px; /* 왼쪽과 동일하게 설정 */
-    padding: 0 4px; /* 내부 요소들이 이미 높이를 가지고 있으므로 좌우 여백만 조정 */
-    gap: 2px;
+    height: 50px; /* 왼쪽과 높이 통일 */
+    padding: 0 6px; /* 내부 여백 최적화 */
+    margin: 0; /* 불필요한 마진 제거 */
     box-sizing: border-box;
 }
 
@@ -287,7 +295,7 @@
         #newChatBtn, #historyBtn { display: flex; } 
 
         #welcomeContainer {
-            position: absolute; top: 45%; left: 50%; transform: translate(-50%, -50%);
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
             width: 92%; max-width: 720px; 
             text-align: left; 
             transition: opacity 0.3s ease; z-index: 5; 
@@ -688,6 +696,49 @@
 
         .empty-history { text-align: center; color: #aaa; padding: 20px; font-size: 0.9rem; }
 
+
+
+/* 버튼들을 감싸는 박스 스타일 */
+.sidebar-nav-group {
+    border: 1px solid #E0DEDE; /* 매우 연한 테두리 */
+    border-radius: 16px;       /* 둥근 사각형 모양 */
+    padding: 4px;              /* 내부 버튼과의 간격 */
+    margin-bottom: 16px;       /* 다음 요소와의 간격 */
+    background-color: transparent;
+}
+
+/* 박스 안의 버튼 스타일 미세 조정 */
+.sidebar-nav-group .sidebar-nav-item {
+    margin-bottom: 0;          /* 그룹 내에서는 하단 마진 제거 */
+    border-radius: 12px;       /* 그룹 곡률에 맞게 조절 */
+}
+
+
+/* '최근' 글자와 대화 목록 전체를 감싸는 영역 */
+.pc-history-container {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    margin-top: 4px;
+    /* 연한 테두리가 있는 둥근 사각형 박스 추가 */
+    border: 1px solid #E0DEDE; 
+    border-radius: 16px;
+    padding: 8px; /* 내부 대화 목록과의 간격 */
+    background-color: transparent;
+}
+
+/* 박스 내부의 개별 대화 목록 아이템 스타일 미세 조정 */
+.pc-sidebar .history-item {
+    padding: 10px 12px;
+    border-bottom: none; /* 구분선 제거 */
+    border-radius: 12px;  /* 아이템도 둥글게 */
+    margin-bottom: 2px;
+}
+
+/* 스크롤바가 박스 테두리를 침범하지 않게 조정 */
+.pc-history-container::-webkit-scrollbar {
+    width: 3px;
+}
     </style>
 </head>
 <body>
@@ -712,22 +763,24 @@
              <input type="text" class="sidebar-search-input" id="sidebar-search" placeholder="채팅 검색..." autocomplete="off">
         </div>
 
-        <div class="sidebar-nav-item" onclick="showFeatureNotReady()">
-            <span class="material-symbols-rounded">image</span> 이미지
-        </div>
-        <div class="sidebar-nav-item" onclick="showFeatureNotReady()">
-            <span class="material-symbols-rounded">apps</span> 앱
-        </div>
-        <div class="sidebar-nav-item" onclick="showFeatureNotReady()">
-            <span class="material-symbols-rounded">folder_open</span> 프로젝트
-        </div>
+        <div class="sidebar-nav-group">
+    <div class="sidebar-nav-item" onclick="showFeatureNotReady()">
+        <span class="material-symbols-rounded">image</span> 이미지
+    </div>
+    <div class="sidebar-nav-item" onclick="showFeatureNotReady()">
+        <span class="material-symbols-rounded">apps</span> 앱
+    </div>
+    <div class="sidebar-nav-item" onclick="showFeatureNotReady()">
+        <span class="material-symbols-rounded">folder_open</span> 프로젝트
+    </div>
+</div>
 
         <div class="sidebar-section-title">최근</div>
         
         <div class="pc-history-container" id="pcHistoryContainer">
             </div>
 
-        <div style="margin-top: auto; border-top: 1px solid var(--input-border); padding-top: 10px;">
+        <div style="margin-top: auto; padding-top: 10px;">
              <div class="sidebar-nav-item" id="pc-new-chat-btn">
                 <span class="material-symbols-rounded">add</span> 새 채팅
              </div>
@@ -780,22 +833,36 @@
     </header>
 
     <div id="welcomeContainer">
-        <div class="welcome-text">무엇을 도와드릴까요?</div>
-        <div class="suggestion-container">
-            <button class="suggestion-btn" onclick="sendMessage('농담해줘')">
-                <span class="material-symbols-rounded icon-joke">sentiment_very_satisfied</span>
-                농담하기
-            </button>
-            <button class="suggestion-btn" onclick="sendMessage('같이 이야기하자')">
-                <span class="material-symbols-rounded icon-talk">chat_bubble</span>
-                함께 이야기 하기
-            </button>
-            <button class="suggestion-btn" onclick="prepareWriteMode()">
-                <span class="material-symbols-rounded icon-write">edit_note</span>
-                글쓰기
-            </button>
-        </div>
+    <div class="welcome-text">무엇을 도와드릴까요?</div>
+    <div class="suggestion-container" style="margin-bottom: 8px;">
+        <button class="suggestion-btn" onclick="sendMessage('농담해줘')">
+            <span class="material-symbols-rounded icon-joke">sentiment_very_satisfied</span>
+            농담하기
+        </button>
+        <button class="suggestion-btn" onclick="sendMessage('같이 이야기하자')">
+            <span class="material-symbols-rounded icon-talk">chat_bubble</span>
+            함께 이야기 하기
+        </button>
+        <button class="suggestion-btn" onclick="prepareWriteMode()">
+            <span class="material-symbols-rounded icon-write">edit_note</span>
+            글쓰기
+        </button>
     </div>
+    <div class="suggestion-container">
+        <button class="suggestion-btn" onclick="sendMessage('코드 짜줘')">
+            <span class="material-symbols-rounded" style="color: #059669;">terminal</span>
+            코드짜기
+        </button>
+        <button class="suggestion-btn" onclick="sendMessage('계산해줘')">
+            <span class="material-symbols-rounded" style="color: #ea580c;">calculate</span>
+            계산하기
+        </button>
+        <button class="suggestion-btn" onclick="sendMessage('계획을 세우려고해. 어디서 부터 시작할까?')">
+            <span class="material-symbols-rounded" style="color: #2563eb;">calendar_month</span>
+            계획세우기
+        </button>
+    </div>
+</div>
 
     <div class="chat-window" id="chatWindow">
         <div class="messages-container" id="chatMessages"></div>
