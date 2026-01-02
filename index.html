@@ -12,7 +12,8 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
     <link rel="icon" type="image/png" href="https://i.postimg.cc/kg01fcVG/logop.png">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <script>
+    
+<script>
     // 허용할 도메인 리스트
     const ALLOWED_REFERRERS = [
         'https://ai.minsugpt.kro.kr/',
@@ -28,7 +29,6 @@
       window.location.replace(REDIRECT_URL);
     }
 </script>
-
     
     <style>
     /* 1. 전체 페이지 및 모든 요소의 스크롤바 숨기기 */
@@ -75,7 +75,7 @@
             --accent-color: #000000; /* 전송 버튼 활성색 */
             --accent-bubble-bg: #f2f2f2; /* 사용자 말풍선 배경 */
             --accent-bubble-text: #212121; /* 사용자 말풍선 텍스트 */
-            --toggle-bg-checked: #212121; /* 토글 스위치 켜짐 색상 */
+            --toggle-bg-checked: #1E76FB; /* 토글 스위치 켜짐 색상 */
         }
 
         /* 다크 테마 */
@@ -101,7 +101,9 @@
             --accent-color: #ffffff;
             --accent-bubble-bg: #333333;
             --accent-bubble-text: #e0e0e0;
-            --toggle-bg-checked: #ffffff;
+            --toggle-bg-checked: #1E76FB;
+            
+            
         }
 
         html, body {
@@ -1059,19 +1061,7 @@
             z-index: 4; pointer-events: none;
         }
         
-        /* 다크모드 전용 토글 버튼 스타일 커스텀 */
-.dark-mode .slider {
-    background-color: #ffffff !important; /* 배경색을 흰색으로 변경 */
-}
-
-.dark-mode .slider:before {
-    background-color: #000000 !important; /* 내부 원 색상을 검은색으로 변경 */
-}
-
-/* 체크(Checked) 되었을 때도 동일하게 유지하고 싶을 경우 추가 */
-.dark-mode input:checked + .slider {
-    background-color: #ffffff !important;
-}
+        
     </style>
 </head>
 <body>
