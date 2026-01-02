@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
@@ -41,9 +41,8 @@
     display: none; /* Chrome, Safari, Opera */
 }
 
-/* 2. (선택사항) 특정 영역만 다시 보이게 하고 싶다면 해당 요소에 아래를 적용하세요 */
-/* .show-scroll::-webkit-scrollbar { display: block; } */
         :root {
+            /* 기본 테마 (Light) */
             --bg-main: #ffffff;
             --text-main: #212121;
             --text-gray: #a0a0a0;
@@ -52,6 +51,7 @@
             --btn-disabled-icon: #cccccc;
             --btn-active: #000000;
             --user-msg-bg: #f2f2f2; 
+            --user-msg-text: #212121;
             --thought-bg: #f9f9f9;
             --thought-border: #eee;
             --font-en: "Outfit", sans-serif; 
@@ -63,13 +63,43 @@
             --btn-bg-soft: #f5f5f5;
             
             /* Variables for Sidebar & Header Pill */
-            --sidebar-width: 280px; /* Adjusted width */
+            --sidebar-width: 280px; 
             --mini-sidebar-width: 60px;
             --header-btn-bg: #f1f4f9;
             --border-color: #e5e8eb;
             --primary-blue: #1d6fef;
             --surface-hover: #f9fafb;
             --surface-secondary: #f1f4f9;
+            
+            /* Accent Colors Default */
+            --accent-color: #000000; /* 전송 버튼 활성색 */
+            --accent-bubble-bg: #f2f2f2; /* 사용자 말풍선 배경 */
+            --accent-bubble-text: #212121; /* 사용자 말풍선 텍스트 */
+        }
+
+        /* 다크 테마 */
+        [data-theme="dark"] {
+            --bg-main: #121212;
+            --text-main: #e0e0e0;
+            --text-gray: #888888;
+            --input-border: #333333;
+            --btn-disabled: #2a2a2a;
+            --btn-disabled-icon: #555555;
+            --btn-active: #ffffff;
+            --user-msg-bg: #2a2a2a;
+            --user-msg-text: #e0e0e0;
+            --thought-bg: #1e1e1e;
+            --thought-border: #333;
+            --code-bg: #1e1e1e;
+            --btn-bg-soft: #2a2a2a;
+            --header-btn-bg: #2a2a2a;
+            --border-color: #333333;
+            --surface-hover: #2a2a2a;
+            --surface-secondary: #1e1e1e;
+            
+            --accent-color: #ffffff;
+            --accent-bubble-bg: #333333;
+            --accent-bubble-text: #e0e0e0;
         }
 
         html, body {
@@ -80,6 +110,7 @@
             font-family: var(--font-en), var(--font-ko);
             background-color: var(--bg-main); color: var(--text-main);
             -webkit-font-smoothing: antialiased;
+            transition: background-color 0.3s, color 0.3s;
         }
 
         #app { display: flex; flex-direction: column; height: 100%; position: relative; transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
@@ -108,7 +139,7 @@
         }
         .mini-sidebar-icon:hover { background-color: var(--btn-bg-soft); color: var(--text-main); }
         .mini-sidebar-icon.delete-all { color: var(--error-red); opacity: 0.7; margin-top: auto; margin-bottom: 20px; }
-        .mini-sidebar-icon.delete-all:hover { opacity: 1; background-color: #fee2e2; }
+        .mini-sidebar-icon.delete-all:hover { opacity: 1; background-color: rgba(239, 68, 68, 0.1); }
 
         .pc-sidebar {
             position: fixed; top: 0; left: 0; bottom: 0; width: var(--sidebar-width);
@@ -118,7 +149,6 @@
         }
         .pc-sidebar.visible { transform: translateX(0); }
 
-        /* New PC Sidebar Internal Layout */
         .pc-sidebar-content {
             display: flex; flex-direction: column; height: 100%; padding: 16px; box-sizing: border-box;
         }
@@ -131,34 +161,31 @@
         }
 
         .sidebar-search-box {
-    background-color: var(--surface-secondary);
-    /* 8px에서 30px(알약 모양)로 변경 */
-    border-radius: 30px; 
-    /* 상하 여백을 헤더와 비슷하게 조절 */
-    padding: 10px 16px; 
-    display: flex; 
-    align-items: center; 
-    gap: 10px;
-    margin-bottom: 12px;
-    border: 1px solid transparent;
-    transition: border 0.2s ease;
-}
+            background-color: var(--surface-secondary);
+            border-radius: 30px; 
+            padding: 10px 16px; 
+            display: flex; 
+            align-items: center; 
+            gap: 10px;
+            margin-bottom: 12px;
+            border: 1px solid transparent;
+            transition: border 0.2s ease;
+        }
 
-/* 마우스 클릭(포커스) 시 시각적 효과 추가 (선택 사항) */
-.sidebar-search-box:focus-within {
-    border: 1px solid var(--input-border);
-    background-color: #fff;
-}
+        .sidebar-search-box:focus-within {
+            border: 1px solid var(--input-border);
+            background-color: var(--bg-main);
+        }
 
-.sidebar-search-input {
-    border: none; 
-    background: transparent; 
-    width: 100%; 
-    outline: none;
-    font-family: var(--font-ko); 
-    font-size: 0.9rem; 
-    color: var(--text-main);
-}
+        .sidebar-search-input {
+            border: none; 
+            background: transparent; 
+            width: 100%; 
+            outline: none;
+            font-family: var(--font-ko); 
+            font-size: 0.9rem; 
+            color: var(--text-main);
+        }
 
         .sidebar-nav-item {
             display: flex; align-items: center; gap: 10px;
@@ -171,7 +198,7 @@
             margin-bottom: 2px;
         }
         .sidebar-nav-item:hover { background-color: var(--btn-bg-soft); }
-        .sidebar-nav-item .material-symbols-rounded { font-size: 20px; color: #555; }
+        .sidebar-nav-item .material-symbols-rounded { font-size: 20px; color: var(--text-gray); }
 
         .sidebar-section-title {
             font-size: 0.75rem; color: var(--text-gray); font-weight: 600;
@@ -185,17 +212,16 @@
         .pc-history-container::-webkit-scrollbar { width: 4px; }
         .pc-history-container::-webkit-scrollbar-thumb { background: #ddd; border-radius: 4px; }
 
-        /* Reuse history item styles but adjust padding */
         .pc-sidebar .history-item { padding: 12px 12px; border-bottom: none; border-radius: 8px; }
         .pc-sidebar .history-item:hover { background-color: var(--btn-bg-soft); }
         
         .pc-sidebar-close { 
             position: absolute; right: 10px; top: 16px;
             cursor: pointer; padding: 4px; border-radius: 50%; display: flex; 
+            color: var(--text-main);
         }
         .pc-sidebar-close:hover { background-color: var(--btn-bg-soft); }
 
-        /* Layout Adjustments for PC Sidebar */
         @media (min-width: 769px) {
             .mini-sidebar { display: flex; }
             #app { margin-left: var(--mini-sidebar-width); }
@@ -204,61 +230,56 @@
             body.sidebar-open .mini-sidebar { display: none; } 
         }
 
-        /* --- Header Styles (Modified for Left Pill & No Border) --- */
+        /* --- Header Styles --- */
         header {
-    /* 상하 패딩을 12px, 좌우 패딩을 16px로 고정하여 기준점을 잡습니다. */
-    padding: 12px 12px; 
-    display: flex; 
-    align-items: center; 
-    justify-content: space-between;
-    background: white; 
-    flex-shrink: 0; 
-    z-index: 10;
-    border-bottom: none;
-    box-sizing: border-box; /* 패딩이 높이에 영향을 주지 않도록 설정 */
-}
+            padding: 12px 12px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between;
+            background: var(--bg-main); 
+            flex-shrink: 0; 
+            z-index: 10;
+            border-bottom: none;
+            box-sizing: border-box;
+            transition: background 0.3s;
+        }
 
-/* 2. 왼쪽 알약 (메뉴 + MinsuGPT) */
-.header-left-pill {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    background-color: var(--header-btn-bg);
-    border-radius: 30px;
-    height: 50px; /* 오른쪽과 높이 통일 */
-    padding: 0 14px 0 6px; /* 내부 여백 최적화 */
-    margin: 0; /* 불필요한 마진 제거 */
-    box-sizing: border-box;
-}
+        .header-left-pill {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            background-color: var(--header-btn-bg);
+            border-radius: 30px;
+            height: 50px; 
+            padding: 0 14px 0 6px; 
+            margin: 0; 
+            box-sizing: border-box;
+        }
 
-/* 3. 오른쪽 알약 그룹 (모델선택 + 새채팅) */
-.header-pill-group {
-    display: flex;
-    align-items: center;
-    gap: 2px;
-    background-color: var(--header-btn-bg);
-    border-radius: 30px;
-    height: 50px; /* 왼쪽과 높이 통일 */
-    padding: 0 6px; /* 내부 여백 최적화 */
-    margin: 0; /* 불필요한 마진 제거 */
-    box-sizing: border-box;
-}
+        .header-pill-group {
+            display: flex;
+            align-items: center;
+            gap: 2px;
+            background-color: var(--header-btn-bg);
+            border-radius: 30px;
+            height: 50px; 
+            padding: 0 6px; 
+            margin: 0; 
+            box-sizing: border-box;
+        }
 
-/* 3. 메뉴 버튼 원형 크기 조정 (알약 안에서 꽉 차거나 조화롭게) */
-.header-btn-circle {
-    width: 32px;
-    height: 32px;
-    background-color: transparent;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    color: var(--text-main);
-    transition: background-color 0.2s;
-} 
-
-        /* Menu Button (Inside Pill) */
+        .header-btn-circle {
+            width: 32px;
+            height: 32px;
+            background-color: transparent;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--text-main);
+            transition: background-color 0.2s;
+        } 
         
         .header-btn-circle:hover { background-color: rgba(0,0,0,0.05); }
 
@@ -267,12 +288,9 @@
             font-size: 1.1rem; font-weight: 300; letter-spacing: -0.03em; 
             margin-left: 4px;
             user-select: none;
+            color: var(--text-main);
         }
 
-        /* Right Side: Pill Group */
-        
-
-        /* Model Selector Styles */
         .header-model-wrapper { position: relative; }
         .header-model-pill {
             display: flex; align-items: center; gap: 4px;
@@ -288,7 +306,7 @@
 
         .model-dropdown-menu {
             position: absolute; top: 100%; right: 0; margin-top: 8px;
-            background-color: #ffffff; border: 1px solid var(--input-border);
+            background-color: var(--bg-main); border: 1px solid var(--input-border);
             border-radius: 12px; padding: 6px;
             box-shadow: 0 4px 20px rgba(0,0,0,0.15); z-index: 1000;
             min-width: 140px; display: none; flex-direction: column; gap: 2px;
@@ -307,7 +325,6 @@
         .model-option-item .check-icon { font-size: 18px; opacity: 0; }
         .model-option-item.selected .check-icon { opacity: 1; }
 
-        /* Integrated Icon Buttons within Pill */
         .header-icon {
             width: 40px; height: 40px;
             display: flex; align-items: center; justify-content: center;
@@ -319,7 +336,6 @@
         .header-icon:hover { background-color: rgba(0,0,0,0.05); }
         .header-icon .material-symbols-rounded { font-size: 22px; }
 
-        /* Hide original buttons logic but keep IDs for JS compatibility */
         #newChatBtn, #historyBtn { display: flex; } 
 
         #welcomeContainer {
@@ -333,23 +349,19 @@
             font-size: clamp(1.5rem, 5vw, 2.0rem); 
             font-weight: 500; 
             letter-spacing: -0.03em; 
-            color: #1a1a1a; 
+            color: var(--text-main); 
             margin-bottom: 12px; 
             margin-left: 4px;
             animation: fadeInOnly 0.6s ease-out;
         }
 
         .suggestion-container {
-            display: flex;
-            width: 100%;
-            gap: 6px;
-            justify-content: flex-start;
-            flex-wrap: nowrap; 
-            overflow: hidden; 
+            display: flex; width: 100%; gap: 6px; justify-content: flex-start;
+            flex-wrap: nowrap; overflow: hidden; 
         }
 
         .suggestion-btn {
-            background-color: white;
+            background-color: var(--bg-main);
             border: 1px solid var(--input-border);
             border-radius: 9999px; 
             flex: 0 1 auto; 
@@ -358,18 +370,12 @@
             font-size: clamp(11px, 3.2vw, 15px); 
             color: var(--text-main);
             cursor: pointer;
-            white-space: nowrap; 
-            text-overflow: ellipsis; 
-            overflow: hidden;
+            white-space: nowrap; text-overflow: ellipsis; overflow: hidden;
             transition: all 0.2s ease; 
             font-family: var(--font-ko);
             letter-spacing: -0.03em; 
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 4px;
-            opacity: 0; 
-            animation: fadeInOnly 0.5s ease-out forwards; 
+            display: inline-flex; align-items: center; justify-content: center; gap: 4px;
+            opacity: 0; animation: fadeInOnly 0.5s ease-out forwards; 
         }
 
         .suggestion-btn:nth-child(1) { animation-delay: 0.1s; }
@@ -381,18 +387,12 @@
             border-color: #d0d0d0;
         }
         .suggestion-btn:active { transform: scale(0.96); }
-
-        .suggestion-btn .material-symbols-rounded {
-            font-size: clamp(16px, 4vw, 18px);
-            font-variation-settings: 'wght' 500;
-            flex-shrink: 0;
-        }
+        .suggestion-btn .material-symbols-rounded { font-size: clamp(16px, 4vw, 18px); flex-shrink: 0; }
 
         .icon-joke { color: #2563eb; } 
         .icon-talk { color: #9333ea; } 
         .icon-write { color: #ef4444; } 
 
-        /* --- Chat Window --- */
         .chat-window { flex: 1; overflow-y: auto; display: flex; flex-direction: column; align-items: center; padding-bottom: 20px; -webkit-overflow-scrolling: touch; }
         
         .messages-container { 
@@ -401,16 +401,14 @@
             padding: 20px 0; box-sizing: border-box; 
         }
 
-        .msg { 
-            display: flex; flex-direction: column; width: 100%; 
-            animation: fadeInOnly 0.4s ease-out; 
-        }
+        .msg { display: flex; flex-direction: column; width: 100%; animation: fadeInOnly 0.4s ease-out; }
         .msg.bot { align-items: flex-start; }
         
         .bot-content { 
             width: 100%; font-size: 1rem; line-height: 1.6; word-break: break-word; 
             display: block; min-height: 1.2em;
             font-family: var(--font-en), var(--font-ko); 
+            color: var(--text-main);
         }
         .bot-content p { margin: 0 0 10px 0; }
         
@@ -418,12 +416,13 @@
             background: var(--code-bg); padding: 12px; border-radius: 8px; 
             overflow-x: auto; font-size: 0.9em; margin: 10px 0; 
             position: relative !important;
+            border: 1px solid var(--input-border);
+            color: var(--text-main);
         }
         .bot-content code { 
             background: transparent; padding: 0; 
             font-family: monospace; font-size: 0.9em; 
         }
-        
         .bot-content p code, .bot-content li code {
             background: var(--code-bg); padding: 2px 4px; border-radius: 4px;
         }
@@ -434,28 +433,76 @@
             border: 1px solid #ddd; border-radius: 6px;
             width: 28px; height: 28px;
             display: flex; align-items: center; justify-content: center;
-            cursor: pointer; 
-            opacity: 1; 
-            transition: background 0.2s;
-            color: #555;
-            z-index: 10;
+            cursor: pointer; opacity: 1; transition: background 0.2s;
+            color: #555; z-index: 10;
         }
         .code-copy-btn:hover { background: white; color: var(--text-main); }
         .code-copy-btn .material-symbols-rounded { font-size: 16px; }
 
-        /* Old thought styles - Keeping them in code but they won't be used for details element anymore */
-        details.thought-details {
-            display: none; /* Hide old inline thought style */
-        }
-
         .msg.user { align-items: flex-end; }
         .user-bubble {
             max-width: 80%; padding: 10px 18px; border-radius: 22px;
-            background-color: var(--user-msg-bg); color: var(--text-main); font-size: 0.95rem;
+            background-color: var(--accent-bubble-bg); 
+            color: var(--accent-bubble-text); 
+            font-size: 0.95rem;
             white-space: pre-wrap;
             font-family: var(--font-en), var(--font-ko); 
             line-height: 1.5;
+            cursor: pointer;
+            position: relative;
+            transition: background-color 0.3s, color 0.3s;
         }
+        
+        .user-bubble:hover::after {
+            content: "수정하려면 클릭";
+            position: absolute;
+            top: -24px; right: 0;
+            background: rgba(0,0,0,0.7); color: white;
+            padding: 4px 8px; border-radius: 4px;
+            font-size: 11px;
+            white-space: nowrap;
+            pointer-events: none;
+            opacity: 0; transition: opacity 0.2s;
+        }
+        .user-bubble:hover::after { opacity: 1; }
+
+        /* User Message Edit Mode Styles */
+        .msg.user.editing .user-bubble { display: none; }
+        .edit-container {
+            width: 100%; max-width: 100%;
+            display: flex; flex-direction: column; align-items: flex-end; gap: 8px;
+            animation: fadeInOnly 0.2s;
+        }
+        .edit-textarea {
+            width: 100%; 
+            background: var(--bg-main); color: var(--text-main);
+            border: 1px solid var(--accent-color);
+            border-radius: 16px;
+            padding: 12px;
+            font-size: 0.95rem; font-family: var(--font-ko);
+            resize: none; outline: none;
+            min-height: 60px;
+            box-sizing: border-box;
+        }
+        .edit-buttons { display: flex; gap: 6px; }
+        .edit-btn-pill {
+            padding: 6px 16px; border-radius: 20px; font-size: 0.85rem; font-weight: 500;
+            cursor: pointer; border: none; transition: all 0.2s;
+        }
+        .edit-cancel { background: var(--btn-disabled); color: var(--text-gray); }
+        .edit-cancel:hover { background: #e0e0e0; }
+        .edit-confirm { background: var(--accent-color); color: white; }
+        .edit-confirm:hover { opacity: 0.9; }
+
+        /* 수정 버튼 (User bubble 아래 표시) */
+        .msg-edit-btn {
+            font-size: 12px; color: var(--text-gray); margin-top: 4px; 
+            cursor: pointer; background: none; border: none;
+            display: flex; align-items: center; gap: 2px;
+            opacity: 0; transition: opacity 0.2s;
+        }
+        .msg.user:hover .msg-edit-btn { opacity: 1; }
+        .msg-edit-btn:hover { color: var(--text-main); text-decoration: underline; }
 
         .action-buttons { 
             display: flex; gap: 6px; margin-top: 6px; opacity: 1; 
@@ -471,12 +518,10 @@
         .action-btn.disabled { opacity: 0.2; pointer-events: none; }
         .action-btn .material-symbols-rounded { font-size: 19px; font-variation-settings: 'wght' 300; }
         
-        /* New Thought Button Style */
         .thought-btn {
-             font-size: 12px;
-             color: var(--text-gray);
+             font-size: 12px; color: var(--text-gray);
              background: transparent;
-             border: 1px solid #eee;
+             border: 1px solid var(--input-border);
              border-radius: 12px;
              padding: 4px 10px;
              cursor: pointer;
@@ -487,13 +532,12 @@
         .thought-btn:hover { background-color: var(--btn-bg-soft); color: var(--text-main); }
         .thought-btn .material-symbols-rounded { font-size: 16px; }
 
-        /* --- Input Area Layout (Modified) --- */
         .input-container { 
             width: 100%; 
             display: flex; 
             justify-content: center; 
             padding: 10px 0 25px 0; 
-            background: white; 
+            background: var(--bg-main); 
             flex-shrink: 0; 
             position: relative; 
         }
@@ -510,7 +554,7 @@
             width: 48px; height: 48px;
             border-radius: 50%;
             border: 1px solid var(--input-border);
-            background: white;
+            background: var(--bg-main);
             color: var(--text-main);
             display: flex; align-items: center; justify-content: center;
             cursor: pointer;
@@ -521,30 +565,22 @@
         .plus-btn:hover { background-color: var(--btn-bg-soft); }
         .plus-btn:active { transform: scale(0.94); }
         .plus-btn .material-symbols-rounded { font-size: 24px; font-variation-settings: 'wght' 300; }
-        .plus-btn.active { background-color: #f0f0f0; transform: rotate(45deg); }
+        .plus-btn.active { background-color: var(--btn-bg-soft); transform: rotate(45deg); }
 
-        /* Attachment Menu (Modal) */
         .attach-menu {
-            position: absolute;
-            bottom: 60px; 
-            left: 0;
-            background: white;
+            position: absolute; bottom: 60px; left: 0;
+            background: var(--bg-main);
             border: 1px solid var(--input-border);
             border-radius: 16px;
             box-shadow: 0 4px 20px rgba(0,0,0,0.12);
-            display: flex;
-            flex-direction: column;
-            padding: 8px;
-            gap: 4px;
+            display: flex; flex-direction: column; padding: 8px; gap: 4px;
             min-width: 160px;
             opacity: 0; visibility: hidden; transform: translateY(10px) scale(0.95);
             transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
             z-index: 50;
         }
         
-        .attach-menu.open {
-            opacity: 1; visibility: visible; transform: translateY(0) scale(1);
-        }
+        .attach-menu.open { opacity: 1; visibility: visible; transform: translateY(0) scale(1); }
 
         .menu-item {
             display: flex; align-items: center; gap: 10px;
@@ -561,21 +597,13 @@
         .menu-item:hover { background-color: var(--btn-bg-soft); }
         .menu-item .material-symbols-rounded { font-size: 20px; color: #555; }
 
-        @media (max-width: 600px) {
-            .attach-menu {
-                bottom: 65px; left: 4px; 
-                min-width: 180px;
-            }
-            .menu-item { padding: 12px 14px; font-size: 1rem; } 
-        }
-
         .input-wrapper {
             flex: 1; 
             display: flex; align-items: flex-end;
             border: 1px solid var(--input-border); border-radius: 24px;
             padding: 8px 8px 8px 16px; 
             box-sizing: border-box;
-            background: white;
+            background: var(--bg-main);
             min-height: 48px; 
         }
         
@@ -589,11 +617,12 @@
             max-height: 90px; 
             overflow-y: hidden; 
             background: transparent;
+            color: var(--text-main);
             line-height: 24px; 
             height: 24px; 
             box-sizing: border-box;
         }
-        #userInput::placeholder { font-family: var(--font-en), var(--font-ko); opacity: 0.6; }
+        #userInput::placeholder { font-family: var(--font-en), var(--font-ko); opacity: 0.6; color: var(--text-main); }
 
         .send-btn {
             background-color: var(--btn-disabled); color: var(--btn-disabled-icon); border: none; border-radius: 50%;
@@ -601,7 +630,8 @@
             cursor: default; transition: all 0.2s ease; pointer-events: none;
             flex-shrink: 0; margin-left: 8px; margin-bottom: 0px; 
         }
-        .send-btn.active { background-color: var(--btn-active); color: #ffffff; cursor: pointer; pointer-events: auto; }
+        /* Active Send Button Color controlled by --accent-color */
+        .send-btn.active { background-color: var(--accent-color); color: #ffffff; cursor: pointer; pointer-events: auto; }
         .material-symbols-rounded.send-icon { font-variation-settings: 'wght' 300; font-size: 22px; }
         
         .thinking-indicator { 
@@ -641,35 +671,32 @@
             transition: opacity 0.3s ease, visibility 0.3s;
         }
 
-        .modal-overlay.open { 
-            opacity: 1; visibility: visible; pointer-events: auto; 
-        }
+        .modal-overlay.open { opacity: 1; visibility: visible; pointer-events: auto; }
         
         .modal-box {
-            background: white; width: 90%; max-width: 400px; max-height: 80%;
+            background: var(--bg-main); width: 90%; max-width: 400px; max-height: 80%;
             border-radius: 20px; padding: 20px; display: flex; flex-direction: column;
             box-shadow: 0 10px 25px rgba(0,0,0,0.1);
             position: relative;
             transform: scale(0.95) translateY(10px);
             transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            color: var(--text-main);
         }
         
-        .modal-overlay.open .modal-box { 
-            transform: scale(1) translateY(0); 
-        }
+        .modal-overlay.open .modal-box { transform: scale(1) translateY(0); }
         
         .modal-box.small-box { max-width: 320px; height: auto; padding: 24px; text-align: center; }
         .confirm-title { font-size: 1.1rem; font-weight: 600; margin-bottom: 8px; }
-        .confirm-msg { font-size: 0.95rem; color: #666; margin-bottom: 24px; line-height: 1.5; }
+        .confirm-msg { font-size: 0.95rem; color: var(--text-gray); margin-bottom: 24px; line-height: 1.5; }
         .modal-actions { display: flex; gap: 10px; justify-content: center; width: 100%; }
         .modal-btn {
             flex: 1; padding: 12px; border-radius: 12px; font-size: 0.95rem; font-weight: 500; cursor: pointer; border: none;
             transition: transform 0.1s;
         }
         .modal-btn:active { transform: scale(0.95); }
-        .btn-cancel { background: #f0f0f0; color: #333; }
+        .btn-cancel { background: var(--btn-disabled); color: var(--text-main); }
         .btn-delete { background: var(--error-red); color: white; }
-        .btn-ok { background: var(--text-main); color: white; }
+        .btn-ok { background: var(--text-main); color: var(--bg-main); }
 
         @media (max-width: 600px) {
             .modal-overlay:not(#confirmModal):not(#msgModal) { align-items: flex-end; }
@@ -679,529 +706,315 @@
                 transform: translateY(100%);
                 transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
             }
-            .modal-overlay.open .modal-box:not(.small-box) {
-                transform: translateY(0);
-            }
+            .modal-overlay.open .modal-box:not(.small-box) { transform: translateY(0); }
         }
 
         .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        .modal-title { font-weight: 600; font-size: 1.1rem; }
-        .close-modal-btn { background: none; border: none; cursor: pointer; padding: 4px; }
+        .modal-title { font-weight: 600; font-size: 1.1rem; color: var(--text-main); }
+        .close-modal-btn { background: none; border: none; cursor: pointer; padding: 4px; color: var(--text-main); }
         .clear-all-btn {
             font-size: 0.85rem; color: var(--error-red); background: none; border: none;
             font-weight: 500; cursor: pointer; padding: 4px 8px; border-radius: 6px;
         }
-        .clear-all-btn:hover { background: #fee2e2; }
+        .clear-all-btn:hover { background: rgba(239, 68, 68, 0.1); }
 
         .history-list { overflow-y: auto; flex: 1; list-style: none; padding: 0; margin: 0; }
         
         .history-item {
-            padding: 12px; border-bottom: 1px solid #eee; transition: background 0.2s;
+            padding: 12px; border-bottom: 1px solid var(--input-border); transition: background 0.2s;
             border-radius: 12px; margin-bottom: 4px;
             display: flex; justify-content: space-between; align-items: center;
             animation: fadeInOnly 0.3s ease-out backwards; 
         }
-        .history-item:hover { background: #f9f9f9; }
+        .history-item:hover { background: var(--btn-bg-soft); }
         .history-info { flex: 1; overflow: hidden; cursor: pointer; }
-        .h-title { font-size: 0.95rem; font-weight: 500; margin-bottom: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .h-date { font-size: 0.75rem; color: #aaa; }
+        .h-title { font-size: 0.95rem; font-weight: 500; margin-bottom: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-main); }
+        .h-date { font-size: 0.75rem; color: var(--text-gray); }
         
         .delete-chat-btn {
-            background: none; border: none; padding: 8px; cursor: pointer; color: #ccc;
+            background: none; border: none; padding: 8px; cursor: pointer; color: var(--text-gray);
             display: flex; align-items: center; justify-content: center;
             border-radius: 50%;
         }
-        .delete-chat-btn:hover { color: var(--error-red); background: #fff0f0; }
+        .delete-chat-btn:hover { color: var(--error-red); background: rgba(239, 68, 68, 0.1); }
         .delete-chat-btn .material-symbols-rounded { font-size: 20px; }
 
-        .empty-history { text-align: center; color: #aaa; padding: 20px; font-size: 0.9rem; }
-
-
-
-/* 버튼들을 감싸는 박스 스타일 */
-.sidebar-nav-group {
-    border: 1px solid #FFFFFF; /* 매우 연한 테두리 */
-    border-radius: 16px;       /* 둥근 사각형 모양 */
-    padding: 4px;              /* 내부 버튼과의 간격 */
-    margin-bottom: 16px;       /* 다음 요소와의 간격 */
-    background-color: transparent;
-}
-
-/* 박스 안의 버튼 스타일 미세 조정 */
-.sidebar-nav-group .sidebar-nav-item {
-    margin-bottom: 0;          /* 그룹 내에서는 하단 마진 제거 */
-    border-radius: 12px;       /* 그룹 곡률에 맞게 조절 */
-}
-
-
-/* '최근' 글자와 대화 목록 전체를 감싸는 영역 */
-.pc-history-container {
-    flex: 1;
-    overflow-y: auto;
-    overflow-x: hidden;
-    margin-top: 4px;
-    /* 연한 테두리가 있는 둥근 사각형 박스 추가 */
-    border: 1px solid #FFFFFF; 
-    border-radius: 16px;
-    padding: 8px; /* 내부 대화 목록과의 간격 */
-    background-color: transparent;
-}
-
-/* 박스 내부의 개별 대화 목록 아이템 스타일 미세 조정 */
-.pc-sidebar .history-item {
-    padding: 10px 12px;
-    border-bottom: none; /* 구분선 제거 */
-    border-radius: 12px;  /* 아이템도 둥글게 */
-    margin-bottom: 2px;
-}
-
-/* 스크롤바가 박스 테두리를 침범하지 않게 조정 */
-.pc-history-container::-webkit-scrollbar {
-    width: 3px;
-}
-
-
-
-@media (max-width: 600px) {
-    /* 1. 사용자의 말풍선 크기 및 텍스트 줄이기 */
-    .user-bubble {
-        max-width: 85%;         /* 말풍선 최대 너비 살짝 조정 */
-        padding: 8px 14px;      /* 상하좌우 여백 줄임 (기존 10px 18px) */
-        font-size: 0.85rem;     /* 텍스트 크기 축소 (기존 0.95rem) */
-        line-height: 1.4;       /* 줄 간격 살짝 좁힘 */
-    }
-
-    /* 2. 봇(MinsuGPT)의 답변 텍스트 크기 줄이기 */
-    .bot-content {
-        font-size: 0.85rem;      /* 텍스트 크기 축소 (기존 1rem) */
-        line-height: 1.4;       /* 줄 간격 조정 */
-    }
-
-    /* 3. (선택사항) 봇 답변 내의 코드 블록 텍스트도 함께 줄이기 */
-    .bot-content pre {
-        padding: 10px;
-        font-size: 0.8rem;      /* 코드 텍스트 크기 축소 */
-    }
-
-    /* 4. 메시지 사이의 간격 줄이기 */
-    .messages-container {
-        gap: 20px;              /* 메시지 간의 상하 간격 축소 (기존 32px) */
-    }
-}
-
-/* 모바일 전용 스타일 수정 (화면 너비 600px 이하) */
-/* 모든 요소에 대해 클릭 시 발생하는 파란색 하이라이트 제거 */
-* {
-    -webkit-tap-highlight-color: transparent;
-    -webkit-tap-highlight-color: rgba(0, 0, 0, 0); /* 일부 구형 안드로이드 대응 */
-    outline: none; /* 포커스 시 나타나는 테두리도 함께 제거 */
-}
-
-
-/* 사이드바 텍스트 정렬 통일 (최근 타이틀 & 채팅 제목) */
-.sidebar-section-title {
-    /* 왼쪽 여백을 16px로 고정 */
-    margin: 24px 0 8px 16px !important;
-}
-
-.pc-sidebar .history-item {
-    /* 내부 여백 왼쪽을 16px로 고정하여 위 타이틀과 시작점 일치 */
-    padding: 10px 5px !important;
-}
-
-/* 추가: 메뉴 아이템(이미지, 앱 등)도 같은 라인으로 맞추고 싶다면 아래 주석을 해제하세요 */
- .sidebar-nav-item {
-    padding: 10px 6px !important;
-} 
-
-
-/* 1. 사이드바 "최근" 타이틀과 채팅 제목 시작 위치 일치시키기 */
-.sidebar-section-title {
-    /* 왼쪽 여백을 16px로 설정 */
-    margin: 24px 0 8px 16px !important;
-}
-
-.pc-sidebar .history-item {
-    /* 아이템 내부 여백을 16px로 설정하여 위 타이틀 글자와 세로 라인을 맞춤 */
-    padding: 2px 5px !important;
-}
-
-/* 2. 채팅 제목 아래의 날짜/시간 텍스트 완전히 없애기 */
-.h-date {
-    display: none !important;
-}
-
-/* 3. 날짜가 사라진 후 제목이 위로 쏠리지 않게 중앙 정렬 보정 */
-.history-info {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    min-height: 24px; /* 제목만 있을 때의 적정 높이 */
-}
-
-.h-title {
-    margin-bottom: 0 !important; /* 아래쪽 여백 제거 */
-}
-
-
-
-/* 푸터 그룹 레이아웃: 사이드바의 실제 벽면에서 시작하도록 여백 조정 */
-.sidebar-footer-group {
-    display: flex !important;
-    align-items: center !important;
-    gap: 8px !important;
-    padding: 0 0px !important; /* 양옆 여백을 줄여 버튼 내부 여백과 합쳐지게 함 */
-    margin-top: 10px !important;
-    margin-bottom: 0px !important;
-}
-
-/* 전체 삭제 버튼: 새 채팅 버튼과 동일한 시작 라인 확보 */
-#pc-delete-all {
-    flex: 1 !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: flex-start !important;
-    height: 40px !important;
-    margin: 0 !important;
-    padding: 0 5px !important; /* 내부 패딩을 조절해 아이콘 위치를 맞춤 */
-    gap: 12px !important; 
-    border-radius: 12px !important;
-}
-
-/* 설정 버튼: 1:1 비율 유지 */
-.settings-btn-pc {
-    width: 40px !important;
-    height: 40px !important;
-    flex-shrink: 0 !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    background: var(--bg-gray);
-    border-radius: 12px !important;
-}
-
-/* 아이콘과 텍스트가 새 채팅 버튼과 동일하게 보이도록 마진 제거 */
-#pc-delete-all .material-symbols-rounded {
-    margin: 0 !important;
-    font-size: 22px !important;
-}
-/* 모바일 전체삭제 버튼 보정 */
-.clear-all-btn {
-    height: 40px !important;
-    margin: 0 !important;
-    flex: 1 !important;
-}
-
-/* 모바일 설정 및 닫기 버튼 (1:1 정사각형 공통) */
-.mobile-settings-btn, 
-.close-modal-btn {
-    width: 48px !important;
-    height: 48px !important;
-    flex-shrink: 0 !important; /* 찌그러짐 방지 */
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    background: var(--bg-gray) !important;
-    border-radius: 12px !important;
-    border: none !important;
-    padding: 0 !important;
-    cursor: pointer;
-}
-
-/* 설정 버튼 아이콘 색상 (글자색과 맞춤) */
-.mobile-settings-btn .material-symbols-rounded {
-    color: var(--text-main);
-    font-size: 24px;
-}
-
-/* 버튼 눌렀을 때 반응 */
-.mobile-settings-btn:active, 
-.close-modal-btn:active {
-    opacity: 0.7;
-}
-
-/* --- New Styles for Thought Modal & Settings Modal --- */
-.settings-box {
-    max-width: 600px !important;
-    height: 400px;
-    padding: 0 !important;
-    display: flex; flex-direction: column;
-    overflow: hidden;
-}
-
-.settings-layout {
-    display: flex;
-    flex: 1;
-    height: 100%;
-}
-
-.settings-sidebar {
-    width: 140px;
-    background: #f8f9fa;
-    border-right: 1px solid #eee;
-    padding: 16px 8px;
-    display: flex; flex-direction: column; gap: 4px;
-}
-
-.settings-content-area {
-    flex: 1;
-    padding: 24px;
-    overflow-y: auto;
-}
-
-.settings-nav-btn {
-    padding: 10px 12px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 0.9rem;
-    color: #555;
-    font-weight: 500;
-    transition: all 0.2s;
-    text-align: left;
-}
-.settings-nav-btn:hover { background-color: #eee; color: #333; }
-.settings-nav-btn.active { background-color: white; color: var(--primary-blue); box-shadow: 0 2px 4px rgba(0,0,0,0.05); font-weight: 600; }
-
-.settings-panel { display: none; animation: fadeInOnly 0.3s ease-out; }
-.settings-panel.active { display: block; }
-
-.settings-item {
-    display: flex; justify-content: space-between; align-items: center;
-    padding: 12px 0; border-bottom: 1px solid #f0f0f0;
-}
-.settings-item:last-child { border-bottom: none; }
-.setting-label { font-size: 0.95rem; font-weight: 500; color: #333; }
-.setting-desc { font-size: 0.8rem; color: #888; margin-top: 4px; }
-
-/* Toggle Switch */
-.toggle-switch {
-    position: relative; width: 40px; height: 22px;
-}
-.toggle-switch input { opacity: 0; width: 0; height: 0; }
-.slider {
-    position: absolute; cursor: pointer;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background-color: #ccc; transition: .4s; border-radius: 34px;
-}
-.slider:before {
-    position: absolute; content: "";
-    height: 16px; width: 16px; left: 3px; bottom: 3px;
-    background-color: white; transition: .4s; border-radius: 50%;
-}
-input:checked + .slider { background-color: var(--primary-blue); }
-input:checked + .slider:before { transform: translateX(18px); }
-
-/* Info Panel Styles */
-.info-logo { font-family: var(--font-logo); font-size: 1.8rem; margin-bottom: 8px; }
-.info-text { font-size: 0.85rem; color: #666; margin-bottom: 20px; line-height: 1.5; }
-.warning-box { background: #fff5f5; border: 1px solid #feb2b2; padding: 12px; border-radius: 8px; font-size: 0.85rem; color: #c53030; margin-bottom: 20px; }
-.credit-text { font-size: 0.8rem; color: #999; margin-top: auto; }
-
-/* Thought Modal */
-.thought-modal-content {
-    font-family: var(--font-ko);
-    white-space: pre-wrap;
-    line-height: 1.6;
-    color: #444;
-    font-size: 0.95rem;
-    padding: 10px;
-    max-height: 70vh; /* 세로 높이 제한 */
-    overflow-y: auto; /* 내용이 길면 스크롤 발생 */
-}
-
-/* 스크롤바 디자인 (선택 사항: 더 깔끔하게 보이게 함) */
-.thought-modal-content::-webkit-scrollbar {
-    width: 4px;  /* 세로 스크롤바 두께 */
-}
-
-.thought-modal-content::-webkit-scrollbar-thumb {
-    background-color: #ccc; /* 스크롤바 색상 */
-    border-radius: 10px;
-}
-
-.thought-modal-content::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-.thought-raw { display: none; }
-
-
-/* 모바일 설정 모달 레이아웃 및 탭 전환 오류 수정 */
-@media (max-width: 600px) {
-    .settings-box {
-        width: 100% !important;
-        max-width: 100% !important;
-        height: 500px !important; /* 모바일에서 적절한 고정 높이 부여 */
-        max-height: 85vh !important;
-        display: flex !important;
-        flex-direction: column !important;
-    }
-
-    .settings-layout {
-        flex-direction: column !important;
-        flex: 1 !important;
-        overflow: hidden !important;
-    }
-
-    .settings-sidebar {
-        width: 100% !important;
-        flex-direction: row !important;
-        padding: 6px !important;
-        background: #f8f9fa !important;
-        border-right: none !important;
-        border-bottom: 1px solid #eee !important;
-        box-sizing: border-box !important;
-        display: flex !important;
-        gap: 4px !important;
-        flex-shrink: 0 !important;
-    }
-
-    .settings-nav-btn {
-        flex: 1 !important;
-        text-align: center !important;
-        padding: 12px 0 !important;
-        font-size: 0.9rem !important;
-        white-space: nowrap !important;
-        display: flex !important;
-        justify-content: center !important;
-        align-items: center !important;
-    }
-
-    .settings-content-area {
-        padding: 20px 16px !important;
-        flex: 1 !important;
-        overflow-y: auto !important; /* 내용이 길어지면 내부 스크롤 */
-        display: block !important; /* flex 충돌 방지를 위해 block으로 설정 */
-        box-sizing: border-box !important;
-    }
-
-    /* 탭 전환 시 보이고 숨기는 로직 강제 적용 */
-    .settings-panel {
-        display: none;
-    }
-    .settings-panel.active {
-        display: block !important;
-    }
-
-    .settings-item {
-        display: flex !important;
-        justify-content: space-between !important;
-        align-items: center !important;
-        width: 100% !important;
-        gap: 12px !important;
-        padding: 12px 0 !important;
-    }
-}
-
-/* 비활성화된(기본 쿠키) 토글 및 텍스트 시각적 효과 */
-.settings-item.disabled-item {
-    opacity: 0.7;
-}
-
-.toggle-switch input:disabled + .slider {
-    background-color: #e0e0e0 !important;
-    cursor: not-allowed;
-}
-
-.toggle-switch input:disabled:checked + .slider {
-    background-color: #abc9f3 !important; /* 연한 하늘색 */
-}
-
-.toggle-switch input:disabled + .slider:before {
-    background-color: #f5f5f5 !important;
-}
-
-        /* 생각 과정 박스 스크롤 및 디자인 수정 */
-.thought-box {
-    background-color: #f8f9fa; /* 연한 회색 배경 */
-    border-left: 3px solid #dee2e6; /* 왼쪽 테두리 강조 */
-    padding: 12px;
-    margin: 10px 0;
-    font-size: 0.9rem;
-    color: #666;
-    border-radius: 4px;
-    
-    /* 스크롤 핵심 설정 */
-    max-height: 250px;       /* 세로 최대 높이 (이 이상 커지면 스크롤 발생) */
-    overflow-y: auto;        /* 세로 스크롤 허용 */
-    overflow-x: auto;        /* 가로 스크롤 허용 (긴 텍스트나 코드 대비) */
-    white-space: pre-wrap;   /* 공백과 줄바꿈 유지하면서 너비 넘어가면 자동 줄바꿈 */
-    word-break: break-all;   /* 단어가 너무 길면 강제 줄바꿈 (가로스크롤 방지 보조) */
-}
-
-/* 스크롤바 디자인 (선택 사항: 더 깔끔하게 보이게 함) */
-.thought-box::-webkit-scrollbar {
-    width: 2px;  /* 세로 스크롤바 두께 */
-    height: 2px; /* 가로 스크롤바 두께 */
-}
-
-.thought-box::-webkit-scrollbar-thumb {
-    background-color: #ccc; /* 스크롤바 색상 */
-    border-radius: 10px;
-}
-
-.thought-box::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-
-        /* --- 봇 메시지 내 링크(a 태그) 버튼 스타일링 --- */
-    .bot-content a {
-        display: inline-flex;          /* 아이콘과 텍스트 정렬을 위해 flex 사용 */
-        align-items: center;           /* 세로 중앙 정렬 */
-        gap: 6px;                      /* 아이콘과 텍스트 사이 간격 */
-        
-        max-width: 260px;              /* 버튼의 최대 너비 (이보다 길면 ... 처리됨) */
-        height: 36px;                  /* 버튼 높이 고정 */
-        
-        padding: 0 14px;               /* 좌우 여백 */
-        margin: 4px 2px;               /* 외부 여백 (줄바꿈 시 간격) */
-        
-        background-color: #f8f9fa;     /* 배경색 (아주 연한 회색) */
-        border: 1px solid #e9ecef;     /* 테두리 색상 */
-        border-radius: 18px;           /* 둥근 알약 모양 */
-        
-        color: var(--primary-blue);    /* 글자색 (기존 테마의 파란색 사용) */
-        text-decoration: none;         /* 밑줄 제거 */
-        font-weight: 500;              /* 글자 두께 */
-        font-size: 0.9rem;             /* 글자 크기 */
-        
-        /* 말줄임표(...) 처리를 위한 핵심 속성 3가지 */
-        white-space: nowrap;           /* 텍스트를 한 줄로 강제 */
-        overflow: hidden;              /* 넘치는 텍스트 숨김 */
-        text-overflow: ellipsis;       /* 넘치는 부분 ... 표시 */
-        
-        transition: all 0.2s ease;     /* 부드러운 호버 효과 */
-        vertical-align: middle;        /* 텍스트 줄 맞춤 */
-        box-sizing: border-box;
-    }
-
-    /* 마우스 올렸을 때 효과 */
-    .bot-content a:hover {
-        background-color: #e3f2fd;     /* 배경색을 연한 파란색으로 변경 */
-        border-color: var(--primary-blue); /* 테두리를 파란색으로 변경 */
-        transform: translateY(-1px);   /* 살짝 위로 떠오름 */
-        box-shadow: 0 2px 5px rgba(29, 111, 239, 0.15); /* 그림자 추가 */
-    }
-
-    /* 링크 앞에 'public' (지구본) 아이콘 자동 추가 */
-    /* 이미 로드된 Material Symbols 폰트를 활용합니다 */
-    .bot-content a::before {
-        content: "public";             /* 아이콘 코드 */
-        font-family: 'Material Symbols Rounded';
-        font-weight: normal;
-        font-style: normal;
-        font-size: 18px;
-        color: #777;                   /* 아이콘 색상 */
-        flex-shrink: 0;                /* 아이콘이 찌그러지지 않게 고정 */
-    }
-
-    /* 링크에 마우스 올리면 아이콘 색상도 변경 */
-    .bot-content a:hover::before {
-        color: var(--primary-blue);
-    }
+        .empty-history { text-align: center; color: var(--text-gray); padding: 20px; font-size: 0.9rem; }
+
+        .sidebar-nav-group {
+            border: 1px solid transparent; 
+            border-radius: 16px;       
+            padding: 4px;              
+            margin-bottom: 16px;       
+            background-color: transparent;
+        }
+
+        .sidebar-nav-group .sidebar-nav-item { margin-bottom: 0; border-radius: 12px; }
+
+        .pc-history-container {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            margin-top: 4px;
+            border: 1px solid transparent; 
+            border-radius: 16px;
+            padding: 8px; 
+            background-color: transparent;
+        }
+
+        .pc-sidebar .history-item {
+            padding: 10px 12px;
+            border-bottom: none; 
+            border-radius: 12px;  
+            margin-bottom: 2px;
+        }
+
+        .pc-history-container::-webkit-scrollbar { width: 3px; }
+
+        @media (max-width: 600px) {
+            .user-bubble {
+                max-width: 85%;         
+                padding: 8px 14px;      
+                font-size: 0.85rem;     
+                line-height: 1.4;       
+            }
+            .bot-content {
+                font-size: 0.85rem;      
+                line-height: 1.4;       
+            }
+            .bot-content pre { padding: 10px; font-size: 0.8rem; }
+            .messages-container { gap: 20px; }
+        }
+
+        * {
+            -webkit-tap-highlight-color: transparent;
+            -webkit-tap-highlight-color: rgba(0, 0, 0, 0); 
+            outline: none; 
+        }
+
+        .sidebar-section-title { margin: 24px 0 8px 16px !important; }
+        .pc-sidebar .history-item { padding: 10px 5px !important; }
+        .sidebar-nav-item { padding: 10px 6px !important; } 
+        .pc-sidebar .history-item { padding: 2px 5px !important; }
+        .h-date { display: none !important; }
+        .history-info { display: flex; flex-direction: column; justify-content: center; min-height: 24px; }
+        .h-title { margin-bottom: 0 !important; }
+
+        .sidebar-footer-group {
+            display: flex !important;
+            align-items: center !important;
+            gap: 8px !important;
+            padding: 0 0px !important; 
+            margin-top: 10px !important;
+            margin-bottom: 0px !important;
+        }
+
+        #pc-delete-all {
+            flex: 1 !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: flex-start !important;
+            height: 40px !important;
+            margin: 0 !important;
+            padding: 0 5px !important; 
+            gap: 12px !important; 
+            border-radius: 12px !important;
+        }
+
+        .settings-btn-pc {
+            width: 40px !important;
+            height: 40px !important;
+            flex-shrink: 0 !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            background: var(--bg-main);
+            border-radius: 12px !important;
+            color: var(--text-main);
+        }
+        .settings-btn-pc:hover { background: var(--btn-bg-soft); }
+
+        #pc-delete-all .material-symbols-rounded { margin: 0 !important; font-size: 22px !important; }
+        .clear-all-btn { height: 40px !important; margin: 0 !important; flex: 1 !important; }
+
+        .mobile-settings-btn, 
+        .close-modal-btn {
+            width: 48px !important;
+            height: 48px !important;
+            flex-shrink: 0 !important; 
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            background: var(--bg-main) !important;
+            border-radius: 12px !important;
+            border: none !important;
+            padding: 0 !important;
+            cursor: pointer;
+        }
+
+        .mobile-settings-btn .material-symbols-rounded { color: var(--text-main); font-size: 24px; }
+        .mobile-settings-btn:active, .close-modal-btn:active { opacity: 0.7; }
+
+        /* --- Settings Modal Styles --- */
+        .settings-box {
+            max-width: 600px !important;
+            height: 400px;
+            padding: 0 !important;
+            display: flex; flex-direction: column;
+            overflow: hidden;
+        }
+
+        .settings-layout {
+            display: flex; flex: 1; height: 100%;
+        }
+
+        .settings-sidebar {
+            width: 140px;
+            background: var(--surface-secondary);
+            border-right: 1px solid var(--input-border);
+            padding: 16px 8px;
+            display: flex; flex-direction: column; gap: 4px;
+        }
+
+        .settings-content-area {
+            flex: 1; padding: 24px; overflow-y: auto; background: var(--bg-main);
+        }
+
+        .settings-nav-btn {
+            padding: 10px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            color: var(--text-gray);
+            font-weight: 500;
+            transition: all 0.2s;
+            text-align: left;
+        }
+        .settings-nav-btn:hover { background-color: var(--btn-bg-soft); color: var(--text-main); }
+        .settings-nav-btn.active { background-color: var(--bg-main); color: var(--primary-blue); box-shadow: 0 2px 4px rgba(0,0,0,0.05); font-weight: 600; }
+
+        .settings-panel { display: none; animation: fadeInOnly 0.3s ease-out; }
+        .settings-panel.active { display: block; }
+
+        .settings-item {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 12px 0; border-bottom: 1px solid var(--input-border);
+        }
+        .settings-item:last-child { border-bottom: none; }
+        .setting-label { font-size: 0.95rem; font-weight: 500; color: var(--text-main); }
+        .setting-desc { font-size: 0.8rem; color: var(--text-gray); margin-top: 4px; }
+
+        /* Custom Select for Theme/Color */
+        .setting-select {
+            appearance: none; -webkit-appearance: none;
+            background-color: var(--btn-bg-soft);
+            color: var(--text-main);
+            border: 1px solid var(--input-border);
+            padding: 8px 30px 8px 12px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            font-family: var(--font-ko);
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 8px center;
+            background-size: 14px;
+        }
+        .setting-select:focus { border-color: var(--primary-blue); outline: none; }
+
+        /* Toggle Switch */
+        .toggle-switch { position: relative; width: 40px; height: 22px; }
+        .toggle-switch input { opacity: 0; width: 0; height: 0; }
+        .slider {
+            position: absolute; cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #ccc; transition: .4s; border-radius: 34px;
+        }
+        .slider:before {
+            position: absolute; content: "";
+            height: 16px; width: 16px; left: 3px; bottom: 3px;
+            background-color: white; transition: .4s; border-radius: 50%;
+        }
+        input:checked + .slider { background-color: var(--primary-blue); }
+        input:checked + .slider:before { transform: translateX(18px); }
+
+        .info-logo { font-family: var(--font-logo); font-size: 1.8rem; margin-bottom: 8px; color: var(--text-main); }
+        .info-text { font-size: 0.85rem; color: var(--text-gray); margin-bottom: 20px; line-height: 1.5; }
+        .warning-box { background: rgba(239, 68, 68, 0.1); border: 1px solid var(--error-red); padding: 12px; border-radius: 8px; font-size: 0.85rem; color: var(--error-red); margin-bottom: 20px; }
+        .credit-text { font-size: 0.8rem; color: var(--text-gray); margin-top: auto; }
+
+        .thought-modal-content {
+            font-family: var(--font-ko); white-space: pre-wrap; line-height: 1.6;
+            color: var(--text-main); font-size: 0.95rem; padding: 10px;
+            max-height: 70vh; overflow-y: auto;
+        }
+
+        .thought-modal-content::-webkit-scrollbar { width: 4px; }
+        .thought-modal-content::-webkit-scrollbar-thumb { background-color: #ccc; border-radius: 10px; }
+        .thought-modal-content::-webkit-scrollbar-track { background: transparent; }
+        .thought-raw { display: none; }
+
+        @media (max-width: 600px) {
+            .settings-box {
+                width: 100% !important; max-width: 100% !important; height: 500px !important;
+                max-height: 85vh !important; display: flex !important; flex-direction: column !important;
+            }
+            .settings-layout { flex-direction: column !important; flex: 1 !important; overflow: hidden !important; }
+            .settings-sidebar {
+                width: 100% !important; flex-direction: row !important; padding: 6px !important;
+                background: var(--surface-secondary) !important; border-right: none !important; border-bottom: 1px solid var(--input-border) !important;
+                box-sizing: border-box !important; display: flex !important; gap: 4px !important; flex-shrink: 0 !important;
+            }
+            .settings-nav-btn {
+                flex: 1 !important; text-align: center !important; padding: 12px 0 !important;
+                font-size: 0.9rem !important; white-space: nowrap !important;
+                display: flex !important; justify-content: center !important; align-items: center !important;
+            }
+            .settings-content-area {
+                padding: 20px 16px !important; flex: 1 !important; overflow-y: auto !important;
+                display: block !important; box-sizing: border-box !important;
+            }
+            .settings-panel { display: none; }
+            .settings-panel.active { display: block !important; }
+            .settings-item {
+                display: flex !important; justify-content: space-between !important;
+                align-items: center !important; width: 100% !important; gap: 12px !important; padding: 12px 0 !important;
+            }
+        }
+
+        .settings-item.disabled-item { opacity: 0.7; }
+        .toggle-switch input:disabled + .slider { background-color: #e0e0e0 !important; cursor: not-allowed; }
+        .toggle-switch input:disabled:checked + .slider { background-color: #abc9f3 !important; }
+        .toggle-switch input:disabled + .slider:before { background-color: #f5f5f5 !important; }
+
+        .thought-box {
+            background-color: var(--thought-bg); border-left: 3px solid #dee2e6;
+            padding: 12px; margin: 10px 0; font-size: 0.9rem; color: var(--text-gray); border-radius: 4px;
+            max-height: 250px; overflow-y: auto; overflow-x: auto; white-space: pre-wrap; word-break: break-all;
+        }
+        .thought-box::-webkit-scrollbar { width: 2px; height: 2px; }
+        .thought-box::-webkit-scrollbar-thumb { background-color: #ccc; border-radius: 10px; }
+        .thought-box::-webkit-scrollbar-track { background: transparent; }
+
+        .bot-content a {
+            display: inline-flex; align-items: center; gap: 6px;
+            max-width: 260px; height: 36px; padding: 0 14px; margin: 4px 2px;
+            background-color: var(--bg-main); border: 1px solid var(--input-border); border-radius: 18px;
+            color: var(--primary-blue); text-decoration: none; font-weight: 500; font-size: 0.9rem;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+            transition: all 0.2s ease; vertical-align: middle; box-sizing: border-box;
+        }
+        .bot-content a:hover {
+            background-color: rgba(29, 111, 239, 0.1); border-color: var(--primary-blue);
+            transform: translateY(-1px); box-shadow: 0 2px 5px rgba(29, 111, 239, 0.15);
+        }
+        .bot-content a::before {
+            content: "public"; font-family: 'Material Symbols Rounded'; font-weight: normal;
+            font-style: normal; font-size: 18px; color: var(--text-gray); flex-shrink: 0;
+        }
+        .bot-content a:hover::before { color: var(--primary-blue); }
     </style>
 </head>
 <body>
@@ -1392,7 +1205,7 @@ input:checked + .slider:before { transform: translateX(18px); }
 
 <div class="modal-overlay" id="settingsModal">
     <div class="modal-box settings-box">
-        <div class="modal-header" style="margin-bottom:0; padding: 16px; border-bottom:1px solid #eee;">
+        <div class="modal-header" style="margin-bottom:0; padding: 16px; border-bottom:1px solid var(--input-border);">
             <span class="modal-title">설정</span>
             <button class="close-modal-btn" onclick="closeSettings()">
                 <span class="material-symbols-rounded">close</span>
@@ -1401,21 +1214,22 @@ input:checked + .slider:before { transform: translateX(18px); }
         <div class="settings-layout">
             <div class="settings-sidebar">
                 <div class="settings-nav-btn active" onclick="switchSettingTab(this, 'tab-general')">일반</div>
+                <div class="settings-nav-btn" onclick="switchSettingTab(this, 'tab-theme')">테마</div>
                 <div class="settings-nav-btn" onclick="switchSettingTab(this, 'tab-response')">답변</div>
                 <div class="settings-nav-btn" onclick="switchSettingTab(this, 'tab-info')">정보</div>
             </div>
             <div class="settings-content-area">
                 <div id="tab-general" class="settings-panel active">
                     <div class="settings-item disabled-item">
-    <div>
-        <div class="setting-label" style="color: #777;">기본 쿠키 허용</div>
-        <div class="setting-desc">서비스 이용에 필수적인 쿠키입니다. <br> 이 쿠키는 끌 수 없습니다.</div>
-    </div>
-    <label class="toggle-switch">
-        <input type="checkbox" checked disabled>
-        <span class="slider"></span>
-    </label>
-</div>
+                        <div>
+                            <div class="setting-label" style="color: var(--text-gray);">기본 쿠키 허용</div>
+                            <div class="setting-desc">서비스 이용에 필수적인 쿠키입니다. <br> 이 쿠키는 끌 수 없습니다.</div>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" checked disabled>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
                     <div class="settings-item">
                         <div>
                             <div class="setting-label">분석용 쿠키</div>
@@ -1435,6 +1249,37 @@ input:checked + .slider:before { transform: translateX(18px); }
                             <input type="checkbox" id="setting-cookie-marketing">
                             <span class="slider"></span>
                         </label>
+                    </div>
+                </div>
+
+                <div id="tab-theme" class="settings-panel">
+                    <div class="settings-item">
+                        <div>
+                            <div class="setting-label">화면 테마</div>
+                            <div class="setting-desc">앱의 전반적인 분위기를 선택하세요.</div>
+                        </div>
+                        <select id="setting-theme-mode" class="setting-select" onchange="changeThemeMode(this.value)">
+                            <option value="auto">자동 (시스템 설정)</option>
+                            <option value="light">화이트</option>
+                            <option value="dark">다크</option>
+                        </select>
+                    </div>
+                    
+                    <div class="settings-item">
+                        <div>
+                            <div class="setting-label">강조 색상</div>
+                            <div class="setting-desc">전송 버튼과 말풍선 색상을 변경합니다.</div>
+                        </div>
+                        <select id="setting-accent-color" class="setting-select" onchange="changeAccentColor(this.value)">
+                            <option value="default">⚫ 기본</option>
+                            <option value="pastel-red">🔴 파스텔 레드</option>
+                            <option value="pastel-orange">🟠 파스텔 오렌지</option>
+                            <option value="pastel-yellow">🟡 파스텔 옐로우</option>
+                            <option value="pastel-green">🟢 파스텔 그린</option>
+                            <option value="pastel-blue">🔵 파스텔 블루</option>
+                            <option value="pastel-navy">🔵 파스텔 네이비</option>
+                            <option value="pastel-purple">🟣 파스텔 퍼플</option>
+                        </select>
                     </div>
                 </div>
                 
@@ -1538,7 +1383,7 @@ input:checked + .slider:before { transform: translateX(18px); }
     const appContainer = document.getElementById('app');
     
     const newChatBtn = document.getElementById('newChatBtn');
-    const historyBtn = document.getElementById('historyBtn'); // kept for JS compatibility
+    const historyBtn = document.getElementById('historyBtn'); 
     const historyModal = document.getElementById('historyModal');
     const closeModalBtn = document.getElementById('closeModalBtn');
     const historyList = document.getElementById('historyList');
@@ -1570,14 +1415,12 @@ input:checked + .slider:before { transform: translateX(18px); }
     const miniNewChat = document.getElementById('mini-new-chat');
     const miniDeleteAll = document.getElementById('mini-delete-all');
     
-    // New PC Sidebar Elements
     const pcDeleteAll = document.getElementById('pc-delete-all');
     const pcNewChatBtn = document.getElementById('pc-new-chat-btn');
     const pcHistoryContainer = document.getElementById('pcHistoryContainer');
     const sidebarLogoBtn = document.getElementById('sidebar-logo-btn');
     const sidebarSearch = document.getElementById('sidebar-search');
 
-    // Modals
     const settingsModal = document.getElementById('settingsModal');
     const thoughtModal = document.getElementById('thoughtModal');
     const thoughtModalContent = document.getElementById('thoughtModalContent');
@@ -1600,6 +1443,74 @@ input:checked + .slider:before { transform: translateX(18px); }
     ];
 
     marked.setOptions({ breaks: true, gfm: true });
+
+    /* --- Theme & Accent Color Logic --- */
+    const THEME_KEY = 'minsugpt_theme_pref';
+    const ACCENT_KEY = 'minsugpt_accent_pref';
+
+    const ACCENT_COLORS = {
+        'default': { color: '#000000', bubbleBg: '#f2f2f2', bubbleText: '#212121' },
+        'pastel-red': { color: '#ff6b6b', bubbleBg: '#ffadad', bubbleText: '#5c0000' },
+        'pastel-orange': { color: '#ffa502', bubbleBg: '#ffd6a5', bubbleText: '#5e3e00' },
+        'pastel-yellow': { color: '#ffd32a', bubbleBg: '#fdffb6', bubbleText: '#4e4b00' },
+        'pastel-green': { color: '#2ed573', bubbleBg: '#caffbf', bubbleText: '#004400' },
+        'pastel-blue': { color: '#1e90ff', bubbleBg: '#a0c4ff', bubbleText: '#001a4d' },
+        'pastel-navy': { color: '#3742fa', bubbleBg: '#bdf2ff', bubbleText: '#002347' },
+        'pastel-purple': { color: '#5352ed', bubbleBg: '#bdb2ff', bubbleText: '#1f005c' }
+    };
+
+    function initTheme() {
+        // Load Theme
+        const savedTheme = localStorage.getItem(THEME_KEY) || 'auto';
+        document.getElementById('setting-theme-mode').value = savedTheme;
+        changeThemeMode(savedTheme);
+
+        // Load Accent
+        const savedAccent = localStorage.getItem(ACCENT_KEY) || 'default';
+        document.getElementById('setting-accent-color').value = savedAccent;
+        changeAccentColor(savedAccent);
+    }
+
+    function changeThemeMode(mode) {
+        localStorage.setItem(THEME_KEY, mode);
+        if (mode === 'auto') {
+            if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            } else {
+                document.documentElement.setAttribute('data-theme', 'light');
+            }
+        } else {
+            document.documentElement.setAttribute('data-theme', mode);
+        }
+    }
+
+    // System theme change listener
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+        if (localStorage.getItem(THEME_KEY) === 'auto') {
+            changeThemeMode('auto');
+        }
+    });
+
+    function changeAccentColor(colorKey) {
+        localStorage.setItem(ACCENT_KEY, colorKey);
+        const palette = ACCENT_COLORS[colorKey] || ACCENT_COLORS['default'];
+        const root = document.documentElement.style;
+        
+        // Dark mode adjustment for default bubble
+        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        
+        root.setProperty('--accent-color', palette.color);
+        
+        if (colorKey === 'default') {
+             // Let css variables handle dark/light mode for default
+             root.removeProperty('--accent-bubble-bg');
+             root.removeProperty('--accent-bubble-text');
+        } else {
+             root.setProperty('--accent-bubble-bg', palette.bubbleBg);
+             root.setProperty('--accent-bubble-text', palette.bubbleText);
+        }
+    }
+
 
     /* --- Model Selector Logic --- */
     function setModel(model) {
@@ -1636,130 +1547,116 @@ input:checked + .slider:before { transform: translateX(18px); }
         }
     });
 
-    /* --- PC Sidebar Logic (수정본) --- */
-
-// 페이지 로드 시 PC 버전이면 사이드바를 기본적으로 엽니다.
-window.addEventListener('DOMContentLoaded', () => {
-    if (window.innerWidth > 768) {
-        togglePCSidebar(true); // PC라면 강제로 열기
-    }
-});
-
-function togglePCSidebar(force) {
-    // force 인자가 있으면 그 값에 따르고, 없으면 토글합니다.
-    const shouldOpen = (force === undefined) ? !pcSidebar.classList.contains('visible') : force;
-
-    if (shouldOpen) {
-        pcSidebar.classList.add('visible');
-        document.body.classList.add('sidebar-open');
-        // 사이드바가 열릴 때 히스토리를 렌더링합니다.
-        renderPCHistory(sidebarSearch.value || "");
-    } else {
-        pcSidebar.classList.remove('visible');
-        document.body.classList.remove('sidebar-open');
-    }
-}
-
-// 메뉴 버튼 클릭 이벤트 (PC/모바일 분기)
-menuButton.addEventListener('click', () => {
-    if (window.innerWidth > 768) {
-        // PC 버전: 사이드바 열고 닫기
-        togglePCSidebar();
-    } else {
-        // 모바일 버전: 기존처럼 히스토리 모달 열기
-        openHistoryModal();
-    }
-});
-
-// 사이드바 닫기 버튼 (닫기 버튼이 있을 경우)
-if (pcSidebarClose) {
-    pcSidebarClose.addEventListener('click', () => togglePCSidebar(false));
-}
-
-// 사이드바 액션 (새 채팅)
-[miniNewChat, sidebarLogoBtn, pcNewChatBtn].forEach(btn => {
-    if (btn) btn.addEventListener('click', startNewChat);
-});
-
-// 사이드바 검색 (실시간 검색)
-sidebarSearch.addEventListener('input', (e) => {
-    renderPCHistory(e.target.value);
-});
-
-// PC 전체 삭제 기능 (공통 함수화)
-const handleDeleteAll = () => {
-    showConfirmModal("전체 삭제", "모든 채팅 기록을 삭제하시겠습니까?", () => {
-        localStorage.removeItem(STORAGE_KEY);
-        if (typeof renderHistoryList === "function") renderHistoryList(); 
-        renderPCHistory(); // PC 목록 갱신
-        startNewChat();
+    /* --- PC Sidebar Logic --- */
+    window.addEventListener('DOMContentLoaded', () => {
+        if (window.innerWidth > 768) {
+            togglePCSidebar(true); 
+        }
+        initTheme(); // Initialize Theme
     });
-};
 
-if (miniDeleteAll) miniDeleteAll.addEventListener('click', handleDeleteAll);
-if (pcDeleteAll) pcDeleteAll.addEventListener('click', handleDeleteAll);
-
-/* --- 기능 미지원 알림 모달 --- */
-window.showFeatureNotReady = function() {
-    msgTitle.innerText = "알림";
-    msgContent.innerText = "아직 지원되지 않는 기능입니다.";
-    msgModal.classList.add('open');
-}
-
-msgOkBtn.addEventListener('click', () => msgModal.classList.remove('open'));
-msgModal.addEventListener('click', (e) => {
-    if (e.target === msgModal) msgModal.classList.remove('open');
-});
-
-/* --- PC 전용 히스토리 렌더링 --- */
-function renderPCHistory(filter = "") {
-    if (!pcHistoryContainer) return;
-
-    const chats = getSavedChats();
-    const filteredChats = filter.trim() === "" 
-        ? chats 
-        : chats.filter(c => c.title.toLowerCase().includes(filter.toLowerCase()));
-
-    if (filteredChats.length === 0) {
-        pcHistoryContainer.innerHTML = `<div class="empty-history">${filter ? '검색 결과가 없습니다.' : '기록이 없습니다.'}</div>`;
-        return;
+    function togglePCSidebar(force) {
+        const shouldOpen = (force === undefined) ? !pcSidebar.classList.contains('visible') : force;
+        if (shouldOpen) {
+            pcSidebar.classList.add('visible');
+            document.body.classList.add('sidebar-open');
+            renderPCHistory(sidebarSearch.value || "");
+        } else {
+            pcSidebar.classList.remove('visible');
+            document.body.classList.remove('sidebar-open');
+        }
     }
 
-    const list = document.createElement('ul');
-    list.className = 'history-list';
-    list.style.padding = '0';
+    menuButton.addEventListener('click', () => {
+        if (window.innerWidth > 768) {
+            togglePCSidebar();
+        } else {
+            openHistoryModal();
+        }
+    });
 
-    filteredChats.forEach((chat) => {
-        const date = new Date(chat.timestamp).toLocaleDateString();
-        const li = document.createElement('li');
-        li.className = 'history-item';
-        // 현재 활성화된 채팅인 경우 강조 표시를 원한다면 여기에 클래스 추가 가능
-        if (chat.id === currentChatId) li.classList.add('active');
+    if (pcSidebarClose) {
+        pcSidebarClose.addEventListener('click', () => togglePCSidebar(false));
+    }
 
-        li.innerHTML = `
-            <div class="history-info">
-                <div class="h-title">${chat.title}</div>
-                <div class="h-date">${date}</div>
-            </div>
-            <button class="delete-chat-btn" title="삭제">
-                <span class="material-symbols-rounded">delete</span>
-            </button>
-        `;
+    [miniNewChat, sidebarLogoBtn, pcNewChatBtn].forEach(btn => {
+        if (btn) btn.addEventListener('click', startNewChat);
+    });
 
-        li.querySelector('.history-info').addEventListener('click', () => loadChat(chat.id));
-        li.querySelector('.delete-chat-btn').addEventListener('click', (e) => {
-            e.stopPropagation();
-            showConfirmModal("기록 삭제", "이 채팅 기록을 삭제하시겠습니까?", () => {
-                deleteChat(chat.id); // 삭제 로직 후 renderPCHistory()가 내부에서 호출되어야 함
-                renderPCHistory(sidebarSearch.value); 
-            });
+    sidebarSearch.addEventListener('input', (e) => {
+        renderPCHistory(e.target.value);
+    });
+
+    const handleDeleteAll = () => {
+        showConfirmModal("전체 삭제", "모든 채팅 기록을 삭제하시겠습니까?", () => {
+            localStorage.removeItem(STORAGE_KEY);
+            if (typeof renderHistoryList === "function") renderHistoryList(); 
+            renderPCHistory(); 
+            startNewChat();
         });
-        list.appendChild(li);
+    };
+
+    if (miniDeleteAll) miniDeleteAll.addEventListener('click', handleDeleteAll);
+    if (pcDeleteAll) pcDeleteAll.addEventListener('click', handleDeleteAll);
+
+    window.showFeatureNotReady = function() {
+        msgTitle.innerText = "알림";
+        msgContent.innerText = "아직 지원되지 않는 기능입니다.";
+        msgModal.classList.add('open');
+    }
+
+    msgOkBtn.addEventListener('click', () => msgModal.classList.remove('open'));
+    msgModal.addEventListener('click', (e) => {
+        if (e.target === msgModal) msgModal.classList.remove('open');
     });
 
-    pcHistoryContainer.innerHTML = '';
-    pcHistoryContainer.appendChild(list);
-}
+    function renderPCHistory(filter = "") {
+        if (!pcHistoryContainer) return;
+
+        const chats = getSavedChats();
+        const filteredChats = filter.trim() === "" 
+            ? chats 
+            : chats.filter(c => c.title.toLowerCase().includes(filter.toLowerCase()));
+
+        if (filteredChats.length === 0) {
+            pcHistoryContainer.innerHTML = `<div class="empty-history">${filter ? '검색 결과가 없습니다.' : '기록이 없습니다.'}</div>`;
+            return;
+        }
+
+        const list = document.createElement('ul');
+        list.className = 'history-list';
+        list.style.padding = '0';
+
+        filteredChats.forEach((chat) => {
+            const date = new Date(chat.timestamp).toLocaleDateString();
+            const li = document.createElement('li');
+            li.className = 'history-item';
+            if (chat.id === currentChatId) li.classList.add('active');
+
+            li.innerHTML = `
+                <div class="history-info">
+                    <div class="h-title">${chat.title}</div>
+                    <div class="h-date">${date}</div>
+                </div>
+                <button class="delete-chat-btn" title="삭제">
+                    <span class="material-symbols-rounded">delete</span>
+                </button>
+            `;
+
+            li.querySelector('.history-info').addEventListener('click', () => loadChat(chat.id));
+            li.querySelector('.delete-chat-btn').addEventListener('click', (e) => {
+                e.stopPropagation();
+                showConfirmModal("기록 삭제", "이 채팅 기록을 삭제하시겠습니까?", () => {
+                    deleteChat(chat.id); 
+                    renderPCHistory(sidebarSearch.value); 
+                });
+            });
+            list.appendChild(li);
+        });
+
+        pcHistoryContainer.innerHTML = '';
+        pcHistoryContainer.appendChild(list);
+    }
 
     /* --- Plus Button Logic --- */
     plusBtn.addEventListener('click', (e) => {
@@ -1774,7 +1671,6 @@ function renderPCHistory(filter = "") {
         }
     });
 
-    // Close menu when clicking outside
     document.addEventListener('click', (e) => {
         if (!attachMenu.contains(e.target) && !plusBtn.contains(e.target)) {
             attachMenu.classList.remove('open');
@@ -1901,7 +1797,6 @@ function renderPCHistory(filter = "") {
         else chats.unshift(chatData); 
         localStorage.setItem(STORAGE_KEY, JSON.stringify(chats));
         
-        // Update Sidebars if open
         if (document.body.classList.contains('sidebar-open')) {
             renderPCHistory(sidebarSearch.value);
         }
@@ -1922,11 +1817,6 @@ function renderPCHistory(filter = "") {
                 const msgDiv = renderMessage(msg.content, 'bot');
                 const contentDiv = msgDiv.querySelector('.bot-content');
                 addCodeCopyButtons(contentDiv);
-                
-                // Load saved thought if needed, but streaming logic handles storage. 
-                // For reloading from localStorage, we need to extract thought again if we didn't save it separately.
-                // But finalizeMessage saves full content with tags.
-                // So let's re-run extraction logic in appendActionButtons by passing full content.
                 appendActionButtons(msgDiv, msg.content); 
             }
         });
@@ -1971,7 +1861,6 @@ function renderPCHistory(filter = "") {
             historyList.appendChild(li);
         });
         
-        // Sync PC sidebar
         if (document.body.classList.contains('sidebar-open')) renderPCHistory(sidebarSearch.value);
     }
 
@@ -1989,24 +1878,15 @@ function renderPCHistory(filter = "") {
     function formatMessageContent(text) {
         if (!text) return "";
         let cleanText = text;
-        
-        // 1. 이미 완료된 [THOUGHT]...[/THOUGHT] 블록 모두 제거
         cleanText = cleanText.replace(/\[THOUGHT\][\s\S]*?\[\/THOUGHT\]/g, '');
-        
-        // 2. 스트리밍 중에 열려있는 [THOUGHT] 태그 이후의 모든 내용 제거 (아직 닫히지 않은 경우)
-        // [THOUGHT]가 발견되면 그 지점부터 끝까지 다 자름
         cleanText = cleanText.replace(/\[THOUGHT\][\s\S]*/, '');
-        
-        // 3. 혹시 남은 태그 제거
         cleanText = cleanText.replace(/\[THOUGHT\]/g, '').replace(/\[\/THOUGHT\]/g, '');
-
         return marked.parse(cleanText.trim());
     }
 
     function getCleanText(msgDiv) {
         const contentDiv = msgDiv.querySelector('.bot-content');
         const clone = contentDiv.cloneNode(true);
-        // Clean any potential hidden elements or buttons
         clone.querySelectorAll('.code-copy-btn').forEach(b => b.remove());
         return clone.innerText.trim();
     }
@@ -2052,7 +1932,6 @@ function renderPCHistory(filter = "") {
             
             btn.addEventListener('click', () => {
                 const code = pre.querySelector('code')?.innerText || pre.innerText;
-                
                 if (navigator.clipboard && navigator.clipboard.writeText) {
                     navigator.clipboard.writeText(code).then(() => {
                         showCopySuccess(btn);
@@ -2065,7 +1944,6 @@ function renderPCHistory(filter = "") {
                     showCopySuccess(btn);
                 }
             });
-            
             pre.appendChild(btn);
         });
     }
@@ -2087,7 +1965,11 @@ function renderPCHistory(filter = "") {
             renderMessage(text, 'user');
             history.push({ role: "user", content: text });
             userInput.value = ''; resizeInput(); setStreamingState(true); saveChatToLocal();
+        } else {
+            // Regenerate mode - assume history is already updated and UI cleared
+            setStreamingState(true);
         }
+        
         scrollToBottom();
         const botMsgDiv = renderMessage('', 'bot', true); 
         const contentDiv = botMsgDiv.querySelector('.bot-content');
@@ -2142,17 +2024,22 @@ function renderPCHistory(filter = "") {
     function renderMessage(content, role, isLoading = false) {
         const msgDiv = document.createElement('div');
         msgDiv.className = `msg ${role}`;
-        if (role === 'user') msgDiv.innerHTML = `<div class="user-bubble">${content}</div>`;
+        
+        if (role === 'user') {
+            msgDiv.innerHTML = `
+                <div class="user-bubble">${content}</div>
+                <button class="msg-edit-btn" onclick="startEditingMessage(this)">
+                    <span class="material-symbols-rounded" style="font-size:14px;">edit</span> 수정
+                </button>
+            `;
+            // Message editing setup attached via onclick above
+        }
         else {
             let innerHTML = '';
-            // 로딩 시 생각 중 텍스트와 애니메이션
             if (isLoading) {
                 innerHTML += `<div class="thinking-indicator"><div class="ui-load-glx"><div class="gbx"><div class="bx"><i></i><i></i><i></i><i></i></div></div></div> 생각 중...</div>`;
-                
-                // 랜덤 텍스트 변경 로직 시작
                 if (thinkingInterval) clearInterval(thinkingInterval);
                 let msgIdx = 0;
-                // 초기화 후 5초마다 텍스트 변경
                 thinkingInterval = setInterval(() => {
                     msgIdx = (msgIdx + 1) % thinkingMessages.length;
                     const indicator = msgDiv.querySelector('.thinking-indicator');
@@ -2161,7 +2048,6 @@ function renderPCHistory(filter = "") {
                     }
                 }, 5000);
             }
-
             innerHTML += `<div class="bot-content">${formatMessageContent(content)}</div>`;
             msgDiv.innerHTML = innerHTML;
         }
@@ -2169,12 +2055,113 @@ function renderPCHistory(filter = "") {
         return msgDiv;
     }
 
+    /* --- User Message Editing Functions --- */
+    window.startEditingMessage = function(btn) {
+        if (isStreaming) return; // Prevent editing while streaming
+        const msgDiv = btn.closest('.msg.user');
+        const bubble = msgDiv.querySelector('.user-bubble');
+        const currentText = bubble.innerText;
+        
+        // Hide edit button and bubble
+        btn.style.display = 'none';
+        msgDiv.classList.add('editing');
+        
+        // Create Edit UI
+        const editContainer = document.createElement('div');
+        editContainer.className = 'edit-container';
+        editContainer.innerHTML = `
+            <textarea class="edit-textarea">${currentText}</textarea>
+            <div class="edit-buttons">
+                <button class="edit-btn-pill edit-cancel">취소</button>
+                <button class="edit-btn-pill edit-confirm">전송</button>
+            </div>
+        `;
+        
+        msgDiv.appendChild(editContainer);
+        const textarea = editContainer.querySelector('.edit-textarea');
+        textarea.focus();
+        // Auto resize textarea
+        textarea.style.height = textarea.scrollHeight + 'px';
+        textarea.addEventListener('input', () => {
+             textarea.style.height = 'auto';
+             textarea.style.height = textarea.scrollHeight + 'px';
+        });
+
+        // Event Listeners
+        editContainer.querySelector('.edit-cancel').addEventListener('click', () => {
+            msgDiv.classList.remove('editing');
+            editContainer.remove();
+            btn.style.display = 'flex';
+        });
+        
+        editContainer.querySelector('.edit-confirm').addEventListener('click', () => {
+            const newText = textarea.value.trim();
+            if(!newText) return;
+            submitEditedMessage(msgDiv, newText);
+        });
+    };
+
+    function submitEditedMessage(msgDiv, newText) {
+        // Find the index of this message in the DOM to match history
+        const allMsgs = Array.from(chatMessages.children);
+        const domIndex = allMsgs.indexOf(msgDiv);
+        
+        // Filter out non-message elements if any (safe guard) although all children are .msg
+        // Reconstruct history based on DOM structure index
+        // Count how many 'msg' are before this one
+        
+        // Simpler approach: Iterate history and DOM in sync is risky if they drift.
+        // We know history order matches DOM order exactly for chat messages.
+        // However, history has {role, content}. DOM has .msg.user/.msg.bot.
+        // Let's find the history index corresponding to this DOM element.
+        
+        let historyIndex = -1;
+        // Count actual messages up to this point
+        for(let i=0; i<=domIndex; i++) {
+             historyIndex++; // 1:1 mapping assumed
+        }
+        
+        if(historyIndex === -1 || historyIndex >= history.length) return; // Error safety
+
+        // Update history: truncate after this message
+        history = history.slice(0, historyIndex + 1);
+        history[historyIndex].content = newText;
+        
+        // Update UI: Remove all subsequent messages from DOM
+        while(chatMessages.children.length > domIndex + 1) {
+            chatMessages.removeChild(chatMessages.lastChild);
+        }
+        
+        // Update current message UI
+        const bubble = msgDiv.querySelector('.user-bubble');
+        bubble.innerText = newText;
+        msgDiv.classList.remove('editing');
+        msgDiv.querySelector('.edit-container').remove();
+        msgDiv.querySelector('.msg-edit-btn').style.display = 'flex';
+        
+        saveChatToLocal(); // Save truncated state
+        
+        // Trigger Bot Response
+        // We call sendMessage with newText, but we need it to NOT create a user bubble.
+        // sendMessage function logic:
+        // if !isRegenerate -> renderMessage(user) ...
+        // So we pass isRegenerate=true, but we also need to pass the text for the API call?
+        // Actually sendMessage uses `history` for context. `userMessageOverride` is strictly for the *latest* user input content 
+        // if that wasn't added to history yet.
+        // Here, we added to history. So we pass `newText` as userMessageOverride and `true` as isRegenerate.
+        // Wait, `sendMessage` pushes to history if !isRegenerate. 
+        // If isRegenerate=true, it skips pushing.
+        // BUT it uses `text` (first arg) as the prompt to the backend.
+        
+        sendMessage(newText, true);
+    }
+
+
     function finalizeMessage(msgDiv, content) {
         setStreamingState(false);
         const indicator = msgDiv.querySelector('.thinking-indicator');
         if (indicator) indicator.remove();
         
-        // 로딩 텍스트 인터벌 종료
         if (thinkingInterval) {
             clearInterval(thinkingInterval);
             thinkingInterval = null;
@@ -2195,16 +2182,14 @@ function renderPCHistory(filter = "") {
         const actionsDiv = document.createElement('div');
         actionsDiv.className = 'action-buttons';
         
-        // Extract thought for the button
         const thoughtRegex = /\[THOUGHT\]([\s\S]*?)\[\/THOUGHT\]/g;
         let combinedThought = "";
         let match;
         while ((match = thoughtRegex.exec(content)) !== null) {
-            combinedThought += match[1].trim() + "\n\n"; // Multiple blocks separated by newlines
+            combinedThought += match[1].trim() + "\n\n"; 
         }
         combinedThought = combinedThought.trim();
         
-        // Store thought in a hidden div for retrieval
         if(combinedThought) {
             const hiddenThought = document.createElement('div');
             hiddenThought.className = 'thought-raw';
@@ -2240,7 +2225,7 @@ function renderPCHistory(filter = "") {
 
     function stopResponse() { 
         if (abortController) abortController.abort(); 
-        if (thinkingInterval) clearInterval(thinkingInterval); // Ensure interval stops
+        if (thinkingInterval) clearInterval(thinkingInterval); 
     }
     
     function scrollToBottom() { 
@@ -2304,7 +2289,6 @@ function renderPCHistory(filter = "") {
     }
     window.addEventListener('resize', () => {
         adjustLayout();
-        // 화면 너비가 768px 이하로 줄어들면 사이드바 자동 닫기
         if (window.innerWidth <= 768) {
             togglePCSidebar(false);
         }
@@ -2347,24 +2331,17 @@ function renderPCHistory(filter = "") {
         if (e.target === thoughtModal) closeThoughtModal();
     });
 
-
-
-/* --- 설정 저장 및 레이아웃 제어 로직 시작 --- */
-
-// 1. 로컬 스토리지 키 정의
+/* --- 설정 저장 로직 --- */
 const GPT_SETTINGS_KEY = 'minsu_gpt_user_config';
 
-// 2. 설정 저장 함수 (ID 기반)
 function saveMinsuSettings() {
     const settings = {};
-    // 설정 모달 내 모든 ID가 있는 체크박스 상태 수집
     document.querySelectorAll('.settings-box .toggle-switch input[id]').forEach(checkbox => {
         settings[checkbox.id] = checkbox.checked;
     });
     localStorage.setItem(GPT_SETTINGS_KEY, JSON.stringify(settings));
 }
 
-// 3. 설정 불러오기 함수
 function loadMinsuSettings() {
     const savedData = localStorage.getItem(GPT_SETTINGS_KEY);
     if (!savedData) return;
@@ -2373,7 +2350,6 @@ function loadMinsuSettings() {
         const settings = JSON.parse(savedData);
         Object.keys(settings).forEach(id => {
             const checkbox = document.getElementById(id);
-            // 체크박스가 존재하고 사용자가 수정 가능한(disabled가 아닌) 경우에만 복구
             if (checkbox && !checkbox.disabled) {
                 checkbox.checked = settings[id];
             }
@@ -2383,13 +2359,8 @@ function loadMinsuSettings() {
     }
 }
 
-// 4. 이벤트 바인딩 및 초기화
-// 기존 DOMContentLoaded가 이미 있더라도 추가로 등록 가능합니다.
 document.addEventListener('DOMContentLoaded', () => {
-    // 저장된 설정 적용
     loadMinsuSettings();
-
-    // 토글 스위치 변경 시 자동 저장 기능 연결
     document.querySelectorAll('.settings-box .toggle-switch input[id]').forEach(checkbox => {
         checkbox.addEventListener('change', () => {
             if (!checkbox.disabled) {
@@ -2397,13 +2368,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     });
-
-    // 5. 모바일 전환 시 메뉴(사이드바) 자동 닫기 (이미 상단의 resize 이벤트에 통합됨)
-    // 중복 제거 및 안전 장치
 });
-
-/* --- 설정 저장 및 레이아웃 제어 로직 끝 --- */
-
 
 </script>
 
