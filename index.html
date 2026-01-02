@@ -427,34 +427,9 @@
         .code-copy-btn:hover { background: white; color: var(--text-main); }
         .code-copy-btn .material-symbols-rounded { font-size: 16px; }
 
+        /* Old thought styles - Keeping them in code but they won't be used for details element anymore */
         details.thought-details {
-            border: 1px solid var(--thought-border);
-            background: var(--thought-bg);
-            border-radius: 8px;
-            margin-bottom: 15px;
-            overflow: hidden;
-        }
-        summary.thought-summary {
-            padding: 10px 14px;
-            cursor: pointer;
-            font-size: 0.85rem;
-            color: #777;
-            font-weight: 500;
-            list-style: none;
-            display: flex; align-items: center; gap: 6px;
-            outline: none;
-            user-select: none;
-        }
-        summary.thought-summary::-webkit-details-marker { display: none; }
-        .thought-content {
-            padding: 10px 14px;
-            border-top: 1px solid var(--thought-border);
-            font-size: 0.9rem;
-            color: #555;
-            white-space: pre-wrap;
-            font-family: var(--font-ko);
-            background: white;
-            line-height: 1.5;
+            display: none; /* Hide old inline thought style */
         }
 
         .msg.user { align-items: flex-end; }
@@ -469,6 +444,7 @@
         .action-buttons { 
             display: flex; gap: 6px; margin-top: 6px; opacity: 1; 
             animation: slideInRight 0.3s ease-out; 
+            align-items: center;
         }
         .action-btn {
             background: none; border: none; color: var(--text-gray);
@@ -478,6 +454,22 @@
         .action-btn:hover { color: var(--text-main); }
         .action-btn.disabled { opacity: 0.2; pointer-events: none; }
         .action-btn .material-symbols-rounded { font-size: 19px; font-variation-settings: 'wght' 300; }
+        
+        /* New Thought Button Style */
+        .thought-btn {
+             font-size: 12px;
+             color: var(--text-gray);
+             background: transparent;
+             border: 1px solid #eee;
+             border-radius: 12px;
+             padding: 4px 10px;
+             cursor: pointer;
+             display: flex; align-items: center; gap: 4px;
+             font-family: var(--font-ko);
+             margin-left: 4px;
+        }
+        .thought-btn:hover { background-color: var(--btn-bg-soft); color: var(--text-main); }
+        .thought-btn .material-symbols-rounded { font-size: 16px; }
 
         /* --- Input Area Layout (Modified) --- */
         .input-container { 
@@ -914,41 +906,178 @@
     opacity: 0.7;
 }
 
-/* 생각 과정 버튼 디자인 */
-.thought-text-btn {
-    width: auto !important;
-    padding: 0 10px !important;
-    font-size: 11px !important;
-    font-weight: 600 !important;
-    color: #888 !important;
-    background: var(--bg-gray) !important;
-    border-radius: 6px !important;
-    height: 26px !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    margin-right: 6px !important;
-    border: none !important;
-    cursor: pointer;
+/* --- New Styles for Thought Modal & Settings Modal --- */
+.settings-box {
+    max-width: 600px !important;
+    height: 400px;
+    padding: 0 !important;
+    display: flex; flex-direction: column;
+    overflow: hidden;
 }
 
-.thought-text-btn.active {
-    background: var(--mint-point) !important;
-    color: white !important;
+.settings-layout {
+    display: flex;
+    flex: 1;
+    height: 100%;
 }
 
-/* 생각 과정 답변 상자 */
-.thought-box {
-    display: none;
+.settings-sidebar {
+    width: 140px;
     background: #f8f9fa;
-    border: 1px solid #eee;
-    border-radius: 12px;
-    padding: 14px;
-    margin: 10px 0;
+    border-right: 1px solid #eee;
+    padding: 16px 8px;
+    display: flex; flex-direction: column; gap: 4px;
+}
+
+.settings-content-area {
+    flex: 1;
+    padding: 24px;
+    overflow-y: auto;
+}
+
+.settings-nav-btn {
+    padding: 10px 12px;
+    border-radius: 8px;
+    cursor: pointer;
     font-size: 0.9rem;
     color: #555;
+    font-weight: 500;
+    transition: all 0.2s;
+    text-align: left;
+}
+.settings-nav-btn:hover { background-color: #eee; color: #333; }
+.settings-nav-btn.active { background-color: white; color: var(--primary-blue); box-shadow: 0 2px 4px rgba(0,0,0,0.05); font-weight: 600; }
+
+.settings-panel { display: none; animation: fadeInOnly 0.3s ease-out; }
+.settings-panel.active { display: block; }
+
+.settings-item {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 12px 0; border-bottom: 1px solid #f0f0f0;
+}
+.settings-item:last-child { border-bottom: none; }
+.setting-label { font-size: 0.95rem; font-weight: 500; color: #333; }
+.setting-desc { font-size: 0.8rem; color: #888; margin-top: 4px; }
+
+/* Toggle Switch */
+.toggle-switch {
+    position: relative; width: 40px; height: 22px;
+}
+.toggle-switch input { opacity: 0; width: 0; height: 0; }
+.slider {
+    position: absolute; cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: #ccc; transition: .4s; border-radius: 34px;
+}
+.slider:before {
+    position: absolute; content: "";
+    height: 16px; width: 16px; left: 3px; bottom: 3px;
+    background-color: white; transition: .4s; border-radius: 50%;
+}
+input:checked + .slider { background-color: var(--primary-blue); }
+input:checked + .slider:before { transform: translateX(18px); }
+
+/* Info Panel Styles */
+.info-logo { font-family: var(--font-logo); font-size: 1.8rem; margin-bottom: 8px; }
+.info-text { font-size: 0.85rem; color: #666; margin-bottom: 20px; line-height: 1.5; }
+.warning-box { background: #fff5f5; border: 1px solid #feb2b2; padding: 12px; border-radius: 8px; font-size: 0.85rem; color: #c53030; margin-bottom: 20px; }
+.credit-text { font-size: 0.8rem; color: #999; margin-top: auto; }
+
+/* Thought Modal */
+.thought-modal-content {
+    font-family: var(--font-ko);
+    white-space: pre-wrap;
     line-height: 1.6;
-    border-left: 4px solid var(--mint-point);
+    color: #444;
+    font-size: 0.95rem;
+    padding: 10px;
+}
+.thought-raw { display: none; }
+
+
+/* 모바일 설정 모달 레이아웃 및 탭 전환 오류 수정 */
+@media (max-width: 600px) {
+    .settings-box {
+        width: 100% !important;
+        max-width: 100% !important;
+        height: 500px !important; /* 모바일에서 적절한 고정 높이 부여 */
+        max-height: 85vh !important;
+        display: flex !important;
+        flex-direction: column !important;
+    }
+
+    .settings-layout {
+        flex-direction: column !important;
+        flex: 1 !important;
+        overflow: hidden !important;
+    }
+
+    .settings-sidebar {
+        width: 100% !important;
+        flex-direction: row !important;
+        padding: 6px !important;
+        background: #f8f9fa !important;
+        border-right: none !important;
+        border-bottom: 1px solid #eee !important;
+        box-sizing: border-box !important;
+        display: flex !important;
+        gap: 4px !important;
+        flex-shrink: 0 !important;
+    }
+
+    .settings-nav-btn {
+        flex: 1 !important;
+        text-align: center !important;
+        padding: 12px 0 !important;
+        font-size: 0.9rem !important;
+        white-space: nowrap !important;
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+    }
+
+    .settings-content-area {
+        padding: 20px 16px !important;
+        flex: 1 !important;
+        overflow-y: auto !important; /* 내용이 길어지면 내부 스크롤 */
+        display: block !important; /* flex 충돌 방지를 위해 block으로 설정 */
+        box-sizing: border-box !important;
+    }
+
+    /* 탭 전환 시 보이고 숨기는 로직 강제 적용 */
+    .settings-panel {
+        display: none;
+    }
+    .settings-panel.active {
+        display: block !important;
+    }
+
+    .settings-item {
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        width: 100% !important;
+        gap: 12px !important;
+        padding: 12px 0 !important;
+    }
+}
+
+/* 비활성화된(기본 쿠키) 토글 및 텍스트 시각적 효과 */
+.settings-item.disabled-item {
+    opacity: 0.7;
+}
+
+.toggle-switch input:disabled + .slider {
+    background-color: #e0e0e0 !important;
+    cursor: not-allowed;
+}
+
+.toggle-switch input:disabled:checked + .slider {
+    background-color: #abc9f3 !important; /* 연한 하늘색 */
+}
+
+.toggle-switch input:disabled + .slider:before {
+    background-color: #f5f5f5 !important;
 }
     </style>
 </head>
@@ -1138,6 +1267,98 @@
     </div>
 </div>
 
+<div class="modal-overlay" id="settingsModal">
+    <div class="modal-box settings-box">
+        <div class="modal-header" style="margin-bottom:0; padding: 16px; border-bottom:1px solid #eee;">
+            <span class="modal-title">설정</span>
+            <button class="close-modal-btn" onclick="closeSettings()">
+                <span class="material-symbols-rounded">close</span>
+            </button>
+        </div>
+        <div class="settings-layout">
+            <div class="settings-sidebar">
+                <div class="settings-nav-btn active" onclick="switchSettingTab(this, 'tab-general')">일반</div>
+                <div class="settings-nav-btn" onclick="switchSettingTab(this, 'tab-response')">답변</div>
+                <div class="settings-nav-btn" onclick="switchSettingTab(this, 'tab-info')">정보</div>
+            </div>
+            <div class="settings-content-area">
+                <div id="tab-general" class="settings-panel active">
+                    <div class="settings-item disabled-item">
+    <div>
+        <div class="setting-label" style="color: #777;">기본 쿠키 허용</div>
+        <div class="setting-desc">서비스 이용에 필수적인 쿠키입니다. <br> 이 쿠기는 끌 수 없습니다.</div>
+    </div>
+    <label class="toggle-switch">
+        <input type="checkbox" checked disabled>
+        <span class="slider"></span>
+    </label>
+</div>
+                    <div class="settings-item">
+                        <div>
+                            <div class="setting-label">분석용 쿠키</div>
+                            <div class="setting-desc">서비스 개선을 위한 분석 데이터 수집을 허용합니다.</div>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="setting-cookie-analysis">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div class="settings-item">
+                        <div>
+                            <div class="setting-label">마케팅 쿠키</div>
+                            <div class="setting-desc">맞춤형 정보 제공을 위한 쿠키를 허용합니다.</div>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="setting-cookie-marketing">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+                
+                <div id="tab-response" class="settings-panel">
+                    <div class="settings-item">
+                        <div>
+                            <div class="setting-label">답변 데이터 수집</div>
+                            <div class="setting-desc">품질 향상을 위해 대화 내용을 수집하는 것을 허용합니다.</div>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="setting-collect-data" checked>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <div id="tab-info" class="settings-panel">
+                    <div style="text-align:center; padding-top:20px;">
+                        <div class="info-logo">MinsuGPT</div>
+                        <div class="info-text">© 2026 MinsuGPT. All rights reserved.</div>
+                        <div class="warning-box">
+                            MinsuGPT는 정확하지 않을 수 있습니다. 중요한 정보 제공 시 한번 더 확인하세요.
+                        </div>
+                        <div class="credit-text">
+                            Created by CorerepubliX & Shin Jaewon
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="thoughtModal">
+    <div class="modal-box">
+        <div class="modal-header">
+            <span class="modal-title" style="display:flex; align-items:center; gap:6px;">
+                <span class="material-symbols-rounded">psychology</span> 생각 과정
+            </span>
+            <button class="close-modal-btn" onclick="closeThoughtModal()">
+                <span class="material-symbols-rounded">close</span>
+            </button>
+        </div>
+        <div id="thoughtModalContent" class="thought-modal-content"></div>
+    </div>
+</div>
+
 <div class="modal-overlay" id="confirmModal">
     <div class="modal-box small-box">
         <div class="confirm-title" id="confirmTitle">삭제 하시겠습니까?</div>
@@ -1221,6 +1442,11 @@
     const pcHistoryContainer = document.getElementById('pcHistoryContainer');
     const sidebarLogoBtn = document.getElementById('sidebar-logo-btn');
     const sidebarSearch = document.getElementById('sidebar-search');
+
+    // Modals
+    const settingsModal = document.getElementById('settingsModal');
+    const thoughtModal = document.getElementById('thoughtModal');
+    const thoughtModalContent = document.getElementById('thoughtModalContent');
 
     let history = []; 
     let currentChatId = null; 
@@ -1552,6 +1778,11 @@ function renderPCHistory(filter = "") {
                 const msgDiv = renderMessage(msg.content, 'bot');
                 const contentDiv = msgDiv.querySelector('.bot-content');
                 addCodeCopyButtons(contentDiv);
+                
+                // Load saved thought if needed, but streaming logic handles storage. 
+                // For reloading from localStorage, we need to extract thought again if we didn't save it separately.
+                // But finalizeMessage saves full content with tags.
+                // So let's re-run extraction logic in appendActionButtons by passing full content.
                 appendActionButtons(msgDiv, msg.content); 
             }
         });
@@ -1612,43 +1843,25 @@ function renderPCHistory(filter = "") {
     }
 
     function formatMessageContent(text) {
-    if (!text) return "";
-    let html = text;
-    
-    // 1. 모든 [THOUGHT]...[/THOUGHT] 구간을 찾아서 합칩니다. (g 플래그 사용)
-    const thoughtRegex = /\[THOUGHT\]([\s\S]*?)\[\/THOUGHT\]/g;
-    let combinedThought = "";
-    let match;
+        if (!text) return "";
+        let html = text;
+        
+        // Remove [THOUGHT] blocks from visible display
+        // We do not render the details element anymore.
+        const thoughtRegex = /\[THOUGHT\]([\s\S]*?)\[\/THOUGHT\]/g;
+        
+        // Remove tags and content for the main display
+        let finalAnswerText = html.replace(thoughtRegex, '').replace(/\[THOUGHT\]/g, '').trim();
 
-    // 여러 개의 생각 태그가 있을 경우 모두 추출하여 하나로 합침
-    while ((match = thoughtRegex.exec(html)) !== null) {
-        combinedThought += match[1].trim() + "\n";
+        let renderedHtml = marked.parse(finalAnswerText);
+        
+        return renderedHtml;
     }
 
-    // 2. 출력될 본문에서는 모든 [THOUGHT] 태그 영역을 제거합니다.
-    // 아직 닫히지 않은 [THOUGHT]가 있을 경우를 대비해 태그 자체도 제거
-    let finalAnswerText = html.replace(thoughtRegex, '').replace(/\[THOUGHT\]/g, '').trim();
-
-    let renderedHtml = marked.parse(finalAnswerText);
-    
-    // 3. 합쳐진 생각이 있다면 알약 모양(details) 안에 넣어서 반환합니다.
-    if (combinedThought.trim()) {
-        const thoughtHtml = `
-            <details class="thought-details">
-                <summary class="thought-summary">
-                    <span class="material-symbols-rounded" style="font-size:18px;">psychology</span>
-                    생각 과정 (클릭하여 보기)
-                </summary>
-                <div class="thought-content">${combinedThought.trim()}</div>
-            </details>`;
-        renderedHtml = thoughtHtml + renderedHtml;
-    }
-    return renderedHtml;
-}
     function getCleanText(msgDiv) {
         const contentDiv = msgDiv.querySelector('.bot-content');
         const clone = contentDiv.cloneNode(true);
-        clone.querySelectorAll('.thought-details').forEach(t => t.remove()); 
+        // Clean any potential hidden elements or buttons
         clone.querySelectorAll('.code-copy-btn').forEach(b => b.remove());
         return clone.innerText.trim();
     }
@@ -1814,14 +2027,36 @@ function renderPCHistory(filter = "") {
     function appendActionButtons(msgDiv, content) {
         const actionsDiv = document.createElement('div');
         actionsDiv.className = 'action-buttons';
-        actionsDiv.innerHTML = `
+        
+        // Extract thought for the button
+        const thoughtRegex = /\[THOUGHT\]([\s\S]*?)\[\/THOUGHT\]/g;
+        let combinedThought = "";
+        let match;
+        while ((match = thoughtRegex.exec(content)) !== null) {
+            combinedThought += match[1].trim(); // Combined without newline
+        }
+        
+        // Store thought in a hidden div for retrieval
+        if(combinedThought) {
+            const hiddenThought = document.createElement('div');
+            hiddenThought.className = 'thought-raw';
+            hiddenThought.innerText = combinedThought;
+            msgDiv.appendChild(hiddenThought);
+        }
+
+        let buttonHTML = `
             <button class="action-btn" onclick="copyText(this)" title="복사"><span class="material-symbols-rounded">content_copy</span></button>
             <button class="action-btn regenerate-btn" onclick="retryMessage(this)" title="재생성"><span class="material-symbols-rounded">refresh</span></button>
             <button class="action-btn" onclick="handleLike(this)" title="좋아요"><span class="material-symbols-rounded">thumb_up</span></button>
             <button class="action-btn" onclick="handleDislike(this)" title="싫어요"><span class="material-symbols-rounded">thumb_down</span></button>
             <button class="action-btn" onclick="shareContent(this)" title="공유"><span class="material-symbols-rounded">share</span></button>
-            <button class="msg-btn thought-text-btn" onclick="toggleThought(this)">생각 과정</button>
         `;
+        
+        if (combinedThought) {
+            buttonHTML += `<button class="thought-btn" onclick="openThoughtModal(this)"><span class="material-symbols-rounded">psychology</span>생각 과정</button>`;
+        }
+
+        actionsDiv.innerHTML = buttonHTML;
         msgDiv.appendChild(actionsDiv);
         updateRegenerateButtons();
     }
@@ -1899,30 +2134,113 @@ function renderPCHistory(filter = "") {
     window.addEventListener('resize', adjustLayout);
     adjustLayout();
     
-    
-    // 생각 과정 토글 함수
-window.toggleThought = function(btn) {
-    const msgDiv = btn.closest('.msg-content');
-    let thoughtBox = msgDiv.querySelector('.thought-box');
-    
-    if (!thoughtBox) {
-        thoughtBox = document.createElement('div');
-        thoughtBox.className = 'thought-box';
-        // 임시 내용입니다. 나중에 실제 AI 응답의 reasoning 데이터를 넣으시면 됩니다.
-        thoughtBox.innerText = "사용자의 의도를 분석하여 최적의 답변을 생성하는 과정을 거쳤습니다."; 
-        msgDiv.insertBefore(thoughtBox, msgDiv.querySelector('.msg-footer'));
+    /* Settings Modal Logic */
+    window.openSettings = function() {
+        if(document.getElementById('historyModal').classList.contains('open')) {
+             document.getElementById('historyModal').classList.remove('open');
+        }
+        settingsModal.classList.add('open');
     }
-
-    if (thoughtBox.style.display === 'none' || !thoughtBox.style.display) {
-        thoughtBox.style.display = 'block';
+    window.closeSettings = function() {
+        settingsModal.classList.remove('open');
+    }
+    window.switchSettingTab = function(btn, tabId) {
+        document.querySelectorAll('.settings-nav-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
-        btn.innerText = "과정 숨기기";
-    } else {
-        thoughtBox.style.display = 'none';
-        btn.classList.remove('active');
-        btn.innerText = "생각 과정";
+        document.querySelectorAll('.settings-panel').forEach(p => p.classList.remove('active'));
+        document.getElementById(tabId).classList.add('active');
     }
-};
+    settingsModal.addEventListener('click', (e) => {
+        if (e.target === settingsModal) closeSettings();
+    });
+
+    /* Thought Modal Logic */
+    window.openThoughtModal = function(btn) {
+        const msgDiv = btn.closest('.msg');
+        const rawThought = msgDiv.querySelector('.thought-raw');
+        if (rawThought) {
+            thoughtModalContent.innerText = rawThought.innerText;
+            thoughtModal.classList.add('open');
+        }
+    }
+    window.closeThoughtModal = function() {
+        thoughtModal.classList.remove('open');
+    }
+    thoughtModal.addEventListener('click', (e) => {
+        if (e.target === thoughtModal) closeThoughtModal();
+    });
+
+
+
+/* --- 설정 저장 및 레이아웃 제어 로직 시작 --- */
+
+// 1. 로컬 스토리지 키 정의
+const GPT_SETTINGS_KEY = 'minsu_gpt_user_config';
+
+// 2. 설정 저장 함수 (ID 기반)
+function saveMinsuSettings() {
+    const settings = {};
+    // 설정 모달 내 모든 ID가 있는 체크박스 상태 수집
+    document.querySelectorAll('.settings-box .toggle-switch input[id]').forEach(checkbox => {
+        settings[checkbox.id] = checkbox.checked;
+    });
+    localStorage.setItem(GPT_SETTINGS_KEY, JSON.stringify(settings));
+}
+
+// 3. 설정 불러오기 함수
+function loadMinsuSettings() {
+    const savedData = localStorage.getItem(GPT_SETTINGS_KEY);
+    if (!savedData) return;
+
+    try {
+        const settings = JSON.parse(savedData);
+        Object.keys(settings).forEach(id => {
+            const checkbox = document.getElementById(id);
+            // 체크박스가 존재하고 사용자가 수정 가능한(disabled가 아닌) 경우에만 복구
+            if (checkbox && !checkbox.disabled) {
+                checkbox.checked = settings[id];
+            }
+        });
+    } catch (e) {
+        console.error("설정을 불러오는 중 오류가 발생했습니다.", e);
+    }
+}
+
+// 4. 이벤트 바인딩 및 초기화
+// 기존 DOMContentLoaded가 이미 있더라도 추가로 등록 가능합니다.
+document.addEventListener('DOMContentLoaded', () => {
+    // 저장된 설정 적용
+    loadMinsuSettings();
+
+    // 토글 스위치 변경 시 자동 저장 기능 연결
+    document.querySelectorAll('.settings-box .toggle-switch input[id]').forEach(checkbox => {
+        checkbox.addEventListener('change', () => {
+            if (!checkbox.disabled) {
+                saveMinsuSettings();
+            }
+        });
+    });
+
+    // 5. 모바일 전환 시 메뉴(사이드바) 자동 닫기
+    window.addEventListener('resize', () => {
+        // 모바일 기준점(600px) 이하일 때
+        if (window.innerWidth <= 600) {
+            // 사이드바가 열려있는 상태라면 닫기 함수 호출
+            // 기존 코드에 정의된 closeSidebar() 함수를 활용합니다.
+            if (typeof closeSidebar === 'function') {
+                const sidebar = document.getElementById('sidebar');
+                // 사이드바가 현재 화면에 보이는 상태(left: 0)일 때만 닫기 실행
+                if (sidebar && getComputedStyle(sidebar).left === '0px') {
+                    closeSidebar();
+                }
+            }
+        }
+    });
+});
+
+/* --- 설정 저장 및 레이아웃 제어 로직 끝 --- */
+
+
 </script>
 
 </body>
