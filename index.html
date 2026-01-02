@@ -1129,6 +1129,63 @@ input:checked + .slider:before { transform: translateX(18px); }
 .thought-box::-webkit-scrollbar-track {
     background: transparent;
 }
+
+
+        /* --- 봇 메시지 내 링크(a 태그) 버튼 스타일링 --- */
+    .bot-content a {
+        display: inline-flex;          /* 아이콘과 텍스트 정렬을 위해 flex 사용 */
+        align-items: center;           /* 세로 중앙 정렬 */
+        gap: 6px;                      /* 아이콘과 텍스트 사이 간격 */
+        
+        max-width: 260px;              /* 버튼의 최대 너비 (이보다 길면 ... 처리됨) */
+        height: 36px;                  /* 버튼 높이 고정 */
+        
+        padding: 0 14px;               /* 좌우 여백 */
+        margin: 4px 2px;               /* 외부 여백 (줄바꿈 시 간격) */
+        
+        background-color: #f8f9fa;     /* 배경색 (아주 연한 회색) */
+        border: 1px solid #e9ecef;     /* 테두리 색상 */
+        border-radius: 18px;           /* 둥근 알약 모양 */
+        
+        color: var(--primary-blue);    /* 글자색 (기존 테마의 파란색 사용) */
+        text-decoration: none;         /* 밑줄 제거 */
+        font-weight: 500;              /* 글자 두께 */
+        font-size: 0.9rem;             /* 글자 크기 */
+        
+        /* 말줄임표(...) 처리를 위한 핵심 속성 3가지 */
+        white-space: nowrap;           /* 텍스트를 한 줄로 강제 */
+        overflow: hidden;              /* 넘치는 텍스트 숨김 */
+        text-overflow: ellipsis;       /* 넘치는 부분 ... 표시 */
+        
+        transition: all 0.2s ease;     /* 부드러운 호버 효과 */
+        vertical-align: middle;        /* 텍스트 줄 맞춤 */
+        box-sizing: border-box;
+    }
+
+    /* 마우스 올렸을 때 효과 */
+    .bot-content a:hover {
+        background-color: #e3f2fd;     /* 배경색을 연한 파란색으로 변경 */
+        border-color: var(--primary-blue); /* 테두리를 파란색으로 변경 */
+        transform: translateY(-1px);   /* 살짝 위로 떠오름 */
+        box-shadow: 0 2px 5px rgba(29, 111, 239, 0.15); /* 그림자 추가 */
+    }
+
+    /* 링크 앞에 'public' (지구본) 아이콘 자동 추가 */
+    /* 이미 로드된 Material Symbols 폰트를 활용합니다 */
+    .bot-content a::before {
+        content: "public";             /* 아이콘 코드 */
+        font-family: 'Material Symbols Rounded';
+        font-weight: normal;
+        font-style: normal;
+        font-size: 18px;
+        color: #777;                   /* 아이콘 색상 */
+        flex-shrink: 0;                /* 아이콘이 찌그러지지 않게 고정 */
+    }
+
+    /* 링크에 마우스 올리면 아이콘 색상도 변경 */
+    .bot-content a:hover::before {
+        color: var(--primary-blue);
+    }
     </style>
 </head>
 <body>
