@@ -2184,7 +2184,6 @@
             history.push({ role: "user", content: text });
             userInput.value = ''; resizeInput(); setStreamingState(true); saveChatToLocal();
         } else {
-            // Regenerate mode - assume history is already updated and UI cleared
             setStreamingState(true);
         }
         
@@ -2193,12 +2192,43 @@
         const botMsgDiv = renderMessage('', 'bot', true); 
         const contentDiv = botMsgDiv.querySelector('.bot-content');
         setTimeout(scrollToBottom, 50);
+        
         abortController = new AbortController();
         const signal = abortController.signal;
         
-        let fullResponseBuffer = ""; let displayedResponse = ""; let typingInterval = null;   
-        
         const targetUrl = BACKEND_ENDPOINTS[currentModel] || BACKEND_ENDPOINTS['g-fast'];
+
+        // --- NEW STREAMING LOGIC START ---
+        let streamQueue = []; 
+        let displayedText = "";
+        let isStreamComplete = false;
+        let isRendering = false;
+
+        const processStreamQueue = () => {
+            if (streamQueue.length > 0) {
+                isRendering = true;
+                // 큐 길이에 따라 한 번에 처리할 글자 수 조절 (렉 방지)
+                const speed = streamQueue.length > 50 ? 5 : (streamQueue.length > 20 ? 3 : 1);
+                
+                const chunk = streamQueue.splice(0, speed).join('');
+                displayedText += chunk;
+                
+                contentDiv.innerHTML = formatMessageContent(displayedText);
+                addCodeCopyButtons(contentDiv);
+                scrollToBottom();
+
+                // 다음 프레임 호출 (약간의 딜레이로 타자 효과)
+                setTimeout(processStreamQueue, 15); 
+            } else {
+                if (isStreamComplete) {
+                    isRendering = false;
+                    finalizeMessage(botMsgDiv, displayedText);
+                } else {
+                    // 큐가 비었지만 스트림이 안 끝났으면 대기
+                    setTimeout(processStreamQueue, 50);
+                }
+            }
+        };
 
         try {
             const response = await fetch(targetUrl, {
@@ -2207,37 +2237,37 @@
                 body: JSON.stringify({ message: text, history: [PRE_PROMPT, ...history] }),
                 signal: signal
             });
+            
             const reader = response.body.getReader();
             const decoder = new TextDecoder('utf-8');
-            
-            typingInterval = setInterval(() => {
-                if (displayedResponse.length < fullResponseBuffer.length) {
-                    const chunkParams = 15; 
-                    const nextChunk = fullResponseBuffer.substring(displayedResponse.length, displayedResponse.length + chunkParams);
-                    displayedResponse += nextChunk;
-                    contentDiv.innerHTML = formatMessageContent(displayedResponse);
-                    addCodeCopyButtons(contentDiv); 
-                    scrollToBottom();
-                }
-            }, 5); 
+
+            // 렌더링 루프 시작
+            processStreamQueue();
 
             while (true) {
                 const { done, value } = await reader.read();
-                if (done) break;
-                const chunk = decoder.decode(value, { stream: true });
-                if (chunk.includes("[DONE]")) { fullResponseBuffer += chunk.replace("[DONE]", ""); break; }
-                fullResponseBuffer += chunk;
-            }
-            const checkDoneInterval = setInterval(() => {
-                if (displayedResponse.length >= fullResponseBuffer.length) {
-                    clearInterval(checkDoneInterval); clearInterval(typingInterval); finalizeMessage(botMsgDiv, fullResponseBuffer);
+                if (done) {
+                    isStreamComplete = true;
+                    break;
                 }
-            }, 50);
+                const chunk = decoder.decode(value, { stream: true });
+                const cleanChunk = chunk.replace("[DONE]", "");
+                
+                if (cleanChunk) {
+                    // 글자 단위로 쪼개서 큐에 삽입
+                    streamQueue.push(...cleanChunk.split(''));
+                }
+            }
         } catch (error) {
-            clearInterval(typingInterval);
-            if (error.name === 'AbortError') finalizeMessage(botMsgDiv, displayedResponse);
-            else { contentDiv.innerHTML = `<span style="color:var(--error-red);">연결 오류가 발생했습니다.</span>`; setStreamingState(false); scrollToBottom(); }
+            isStreamComplete = true; 
+            if (error.name === 'AbortError') finalizeMessage(botMsgDiv, displayedText);
+            else { 
+                contentDiv.innerHTML = `<span style="color:var(--error-red);">연결 오류가 발생했습니다.</span>`; 
+                setStreamingState(false); 
+                scrollToBottom(); 
+            }
         }
+        // --- NEW STREAMING LOGIC END ---
     }
 
     function renderMessage(content, role, isLoading = false) {
