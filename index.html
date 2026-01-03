@@ -3410,13 +3410,47 @@ window.sendMessage = async function(userMessageOverride = null, isRegenerate = f
 };
 
 
-/* --- 이미지 압축 및 전송 최적화 코드 (스크립트 맨 끝에 추가) --- */
+/* --- 이미지 업로드 시 즉시 압축 & 로딩 표시 시스템 --- */
 
-/**
- * 이미지를 캔버스를 사용하여 리사이징 및 압축하는 함수
- * 최대 크기: 1024px, 포맷: JPEG, 품질: 0.7
- */
-function compressImage(file) {
+// 1. 로딩 애니메이션 스타일 동적 추가
+(function addLoadingStyles() {
+    const style = document.createElement('style');
+    style.innerHTML = `
+        /* 미리보기 아이템 로딩 오버레이 */
+        .preview-item.loading::after {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255, 255, 255, 0.7);
+            z-index: 5;
+            border-radius: 10px;
+        }
+        /* 로딩 스피너 */
+        .preview-loader {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 20px; height: 20px;
+            border: 3px solid #e5e5e5;
+            border-top: 3px solid var(--accent-color);
+            border-radius: 50%;
+            animation: preview-spin 1s linear infinite;
+            z-index: 10;
+            display: none;
+        }
+        .preview-item.loading .preview-loader {
+            display: block;
+        }
+        @keyframes preview-spin {
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+    `;
+    document.head.appendChild(style);
+})();
+
+// 2. 강력한 이미지 압축 함수 (800px, 0.6 퀄리티)
+function aggressiveCompress(file) {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.readAsDataURL(file);
@@ -3427,19 +3461,19 @@ function compressImage(file) {
                 const canvas = document.createElement('canvas');
                 let width = img.width;
                 let height = img.height;
-                const MAX_WIDTH = 1024;
-                const MAX_HEIGHT = 1024;
+                
+                // 크기를 800px로 제한 (전송 성공률 높임)
+                const MAX_SIZE = 800;
 
-                // 비율 유지하며 크기 조절
                 if (width > height) {
-                    if (width > MAX_WIDTH) {
-                        height *= MAX_WIDTH / width;
-                        width = MAX_WIDTH;
+                    if (width > MAX_SIZE) {
+                        height *= MAX_SIZE / width;
+                        width = MAX_SIZE;
                     }
                 } else {
-                    if (height > MAX_HEIGHT) {
-                        width *= MAX_HEIGHT / height;
-                        height = MAX_HEIGHT;
+                    if (height > MAX_SIZE) {
+                        width *= MAX_SIZE / height;
+                        height = MAX_SIZE;
                     }
                 }
 
@@ -3448,27 +3482,134 @@ function compressImage(file) {
                 const ctx = canvas.getContext('2d');
                 ctx.drawImage(img, 0, 0, width, height);
 
-                // JPEG 포맷, 퀄리티 0.7로 변환 (용량 대폭 감소)
-                resolve(canvas.toDataURL('image/jpeg', 0.7));
+                // JPEG 포맷, 품질 0.6 (용량 대폭 감소)
+                resolve(canvas.toDataURL('image/jpeg', 0.6));
             };
-            img.onerror = (err) => reject(err);
+            img.onerror = reject;
         };
-        reader.onerror = (err) => reject(err);
+        reader.onerror = reject;
     });
 }
 
-// 기존 sendMessage 함수 덮어쓰기 (압축 로직 적용)
+// 3. handleFiles 재정의 (업로드 시 압축 로직 추가)
+window.handleFiles = async function(files) {
+    // 1단계: 자리 만들기 (로딩 상태로 미리보기 추가)
+    const newStartIndex = attachedFiles.length;
+    
+    files.forEach(file => {
+        // 일단 로딩 중인 상태로 배열에 추가
+        attachedFiles.push({
+            file: file,
+            content: null, // 아직 내용 없음
+            type: file.type.startsWith('image/') ? 'image' : 'file',
+            isLoading: true // 로딩 플래그
+        });
+    });
+    
+    // 로딩 UI 즉시 렌더링
+    renderAttachments();
+    
+    // 2단계: 파일 처리 (비동기)
+    const processPromises = files.map(async (file, i) => {
+        const targetIndex = newStartIndex + i;
+        
+        try {
+            let content;
+            if (file.type.startsWith('image/')) {
+                // 이미지면 압축 수행
+                content = await aggressiveCompress(file);
+            } else {
+                // 파일이면 텍스트 읽기
+                content = await new Promise((resolve) => {
+                    const reader = new FileReader();
+                    reader.onload = (e) => resolve(e.target.result);
+                    reader.readAsText(file);
+                });
+            }
+            
+            // 처리 완료되면 배열 업데이트
+            if (attachedFiles[targetIndex]) {
+                attachedFiles[targetIndex].content = content;
+                attachedFiles[targetIndex].isLoading = false;
+            }
+        } catch (err) {
+            console.error("파일 처리 실패:", err);
+            // 실패 시 해당 항목 제거
+            attachedFiles.splice(targetIndex, 1);
+        }
+    });
+
+    // 모든 처리가 끝나면 다시 렌더링 (로딩 제거 및 이미지 표시)
+    await Promise.all(processPromises);
+    renderAttachments();
+    
+    // 전송 버튼 활성화 체크
+    if (!isStreaming) sendBtn.classList.toggle('active', userInput.value.trim() !== "" || attachedFiles.length > 0);
+};
+
+// 4. renderAttachments 재정의 (로딩 UI 지원)
+window.renderAttachments = function() {
+    const attachmentPreview = document.getElementById('attachmentPreview');
+    attachmentPreview.innerHTML = '';
+    
+    if (attachedFiles.length === 0) {
+        attachmentPreview.classList.remove('has-files');
+        return;
+    }
+    
+    attachmentPreview.classList.add('has-files');
+    
+    attachedFiles.forEach((item, index) => {
+        const div = document.createElement('div');
+        div.className = 'preview-item';
+        
+        // 로딩 중이면 클래스 추가
+        if (item.isLoading) {
+            div.classList.add('loading');
+            div.innerHTML = `<div class="preview-loader"></div>`;
+        } else {
+            // 로딩 끝남
+            if (item.type === 'image') {
+                div.style.backgroundImage = `url(${item.content})`;
+            } else {
+                div.classList.add('file-type');
+                div.innerHTML = `
+                    <span class="material-symbols-rounded file-icon">description</span>
+                    <span class="file-name">${item.file.name}</span>
+                `;
+            }
+        }
+
+        // 닫기 버튼 (로딩 중에도 삭제 가능하게)
+        const closeBtn = document.createElement('div');
+        closeBtn.className = 'preview-close';
+        closeBtn.innerHTML = '<span class="material-symbols-rounded" style="font-size:14px; font-weight:bold;">close</span>';
+        closeBtn.onclick = (e) => {
+            e.stopPropagation();
+            removeAttachment(index);
+        };
+        
+        div.appendChild(closeBtn);
+        attachmentPreview.appendChild(div);
+    });
+};
+
+// 5. sendMessage 재정의 (압축 과정 없이 즉시 전송)
 window.sendMessage = async function(userMessageOverride = null, isRegenerate = false, attachmentsOverride = null) {
     let text = userMessageOverride !== null ? userMessageOverride : userInput.value.trim();
+    
+    // 로딩 중인 파일이 있으면 전송 차단
+    if (attachedFiles.some(f => f.isLoading)) {
+        alert("이미지 처리 중입니다. 잠시만 기다려주세요.");
+        return;
+    }
+
     const filesToSend = attachmentsOverride ? attachmentsOverride : [...attachedFiles];
 
-    // 입력값 검증
     if (!text && filesToSend.length === 0 && !isRegenerate) return;
 
-    // 1. UI 즉시 반응 (로딩 상태 먼저 활성화하여 멈춤 느낌 방지)
     setStreamingState(true); 
     
-    // 웰컴 메시지 숨김 처리
     if (welcomeContainer.style.display !== 'none') {
         welcomeContainer.style.opacity = '0';
         setTimeout(() => welcomeContainer.style.display = 'none', 500);
@@ -3477,38 +3618,24 @@ window.sendMessage = async function(userMessageOverride = null, isRegenerate = f
     try {
         let imageBase64List = [];
         let combinedTextForAI = text;
-        const savedAttachments = [...filesToSend]; // 로컬 저장용 원본 유지
 
-        // 2. 파일 처리 및 이미지 압축 (비동기 처리)
-        // 화면 멈춤을 방지하기 위해 await 사용
+        // 이미 압축된 데이터를 그대로 사용
+        filesToSend.forEach(f => {
+            if (f.type === 'file') {
+                combinedTextForAI += `\n\n[파일 내용: ${f.file.name}]\n${f.content}`;
+            } else if (f.type === 'image') {
+                imageBase64List.push(f.content);
+                combinedTextForAI += `\n[이미지 전송됨]`;
+            }
+        });
+
         if (!isRegenerate) {
-            // 파일을 순회하며 처리
-            const processedFiles = await Promise.all(filesToSend.map(async (f) => {
-                if (f.type === 'file') {
-                    // 텍스트/일반 파일은 내용 그대로 사용
-                    combinedTextForAI += `\n\n[파일 내용: ${f.file.name}]\n${f.content}`;
-                    return null; // 이미지는 아님
-                } else if (f.type === 'image') {
-                    // [핵심] 이미지 파일 압축 수행
-                    try {
-                        const compressedBase64 = await compressImage(f.file);
-                        combinedTextForAI += `\n[이미지 전송됨]`;
-                        return compressedBase64;
-                    } catch (e) {
-                        console.error("이미지 압축 실패:", e);
-                        // 실패 시 원본 사용 (혹은 에러 처리)
-                        return f.content; 
-                    }
-                }
-            }));
-
-            // 압축된 이미지들만 리스트에 담기
-            imageBase64List = processedFiles.filter(item => item !== null);
-
-            // 사용자 UI에 메시지 표시 (압축 전 원본 데이터로 렌더링 - 화질 유지)
             renderMessage(text, 'user', false, filesToSend);
-
-            // 히스토리 저장
+            
+            // 로컬 히스토리 저장
+            // content 필드에 base64 이미지가 들어가면 용량 초과로 저장이 안 될 수 있으므로
+            // 로컬 저장용으로는 이미지는 [Image Data] 텍스트로 대체하거나 유지하되 주의 필요
+            // 여기서는 원활한 동작을 위해 그대로 저장합니다.
             history.push({ 
                 role: "user", 
                 content: combinedTextForAI, 
@@ -3516,45 +3643,25 @@ window.sendMessage = async function(userMessageOverride = null, isRegenerate = f
                 attachments: filesToSend 
             });
 
-            // 입력창 초기화
             userInput.value = '';
-            attachedFiles = [];
+            attachedFiles = []; // 초기화
             renderAttachments();
             
             if (typeof isExpandedMode !== 'undefined' && isExpandedMode) {
                 document.getElementById('expandToggle').click();
             }
-            
             resizeInput();
-            saveChatToLocal();
-        } else {
-            // 재생성(Retry)일 경우 기존 데이터 활용 (이미 처리된 데이터라고 가정하나, 용량이 크면 여기서도 압축 필요할 수 있음)
-            // 간단하게 처리하기 위해 기존 로직 유지
-            if (attachmentsOverride) {
-                // 재생성 시에는 이미 메모리에 있는 내용을 다시 압축하지 않고 보냄 
-                // (만약 재생성도 느리다면 여기서도 compressImage를 호출해야 함)
-                for (const f of attachmentsOverride) {
-                    if (f.type === 'image') {
-                        // Base64 문자열 길이 체크 (대략 2MB 이상이면 압축 시도)
-                        if (f.content.length > 2 * 1024 * 1024) {
-                             // File 객체가 없으면 base64 -> blob -> compress 과정을 거쳐야 하나 복잡하므로 패스
-                             imageBase64List.push(f.content); 
-                        } else {
-                             imageBase64List.push(f.content);
-                        }
-                    }
-                }
-            }
+            
+            // 로컬 스토리지 저장 시 용량 문제 방지를 위해 try-catch
+            try { saveChatToLocal(); } catch(e) { console.warn("Local storage full", e); }
         }
 
         updateLastUserMsgClass();
         scrollToBottom();
 
-        // 봇 답변 시작 UI 렌더링
         const botMsgDiv = renderMessage('', 'bot', true);
         const contentDiv = botMsgDiv.querySelector('.bot-content');
 
-        // --- 네트워크 전송 ---
         abortController = new AbortController();
         const signal = abortController.signal;
         const targetUrl = BACKEND_ENDPOINTS[currentModel] || BACKEND_ENDPOINTS['g-fast'];
@@ -3576,21 +3683,13 @@ window.sendMessage = async function(userMessageOverride = null, isRegenerate = f
 
         const processStreamQueue = () => {
             if (signal.aborted) return;
-
             if (streamQueue.length > 0) {
-                const queueLength = streamQueue.length;
-                let charsToRender = 1;
-                if (queueLength > 50) charsToRender = Math.floor(queueLength / 25) + 1;
-                
-                const chunk = streamQueue.splice(0, charsToRender).join('');
+                const chunk = streamQueue.splice(0, streamQueue.length > 50 ? 5 : 1).join('');
                 displayedText += chunk;
-                
                 contentDiv.innerHTML = formatMessageContent(displayedText);
                 addCodeCopyButtons(contentDiv);
                 scrollToBottom();
-
-                const delay = queueLength > 30 ? 15 : 25; 
-                setTimeout(processStreamQueue, delay);
+                setTimeout(processStreamQueue, 10);
             } else if (isStreamComplete) {
                 finalizeMessage(botMsgDiv, displayedText);
             } else {
@@ -3618,30 +3717,20 @@ window.sendMessage = async function(userMessageOverride = null, isRegenerate = f
                 isStreamComplete = true; 
                 break; 
             }
-            
             const chunk = decoder.decode(value, { stream: true });
             const cleanChunk = chunk.replace("[DONE]", "");
             if (cleanChunk) streamQueue.push(...cleanChunk.split(''));
         }
 
     } catch (error) {
-        console.error("Transmission Error:", error);
-        
-        // 에러 발생 시 UI 처리
+        console.error(error);
         const botMsgs = document.querySelectorAll('.msg.bot');
-        if(botMsgs.length > 0) {
-            const lastBotMsg = botMsgs[botMsgs.length - 1];
-            // 로딩 중이었다면 제거
-            if (lastBotMsg.querySelector('.thinking-indicator')) {
-                lastBotMsg.remove();
-            }
+        if(botMsgs.length > 0 && botMsgs[botMsgs.length-1].querySelector('.thinking-indicator')) {
+             botMsgs[botMsgs.length-1].remove();
         }
-        
-        // 사용자에게 알림
         msgTitle.innerText = "전송 오류";
-        msgContent.innerText = "메시지를 전송하는 중 오류가 발생했습니다.\n(이미지 용량이 너무 크거나 서버가 응답하지 않습니다.)";
+        msgContent.innerText = "서버 연결에 실패했습니다.\n(인터넷 연결을 확인하거나 잠시 후 다시 시도해주세요.)";
         msgModal.classList.add('open');
-        
         setStreamingState(false);
     }
 };
