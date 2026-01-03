@@ -1606,17 +1606,20 @@
     // Pastel Colors Optimized for Dark/Light
     // added text: color for button active state if needed, though handled by css vars now mostly
     const ACCENT_COLORS = {
-        'default': { color: '#000000', bubbleBg: '#f2f2f2', bubbleText: '#212121' },
-        'pastel-pink': { color: '#ff9ff3', bubbleBg: '#ffd1f9', bubbleText: '#5f0a40' },
-        'pastel-red': { color: '#ff6b6b', bubbleBg: '#ffadad', bubbleText: '#5c0000' },
-        'pastel-orange': { color: '#ffa502', bubbleBg: '#ffd6a5', bubbleText: '#5e3e00' },
-        'pastel-yellow': { color: '#ffd32a', bubbleBg: '#fdffb6', bubbleText: '#4e4b00' },
-        'pastel-green': { color: '#2ed573', bubbleBg: '#caffbf', bubbleText: '#004400' },
-        'pastel-mint': { color: '#1dd1a1', bubbleBg: '#bdfceb', bubbleText: '#004d3a' },
-        'pastel-sky': { color: '#48dbfb', bubbleBg: '#bbf0ff', bubbleText: '#00405c' },
-        'pastel-blue': { color: '#1e90ff', bubbleBg: '#a0c4ff', bubbleText: '#001a4d' },
-        'pastel-lavender': { color: '#a29bfe', bubbleBg: '#dcd6ff', bubbleText: '#2a235e' },
-        'pastel-purple': { color: '#5352ed', bubbleBg: '#bdb2ff', bubbleText: '#1f005c' }
+        'default': { color: 'var(--btn-active)', bubbleBg: '#f2f2f2', bubbleText: '#212121' },
+        // 이미 수정됨 (흰색)
+        'pastel-pink': { color: '#ff9ff3', bubbleBg: '#ffd1f9', bubbleText: '#5f0a40', btnText: '#ffffff' },
+        
+        // 다른 색상들도 흰색으로 바꾸고 싶다면 아래처럼 btnText: '#ffffff'를 추가하세요.
+        'pastel-red': { color: '#ff6b6b', bubbleBg: '#ffadad', bubbleText: '#5c0000', btnText: '#ffffff' },
+        'pastel-orange': { color: '#ffa502', bubbleBg: '#ffd6a5', bubbleText: '#5e3e00', btnText: '#ffffff' },
+        'pastel-yellow': { color: '#ffd32a', bubbleBg: '#fdffb6', bubbleText: '#4e4b00', btnText: '#ffffff' },
+        'pastel-green': { color: '#2ed573', bubbleBg: '#caffbf', bubbleText: '#004400', btnText: '#ffffff' },
+        'pastel-mint': { color: '#1dd1a1', bubbleBg: '#bdfceb', bubbleText: '#004d3a', btnText: '#ffffff' },
+        'pastel-sky': { color: '#48dbfb', bubbleBg: '#bbf0ff', bubbleText: '#00405c', btnText: '#ffffff' },
+        'pastel-blue': { color: '#1e90ff', bubbleBg: '#a0c4ff', bubbleText: '#001a4d', btnText: '#ffffff' },
+        'pastel-lavender': { color: '#a29bfe', bubbleBg: '#dcd6ff', bubbleText: '#2a235e', btnText: '#ffffff' },
+        'pastel-purple': { color: '#5352ed', bubbleBg: '#bdb2ff', bubbleText: '#1f005c', btnText: '#ffffff' }
     };
 
     function initTheme() {
@@ -1663,13 +1666,14 @@
              root.removeProperty('--accent-bubble-bg');
              root.removeProperty('--accent-bubble-text');
              // Default accent button text color handled by CSS vars (--btn-active-text)
+             root.removeProperty('--btn-active-text'); 
         } else {
              // Use palette values but check for dark mode adjustments if needed
              // For now, using palette directly which is optimized for readability
              root.setProperty('--accent-bubble-bg', palette.bubbleBg);
              root.setProperty('--accent-bubble-text', palette.bubbleText);
              // Pastels are light, so active text should be dark
-             root.setProperty('--btn-active-text', '#000000');
+             root.setProperty('--btn-active-text', palette.btnText || '#000000');
         }
     }
 
