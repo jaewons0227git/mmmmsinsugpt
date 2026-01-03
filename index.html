@@ -2202,29 +2202,37 @@
         let streamQueue = []; 
         let displayedText = "";
         let isStreamComplete = false;
-        let isRendering = false;
 
         const processStreamQueue = () => {
             if (streamQueue.length > 0) {
-                isRendering = true;
-                // 큐 길이에 따라 한 번에 처리할 글자 수 조절 (렉 방지)
-                const speed = streamQueue.length > 50 ? 5 : (streamQueue.length > 20 ? 3 : 1);
+                // 적응형 속도 제어: 큐에 쌓인 양에 따라 출력 속도 조절
+                const queueLength = streamQueue.length;
+                let charsToRender = 1;
+
+                if (queueLength > 50) {
+                    // 많이 밀려있으면 한 번에 많이 처리 (가속)
+                    charsToRender = Math.floor(queueLength / 10) + 2; 
+                } else if (queueLength > 20) {
+                    // 조금 밀려있으면 2글자씩
+                    charsToRender = 2;
+                }
                 
-                const chunk = streamQueue.splice(0, speed).join('');
+                // 설정된 개수만큼 큐에서 꺼내서 표시
+                const chunk = streamQueue.splice(0, charsToRender).join('');
                 displayedText += chunk;
                 
                 contentDiv.innerHTML = formatMessageContent(displayedText);
                 addCodeCopyButtons(contentDiv);
                 scrollToBottom();
 
-                // 다음 프레임 호출 (약간의 딜레이로 타자 효과)
-                setTimeout(processStreamQueue, 15); 
+                // 큐가 많이 쌓였으면 딜레이를 짧게, 적으면 부드럽게(20ms)
+                const delay = queueLength > 50 ? 5 : 20;
+                setTimeout(processStreamQueue, delay);
             } else {
                 if (isStreamComplete) {
-                    isRendering = false;
                     finalizeMessage(botMsgDiv, displayedText);
                 } else {
-                    // 큐가 비었지만 스트림이 안 끝났으면 대기
+                    // 데이터 대기 중
                     setTimeout(processStreamQueue, 50);
                 }
             }
@@ -2254,7 +2262,6 @@
                 const cleanChunk = chunk.replace("[DONE]", "");
                 
                 if (cleanChunk) {
-                    // 글자 단위로 쪼개서 큐에 삽입
                     streamQueue.push(...cleanChunk.split(''));
                 }
             }
