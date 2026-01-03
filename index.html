@@ -13,22 +13,7 @@
     <link rel="icon" type="image/png" href="https://i.postimg.cc/kg01fcVG/logop.png">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     
-    <script>
-    // 허용할 도메인 리스트
-    const ALLOWED_REFERRERS = [
-        'https://ai.minsugpt.kro.kr/',
-        'https://user.minsugpt.kro.kr/'
-    ];
-    const REDIRECT_URL = 'https://user.minsugpt.kro.kr';
-    const referrer = document.referrer;
 
-    // some() 함수를 사용하여 현재 referrer가 허용 리스트 중 하나로 시작하는지 확인합니다.
-    const isAllowed = ALLOWED_REFERRERS.some(url => referrer.startsWith(url));
-
-    if (referrer === '' || !isAllowed) {
-      window.location.replace(REDIRECT_URL);
-    }
-</script>
     
     <style>
     /* 1. 전체 페이지 및 모든 요소의 스크롤바 숨기기 */
@@ -109,11 +94,8 @@
             --btn-active-text: #000000; /* 다크모드 기본값은 블랙 */
         }
 
-        /* 다크모드에서 수정 버튼 텍스트 색상 강제 지정 (요청사항) */
-        [data-theme="dark"] .edit-confirm {
-            color: #ffffff !important;
-        }
-
+        /* 다크모드 수정 버튼 텍스트 색상 강제 지정 삭제됨 (수정 요청 반영) */
+        
         html, body {
             margin: 0; padding: 0; 
             width: 100%; height: 100%; 
@@ -520,7 +502,9 @@
         }
         .edit-cancel { background: var(--btn-disabled); color: var(--text-gray); }
         .edit-cancel:hover { background: #e0e0e0; }
-        .edit-confirm { background: var(--accent-color); color: white; }
+        
+        /* 수정됨: 다크 모드 + 기본 강조색상에서 텍스트 색상이 블랙으로 나오도록 수정 */
+        .edit-confirm { background: var(--accent-color); color: var(--btn-active-text); }
         .edit-confirm:hover { opacity: 0.9; }
 
         /* 수정/복사 버튼 컨테이너 (User bubble 아래 표시) */
@@ -1400,7 +1384,7 @@ body.drag-active #dropZone {
     border-radius: 12px;
     border: 1px solid var(--input-border);
     object-fit: cover;
-    cursor: pointer;
+    /* onclick 제거됨 (새 탭 방지) */
     transition: transform 0.2s;
 }
 
@@ -2440,7 +2424,6 @@ body.drag-active #dropZone {
     confirmModal.addEventListener('click', (e) => {
         if (e.target === confirmModal) closeConfirmModal();
     });
-
     function startNewChat() {
         if (isStreaming) stopResponse();
         currentChatId = null;
@@ -2453,7 +2436,7 @@ body.drag-active #dropZone {
         userInput.value = '';
         
         // Reset Expand Mode
-        if(isExpandedMode) expandToggle.click();
+        if(isExpandedMode && expandToggle) expandToggle.click();
         
         resizeInput(); 
         sendBtn.classList.remove('active');
@@ -2491,10 +2474,23 @@ body.drag-active #dropZone {
         if (!currentChatId) currentChatId = Date.now().toString();
         let chats = getSavedChats();
         const existingIndex = chats.findIndex(c => c.id === currentChatId);
+        
+        // 제목 생성 (첫 번째 사용자 메시지 기준)
         const firstUserMsg = history.find(m => m.role === 'user');
         let title = "새로운 채팅";
-        if (firstUserMsg) title = firstUserMsg.content.length > 20 ? firstUserMsg.content.substring(0, 20) + "..." : firstUserMsg.content;
-        const chatData = { id: currentChatId, title: existingIndex !== -1 ? chats[existingIndex].title : title, messages: history, timestamp: Date.now() };
+        if (firstUserMsg) {
+            // content가 문자열인지 확인
+            const txt = typeof firstUserMsg.content === 'string' ? firstUserMsg.content : "첨부파일이 포함된 메시지";
+            title = txt.length > 20 ? txt.substring(0, 20) + "..." : txt;
+        }
+
+        const chatData = { 
+            id: currentChatId, 
+            title: existingIndex !== -1 ? chats[existingIndex].title : title, 
+            messages: history, // 첨부파일(attachments) 정보가 포함된 history 저장
+            timestamp: Date.now() 
+        };
+
         if (existingIndex !== -1) chats[existingIndex] = chatData;
         else chats.unshift(chatData); 
         localStorage.setItem(STORAGE_KEY, JSON.stringify(chats));
@@ -2513,8 +2509,12 @@ body.drag-active #dropZone {
         welcomeContainer.style.opacity = '0';
         currentChatId = chat.id;
         history = chat.messages; 
+        
         history.forEach(msg => {
-            if (msg.role === 'user') renderMessage(msg.content, 'user');
+            if (msg.role === 'user') {
+                // 저장된 첨부파일이 있으면 함께 렌더링
+                renderMessage(msg.displayContent || msg.content, 'user', false, msg.attachments || []);
+            }
             else if (msg.role === 'model') {
                 const msgDiv = renderMessage(msg.content, 'bot');
                 const contentDiv = msgDiv.querySelector('.bot-content');
@@ -2676,144 +2676,10 @@ body.drag-active #dropZone {
         setTimeout(() => btn.innerHTML = originalIcon, 1500);
     }
 
-    async function sendMessage(userMessageOverride = null, isRegenerate = false) {
-        let text = userMessageOverride !== null ? userMessageOverride : userInput.value.trim();
-        const filesToSend = [...attachedFiles]; // Copy attached files
+    // Original sendMessage placeholder removed to avoid conflicts.
+    // We will define the robust sendMessage at the end of the script.
 
-        // Prevent empty send
-        if (!text && filesToSend.length === 0 && !isRegenerate) return;
-
-        if (welcomeContainer.style.display !== 'none') {
-            welcomeContainer.style.opacity = '0';
-            setTimeout(() => welcomeContainer.style.display = 'none', 500);
-        }
-
-        // Process attachments for display and payload
-        let imageBase64List = [];
-        let displayText = text;
-
-        if (!isRegenerate) {
-            // Append file info to display text for user bubble (optional, but good for context)
-            if (filesToSend.length > 0) {
-                 filesToSend.forEach(f => {
-                     if(f.type === 'file') {
-                         text += `\n\n[파일 내용: ${f.file.name}]\n${f.content}`;
-                         displayText += `\n[📁 ${f.file.name}]`;
-                     } else if (f.type === 'image') {
-                         // Images are sent via separate payload, just show icon in bubble
-                         displayText += `\n[🖼️ 이미지 전송됨]`;
-                         imageBase64List.push(f.content);
-                     }
-                 });
-            }
-
-            renderMessage(displayText, 'user');
-            history.push({ role: "user", content: text }); // Store full text including file content
-            
-            // Reset Input & Attachments
-            userInput.value = ''; 
-            attachedFiles = [];
-            renderAttachments();
-            if(isExpandedMode) expandToggle.click(); // Close expand mode
-            resizeInput(); 
-            setStreamingState(true); 
-            saveChatToLocal();
-        } else {
-            setStreamingState(true);
-        }
-        
-        updateLastUserMsgClass();
-        scrollToBottom();
-        const botMsgDiv = renderMessage('', 'bot', true); 
-        const contentDiv = botMsgDiv.querySelector('.bot-content');
-        setTimeout(scrollToBottom, 50);
-        
-        abortController = new AbortController();
-        const signal = abortController.signal;
-        
-        const targetUrl = BACKEND_ENDPOINTS[currentModel] || BACKEND_ENDPOINTS['g-fast'];
-
-        // --- Payload Construction ---
-        const payload = { 
-            message: text, 
-            history: [PRE_PROMPT, ...history],
-            image_base64: imageBase64List
-        };
-
-        // --- NEW STREAMING LOGIC START ---
-        let streamQueue = []; 
-        let displayedText = "";
-        let isStreamComplete = false;
-
-        const processStreamQueue = () => {
-            if (streamQueue.length > 0) {
-                // 적응형 속도 제어
-                const queueLength = streamQueue.length;
-                let charsToRender = 1;
-
-                if (queueLength > 50) {
-                    charsToRender = Math.floor(queueLength / 10) + 2; 
-                } else if (queueLength > 20) {
-                    charsToRender = 2;
-                }
-                
-                const chunk = streamQueue.splice(0, charsToRender).join('');
-                displayedText += chunk;
-                
-                contentDiv.innerHTML = formatMessageContent(displayedText);
-                addCodeCopyButtons(contentDiv);
-                scrollToBottom();
-
-                const delay = queueLength > 50 ? 15 : 30;
-                setTimeout(processStreamQueue, delay);
-            } else {
-                if (isStreamComplete) {
-                    finalizeMessage(botMsgDiv, displayedText);
-                } else {
-                    setTimeout(processStreamQueue, 50);
-                }
-            }
-        };
-
-        try {
-            const response = await fetch(targetUrl, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload),
-                signal: signal
-            });
-            
-            const reader = response.body.getReader();
-            const decoder = new TextDecoder('utf-8');
-
-            processStreamQueue();
-
-            while (true) {
-                const { done, value } = await reader.read();
-                if (done) {
-                    isStreamComplete = true;
-                    break;
-                }
-                const chunk = decoder.decode(value, { stream: true });
-                const cleanChunk = chunk.replace("[DONE]", "");
-                
-                if (cleanChunk) {
-                    streamQueue.push(...cleanChunk.split(''));
-                }
-            }
-        } catch (error) {
-            isStreamComplete = true; 
-            if (error.name === 'AbortError') finalizeMessage(botMsgDiv, displayedText);
-            else { 
-                contentDiv.innerHTML = `<span style="color:var(--error-red);">연결 오류가 발생했습니다.</span>`; 
-                setStreamingState(false); 
-                scrollToBottom(); 
-            }
-        }
-        // --- NEW STREAMING LOGIC END ---
-    }
-
-    function renderMessage(content, role, isLoading = false) {
+    function renderMessage(content, role, isLoading = false, attachments = []) {
         const msgDiv = document.createElement('div');
         msgDiv.className = `msg ${role}`;
         
@@ -2830,7 +2696,48 @@ body.drag-active #dropZone {
                 </div>
             `;
             // Secure text content setting to avoid HTML injection
-            msgDiv.querySelector('.user-bubble').textContent = content;
+            // Remove [이미지 전송됨] tags for display if they exist in content string
+            let displayContent = content.replace(/\[이미지 전송됨\]/g, '').replace(/\[파일 내용:.*?\]/g, '📎 파일 첨부됨').trim();
+            if (content.includes('[파일 내용:')) {
+                 // 파일 내용이 텍스트에 포함되어 있으면 요약해서 보여줌
+                 // 실제 내용은 attachments 배열을 통해 미리보기로 처리됨
+                 if(displayContent === "") displayContent = "";
+            }
+            
+            const bubble = msgDiv.querySelector('.user-bubble');
+            bubble.textContent = displayContent;
+
+            // 첨부파일 렌더링 (User)
+            if (attachments && attachments.length > 0) {
+                const attContainer = document.createElement('div');
+                attContainer.className = 'msg-attachments-container';
+                
+                attachments.forEach(fileData => {
+                    if (fileData.type === 'image') {
+                        const img = document.createElement('img');
+                        img.src = fileData.content;
+                        img.className = 'msg-img-preview';
+                        // onclick removed to prevent opening in new tab
+                        attContainer.appendChild(img);
+                    } else if (fileData.type === 'file') {
+                        const fileCard = document.createElement('div');
+                        fileCard.className = 'msg-file-card';
+                        fileCard.innerHTML = `
+                            <span class="material-symbols-rounded">description</span>
+                            <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                ${fileData.file.name}
+                            </span>
+                        `;
+                        attContainer.appendChild(fileCard);
+                    }
+                });
+                // Insert before bubble
+                msgDiv.insertBefore(attContainer, bubble);
+            }
+
+            if (!displayContent && attachments.length > 0) {
+                bubble.style.display = 'none';
+            }
         }
         else {
             let innerHTML = '';
@@ -2945,22 +2852,29 @@ body.drag-active #dropZone {
         
         if(historyIndex === -1 || historyIndex >= history.length) return; 
 
+        // 수정 시 이전 기록 잘라내기
         history = history.slice(0, historyIndex + 1);
         history[historyIndex].content = newText;
+        history[historyIndex].displayContent = newText; // 화면 표시용 갱신
         
+        // DOM 정리
         while(chatMessages.children.length > domIndex + 1) {
             chatMessages.removeChild(chatMessages.lastChild);
         }
         
         const bubble = msgDiv.querySelector('.user-bubble');
         bubble.textContent = newText; // Sanitize input
+        bubble.style.display = 'block'; // 혹시 숨겨져 있었다면 보이기
+        
         msgDiv.classList.remove('editing');
         msgDiv.querySelector('.edit-container').remove();
         msgDiv.querySelector('.msg-user-actions').style.display = '';
         
         saveChatToLocal(); 
         
-        sendMessage(newText, true);
+        // 재전송 (첨부파일은 유지)
+        const savedAttachments = history[historyIndex].attachments;
+        sendMessage(newText, true, savedAttachments);
     }
 
 
@@ -3108,8 +3022,11 @@ body.drag-active #dropZone {
         btn.closest('.msg').remove();
         if (history.length > 0 && history[history.length - 1].role === 'model') history.pop();
         saveChatToLocal(); 
-        const lastUserMsg = history.filter(h => h.role === 'user').pop()?.content;
-        if (lastUserMsg) sendMessage(lastUserMsg, true);
+        const lastUserMsg = history.filter(h => h.role === 'user').pop();
+        if (lastUserMsg) {
+             // 첨부파일 포함하여 재시도
+             sendMessage(lastUserMsg.displayContent || lastUserMsg.content, true, lastUserMsg.attachments);
+        }
     };
 
     window.handleLike = function(btn) { btn.style.color = 'var(--mint-point)'; };
@@ -3324,71 +3241,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 })();
 
-
-/* --- 이미지/파일 미리보기 출력 로직 수정 --- */
-
-// 1. renderMessage 함수를 확장하여 첨부파일 미리보기 기능 추가
-const originalRenderMessage = window.renderMessage;
-window.renderMessage = function(content, role, isLoading = false, attachments = []) {
-    // [이미지 전송됨] 등의 텍스트 제거 (미리보기로 대체할 것이므로)
-    let cleanContent = content.replace(/\[이미지 전송됨\]/g, '').replace(/\[파일 전송됨:.*?\]/g, '').trim();
-    
-    // 기존 함수로 메시지 생성
-    const msgDiv = originalRenderMessage(cleanContent, role, isLoading);
-    
-    // 첨부파일이 있는 경우 미리보기 컨테이너 생성
-    if (attachments && attachments.length > 0) {
-        const attContainer = document.createElement('div');
-        attContainer.className = 'msg-attachments-container';
-        
-        attachments.forEach(fileData => {
-            if (fileData.type === 'image') {
-                const img = document.createElement('img');
-                img.src = fileData.content;
-                img.className = 'msg-img-preview';
-                img.onclick = () => window.open(fileData.content, '_blank');
-                attContainer.appendChild(img);
-            } else if (fileData.type === 'file') {
-                const fileCard = document.createElement('div');
-                fileCard.className = 'msg-file-card';
-                fileCard.innerHTML = `
-                    <span class="material-symbols-rounded">description</span>
-                    <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                        ${fileData.file.name}
-                    </span>
-                `;
-                attContainer.appendChild(fileCard);
-            }
-        });
-
-        // 버블(user-bubble 또는 bot-content) 바로 위에 미리보기 삽입
-        const bubble = msgDiv.querySelector('.user-bubble, .bot-content');
-        if (bubble) {
-            msgDiv.insertBefore(attContainer, bubble);
-        }
-    }
-    
-    // 텍스트가 아예 비어있으면 버블 숨김 처리 (이미지만 보낼 경우)
-    const bubble = msgDiv.querySelector('.user-bubble');
-    if (bubble && !cleanContent) {
-        bubble.style.display = 'none';
-        msgDiv.style.marginBottom = '20px'; // 간격 조정
-    }
-
-    return msgDiv;
-};
-
-// 2. sendMessage 수정: 전송 시 [이미지 전송됨] 텍스트가 history에만 남고 UI에는 안보이게 처리
-const originalSendMessage = window.sendMessage;
-window.sendMessage = async function(userMessageOverride = null, isRegenerate = false, attachmentsOverride = null) {
-    // 기존 sendMessage 로직은 그대로 실행하되, 
-    // 위에서 수정한 renderMessage가 실행되면서 [이미지 전송됨] 텍스트를 걸러내게 됩니다.
-    return originalSendMessage(userMessageOverride, isRegenerate, attachmentsOverride);
-};
-
-/* --- 이미지/파일 전송 시 텍스트 제거 로직 --- */
-
-/* --- 정지 버튼 기능 복구 및 sendMessage 최종본 --- */
+/* --- sendMessage 최종본 (API 오류 수정, 로컬 저장 복구, 새탭 방지 적용) --- */
 
 window.sendMessage = async function(userMessageOverride = null, isRegenerate = false, attachmentsOverride = null) {
     let text = userMessageOverride !== null ? userMessageOverride : userInput.value.trim();
@@ -3407,15 +3260,23 @@ window.sendMessage = async function(userMessageOverride = null, isRegenerate = f
     if (!isRegenerate) {
         filesToSend.forEach(f => {
             if (f.type === 'file') {
+                // 파일 내용은 텍스트 끝에 붙여서 AI에게 전달
                 combinedTextForAI += `\n\n[파일 내용: ${f.file.name}]\n${f.content}`;
             } else if (f.type === 'image') {
+                // 이미지는 base64 리스트에 추가 (백엔드가 별도로 처리)
                 imageBase64List.push(f.content);
+                // 텍스트에는 이미지 전송됨 표시 추가 (AI가 알 수 있게)
+                combinedTextForAI += `\n[이미지 전송됨]`;
             }
         });
 
-        // UI 렌더링 (텍스트와 이미지 미리보기 동시에 출력)
+        // UI 렌더링 (화면에는 [이미지 전송됨] 등의 텍스트는 숨기고 미리보기만 보여줌)
         renderMessage(text, 'user', false, filesToSend);
 
+        // 로컬 스토리지용 history 저장
+        // content: AI에게 보낼 전체 텍스트 (파일내용 포함)
+        // displayContent: 화면에 보여줄 텍스트 (사용자가 입력한 원본)
+        // attachments: 파일/이미지 객체 배열 (로컬 저장 및 복구용)
         history.push({ 
             role: "user", 
             content: combinedTextForAI, 
@@ -3455,9 +3316,17 @@ window.sendMessage = async function(userMessageOverride = null, isRegenerate = f
     const signal = abortController.signal;
     const targetUrl = BACKEND_ENDPOINTS[currentModel] || BACKEND_ENDPOINTS['g-fast'];
 
+    // [API 오류 수정]
+    // history 배열의 각 요소 content는 반드시 문자열이어야 합니다.
+    // displayContent나 attachments 같은 객체 필드를 제거하고 순수 {role, content}만 전송합니다.
+    const apiHistory = history.map(h => ({
+        role: h.role,
+        content: typeof h.content === 'string' ? h.content : JSON.stringify(h.content) // 안전장치
+    }));
+
     const payload = { 
         message: combinedTextForAI, 
-        history: [PRE_PROMPT, ...history.map(h => ({role: h.role, content: h.content}))],
+        history: [PRE_PROMPT, ...apiHistory],
         image_base64: imageBase64List
     };
 
