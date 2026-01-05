@@ -128,22 +128,7 @@
             from { opacity: 0; }
             to { opacity: 1; }
         }
-        /* 새로 추가: 글자가 나타날 때의 밝기 변화 페이드 인 */
-.fade-in-chunk {
-    display: inline;
-    animation: chunkAppear 0.4s ease-out forwards;
-}
-
-@keyframes chunkAppear {
-    from { 
-        opacity: 0; 
-        filter: brightness(0.5); 
-    }
-    to { 
-        opacity: 1; 
-        filter: brightness(1); 
-    }
-}
+        
         @keyframes slideInRight {
             from { opacity: 0; transform: translateX(20px); }
             to { opacity: 1; transform: translateX(0); }
@@ -433,6 +418,7 @@
             display: block; min-height: 1.2em;
             font-family: var(--font-en), var(--font-ko); 
             color: var(--text-main);
+            animation: fadeInOnly 0.5s ease-out forwards;
         }
         
         /* Bot Image Styles */
@@ -604,7 +590,7 @@
             align-items: flex-end; 
             gap: 10px;
             position: relative;
-            transition: all 0.3s ease;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         /* Expanded Mode Styles */
@@ -1454,8 +1440,6 @@ body.drag-active #dropZone {
 .msg-attachments-container {
     margin-bottom: 4px;
 }
-
-        
     </style>
 </head>
 <body>
@@ -2390,17 +2374,17 @@ body.drag-active #dropZone {
     }
 
     expandToggle.addEventListener('click', () => {
-        isExpandedMode = !isExpandedMode;
-        if (isExpandedMode) {
-            inputGroup.classList.add('expanded-mode');
-            expandToggle.innerHTML = '<span class="material-symbols-rounded">close_fullscreen</span>';
-            userInput.style.height = '100%';
-        } else {
-            inputGroup.classList.remove('expanded-mode');
-            expandToggle.innerHTML = '<span class="material-symbols-rounded">open_in_full</span>';
-            resizeInput(); // Reset height logic
-        }
-    });
+    isExpandedMode = !isExpandedMode;
+    if (isExpandedMode) {
+        inputGroup.classList.add('expanded-mode');
+        expandToggle.innerHTML = '<span class="material-symbols-rounded">close_fullscreen</span>';
+        userInput.style.height = '100%'; 
+    } else {
+        inputGroup.classList.remove('expanded-mode');
+        expandToggle.innerHTML = '<span class="material-symbols-rounded">open_in_full</span>';
+        resizeInput(); // 축소 시 원래 높이 계산 로직 실행
+    }
+});
 
     userInput.addEventListener('input', () => {
         resizeInput();
@@ -3362,12 +3346,33 @@ window.sendMessage = async function(userMessageOverride = null, isRegenerate = f
         image_base64: imageBase64List
     };
 
-    
+    let streamQueue = []; 
     let displayedText = "";
-    
+    let isStreamComplete = false;
 
     // 스트리밍 출력 속도 조절 함수
-    
+    const processStreamQueue = () => {
+    if (signal && signal.aborted) return; // 정지 시 중단
+
+    if (streamQueue.length > 0) {
+        // 대기열에 있는 모든 문자를 즉시 합쳐서 출력 (속도 제한 제거)
+        const chunk = streamQueue.join('');
+        streamQueue = []; // 큐 비우기
+        displayedText += chunk;
+
+        contentDiv.innerHTML = formatMessageContent(displayedText);
+        addCodeCopyButtons(contentDiv);
+        scrollToBottom();
+
+        // 데이터가 계속 들어오고 있으므로 다음 프레임에서 즉시 다시 확인
+        requestAnimationFrame(processStreamQueue);
+    } else if (isStreamComplete) {
+        finalizeMessage(botMsgDiv, displayedText);
+    } else {
+        // 다음 데이터가 올 때까지 짧게 대기
+        setTimeout(processStreamQueue, 10);
+    }
+};
 
     try {
         const response = await fetch(targetUrl, {
@@ -3378,43 +3383,20 @@ window.sendMessage = async function(userMessageOverride = null, isRegenerate = f
         });
 
         const reader = response.body.getReader();
-const decoder = new TextDecoder('utf-8');
+        const decoder = new TextDecoder('utf-8');
+        processStreamQueue();
 
-// 씽킹 인디케이터 제거 (데이터 수신 시작 시점)
-if (botMsg.querySelector('.thinking-indicator')) {
-    botMsg.querySelector('.thinking-indicator').remove();
-}
-
-while (true) {
-    const { done, value } = await reader.read();
-    
-    if (done || signal.aborted) { 
-        if (signal.aborted) await reader.cancel();
-        // 스트리밍 종료 처리
-        setStreamingState(false);
-        
-        // (선택사항) 모든 수신이 끝난 후 마크다운 렌더링을 적용하려면 아래 주석 해제
-        // msgContent.innerHTML = marked.parse(msgContent.innerText);
-        break; 
-    }
-
-    const chunk = decoder.decode(value, { stream: true });
-    const cleanChunk = chunk.replace("[DONE]", "");
-
-    if (cleanChunk) {
-        // 즉시 화면에 추가하기 위해 span 생성
-        const chunkSpan = document.createElement('span');
-        chunkSpan.className = 'fade-in-chunk'; // CSS에서 만든 애니메이션 적용
-        chunkSpan.innerText = cleanChunk;
-        
-        // 메시지 컨텐츠에 바로 추가
-        msgContent.appendChild(chunkSpan);
-        
-        // 화면 아래로 자동 스크롤
-        chatWindow.scrollTo({ top: chatWindow.scrollHeight, behavior: 'auto' });
-    }
-}
-        
+        while (true) {
+            const { done, value } = await reader.read();
+            if (done || signal.aborted) { 
+                if (signal.aborted) await reader.cancel(); // 읽기 중단
+                isStreamComplete = true; 
+                break; 
+            }
+            
+            const chunk = decoder.decode(value, { stream: true });
+            const cleanChunk = chunk.replace("[DONE]", "");
+            if (cleanChunk) streamQueue.push(...cleanChunk.split(''));
         }
     } catch (error) {
         isStreamComplete = true;
@@ -3695,11 +3677,9 @@ window.sendMessage = async function(userMessageOverride = null, isRegenerate = f
             image_base64: imageBase64List
         };
 
-         
-        let displayedText = "";
+        
         
 
-        
         const response = await fetch(targetUrl, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -3711,44 +3691,18 @@ window.sendMessage = async function(userMessageOverride = null, isRegenerate = f
 
         const reader = response.body.getReader();
         const decoder = new TextDecoder('utf-8');
-
-        // 첫 데이터를 받으면 인디케이터를 지우기 위한 변수
-        let isFirstChunk = true;
+        processStreamQueue();
 
         while (true) {
             const { done, value } = await reader.read();
-            
             if (done || signal.aborted) { 
                 if (signal.aborted) await reader.cancel();
-                // 스트리밍 종료 상태로 변경
-                setStreamingState(false);
-                
-                // 수신 완료 후 전체 메시지를 마크다운으로 깔끔하게 변환 (선택 사항)
-                // msgContent.innerHTML = marked.parse(msgContent.innerText);
+                isStreamComplete = true; 
                 break; 
             }
-
             const chunk = decoder.decode(value, { stream: true });
             const cleanChunk = chunk.replace("[DONE]", "");
-
-            if (cleanChunk) {
-                // 1. 첫 조각이 들어오면 '생각 중...' 애니메이션 제거
-                if (isFirstChunk) {
-                    msgContent.innerHTML = '';
-                    isFirstChunk = false;
-                }
-
-                // 2. 새로운 텍스트 조각(span) 생성 및 페이드 인 클래스 부여
-                const chunkSpan = document.createElement('span');
-                chunkSpan.className = 'fade-in-chunk'; // CSS에 정의한 애니메이션 적용
-                chunkSpan.innerText = cleanChunk;
-                
-                // 3. 즉시 화면에 추가
-                msgContent.appendChild(chunkSpan);
-                
-                // 4. 즉시 스크롤 아래로 내림
-                chatWindow.scrollTo({ top: chatWindow.scrollHeight, behavior: 'auto' });
-            }
+            if (cleanChunk) streamQueue.push(...cleanChunk.split(''));
         }
 
     } catch (error) {
