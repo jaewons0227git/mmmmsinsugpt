@@ -3352,27 +3352,28 @@ window.sendMessage = async function(userMessageOverride = null, isRegenerate = f
 
     // 스트리밍 출력 속도 조절 함수
     const processStreamQueue = () => {
-    if (signal && signal.aborted) return; // 정지 시 중단
+        if (signal.aborted) return; // 정지 버튼 누르면 출력 중단
 
-    if (streamQueue.length > 0) {
-        // 대기열에 있는 모든 문자를 즉시 합쳐서 출력 (속도 제한 제거)
-        const chunk = streamQueue.join('');
-        streamQueue = []; // 큐 비우기
-        displayedText += chunk;
+        if (streamQueue.length > 0) {
+            const queueLength = streamQueue.length;
+            let charsToRender = 1;
+            if (queueLength > 50) charsToRender = Math.floor(queueLength / 25) + 1;
+            
+            const chunk = streamQueue.splice(0, charsToRender).join('');
+            displayedText += chunk;
+            
+            contentDiv.innerHTML = formatMessageContent(displayedText);
+            addCodeCopyButtons(contentDiv);
+            scrollToBottom();
 
-        contentDiv.innerHTML = formatMessageContent(displayedText);
-        addCodeCopyButtons(contentDiv);
-        scrollToBottom();
-
-        // 데이터가 계속 들어오고 있으므로 다음 프레임에서 즉시 다시 확인
-        requestAnimationFrame(processStreamQueue);
-    } else if (isStreamComplete) {
-        finalizeMessage(botMsgDiv, displayedText);
-    } else {
-        // 다음 데이터가 올 때까지 짧게 대기
-        setTimeout(processStreamQueue, 10);
-    }
-};
+            const delay = queueLength > 30 ? 15 : 25; // 적당히 느린 속도
+            setTimeout(processStreamQueue, delay);
+        } else if (isStreamComplete) {
+            finalizeMessage(botMsgDiv, displayedText);
+        } else {
+            setTimeout(processStreamQueue, 50);
+        }
+    };
 
     try {
         const response = await fetch(targetUrl, {
@@ -3677,8 +3678,32 @@ window.sendMessage = async function(userMessageOverride = null, isRegenerate = f
             image_base64: imageBase64List
         };
 
-        
-        
+        let streamQueue = []; 
+        let displayedText = "";
+        let isStreamComplete = false;
+
+        const processStreamQueue = () => {
+    if (signal && signal.aborted) return; // 정지 시 중단
+
+    if (streamQueue.length > 0) {
+        // 대기열에 있는 모든 문자를 즉시 합쳐서 출력 (속도 제한 제거)
+        const chunk = streamQueue.join('');
+        streamQueue = []; // 큐 비우기
+        displayedText += chunk;
+
+        contentDiv.innerHTML = formatMessageContent(displayedText);
+        addCodeCopyButtons(contentDiv);
+        scrollToBottom();
+
+        // 데이터가 계속 들어오고 있으므로 다음 프레임에서 즉시 다시 확인
+        requestAnimationFrame(processStreamQueue);
+    } else if (isStreamComplete) {
+        finalizeMessage(botMsgDiv, displayedText);
+    } else {
+        // 다음 데이터가 올 때까지 짧게 대기
+        setTimeout(processStreamQueue, 10);
+    }
+};
 
         const response = await fetch(targetUrl, {
             method: 'POST',
