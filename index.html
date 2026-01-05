@@ -418,7 +418,6 @@
             display: block; min-height: 1.2em;
             font-family: var(--font-en), var(--font-ko); 
             color: var(--text-main);
-            animation: fadeInOnly 0.5s ease-out forwards;
         }
         
         /* Bot Image Styles */
@@ -1454,14 +1453,6 @@ body.drag-active #dropZone {
     }
 }
 
-.bot-content {
-    width: 100%; font-size: 1rem; line-height: 1.6; word-break: break-word; 
-    display: block; min-height: 1.2em;
-    font-family: var(--font-en), var(--font-ko); 
-    color: var(--text-main);
-    /* 수신 즉시 실행될 애니메이션 */
-    animation: revealFromLeft 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
-}
     </style>
 </head>
 <body>
@@ -3374,28 +3365,33 @@ window.sendMessage = async function(userMessageOverride = null, isRegenerate = f
 
     // 스트리밍 출력 속도 조절 함수
     const processStreamQueue = () => {
-        if (signal.aborted) return; // 정지 버튼 누르면 출력 중단
-
-        if (streamQueue.length > 0) {
-            const queueLength = streamQueue.length;
-            let charsToRender = 1;
-            if (queueLength > 50) charsToRender = Math.floor(queueLength / 25) + 1;
+            if (signal && signal.aborted) return;
             
-            const chunk = streamQueue.splice(0, charsToRender).join('');
-            displayedText += chunk;
-            
-            contentDiv.innerHTML = formatMessageContent(displayedText);
-            addCodeCopyButtons(contentDiv);
-            scrollToBottom();
-
-            const delay = queueLength > 30 ? 15 : 25; // 적당히 느린 속도
-            setTimeout(processStreamQueue, delay);
-        } else if (isStreamComplete) {
-            finalizeMessage(botMsgDiv, displayedText);
-        } else {
-            setTimeout(processStreamQueue, 50);
-        }
-    };
+            if (streamQueue.length > 0) {
+                // [수정 핵심] 한 번에 다 보여주지 않고, 큐에 쌓인 양에 따라 속도를 조절하며 글자를 가져옴
+                // 쌓인 게 많으면(50자 이상) 빨리 처리(3글자씩), 적으면 천천히(1글자씩) -> 자연스러운 타자 효과
+                const charsToProcess = streamQueue.length > 50 ? 3 : 1;
+                
+                // 앞에서부터 정해진 개수만큼 잘라냄
+                const chunk = streamQueue.splice(0, charsToProcess).join('');
+                
+                displayedText += chunk;
+                
+                // 마크다운 렌더링 및 복사 버튼 추가
+                contentDiv.innerHTML = formatMessageContent(displayedText);
+                addCodeCopyButtons(contentDiv);
+                scrollToBottom();
+                
+                // 다음 프레임을 요청하여 연속적인 타자 효과 구현
+                requestAnimationFrame(processStreamQueue);
+            } else if (isStreamComplete) {
+                // 큐도 비었고 스트림도 끝났으면 완료 처리
+                finalizeMessage(botMsgDiv, displayedText);
+            } else {
+                // 큐는 비었지만 아직 네트워크에서 데이터가 오는 중이면 잠시 대기
+                setTimeout(processStreamQueue, 20);
+            }
+        };
 
     try {
         const response = await fetch(targetUrl, {
@@ -3617,11 +3613,11 @@ window.renderAttachments = function() {
     });
 };
 
-// 5. sendMessage 재정의 (압축 과정 없이 즉시 전송)
+// window.sendMessage 함수 재정의 (커서 제거 + 부드러운 타자 효과)
 window.sendMessage = async function(userMessageOverride = null, isRegenerate = false, attachmentsOverride = null) {
     let text = userMessageOverride !== null ? userMessageOverride : userInput.value.trim();
     
-    // 로딩 중인 파일이 있으면 전송 차단
+    // [로딩 체크] 처리 중인 파일이 있으면 차단
     if (attachedFiles.some(f => f.isLoading)) {
         alert("이미지 처리 중입니다. 잠시만 기다려주세요.");
         return;
@@ -3633,6 +3629,7 @@ window.sendMessage = async function(userMessageOverride = null, isRegenerate = f
 
     setStreamingState(true); 
     
+    // 웰컴 메시지 숨기기 (페이드 아웃)
     if (welcomeContainer.style.display !== 'none') {
         welcomeContainer.style.opacity = '0';
         setTimeout(() => welcomeContainer.style.display = 'none', 500);
@@ -3642,7 +3639,7 @@ window.sendMessage = async function(userMessageOverride = null, isRegenerate = f
         let imageBase64List = [];
         let combinedTextForAI = text;
 
-        // 이미 압축된 데이터를 그대로 사용
+        // 파일/이미지 전송 데이터 구성
         filesToSend.forEach(f => {
             if (f.type === 'file') {
                 combinedTextForAI += `\n\n[파일 내용: ${f.file.name}]\n${f.content}`;
@@ -3656,9 +3653,6 @@ window.sendMessage = async function(userMessageOverride = null, isRegenerate = f
             renderMessage(text, 'user', false, filesToSend);
             
             // 로컬 히스토리 저장
-            // content 필드에 base64 이미지가 들어가면 용량 초과로 저장이 안 될 수 있으므로
-            // 로컬 저장용으로는 이미지는 [Image Data] 텍스트로 대체하거나 유지하되 주의 필요
-            // 여기서는 원활한 동작을 위해 그대로 저장합니다.
             history.push({ 
                 role: "user", 
                 content: combinedTextForAI, 
@@ -3667,21 +3661,20 @@ window.sendMessage = async function(userMessageOverride = null, isRegenerate = f
             });
 
             userInput.value = '';
-            attachedFiles = []; // 초기화
+            attachedFiles = [];
             renderAttachments();
             
             if (typeof isExpandedMode !== 'undefined' && isExpandedMode) {
                 document.getElementById('expandToggle').click();
             }
             resizeInput();
-            
-            // 로컬 스토리지 저장 시 용량 문제 방지를 위해 try-catch
             try { saveChatToLocal(); } catch(e) { console.warn("Local storage full", e); }
         }
 
         updateLastUserMsgClass();
         scrollToBottom();
 
+        // 봇 답변 영역 생성 (커서 클래스 추가 안 함)
         const botMsgDiv = renderMessage('', 'bot', true);
         const contentDiv = botMsgDiv.querySelector('.bot-content');
 
@@ -3703,27 +3696,47 @@ window.sendMessage = async function(userMessageOverride = null, isRegenerate = f
         let streamQueue = []; 
         let displayedText = "";
         let isStreamComplete = false;
+        let lastRenderTime = 0;
 
-        const processStreamQueue = () => {
-    if (signal && signal.aborted) return;
-    
-    if (streamQueue.length > 0) {
-        // 들어온 데이터를 즉시 전부 결합하여 출력 (속도 제한 제거)
-        while (streamQueue.length > 0) {
-            displayedText += streamQueue.shift();
-        }
-        
-        contentDiv.innerHTML = formatMessageContent(displayedText);
-        addCodeCopyButtons(contentDiv);
-        scrollToBottom();
-        
-        requestAnimationFrame(processStreamQueue);
-    } else if (isStreamComplete) {
-        finalizeMessage(botMsgDiv, displayedText);
-    } else {
-        setTimeout(processStreamQueue, 10);
-    }
-};
+        // ★ [핵심] 부드러운 타자 효과 로직 (커서 없이 글자만 흐르듯 출력)
+        const processStreamQueue = (timestamp) => {
+            if (signal && signal.aborted) return;
+
+            // 프레임 제어 (너무 빠르면 브라우저 렌더링이 못 따라가서 끊겨 보임)
+            // 약 16ms(60fps) 마다 부드럽게 업데이트
+            if (timestamp - lastRenderTime < 16) {
+                requestAnimationFrame(processStreamQueue);
+                return;
+            }
+            lastRenderTime = timestamp;
+            
+            if (streamQueue.length > 0) {
+                // 큐에 쌓인 데이터 양에 따라 가변 속도 (Adaptive Speed)
+                // - 데이터가 적으면: 1글자씩 (매우 부드러움)
+                // - 데이터가 밀리면: 3~5글자씩 (반응성 유지)
+                let charsToProcess = 1;
+                if (streamQueue.length > 50) charsToProcess = 5;
+                else if (streamQueue.length > 20) charsToProcess = 2;
+                
+                // 큐에서 글자를 꺼냄
+                const chunk = streamQueue.splice(0, charsToProcess).join('');
+                displayedText += chunk;
+                
+                // 마크다운 렌더링 및 복사 버튼
+                contentDiv.innerHTML = formatMessageContent(displayedText);
+                addCodeCopyButtons(contentDiv);
+                scrollToBottom();
+                
+                // 다음 프레임 즉시 요청 (끊김 없는 타자 연출)
+                requestAnimationFrame(processStreamQueue);
+            } else if (isStreamComplete) {
+                // 완료 처리
+                finalizeMessage(botMsgDiv, displayedText);
+            } else {
+                // 데이터 수신 대기 (큐가 비었지만 통신 중)
+                setTimeout(() => requestAnimationFrame(processStreamQueue), 20);
+            }
+        };
 
         const response = await fetch(targetUrl, {
             method: 'POST',
@@ -3736,7 +3749,9 @@ window.sendMessage = async function(userMessageOverride = null, isRegenerate = f
 
         const reader = response.body.getReader();
         const decoder = new TextDecoder('utf-8');
-        processStreamQueue();
+        
+        // 애니메이션 루프 시작
+        requestAnimationFrame(processStreamQueue);
 
         while (true) {
             const { done, value } = await reader.read();
@@ -3753,12 +3768,17 @@ window.sendMessage = async function(userMessageOverride = null, isRegenerate = f
     } catch (error) {
         console.error(error);
         const botMsgs = document.querySelectorAll('.msg.bot');
-        if(botMsgs.length > 0 && botMsgs[botMsgs.length-1].querySelector('.thinking-indicator')) {
-             botMsgs[botMsgs.length-1].remove();
+        // 에러 발생 시 로딩 인디케이터 제거
+        if(botMsgs.length > 0) {
+             const lastMsg = botMsgs[botMsgs.length-1];
+             if(lastMsg.querySelector('.thinking-indicator')) lastMsg.remove();
         }
-        msgTitle.innerText = "전송 오류";
-        msgContent.innerText = "서버 연결에 실패했습니다.\n(인터넷 연결을 확인하거나 잠시 후 다시 시도해주세요.)";
-        msgModal.classList.add('open');
+        
+        if (error.name !== 'AbortError') {
+            msgTitle.innerText = "전송 오류";
+            msgContent.innerText = "서버 연결에 실패했습니다.\n(인터넷 연결을 확인하거나 잠시 후 다시 시도해주세요.)";
+            msgModal.classList.add('open');
+        }
         setStreamingState(false);
     }
 };
