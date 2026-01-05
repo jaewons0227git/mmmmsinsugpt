@@ -1440,6 +1440,28 @@ body.drag-active #dropZone {
 .msg-attachments-container {
     margin-bottom: 4px;
 }
+
+        @keyframes revealFromLeft {
+    0% {
+        opacity: 0;
+        clip-path: inset(0 100% 0 0); /* 오른쪽에서 왼쪽으로 가려진 상태 */
+        transform: translateX(-15px); /* 왼쪽에서 살짝 밀려옴 */
+    }
+    100% {
+        opacity: 1;
+        clip-path: inset(0 0 0 0); /* 완전히 다 보임 */
+        transform: translateX(0);
+    }
+}
+
+.bot-content {
+    width: 100%; font-size: 1rem; line-height: 1.6; word-break: break-word; 
+    display: block; min-height: 1.2em;
+    font-family: var(--font-en), var(--font-ko); 
+    color: var(--text-main);
+    /* 수신 즉시 실행될 애니메이션 */
+    animation: revealFromLeft 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+}
     </style>
 </head>
 <body>
@@ -3683,24 +3705,22 @@ window.sendMessage = async function(userMessageOverride = null, isRegenerate = f
         let isStreamComplete = false;
 
         const processStreamQueue = () => {
-    if (signal && signal.aborted) return; // 정지 시 중단
-
+    if (signal && signal.aborted) return;
+    
     if (streamQueue.length > 0) {
-        // 대기열에 있는 모든 문자를 즉시 합쳐서 출력 (속도 제한 제거)
-        const chunk = streamQueue.join('');
-        streamQueue = []; // 큐 비우기
-        displayedText += chunk;
-
+        // 들어온 데이터를 즉시 전부 결합하여 출력 (속도 제한 제거)
+        while (streamQueue.length > 0) {
+            displayedText += streamQueue.shift();
+        }
+        
         contentDiv.innerHTML = formatMessageContent(displayedText);
         addCodeCopyButtons(contentDiv);
         scrollToBottom();
-
-        // 데이터가 계속 들어오고 있으므로 다음 프레임에서 즉시 다시 확인
+        
         requestAnimationFrame(processStreamQueue);
     } else if (isStreamComplete) {
         finalizeMessage(botMsgDiv, displayedText);
     } else {
-        // 다음 데이터가 올 때까지 짧게 대기
         setTimeout(processStreamQueue, 10);
     }
 };
