@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>YouTube 검색 (nocookie)</title>
+
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background: #f2f2f2;
+        padding: 20px;
+        text-align: center;
+    }
+    .container {
+        max-width: 1000px;
+        margin: auto;
+        background: white;
+        padding: 25px;
+        border-radius: 12px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    h1 { color: #c4302b; }
+
+    input {
+        width: 65%;
+        padding: 12px;
+        font-size: 16px;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+    }
+    button {
+        padding: 12px 20px;
+        font-size: 16px;
+        margin-left: 10px;
+        border: none;
+        border-radius: 6px;
+        background: #c4302b;
+        color: white;
+        cursor: pointer;
+    }
+    button:hover { background: #a12622; }
+
+    .results {
+        margin-top: 30px;
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 20px;
+    }
+    .card {
+        cursor: pointer;
+        background: white;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        transition: transform .2s;
+    }
+    .card:hover { transform: scale(1.05); }
+    .card img {
+        width: 100%;
+        height: 130px;
+        object-fit: cover;
+    }
+    .title {
+        padding: 10px;
+        font-size: 14px;
+        color: #111;
+    }
+
+    #player-box {
+        margin-top: 40px;
+        display: none;
+    }
+    iframe {
+        width: 100%;
+        max-width: 800px;
+        height: 450px;
+        border-radius: 10px;
+        border: none;
+        box-shadow: 0 4px 12px rgba(0,0,0,.15);
+    }
+</style>
+</head>
+
+<body>
+<div class="container">
+    <h1>YouTube 검색 (nocookie 재생)</h1>
+    <p>검색 → 썸네일 클릭 → 학교 차단 없이 재생</p>
+
+    <input id="query" placeholder="검색어 입력">
+    <button onclick="search()">검색</button>
+
+    <div class="results" id="results"></div>
+
+    <div id="player-box">
+        <h2>재생 중</h2>
+        <iframe id="player" allowfullscreen></iframe>
+    </div>
+</div>
+
+<script>
+const INSTANCE = "https://yewtu.be"; // CORS 안정적
+
+async function search() {
+    const q = document.getElementById("query").value.trim();
+    if (!q) return alert("검색어를 입력하세요");
+
+    const results = document.getElementById("results");
+    results.innerHTML = "검색 중...";
+
+    try {
+        const res = await fetch(`${INSTANCE}/api/v1/search?q=${encodeURIComponent(q)}&type=video`);
+        if (!res.ok) throw new Error("인스턴스 오류");
+
+        const data = await res.json();
+        results.innerHTML = "";
+
+        if (data.length === 0) {
+            results.innerHTML = "<p>검색 결과 없음</p>";
+            return;
+        }
+
+        data.forEach(v => {
+            const thumb =
+                v.videoThumbnails?.find(t => t.quality === "medium")?.url ||
+                v.videoThumbnails?.[0]?.url;
+
+            const card = document.createElement("div");
+            card.className = "card";
+            card.onclick = () => play(v.videoId);
+
+            card.innerHTML = `
+                <img src="${thumb}">
+                <div class="title">${v.title}</div>
+            `;
+            results.appendChild(card);
+        });
+
+    } catch (e) {
+        alert("검색 실패. 인스턴스 차단 가능성 있음");
+        console.error(e);
+    }
+}
+
+function play(videoId) {
+    const iframe = document.getElementById("player");
+    iframe.src = `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&rel=0`;
+    document.getElementById("player-box").style.display = "block";
+    iframe.scrollIntoView({ behavior: "smooth" });
+}
+
+document.getElementById("query").addEventListener("keydown", e => {
+    if (e.key === "Enter") search();
+});
+</script>
+</body>
+</html>
