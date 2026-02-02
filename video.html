@@ -2,84 +2,236 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<title>YouTube 검색 (nocookie)</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>YouTube</title>
 
 <style>
-body { font-family: Arial; background:#f2f2f2; padding:20px; text-align:center; }
-.container { max-width:1000px; margin:auto; background:#fff; padding:25px; border-radius:12px; }
-input { width:65%; padding:12px; font-size:16px; }
-button { padding:12px 20px; font-size:16px; background:#c4302b; color:#fff; border:none; border-radius:6px; cursor:pointer; }
-.results { margin-top:30px; display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:20px; }
-.card { cursor:pointer; border-radius:10px; overflow:hidden; box-shadow:0 3px 10px rgba(0,0,0,.1); }
-.card img { width:100%; height:130px; object-fit:cover; }
-.title { padding:10px; font-size:14px; }
-#playerBox { margin-top:40px; display:none; }
-iframe { width:100%; max-width:800px; height:450px; border:none; border-radius:10px; }
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: Roboto, Arial, sans-serif;
+  background: #ffffff;
+  color: #0f0f0f;
+}
+
+/* ===== HEADER ===== */
+header {
+  height: 56px;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  border-bottom: 1px solid #e5e5e5;
+  position: sticky;
+  top: 0;
+  background: #ffffff;
+  z-index: 10;
+}
+
+.logo {
+  font-size: 20px;
+  font-weight: 600;
+  color: #ff0000;
+}
+
+.search {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+
+.search input {
+  width: 60%;
+  height: 36px;
+  padding: 0 12px;
+  border: 1px solid #ccc;
+  border-radius: 18px 0 0 18px;
+  font-size: 14px;
+}
+
+.search button {
+  height: 36px;
+  padding: 0 18px;
+  border: 1px solid #ccc;
+  border-left: none;
+  background: #f8f8f8;
+  border-radius: 0 18px 18px 0;
+  cursor: pointer;
+}
+
+/* ===== LAYOUT ===== */
+.layout {
+  display: flex;
+}
+
+/* ===== SIDEBAR ===== */
+aside {
+  width: 220px;
+  border-right: 1px solid #e5e5e5;
+  padding-top: 12px;
+}
+
+.menu {
+  padding: 10px 24px;
+  font-size: 14px;
+  color: #030303;
+  cursor: pointer;
+}
+
+.menu:hover {
+  background: #f2f2f2;
+}
+
+/* ===== CONTENT ===== */
+main {
+  flex: 1;
+  padding: 24px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 24px;
+}
+
+/* ===== VIDEO CARD ===== */
+.card {
+  cursor: pointer;
+}
+
+.thumbnail {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #eaeaea;
+}
+
+.thumbnail img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.meta {
+  padding-top: 10px;
+}
+
+.title {
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.channel {
+  font-size: 13px;
+  color: #606060;
+  margin-top: 4px;
+}
+
+/* ===== PLAYER ===== */
+#playerWrap {
+  position: fixed;
+  bottom: 0;
+  left: 220px;
+  right: 0;
+  height: 360px;
+  background: #000;
+  display: none;
+  border-top: 1px solid #ddd;
+}
+
+#playerWrap iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
 </style>
 </head>
 
 <body>
-<div class="container">
-  <h1>YouTube 검색 (nocookie)</h1>
 
-  <input id="q" placeholder="검색어 입력">
-  <button onclick="search()">검색</button>
-
-  <div id="results" class="results"></div>
-
-  <div id="playerBox">
-    <h2>재생</h2>
-    <iframe id="player" allowfullscreen></iframe>
+<header>
+  <div class="logo">YouTube</div>
+  <div class="search">
+    <input id="q" placeholder="검색">
+    <button onclick="search()">검색</button>
   </div>
+</header>
+
+<div class="layout">
+  <aside>
+    <div class="menu">홈</div>
+    <div class="menu">Shorts</div>
+    <div class="menu">구독</div>
+  </aside>
+
+  <main>
+    <div class="grid" id="results"></div>
+  </main>
+</div>
+
+<div id="playerWrap">
+  <iframe id="player" allowfullscreen></iframe>
 </div>
 
 <script>
-const API_KEY = "AIzaSyDKgbPLHoPoSPAWSW3sGpqg_ZpnsK7Tz_c"; // 여기!
-const API_URL = "https://www.googleapis.com/youtube/v3/search";
+const API_KEY = "AIzaSyDKgbPLHoPoSPAWSW3sGpqg_ZpnsK7Tz_c";
+const API = "https://www.googleapis.com/youtube/v3/search";
 
 async function search() {
   const q = document.getElementById("q").value.trim();
-  if (!q) return alert("검색어 입력");
+  if (!q) return;
 
   const results = document.getElementById("results");
-  results.innerHTML = "검색 중...";
+  results.innerHTML = "";
+
+  const url =
+    `${API}?part=snippet&type=video&maxResults=24&q=${encodeURIComponent(q)}&key=${API_KEY}`;
 
   try {
-    const url =
-      `${API_URL}?part=snippet&type=video&maxResults=20&q=${encodeURIComponent(q)}&key=${API_KEY}`;
     const res = await fetch(url);
     const data = await res.json();
-
     if (data.error) throw new Error(data.error.message);
 
-    results.innerHTML = "";
     data.items.forEach(v => {
       const id = v.id.videoId;
-      const thumb = v.snippet.thumbnails.medium.url;
+      const s = v.snippet;
 
       const card = document.createElement("div");
       card.className = "card";
-      card.innerHTML = `<img src="${thumb}"><div class="title">${v.snippet.title}</div>`;
+      card.innerHTML = `
+        <div class="thumbnail">
+          <img src="${s.thumbnails.high.url}">
+        </div>
+        <div class="meta">
+          <div class="title">${s.title}</div>
+          <div class="channel">${s.channelTitle}</div>
+        </div>
+      `;
       card.onclick = () => play(id);
+
       results.appendChild(card);
     });
   } catch (e) {
-    alert("검색 실패: " + e.message);
+    alert("검색 실패");
     console.error(e);
   }
 }
 
 function play(id) {
+  document.getElementById("playerWrap").style.display = "block";
   document.getElementById("player").src =
     `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0`;
-  document.getElementById("playerBox").style.display = "block";
-  document.getElementById("playerBox").scrollIntoView({behavior:"smooth"});
 }
 
 document.getElementById("q").addEventListener("keydown", e => {
   if (e.key === "Enter") search();
 });
 </script>
+
 </body>
 </html>
