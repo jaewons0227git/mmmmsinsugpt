@@ -6,11 +6,7 @@
 <title>YouTube</title>
 
 <style>
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
+* { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
   font-family: Roboto, Arial, sans-serif;
@@ -21,14 +17,16 @@ body {
 /* ===== HEADER ===== */
 header {
   height: 56px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: #fff;
+  border-bottom: 1px solid #e5e5e5;
   display: flex;
   align-items: center;
   padding: 0 16px;
-  border-bottom: 1px solid #e5e5e5;
-  position: sticky;
-  top: 0;
-  background: #ffffff;
-  z-index: 10;
+  z-index: 20;
 }
 
 .logo {
@@ -45,40 +43,41 @@ header {
 
 .search input {
   width: 60%;
-  height: 36px;
-  padding: 0 12px;
+  height: 38px;
+  padding: 0 14px;
   border: 1px solid #ccc;
-  border-radius: 18px 0 0 18px;
+  border-radius: 20px 0 0 20px;
   font-size: 14px;
 }
 
 .search button {
-  height: 36px;
-  padding: 0 18px;
+  height: 38px;
+  padding: 0 20px;
   border: 1px solid #ccc;
   border-left: none;
-  background: #f8f8f8;
-  border-radius: 0 18px 18px 0;
+  background: #f5f5f5;
+  border-radius: 0 20px 20px 0;
   cursor: pointer;
-}
-
-/* ===== LAYOUT ===== */
-.layout {
-  display: flex;
 }
 
 /* ===== SIDEBAR ===== */
 aside {
+  position: fixed;
+  top: 56px;
+  left: 0;
+  bottom: 0;
   width: 220px;
   border-right: 1px solid #e5e5e5;
+  background: #fff;
   padding-top: 12px;
 }
 
 .menu {
-  padding: 10px 24px;
+  padding: 12px 24px;
   font-size: 14px;
-  color: #030303;
   cursor: pointer;
+  border-radius: 14px;
+  margin: 4px 8px;
 }
 
 .menu:hover {
@@ -87,8 +86,8 @@ aside {
 
 /* ===== CONTENT ===== */
 main {
-  flex: 1;
-  padding: 24px;
+  margin-left: 220px;
+  padding: 88px 24px 24px;
 }
 
 .grid {
@@ -105,9 +104,9 @@ main {
 .thumbnail {
   width: 100%;
   aspect-ratio: 16 / 9;
-  border-radius: 12px;
+  border-radius: 16px;
   overflow: hidden;
-  background: #eaeaea;
+  background: #eee;
 }
 
 .thumbnail img {
@@ -132,22 +131,46 @@ main {
   margin-top: 4px;
 }
 
-/* ===== PLAYER ===== */
-#playerWrap {
+/* ===== MODAL PLAYER ===== */
+#overlay {
   position: fixed;
-  bottom: 0;
-  left: 220px;
-  right: 0;
-  height: 360px;
-  background: #000;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  backdrop-filter: blur(10px);
   display: none;
-  border-top: 1px solid #ddd;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
 }
 
-#playerWrap iframe {
+.modal {
+  width: 80%;
+  max-width: 960px;
+  aspect-ratio: 16 / 9;
+  background: #000;
+  border-radius: 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+.modal iframe {
   width: 100%;
   height: 100%;
   border: none;
+}
+
+/* ===== CLOSE BUTTON ===== */
+.close-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  height: 36px;
+  padding: 0 18px;
+  border: none;
+  border-radius: 18px;
+  background: rgba(255,255,255,0.9);
+  cursor: pointer;
+  font-size: 14px;
 }
 </style>
 </head>
@@ -162,20 +185,22 @@ main {
   </div>
 </header>
 
-<div class="layout">
-  <aside>
-    <div class="menu">홈</div>
-    <div class="menu">Shorts</div>
-    <div class="menu">구독</div>
-  </aside>
+<aside>
+  <div class="menu">홈</div>
+  <div class="menu">Shorts</div>
+  <div class="menu">구독</div>
+</aside>
 
-  <main>
-    <div class="grid" id="results"></div>
-  </main>
-</div>
+<main>
+  <div class="grid" id="results"></div>
+</main>
 
-<div id="playerWrap">
-  <iframe id="player" allowfullscreen></iframe>
+<!-- MODAL -->
+<div id="overlay">
+  <div class="modal">
+    <button class="close-btn" onclick="closePlayer()">닫기</button>
+    <iframe id="player" allowfullscreen></iframe>
+  </div>
 </div>
 
 <script>
@@ -190,42 +215,42 @@ async function search() {
   results.innerHTML = "";
 
   const url =
-    `${API}?part=snippet&type=video&maxResults=24&q=${encodeURIComponent(q)}&key=${API_KEY}`;
+    `${API}?part=snippet&type=video&maxResults=24&videoDuration=any&q=${encodeURIComponent(q)}&key=${API_KEY}`;
 
-  try {
-    const res = await fetch(url);
-    const data = await res.json();
-    if (data.error) throw new Error(data.error.message);
+  const res = await fetch(url);
+  const data = await res.json();
+  if (data.error) return alert("검색 실패");
 
-    data.items.forEach(v => {
-      const id = v.id.videoId;
-      const s = v.snippet;
+  data.items.forEach(v => {
+    const id = v.id.videoId;
+    const s = v.snippet;
 
-      const card = document.createElement("div");
-      card.className = "card";
-      card.innerHTML = `
-        <div class="thumbnail">
-          <img src="${s.thumbnails.high.url}">
-        </div>
-        <div class="meta">
-          <div class="title">${s.title}</div>
-          <div class="channel">${s.channelTitle}</div>
-        </div>
-      `;
-      card.onclick = () => play(id);
+    const card = document.createElement("div");
+    card.className = "card";
+    card.innerHTML = `
+      <div class="thumbnail">
+        <img src="${s.thumbnails.high.url}">
+      </div>
+      <div class="meta">
+        <div class="title">${s.title}</div>
+        <div class="channel">${s.channelTitle}</div>
+      </div>
+    `;
+    card.onclick = () => play(id);
 
-      results.appendChild(card);
-    });
-  } catch (e) {
-    alert("검색 실패");
-    console.error(e);
-  }
+    results.appendChild(card);
+  });
 }
 
 function play(id) {
-  document.getElementById("playerWrap").style.display = "block";
+  document.getElementById("overlay").style.display = "flex";
   document.getElementById("player").src =
     `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0`;
+}
+
+function closePlayer() {
+  document.getElementById("overlay").style.display = "none";
+  document.getElementById("player").src = "";
 }
 
 document.getElementById("q").addEventListener("keydown", e => {
