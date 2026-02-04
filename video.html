@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>YouTube iOS List Style</title>
+<title>Minsugpt</title>
 <style>
     :root {
         --bg-color: #F5F5F7;
@@ -11,415 +11,350 @@
         --text-main: #1D1D1F;
         --text-sub: #86868B;
         --accent: #0071E3;
-        --blur-bg: rgba(255, 255, 255, 0.72);
-        --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.04);
-        --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.08);
-        --radius-lg: 18px;
-        --radius-md: 12px;
-        --ease: cubic-bezier(0.25, 1, 0.5, 1);
+        --rc-blue: #4A90E2;
+        --error: #d93025;
     }
-
-    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-font-smoothing: antialiased; }
-
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: Roboto, sans-serif; }
+    
     body {
-        font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
-        background: var(--bg-color);
+        background: #fff; /* 초기 배경 흰색 */
         color: var(--text-main);
-        overflow-y: scroll; /* 스크롤바 공간 확보 */
+        height: 100vh;
+        overflow: hidden; /* 스크롤 잠금 */
     }
 
-    /* HEADER */
-    header {
-        height: 70px;
-        position: fixed;
-        top: 0; left: 0; right: 0;
-        background: var(--blur-bg);
-        backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
-        display: flex;
-        align-items: center;
-        padding: 0 24px;
-        z-index: 100;
+    /* === 보안 레이어 스타일 === */
+    #security-layer {
+        position: fixed; inset: 0;
+        background: #fff; /* 블러 없이 완전 흰색 */
+        z-index: 9999;
+        display: flex; flex-direction: column;
+        align-items: center; justify-content: center;
+    }
+
+    /* 1. 체크박스 위젯 */
+    .captcha-widget {
+        background: #f9f9f9; border: 1px solid #d3d3d3; border-radius: 3px;
+        width: 300px; height: 74px;
+        display: flex; align-items: center; padding: 0 12px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.08); user-select: none;
+    }
+    .checkbox-wrapper {
+        width: 28px; height: 28px; border: 2px solid #c1c1c1; border-radius: 2px;
+        background: #fff; margin-right: 12px; cursor: pointer;
+        display: flex; align-items: center; justify-content: center;
+    }
+    .spinner {
+        width: 20px; height: 20px; border: 2px solid #ccc; border-top-color: #4a90e2;
+        border-radius: 50%; animation: spin 1s linear infinite; display: none;
+    }
+    .check-mark {
+        width: 10px; height: 18px; border: solid #009688; border-width: 0 3px 3px 0;
+        transform: rotate(45deg); margin-bottom: 4px; display: none;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .captcha-label { flex: 1; font-size: 14px; color: #333; }
+    .captcha-logo img { width: 32px; opacity: 0.6; }
+    .captcha-terms { font-size: 8px; color: #999; text-align: center; }
+
+    /* 2. 주관식 입력 모달 (리캡챠 스타일) */
+    .rc-modal {
+        display: none; width: 350px; background: #fff;
+        box-shadow: 0 0 10px rgba(0,0,0,0.2); border: 1px solid #dfdfdf;
+        padding: 10px; position: relative;
+    }
+    .rc-header { background: var(--rc-blue); color: white; padding: 15px; margin-bottom: 10px; }
+    .rc-header h2 { font-size: 14px; font-weight: 400; margin: 0; }
+    .rc-header strong { font-size: 18px; font-weight: 700; display: block; margin-top: 5px; }
+    
+    .input-area { padding: 10px 5px; }
+    .rc-input {
+        width: 100%; padding: 10px; border: 1px solid #ccc;
+        font-size: 16px; outline: none; margin-bottom: 5px;
+    }
+    .rc-input:focus { border-color: var(--rc-blue); box-shadow: 0 0 0 2px rgba(74,144,226,0.2); }
+    
+    .rc-footer {
+        display: flex; justify-content: flex-end; align-items: center;
+        padding-top: 10px; margin-top: 10px; border-top: 1px solid #eee;
+    }
+    .verify-btn {
+        background: var(--rc-blue); color: white; border: none; padding: 8px 20px;
+        font-size: 14px; font-weight: 600; border-radius: 3px; cursor: pointer;
+    }
+    .error-msg { color: var(--error); font-size: 13px; display: none; margin-top: 5px; }
+
+
+    /* === 여기서부터는 스크립트로 주입될 스타일 === */
+    /* (앱이 로드되기 전에는 적용할 대상이 없음) */
+    .app-header {
+        height: 70px; position: fixed; top: 0; left: 0; right: 0;
+        background: rgba(255,255,255,0.72); backdrop-filter: blur(20px);
+        display: flex; align-items: center; padding: 0 24px; z-index: 100;
         border-bottom: 1px solid rgba(0,0,0,0.05);
     }
-
-    .logo img { height: 24px; display: block; }
-
-    .search {
-        flex: 1;
-        display: flex;
-        justify-content: center;
-        max-width: 600px;
-        margin: 0 auto;
-        position: relative;
+    .app-logo { cursor: pointer; margin-right: 20px; }
+    .app-logo img { height: 24px; }
+    .app-search { flex: 1; display: flex; justify-content: center; max-width: 600px; margin: 0 auto; position: relative; }
+    .app-search input {
+        width: 100%; height: 44px; padding: 0 50px 0 20px;
+        border-radius: 14px; border: none; background: rgba(118, 118, 128, 0.12);
+        font-size: 16px; outline: none;
     }
-
-    .search input {
-        width: 100%;
-        height: 44px;
-        padding: 0 50px 0 20px;
-        border-radius: 14px;
-        border: none;
-        background: rgba(118, 118, 128, 0.12);
-        color: var(--text-main);
-        font-size: 16px;
-        outline: none;
-        transition: 0.2s;
+    .app-search button {
+        position: absolute; right: 8px; top: 8px;
+        height: 28px; padding: 0 12px; border: none; border-radius: 8px;
+        background: #1D1D1F; color: white; font-weight: 600; cursor: pointer;
     }
-
-    .search input:focus {
-        background: #fff;
-        box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.2);
+    .app-aside {
+        position: fixed; top: 90px; left: 20px; width: 240px;
+        background: #fff; border-radius: 18px; padding: 20px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.04); display: flex; flex-direction: column; gap: 8px;
     }
+    .app-menu { padding: 14px 18px; border-radius: 14px; cursor: pointer; font-weight: 500; }
+    .app-menu.active { background: rgba(0,0,0,0.06); color: var(--accent); }
+    
+    .app-main { margin-left: 280px; padding: 94px 40px; max-width: 1000px; margin: 0 auto; padding-left: 300px; /* PC 중앙 정렬 */ }
 
-    .search button {
-        position: absolute;
-        right: 8px; top: 8px;
-        height: 28px; padding: 0 12px;
-        border: none; border-radius: 8px;
-        background: var(--text-main);
-        color: white;
-        font-size: 13px; font-weight: 600;
-        cursor: pointer;
-        opacity: 0; transform: scale(0.9);
-        transition: all 0.2s var(--ease);
-    }
-
-    .search input:not(:placeholder-shown) + button,
-    .search input:focus + button {
-        opacity: 1; transform: scale(1);
-    }
-
-    /* SIDEBAR */
-    aside {
-        position: fixed;
-        top: 90px; left: 20px;
-        width: 240px;
-        height: calc(100vh - 110px);
-        background: var(--card-bg);
-        border-radius: var(--radius-lg);
-        padding: 20px;
-        display: flex; flex-direction: column; gap: 8px;
-        box-shadow: var(--shadow-sm);
-    }
-
-    .menu {
-        padding: 14px 18px;
-        border-radius: 14px;
-        cursor: pointer;
-        font-weight: 500;
-        color: var(--text-main);
-        transition: 0.2s;
-    }
-
-    .menu:hover { background: rgba(0,0,0,0.04); }
-    .menu.active { background: rgba(0,0,0,0.06); color: var(--accent); }
-
-    /* CONTENT AREA */
-    main {
-        margin-left: 280px;
-        padding: 94px 40px 40px 0;
-        min-height: 100vh;
-        max-width: 1000px; /* 리스트가 너무 넓어지지 않도록 제한 */
-    }
-
-    /* EMPTY STATE (초기 화면) */
-    #empty-state {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        height: 60vh;
-        text-align: center;
-    }
-
-    .empty-box {
-        background: var(--card-bg);
-        padding: 40px 60px;
-        border-radius: 24px;
-        box-shadow: var(--shadow-sm);
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 16px;
-    }
-
-    .empty-icon {
-        font-size: 48px;
-        margin-bottom: 8px;
-    }
-
-    .empty-text {
-        font-size: 18px;
-        font-weight: 600;
-        color: var(--text-main);
-    }
-
-    .empty-sub {
-        font-size: 14px;
-        color: var(--text-sub);
-    }
-
-    /* LIST LAYOUT (Grid 대신 Flex Column 사용) */
-    .list-container {
-        display: flex;
-        flex-direction: column;
-        gap: 20px;
-        display: none; /* 검색 전에는 숨김 */
-    }
-
-    /* HORIZONTAL CARD DESIGN */
     .card {
-        background: var(--card-bg);
-        border-radius: var(--radius-lg);
-        overflow: hidden;
-        box-shadow: var(--shadow-sm);
-        transition: all 0.3s var(--ease);
-        cursor: pointer;
-        border: 1px solid rgba(0,0,0,0.02);
-        display: flex; /* 가로 배치 핵심 */
-        height: 160px; /* 카드 높이 고정 */
+        background: #fff; border-radius: 18px; overflow: hidden;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.04); display: flex; height: 160px;
+        cursor: pointer; margin-bottom: 20px; transition: 0.3s;
     }
+    .card:hover { transform: scale(1.01); }
+    .thumb { width: 280px; flex-shrink: 0; background: #eee; }
+    .thumb img { width: 100%; height: 100%; object-fit: cover; }
+    .meta { flex: 1; padding: 18px 24px; display: flex; flex-direction: column; }
+    .title { font-size: 17px; font-weight: 600; margin-bottom: 8px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+    .desc { font-size: 14px; color: #86868B; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+    .channel { font-size: 13px; color: #86868B; margin-top: auto; }
 
-    .card:hover {
-        transform: scale(1.01);
-        box-shadow: var(--shadow-md);
-    }
-
-    .thumb {
-        width: 280px; /* 썸네일 고정 너비 */
-        flex-shrink: 0; /* 찌그러짐 방지 */
-        background: #eee;
-        position: relative;
-    }
-
-    .thumb img {
-        width: 100%; height: 100%;
-        object-fit: cover;
-    }
-
-    .meta {
-        flex: 1; /* 남은 공간 차지 */
-        padding: 18px 24px;
-        display: flex;
-        flex-direction: column;
-        justify-content: flex-start;
-        overflow: hidden;
-    }
-
-    .title {
-        font-size: 17px;
-        font-weight: 600;
-        line-height: 1.3;
-        margin-bottom: 8px;
-        color: var(--text-main);
-        /* 제목도 너무 길면 2줄 처리 */
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-    }
-
-    .desc {
-        font-size: 14px;
-        color: var(--text-sub);
-        line-height: 1.5;
-        margin-bottom: auto; /* 채널명을 바닥으로 밀어내기 위함 */
-        /* 2줄 이상 ... 처리 */
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-
-    .channel {
-        font-size: 13px;
-        color: var(--text-sub);
-        font-weight: 500;
-        margin-top: 12px;
-        display: flex;
-        align-items: center;
-    }
-
-    /* MODAL */
-    #overlay {
-        position: fixed; inset: 0;
-        background: rgba(0,0,0,0.4);
-        backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
-        display: none;
-        align-items: center; justify-content: center;
-        z-index: 200;
-        opacity: 0; transition: opacity 0.3s;
-    }
-    #overlay.show { opacity: 1; }
-
-    .modal {
-        width: 90%; max-width: 1000px;
-        aspect-ratio: 16/9;
-        background: #000;
-        border-radius: 28px;
-        overflow: hidden; position: relative;
-        box-shadow: 0 40px 80px rgba(0,0,0,0.5);
-        transform: scale(0.95) translateY(20px);
-        transition: transform 0.4s var(--ease);
-    }
-    #overlay.show .modal { transform: scale(1) translateY(0); }
-    .modal iframe { width: 100%; height: 100%; border: none; }
-
-    .close {
-        position: absolute; top: 20px; right: 20px;
-        width: 40px; height: 40px; border-radius: 50%;
-        background: rgba(255,255,255,0.25);
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(255,255,255,0.1);
-        color: white; font-size: 20px;
-        display: flex; align-items: center; justify-content: center;
-        cursor: pointer; transition: 0.2s; z-index: 10;
-    }
-    .close:hover { background: rgba(255,255,255,0.4); transform: scale(1.1); }
-
-    /* MOBILE */
+    /* 반응형 */
     @media(max-width: 900px) {
-        aside { display: none; }
-        main { margin-left: 0; padding: 80px 20px; }
-        
+        .app-aside { display: none; }
+        .app-main { margin: 0; padding: 80px 20px; }
+        .app-search { margin-left: 20px; }
         .card { height: auto; min-height: 120px; }
-        .thumb { width: 40%; max-width: 180px; }
-        .meta { padding: 14px; }
-        .title { font-size: 15px; }
-        .desc { -webkit-line-clamp: 2; font-size: 13px; }
+        .thumb { width: 40%; }
+        .desc { display: none; }
     }
     
-    @media(max-width: 500px) {
-        .thumb { width: 35%; }
-        .desc { display: none; } /* 아주 작은 화면에선 설명 숨김 */
-        .title { -webkit-line-clamp: 3; margin-bottom: 0; }
-        .channel { margin-top: 8px; }
+    /* 비디오 플레이어 */
+    #player-overlay {
+        position: fixed; inset: 0; background: rgba(0,0,0,0.8);
+        display: none; align-items: center; justify-content: center; z-index: 200;
+    }
+    .player-modal { width: 90%; max-width: 1000px; aspect-ratio: 16/9; background: #000; position: relative; }
+    .close-btn {
+        position: absolute; top: -40px; right: 0; color: white; font-size: 30px; cursor: pointer; border: none; background: none;
     }
 </style>
 </head>
-
 <body>
 
-<header>
-    <div class="logo">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/b/b8/YouTube_Logo_2017.svg" alt="YouTube">
-    </div>
-
-    <div class="search">
-        <input id="q" placeholder="검색어를 입력하세요">
-        <button onclick="search()">검색</button>
-    </div>
-</header>
-
-<aside>
-    <div class="menu active">홈</div>
-    <div class="menu">Shorts</div>
-    <div class="menu">보관함</div>
-    <div class="menu">설정</div>
-</aside>
-
-<main>
-    <div id="empty-state">
-        <div class="empty-box">
-            <div class="empty-icon">🔍</div>
-            <div class="empty-text">시청할 영상을 검색해보세요</div>
-            <div class="empty-sub">상단 검색창에 키워드를 입력하면<br>여기에 결과가 표시됩니다.</div>
+<div id="security-layer">
+    
+    <div class="captcha-widget" id="captcha-widget">
+        <div class="checkbox-wrapper" onclick="startVerification()">
+            <div class="spinner" id="cap-spin"></div>
+            <div class="check-mark" id="cap-check"></div>
+        </div>
+        <div class="captcha-label">어른이 아닙니다</div>
+        <div class="captcha-logo">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/a/ad/RecaptchaLogo.svg" alt="reCAPTCHA">
+            <div class="captcha-terms">개인정보보호 - 약관</div>
         </div>
     </div>
 
-    <div class="list-container" id="results"></div>
-</main>
+    <div class="rc-modal" id="rc-modal">
+        <div class="rc-header">
+            <h2>보안 질문에 <strong>정답</strong>을 입력하세요.</h2>
+            <strong id="rc-question-text">질문 로딩중...</strong>
+        </div>
+        
+        <div class="input-area">
+            <input type="text" id="rc-input" class="rc-input" placeholder="정답 입력" autocomplete="off">
+            <div class="error-msg" id="rc-error">정답이 아닙니다. 다시 시도하세요.</div>
+        </div>
 
-<div id="overlay">
-    <div class="modal">
-        <button class="close" onclick="closePlayer()">×</button>
-        <iframe id="player" allowfullscreen></iframe>
+        <div class="rc-footer">
+            <button class="verify-btn" onclick="checkAnswer()">확인</button>
+        </div>
     </div>
+
 </div>
 
 <script>
-    const API_KEY = "AIzaSyDKgbPLHoPoSPAWSW3sGpqg_ZpnsK7Tz_c"; 
-    const API = "https://www.googleapis.com/youtube/v3/search";
+    const BACKEND = "https://jaewondevjoongdong.pythonanywhere.com";
+    let currentStep = 1;
 
-    async function search(){
-        const q = document.getElementById("q").value.trim();
+    // 1단계: 로봇 체크박스 클릭
+    function startVerification() {
+        document.getElementById('cap-spin').style.display = 'block';
+        setTimeout(() => {
+            document.getElementById('captcha-widget').style.display = 'none';
+            showQuestion(1);
+        }, 1000);
+    }
+
+    // 질문 보여주기
+    function showQuestion(step) {
+        currentStep = step;
+        const modal = document.getElementById('rc-modal');
+        const qText = document.getElementById('rc-question-text');
+        const input = document.getElementById('rc-input');
+        const err = document.getElementById('rc-error');
+
+        modal.style.display = 'block';
+        err.style.display = 'none';
+        input.value = '';
+        input.focus();
+
+        if(step === 1) {
+            qText.innerText = "Q1. 박건률이 좋아하는 아이돌은?";
+        } else {
+            qText.innerText = "Q2. 신재원이 다니는 영어학원은?";
+        }
+    }
+
+    // 엔터키 지원
+    document.getElementById('rc-input').addEventListener('keydown', (e) => {
+        if(e.key === 'Enter') checkAnswer();
+    });
+
+    // 정답 확인 및 앱 로드
+    async function checkAnswer() {
+        const inputVal = document.getElementById('rc-input').value;
+        const err = document.getElementById('rc-error');
+        
+        try {
+            const res = await fetch(`${BACKEND}/verify`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ step: currentStep, answer: inputVal })
+            });
+            const data = await res.json();
+
+            if(data.result) {
+                if(currentStep === 1) {
+                    showQuestion(2);
+                } else {
+                    // *** 통과 성공! ***
+                    // 보안 레이어 삭제
+                    document.getElementById('security-layer').remove();
+                    // 배경색 복구
+                    document.body.style.background = "#F5F5F7";
+                    document.body.style.overflowY = "scroll";
+                    
+                    // *** 핵심: 여기서 앱 UI를 주입합니다. ***
+                    // 개발자 도구로 미리 보려고 해도 소스가 없어서 볼 수 없습니다.
+                    injectApp(); 
+                }
+            } else {
+                err.style.display = 'block';
+                document.getElementById('rc-input').value = '';
+                document.getElementById('rc-input').focus();
+            }
+        } catch(e) {
+            alert("서버 연결 오류");
+        }
+    }
+
+    // --- 앱 UI 생성기 ---
+    function injectApp() {
+        const appHTML = `
+            <header class="app-header">
+                <div class="app-logo" onclick="location.reload()">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/b/b8/YouTube_Logo_2017.svg">
+                </div>
+                <div class="app-search">
+                    <input id="q" placeholder="검색어를 입력하세요">
+                    <button onclick="searchVideo()">검색</button>
+                </div>
+            </header>
+
+            <aside class="app-aside">
+                <div class="app-menu active">홈</div>
+                <div class="app-menu">Shorts</div>
+                <div class="app-menu">보관함</div>
+            </aside>
+
+            <main class="app-main">
+                <div id="empty-state" style="text-align:center; padding-top:100px;">
+                    <div style="font-size:40px; margin-bottom:20px;">🔍</div>
+                    <h2>검색하여 시작하기</h2>
+                    <p style="color:#86868B;">보고 싶은 영상을 검색하세요.</p>
+                </div>
+                <div id="results"></div>
+            </main>
+
+            <div id="player-overlay" onclick="closePlayer()">
+                <div class="player-modal" onclick="event.stopPropagation()">
+                    <button class="close-btn" onclick="closePlayer()">×</button>
+                    <iframe id="iframe" style="width:100%;height:100%;border:none;" allowfullscreen></iframe>
+                </div>
+            </div>
+        `;
+
+        document.body.insertAdjacentHTML('beforeend', appHTML);
+        
+        // UI가 생성된 후에 이벤트 리스너 연결
+        document.getElementById('q').addEventListener('keydown', (e) => {
+            if(e.key === 'Enter') searchVideo();
+        });
+    }
+
+
+    // --- 유튜브 기능 로직 (UI 생성 후 작동) ---
+    async function searchVideo() {
+        const q = document.getElementById('q').value;
         if(!q) return;
 
-        const emptyState = document.getElementById("empty-state");
-        const resDiv = document.getElementById("results");
+        const list = document.getElementById('results');
+        const empty = document.getElementById('empty-state');
         
-        // 검색 시작 시 UI 전환
-        emptyState.style.display = "none";
-        resDiv.style.display = "flex";
-        resDiv.style.opacity = "0.5"; // 로딩 효과
+        empty.style.display = 'none';
+        list.innerHTML = '';
+        list.style.opacity = '0.5';
 
         try {
-            const url = `${API}?part=snippet&type=video&maxResults=10&videoDuration=any&q=${encodeURIComponent(q)}&key=${API_KEY}`;
-            const res = await fetch(url);
+            const res = await fetch(`${BACKEND}/search?q=${encodeURIComponent(q)}`);
             const data = await res.json();
             
-            if(data.error) throw new Error("API 오류");
+            list.style.opacity = '1';
 
-            resDiv.innerHTML = "";
-            resDiv.style.opacity = "1";
-
-            if (data.items.length === 0) {
-                resDiv.innerHTML = "<div style='text-align:center; padding:40px;'>검색 결과가 없습니다.</div>";
+            if(!data.items || data.items.length === 0) {
+                list.innerHTML = '<div style="text-align:center;padding:20px">결과 없음</div>';
                 return;
             }
 
             data.items.forEach(v => {
-                const id = v.id.videoId;
-                const s = v.snippet;
-                
-                const card = document.createElement("div");
-                card.className = "card";
-                card.innerHTML = `
-                    <div class="thumb">
-                        <img src="${s.thumbnails.high.url}">
-                    </div>
+                const item = document.createElement('div');
+                item.className = 'card';
+                item.onclick = () => openPlayer(v.id.videoId);
+                item.innerHTML = `
+                    <div class="thumb"><img src="${v.snippet.thumbnails.high.url}"></div>
                     <div class="meta">
-                        <div class="title">${s.title}</div>
-                        <div class="desc">${s.description}</div>
-                        <div class="channel">${s.channelTitle}</div>
+                        <div class="title">${v.snippet.title}</div>
+                        <div class="desc">${v.snippet.description}</div>
+                        <div class="channel">${v.snippet.channelTitle}</div>
                     </div>
                 `;
-                card.onclick = () => play(id);
-                resDiv.appendChild(card);
+                list.appendChild(item);
             });
-        } catch (e) {
-            alert("검색에 실패했습니다. API 키를 확인해주세요.");
-            resDiv.style.opacity = "1";
+        } catch(e) {
+            alert('검색 실패');
         }
     }
 
-    const overlay = document.getElementById("overlay");
-    const player = document.getElementById("player");
-
-    function play(id){
-        overlay.style.display = "flex";
-        setTimeout(() => overlay.classList.add("show"), 10);
-        player.src = `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0&modestbranding=1`;
+    function openPlayer(id) {
+        document.getElementById('player-overlay').style.display = 'flex';
+        document.getElementById('iframe').src = `https://www.youtube.com/embed/${id}?autoplay=1`;
     }
-
-    function closePlayer(){
-        overlay.classList.remove("show");
-        setTimeout(() => {
-            overlay.style.display = "none";
-            player.src = "";
-        }, 300);
+    window.closePlayer = function() { // 전역 스코프 등록
+        document.getElementById('player-overlay').style.display = 'none';
+        document.getElementById('iframe').src = '';
     }
-
-    overlay.addEventListener("click", (e) => {
-        if(e.target === overlay) closePlayer();
-    });
-
-    document.getElementById("q").addEventListener("keydown", e => {
-        if(e.key === "Enter") search();
-    });
 </script>
 
 </body>
