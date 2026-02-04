@@ -1,168 +1,159 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Minsugpt</title>
-<style>
-    :root {
-        --bg-color: #F5F5F7;
-        --card-bg: #FFFFFF;
-        --text-main: #1D1D1F;
-        --text-sub: #86868B;
-        --accent: #0071E3;
-        --rc-blue: #4A90E2;
-        --error: #d93025;
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: Roboto, sans-serif; }
-    
-    body {
-        background: #fff; /* 초기 배경 흰색 */
-        color: var(--text-main);
-        height: 100vh;
-        overflow: hidden; /* 스크롤 잠금 */
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube iOS Style - Security Enabled</title>
+    <style>
+        :root {
+            --bg-color: #F5F5F7;
+            --card-bg: #FFFFFF;
+            --text-main: #1D1D1F;
+            --text-sub: #86868B;
+            --accent: #0071E3;
+            --rc-blue: #4A90E2;
+            --error: #d93025;
+            --radius-lg: 18px;
+            --ease: cubic-bezier(0.25, 1, 0.5, 1);
+        }
 
-    /* === 보안 레이어 스타일 === */
-    #security-layer {
-        position: fixed; inset: 0;
-        background: #fff; /* 블러 없이 완전 흰색 */
-        z-index: 9999;
-        display: flex; flex-direction: column;
-        align-items: center; justify-content: center;
-    }
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-font-smoothing: antialiased; }
 
-    /* 1. 체크박스 위젯 */
-    .captcha-widget {
-        background: #f9f9f9; border: 1px solid #d3d3d3; border-radius: 3px;
-        width: 300px; height: 74px;
-        display: flex; align-items: center; padding: 0 12px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.08); user-select: none;
-    }
-    .checkbox-wrapper {
-        width: 28px; height: 28px; border: 2px solid #c1c1c1; border-radius: 2px;
-        background: #fff; margin-right: 12px; cursor: pointer;
-        display: flex; align-items: center; justify-content: center;
-    }
-    .spinner {
-        width: 20px; height: 20px; border: 2px solid #ccc; border-top-color: #4a90e2;
-        border-radius: 50%; animation: spin 1s linear infinite; display: none;
-    }
-    .check-mark {
-        width: 10px; height: 18px; border: solid #009688; border-width: 0 3px 3px 0;
-        transform: rotate(45deg); margin-bottom: 4px; display: none;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .captcha-label { flex: 1; font-size: 14px; color: #333; }
-    .captcha-logo img { width: 32px; opacity: 0.6; }
-    .captcha-terms { font-size: 8px; color: #999; text-align: center; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
+            background: #fff;
+            color: var(--text-main);
+            height: 100vh;
+            overflow: hidden; /* 인증 전 스크롤 방지 */
+        }
 
-    /* 2. 주관식 입력 모달 (리캡챠 스타일) */
-    .rc-modal {
-        display: none; width: 350px; background: #fff;
-        box-shadow: 0 0 10px rgba(0,0,0,0.2); border: 1px solid #dfdfdf;
-        padding: 10px; position: relative;
-    }
-    .rc-header { background: var(--rc-blue); color: white; padding: 15px; margin-bottom: 10px; }
-    .rc-header h2 { font-size: 14px; font-weight: 400; margin: 0; }
-    .rc-header strong { font-size: 18px; font-weight: 700; display: block; margin-top: 5px; }
-    
-    .input-area { padding: 10px 5px; }
-    .rc-input {
-        width: 100%; padding: 10px; border: 1px solid #ccc;
-        font-size: 16px; outline: none; margin-bottom: 5px;
-    }
-    .rc-input:focus { border-color: var(--rc-blue); box-shadow: 0 0 0 2px rgba(74,144,226,0.2); }
-    
-    .rc-footer {
-        display: flex; justify-content: flex-end; align-items: center;
-        padding-top: 10px; margin-top: 10px; border-top: 1px solid #eee;
-    }
-    .verify-btn {
-        background: var(--rc-blue); color: white; border: none; padding: 8px 20px;
-        font-size: 14px; font-weight: 600; border-radius: 3px; cursor: pointer;
-    }
-    .error-msg { color: var(--error); font-size: 13px; display: none; margin-top: 5px; }
+        /* === 보안 레이어 === */
+        #security-layer {
+            position: fixed; inset: 0;
+            background: #fff; z-index: 9999;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+        }
 
+        .captcha-widget {
+            background: #f9f9f9; border: 1px solid #d3d3d3; border-radius: 3px;
+            width: 300px; height: 74px;
+            display: flex; align-items: center; padding: 0 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.08); user-select: none;
+        }
 
-    /* === 여기서부터는 스크립트로 주입될 스타일 === */
-    /* (앱이 로드되기 전에는 적용할 대상이 없음) */
-    .app-header {
-        height: 70px; position: fixed; top: 0; left: 0; right: 0;
-        background: rgba(255,255,255,0.72); backdrop-filter: blur(20px);
-        display: flex; align-items: center; padding: 0 24px; z-index: 100;
-        border-bottom: 1px solid rgba(0,0,0,0.05);
-    }
-    .app-logo { cursor: pointer; margin-right: 20px; }
-    .app-logo img { height: 24px; }
-    .app-search { flex: 1; display: flex; justify-content: center; max-width: 600px; margin: 0 auto; position: relative; }
-    .app-search input {
-        width: 100%; height: 44px; padding: 0 50px 0 20px;
-        border-radius: 14px; border: none; background: rgba(118, 118, 128, 0.12);
-        font-size: 16px; outline: none;
-    }
-    .app-search button {
-        position: absolute; right: 8px; top: 8px;
-        height: 28px; padding: 0 12px; border: none; border-radius: 8px;
-        background: #1D1D1F; color: white; font-weight: 600; cursor: pointer;
-    }
-    .app-aside {
-        position: fixed; top: 90px; left: 20px; width: 240px;
-        background: #fff; border-radius: 18px; padding: 20px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.04); display: flex; flex-direction: column; gap: 8px;
-    }
-    .app-menu { padding: 14px 18px; border-radius: 14px; cursor: pointer; font-weight: 500; }
-    .app-menu.active { background: rgba(0,0,0,0.06); color: var(--accent); }
-    
-    .app-main { margin-left: 280px; padding: 94px 40px; max-width: 1000px; margin: 0 auto; padding-left: 300px; /* PC 중앙 정렬 */ }
+        .checkbox-wrapper {
+            width: 28px; height: 28px; border: 2px solid #c1c1c1; border-radius: 2px;
+            background: #fff; margin-right: 12px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+        }
 
-    .card {
-        background: #fff; border-radius: 18px; overflow: hidden;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.04); display: flex; height: 160px;
-        cursor: pointer; margin-bottom: 20px; transition: 0.3s;
-    }
-    .card:hover { transform: scale(1.01); }
-    .thumb { width: 280px; flex-shrink: 0; background: #eee; }
-    .thumb img { width: 100%; height: 100%; object-fit: cover; }
-    .meta { flex: 1; padding: 18px 24px; display: flex; flex-direction: column; }
-    .title { font-size: 17px; font-weight: 600; margin-bottom: 8px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
-    .desc { font-size: 14px; color: #86868B; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
-    .channel { font-size: 13px; color: #86868B; margin-top: auto; }
+        .spinner {
+            width: 20px; height: 20px; border: 2px solid #ccc; border-top-color: #4a90e2;
+            border-radius: 50%; animation: spin 1s linear infinite; display: none;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* 반응형 */
-    @media(max-width: 900px) {
-        .app-aside { display: none; }
-        .app-main { margin: 0; padding: 80px 20px; }
-        .app-search { margin-left: 20px; }
-        .card { height: auto; min-height: 120px; }
-        .thumb { width: 40%; }
-        .desc { display: none; }
-    }
-    
-    /* 비디오 플레이어 */
-    #player-overlay {
-        position: fixed; inset: 0; background: rgba(0,0,0,0.8);
-        display: none; align-items: center; justify-content: center; z-index: 200;
-    }
-    .player-modal { width: 90%; max-width: 1000px; aspect-ratio: 16/9; background: #000; position: relative; }
-    .close-btn {
-        position: absolute; top: -40px; right: 0; color: white; font-size: 30px; cursor: pointer; border: none; background: none;
-    }
-</style>
+        .captcha-label { flex: 1; font-size: 14px; color: #333; }
+        .captcha-logo img { width: 32px; opacity: 0.6; }
+
+        .rc-modal {
+            display: none; width: 350px; background: #fff;
+            box-shadow: 0 0 10px rgba(0,0,0,0.2); border: 1px solid #dfdfdf;
+            padding: 10px; position: relative;
+        }
+
+        .rc-header { background: var(--rc-blue); color: white; padding: 15px; margin-bottom: 10px; }
+        .rc-header h2 { font-size: 14px; font-weight: 400; margin: 0; }
+        .rc-header strong { font-size: 18px; font-weight: 700; display: block; margin-top: 5px; }
+        
+        .rc-input {
+            width: 100%; padding: 10px; border: 1px solid #ccc;
+            font-size: 16px; outline: none; margin-bottom: 5px;
+        }
+
+        .verify-btn {
+            background: var(--rc-blue); color: white; border: none; padding: 8px 20px;
+            font-size: 14px; font-weight: 600; border-radius: 3px; cursor: pointer;
+        }
+
+        .error-msg { color: var(--error); font-size: 13px; display: none; margin-top: 5px; }
+
+        /* === 앱 인터페이스 스타일 (인증 후 노출) === */
+        #app-wrapper { display: none; } /* 초기엔 숨김 */
+
+        header {
+            height: 70px; position: fixed; top: 0; left: 0; right: 0;
+            background: rgba(255, 255, 255, 0.72); backdrop-filter: blur(20px);
+            display: flex; align-items: center; padding: 0 24px; z-index: 100;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .search { flex: 1; display: flex; justify-content: center; max-width: 600px; margin: 0 auto; position: relative; }
+        .search input {
+            width: 100%; height: 44px; padding: 0 50px 0 20px;
+            border-radius: 14px; border: none; background: rgba(118, 118, 128, 0.12);
+            font-size: 16px; outline: none;
+        }
+
+        .search button {
+            position: absolute; right: 8px; top: 8px;
+            height: 28px; padding: 0 12px; border: none; border-radius: 8px;
+            background: #1D1D1F; color: white; font-weight: 600; cursor: pointer;
+        }
+
+        aside {
+            position: fixed; top: 90px; left: 20px; width: 240px;
+            background: #fff; border-radius: var(--radius-lg); padding: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.04); display: flex; flex-direction: column; gap: 8px;
+        }
+
+        .menu { padding: 14px 18px; border-radius: 14px; cursor: pointer; font-weight: 500; }
+        .menu.active { background: rgba(0,0,0,0.06); color: var(--accent); }
+
+        main { margin-left: 280px; padding: 94px 40px 40px 0; max-width: 1000px; }
+
+        .card {
+            background: #fff; border-radius: var(--radius-lg); overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.04); display: flex; height: 160px;
+            cursor: pointer; margin-bottom: 20px; transition: 0.3s var(--ease);
+        }
+        .card:hover { transform: scale(1.01); }
+
+        .thumb { width: 280px; flex-shrink: 0; background: #eee; }
+        .thumb img { width: 100%; height: 100%; object-fit: cover; }
+
+        .meta { flex: 1; padding: 18px 24px; display: flex; flex-direction: column; overflow: hidden; }
+        .title { font-size: 17px; font-weight: 600; margin-bottom: 8px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .desc { font-size: 14px; color: var(--text-sub); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .channel { font-size: 13px; color: var(--text-sub); margin-top: auto; }
+
+        /* 플레이어 오버레이 */
+        #overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(15px);
+            display: none; align-items: center; justify-content: center; z-index: 1000;
+        }
+        .modal { width: 90%; max-width: 1000px; aspect-ratio: 16/9; background: #000; border-radius: 20px; overflow: hidden; position: relative; }
+        .close-btn { position: absolute; top: 15px; right: 15px; color: white; background: rgba(255,255,255,0.2); border: none; width: 35px; height: 35px; border-radius: 50%; cursor: pointer; font-size: 20px; z-index: 10; }
+
+        @media(max-width: 900px) {
+            aside { display: none; }
+            main { margin-left: 0; padding: 80px 20px; }
+            .card { height: auto; }
+            .thumb { width: 40%; }
+        }
+    </style>
 </head>
 <body>
 
 <div id="security-layer">
-    
     <div class="captcha-widget" id="captcha-widget">
         <div class="checkbox-wrapper" onclick="startVerification()">
             <div class="spinner" id="cap-spin"></div>
-            <div class="check-mark" id="cap-check"></div>
         </div>
         <div class="captcha-label">어른이 아닙니다</div>
         <div class="captcha-logo">
             <img src="https://upload.wikimedia.org/wikipedia/commons/a/ad/RecaptchaLogo.svg" alt="reCAPTCHA">
-            <div class="captcha-terms">개인정보보호 - 약관</div>
         </div>
     </div>
 
@@ -171,58 +162,70 @@
             <h2>보안 질문에 <strong>정답</strong>을 입력하세요.</h2>
             <strong id="rc-question-text">질문 로딩중...</strong>
         </div>
-        
-        <div class="input-area">
-            <input type="text" id="rc-input" class="rc-input" placeholder="정답 입력" autocomplete="off">
-            <div class="error-msg" id="rc-error">정답이 아닙니다. 다시 시도하세요.</div>
+        <div style="padding: 10px;">
+            <input type="text" id="rc-input" class="rc-input" placeholder="정답 입력">
+            <div class="error-msg" id="rc-error">정답이 아닙니다.</div>
         </div>
-
-        <div class="rc-footer">
+        <div style="text-align: right; padding: 10px;">
             <button class="verify-btn" onclick="checkAnswer()">확인</button>
         </div>
     </div>
+</div>
 
+<div id="app-wrapper">
+    <header>
+        <div class="search">
+            <input id="q" placeholder="검색어를 입력하세요">
+            <button onclick="searchVideo()">검색</button>
+        </div>
+    </header>
+
+    <aside>
+        <div class="menu active">홈</div>
+        <div class="menu">Shorts</div>
+        <div class="menu">보관함</div>
+    </aside>
+
+    <main>
+        <div id="empty-state" style="text-align:center; padding-top:100px;">
+            <h2>시청할 영상을 검색하세요</h2>
+        </div>
+        <div id="results"></div>
+    </main>
+
+    <div id="overlay" onclick="closePlayer()">
+        <div class="modal" onclick="event.stopPropagation()">
+            <button class="close-btn" onclick="closePlayer()">×</button>
+            <iframe id="player" style="width:100%; height:100%; border:none;" allowfullscreen></iframe>
+        </div>
+    </div>
 </div>
 
 <script>
     const BACKEND = "https://jaewondevjoongdong.pythonanywhere.com";
     let currentStep = 1;
 
-    // 1단계: 로봇 체크박스 클릭
+    // --- 보안 로직 ---
     function startVerification() {
         document.getElementById('cap-spin').style.display = 'block';
         setTimeout(() => {
             document.getElementById('captcha-widget').style.display = 'none';
             showQuestion(1);
-        }, 1000);
+        }, 800);
     }
 
-    // 질문 보여주기
     function showQuestion(step) {
         currentStep = step;
         const modal = document.getElementById('rc-modal');
         const qText = document.getElementById('rc-question-text');
-        const input = document.getElementById('rc-input');
-        const err = document.getElementById('rc-error');
-
         modal.style.display = 'block';
-        err.style.display = 'none';
-        input.value = '';
-        input.focus();
-
-        if(step === 1) {
-            qText.innerText = "Q1. 박건률이 좋아하는 아이돌은?";
-        } else {
-            qText.innerText = "Q2. 신재원이 다니는 영어학원은?";
-        }
+        document.getElementById('rc-error').style.display = 'none';
+        document.getElementById('rc-input').value = '';
+        document.getElementById('rc-input').focus();
+        
+        qText.innerText = (step === 1) ? "Q1. 박건률이 좋아하는 아이돌은?" : "Q2. 신재원이 다니는 영어학원은?";
     }
 
-    // 엔터키 지원
-    document.getElementById('rc-input').addEventListener('keydown', (e) => {
-        if(e.key === 'Enter') checkAnswer();
-    });
-
-    // 정답 확인 및 앱 로드
     async function checkAnswer() {
         const inputVal = document.getElementById('rc-input').value;
         const err = document.getElementById('rc-error');
@@ -239,100 +242,40 @@
                 if(currentStep === 1) {
                     showQuestion(2);
                 } else {
-                    // *** 통과 성공! ***
-                    // 보안 레이어 삭제
+                    // 인증 성공
                     document.getElementById('security-layer').remove();
-                    // 배경색 복구
+                    document.getElementById('app-wrapper').style.display = 'block';
                     document.body.style.background = "#F5F5F7";
                     document.body.style.overflowY = "scroll";
-                    
-                    // *** 핵심: 여기서 앱 UI를 주입합니다. ***
-                    // 개발자 도구로 미리 보려고 해도 소스가 없어서 볼 수 없습니다.
-                    injectApp(); 
                 }
             } else {
                 err.style.display = 'block';
-                document.getElementById('rc-input').value = '';
-                document.getElementById('rc-input').focus();
             }
         } catch(e) {
             alert("서버 연결 오류");
         }
     }
 
-    // --- 앱 UI 생성기 ---
-    function injectApp() {
-        const appHTML = `
-            <header class="app-header">
-                <div class="app-logo" onclick="location.reload()">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/b/b8/YouTube_Logo_2017.svg">
-                </div>
-                <div class="app-search">
-                    <input id="q" placeholder="검색어를 입력하세요">
-                    <button onclick="searchVideo()">검색</button>
-                </div>
-            </header>
-
-            <aside class="app-aside">
-                <div class="app-menu active">홈</div>
-                <div class="app-menu">Shorts</div>
-                <div class="app-menu">보관함</div>
-            </aside>
-
-            <main class="app-main">
-                <div id="empty-state" style="text-align:center; padding-top:100px;">
-                    <div style="font-size:40px; margin-bottom:20px;">🔍</div>
-                    <h2>검색하여 시작하기</h2>
-                    <p style="color:#86868B;">보고 싶은 영상을 검색하세요.</p>
-                </div>
-                <div id="results"></div>
-            </main>
-
-            <div id="player-overlay" onclick="closePlayer()">
-                <div class="player-modal" onclick="event.stopPropagation()">
-                    <button class="close-btn" onclick="closePlayer()">×</button>
-                    <iframe id="iframe" style="width:100%;height:100%;border:none;" allowfullscreen></iframe>
-                </div>
-            </div>
-        `;
-
-        document.body.insertAdjacentHTML('beforeend', appHTML);
-        
-        // UI가 생성된 후에 이벤트 리스너 연결
-        document.getElementById('q').addEventListener('keydown', (e) => {
-            if(e.key === 'Enter') searchVideo();
-        });
-    }
-
-
-    // --- 유튜브 기능 로직 (UI 생성 후 작동) ---
+    // --- 유튜브 검색 및 재생 로직 ---
     async function searchVideo() {
         const q = document.getElementById('q').value;
         if(!q) return;
 
         const list = document.getElementById('results');
         const empty = document.getElementById('empty-state');
-        
         empty.style.display = 'none';
-        list.innerHTML = '';
-        list.style.opacity = '0.5';
+        list.innerHTML = '로딩 중...';
 
         try {
             const res = await fetch(`${BACKEND}/search?q=${encodeURIComponent(q)}`);
             const data = await res.json();
-            
-            list.style.opacity = '1';
-
-            if(!data.items || data.items.length === 0) {
-                list.innerHTML = '<div style="text-align:center;padding:20px">결과 없음</div>';
-                return;
-            }
+            list.innerHTML = '';
 
             data.items.forEach(v => {
-                const item = document.createElement('div');
-                item.className = 'card';
-                item.onclick = () => openPlayer(v.id.videoId);
-                item.innerHTML = `
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.onclick = () => openPlayer(v.id.videoId);
+                card.innerHTML = `
                     <div class="thumb"><img src="${v.snippet.thumbnails.high.url}"></div>
                     <div class="meta">
                         <div class="title">${v.snippet.title}</div>
@@ -340,7 +283,7 @@
                         <div class="channel">${v.snippet.channelTitle}</div>
                     </div>
                 `;
-                list.appendChild(item);
+                list.appendChild(card);
             });
         } catch(e) {
             alert('검색 실패');
@@ -348,13 +291,25 @@
     }
 
     function openPlayer(id) {
-        document.getElementById('player-overlay').style.display = 'flex';
-        document.getElementById('iframe').src = `https://www.youtube.com/embed/${id}?autoplay=1`;
+        const overlay = document.getElementById('overlay');
+        const player = document.getElementById('player');
+        overlay.style.display = 'flex';
+        // 보안을 위해 nocookie 도메인 사용
+        player.src = `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0`;
     }
-    window.closePlayer = function() { // 전역 스코프 등록
-        document.getElementById('player-overlay').style.display = 'none';
-        document.getElementById('iframe').src = '';
+
+    function closePlayer() {
+        document.getElementById('overlay').style.display = 'none';
+        document.getElementById('player').src = '';
     }
+
+    // 엔터키 처리
+    document.addEventListener('keydown', (e) => {
+        if(e.key === 'Enter') {
+            if(document.getElementById('security-layer')) checkAnswer();
+            else searchVideo();
+        }
+    });
 </script>
 
 </body>
