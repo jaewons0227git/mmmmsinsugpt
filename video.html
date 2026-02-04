@@ -3,259 +3,423 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>YouTube</title>
-
+<title>YouTube iOS List Style</title>
 <style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+        --bg-color: #F5F5F7;
+        --card-bg: #FFFFFF;
+        --text-main: #1D1D1F;
+        --text-sub: #86868B;
+        --accent: #0071E3;
+        --blur-bg: rgba(255, 255, 255, 0.72);
+        --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.04);
+        --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.08);
+        --radius-lg: 18px;
+        --radius-md: 12px;
+        --ease: cubic-bezier(0.25, 1, 0.5, 1);
+    }
 
-body {
-  font-family: Roboto, Arial, sans-serif;
-  background: #ffffff;
-  color: #0f0f0f;
-}
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-font-smoothing: antialiased; }
 
-/* ===== HEADER ===== */
-header {
-  height: 56px;
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  background: #fff;
-  border-bottom: 1px solid #e5e5e5;
-  display: flex;
-  align-items: center;
-  padding: 0 16px;
-  z-index: 20;
-}
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
+        background: var(--bg-color);
+        color: var(--text-main);
+        overflow-y: scroll; /* 스크롤바 공간 확보 */
+    }
 
-.logo {
-  font-size: 20px;
-  font-weight: 600;
-  color: #ff0000;
-}
+    /* HEADER */
+    header {
+        height: 70px;
+        position: fixed;
+        top: 0; left: 0; right: 0;
+        background: var(--blur-bg);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        display: flex;
+        align-items: center;
+        padding: 0 24px;
+        z-index: 100;
+        border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
 
-.search {
-  flex: 1;
-  display: flex;
-  justify-content: center;
-}
+    .logo img { height: 24px; display: block; }
 
-.search input {
-  width: 60%;
-  height: 38px;
-  padding: 0 14px;
-  border: 1px solid #ccc;
-  border-radius: 20px 0 0 20px;
-  font-size: 14px;
-}
+    .search {
+        flex: 1;
+        display: flex;
+        justify-content: center;
+        max-width: 600px;
+        margin: 0 auto;
+        position: relative;
+    }
 
-.search button {
-  height: 38px;
-  padding: 0 20px;
-  border: 1px solid #ccc;
-  border-left: none;
-  background: #f5f5f5;
-  border-radius: 0 20px 20px 0;
-  cursor: pointer;
-}
+    .search input {
+        width: 100%;
+        height: 44px;
+        padding: 0 50px 0 20px;
+        border-radius: 14px;
+        border: none;
+        background: rgba(118, 118, 128, 0.12);
+        color: var(--text-main);
+        font-size: 16px;
+        outline: none;
+        transition: 0.2s;
+    }
 
-/* ===== SIDEBAR ===== */
-aside {
-  position: fixed;
-  top: 56px;
-  left: 0;
-  bottom: 0;
-  width: 220px;
-  border-right: 1px solid #e5e5e5;
-  background: #fff;
-  padding-top: 12px;
-}
+    .search input:focus {
+        background: #fff;
+        box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.2);
+    }
 
-.menu {
-  padding: 12px 24px;
-  font-size: 14px;
-  cursor: pointer;
-  border-radius: 14px;
-  margin: 4px 8px;
-}
+    .search button {
+        position: absolute;
+        right: 8px; top: 8px;
+        height: 28px; padding: 0 12px;
+        border: none; border-radius: 8px;
+        background: var(--text-main);
+        color: white;
+        font-size: 13px; font-weight: 600;
+        cursor: pointer;
+        opacity: 0; transform: scale(0.9);
+        transition: all 0.2s var(--ease);
+    }
 
-.menu:hover {
-  background: #f2f2f2;
-}
+    .search input:not(:placeholder-shown) + button,
+    .search input:focus + button {
+        opacity: 1; transform: scale(1);
+    }
 
-/* ===== CONTENT ===== */
-main {
-  margin-left: 220px;
-  padding: 88px 24px 24px;
-}
+    /* SIDEBAR */
+    aside {
+        position: fixed;
+        top: 90px; left: 20px;
+        width: 240px;
+        height: calc(100vh - 110px);
+        background: var(--card-bg);
+        border-radius: var(--radius-lg);
+        padding: 20px;
+        display: flex; flex-direction: column; gap: 8px;
+        box-shadow: var(--shadow-sm);
+    }
 
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 24px;
-}
+    .menu {
+        padding: 14px 18px;
+        border-radius: 14px;
+        cursor: pointer;
+        font-weight: 500;
+        color: var(--text-main);
+        transition: 0.2s;
+    }
 
-/* ===== VIDEO CARD ===== */
-.card {
-  cursor: pointer;
-}
+    .menu:hover { background: rgba(0,0,0,0.04); }
+    .menu.active { background: rgba(0,0,0,0.06); color: var(--accent); }
 
-.thumbnail {
-  width: 100%;
-  aspect-ratio: 16 / 9;
-  border-radius: 16px;
-  overflow: hidden;
-  background: #eee;
-}
+    /* CONTENT AREA */
+    main {
+        margin-left: 280px;
+        padding: 94px 40px 40px 0;
+        min-height: 100vh;
+        max-width: 1000px; /* 리스트가 너무 넓어지지 않도록 제한 */
+    }
 
-.thumbnail img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
+    /* EMPTY STATE (초기 화면) */
+    #empty-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 60vh;
+        text-align: center;
+    }
 
-.meta {
-  padding-top: 10px;
-}
+    .empty-box {
+        background: var(--card-bg);
+        padding: 40px 60px;
+        border-radius: 24px;
+        box-shadow: var(--shadow-sm);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+    }
 
-.title {
-  font-size: 15px;
-  font-weight: 500;
-  line-height: 1.4;
-}
+    .empty-icon {
+        font-size: 48px;
+        margin-bottom: 8px;
+    }
 
-.channel {
-  font-size: 13px;
-  color: #606060;
-  margin-top: 4px;
-}
+    .empty-text {
+        font-size: 18px;
+        font-weight: 600;
+        color: var(--text-main);
+    }
 
-/* ===== MODAL PLAYER ===== */
-#overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.4);
-  backdrop-filter: blur(10px);
-  display: none;
-  align-items: center;
-  justify-content: center;
-  z-index: 100;
-}
+    .empty-sub {
+        font-size: 14px;
+        color: var(--text-sub);
+    }
 
-.modal {
-  width: 80%;
-  max-width: 960px;
-  aspect-ratio: 16 / 9;
-  background: #000;
-  border-radius: 20px;
-  position: relative;
-  overflow: hidden;
-}
+    /* LIST LAYOUT (Grid 대신 Flex Column 사용) */
+    .list-container {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        display: none; /* 검색 전에는 숨김 */
+    }
 
-.modal iframe {
-  width: 100%;
-  height: 100%;
-  border: none;
-}
+    /* HORIZONTAL CARD DESIGN */
+    .card {
+        background: var(--card-bg);
+        border-radius: var(--radius-lg);
+        overflow: hidden;
+        box-shadow: var(--shadow-sm);
+        transition: all 0.3s var(--ease);
+        cursor: pointer;
+        border: 1px solid rgba(0,0,0,0.02);
+        display: flex; /* 가로 배치 핵심 */
+        height: 160px; /* 카드 높이 고정 */
+    }
 
-/* ===== CLOSE BUTTON ===== */
-.close-btn {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  height: 36px;
-  padding: 0 18px;
-  border: none;
-  border-radius: 18px;
-  background: rgba(255,255,255,0.9);
-  cursor: pointer;
-  font-size: 14px;
-}
+    .card:hover {
+        transform: scale(1.01);
+        box-shadow: var(--shadow-md);
+    }
+
+    .thumb {
+        width: 280px; /* 썸네일 고정 너비 */
+        flex-shrink: 0; /* 찌그러짐 방지 */
+        background: #eee;
+        position: relative;
+    }
+
+    .thumb img {
+        width: 100%; height: 100%;
+        object-fit: cover;
+    }
+
+    .meta {
+        flex: 1; /* 남은 공간 차지 */
+        padding: 18px 24px;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        overflow: hidden;
+    }
+
+    .title {
+        font-size: 17px;
+        font-weight: 600;
+        line-height: 1.3;
+        margin-bottom: 8px;
+        color: var(--text-main);
+        /* 제목도 너무 길면 2줄 처리 */
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .desc {
+        font-size: 14px;
+        color: var(--text-sub);
+        line-height: 1.5;
+        margin-bottom: auto; /* 채널명을 바닥으로 밀어내기 위함 */
+        /* 2줄 이상 ... 처리 */
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .channel {
+        font-size: 13px;
+        color: var(--text-sub);
+        font-weight: 500;
+        margin-top: 12px;
+        display: flex;
+        align-items: center;
+    }
+
+    /* MODAL */
+    #overlay {
+        position: fixed; inset: 0;
+        background: rgba(0,0,0,0.4);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        display: none;
+        align-items: center; justify-content: center;
+        z-index: 200;
+        opacity: 0; transition: opacity 0.3s;
+    }
+    #overlay.show { opacity: 1; }
+
+    .modal {
+        width: 90%; max-width: 1000px;
+        aspect-ratio: 16/9;
+        background: #000;
+        border-radius: 28px;
+        overflow: hidden; position: relative;
+        box-shadow: 0 40px 80px rgba(0,0,0,0.5);
+        transform: scale(0.95) translateY(20px);
+        transition: transform 0.4s var(--ease);
+    }
+    #overlay.show .modal { transform: scale(1) translateY(0); }
+    .modal iframe { width: 100%; height: 100%; border: none; }
+
+    .close {
+        position: absolute; top: 20px; right: 20px;
+        width: 40px; height: 40px; border-radius: 50%;
+        background: rgba(255,255,255,0.25);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255,255,255,0.1);
+        color: white; font-size: 20px;
+        display: flex; align-items: center; justify-content: center;
+        cursor: pointer; transition: 0.2s; z-index: 10;
+    }
+    .close:hover { background: rgba(255,255,255,0.4); transform: scale(1.1); }
+
+    /* MOBILE */
+    @media(max-width: 900px) {
+        aside { display: none; }
+        main { margin-left: 0; padding: 80px 20px; }
+        
+        .card { height: auto; min-height: 120px; }
+        .thumb { width: 40%; max-width: 180px; }
+        .meta { padding: 14px; }
+        .title { font-size: 15px; }
+        .desc { -webkit-line-clamp: 2; font-size: 13px; }
+    }
+    
+    @media(max-width: 500px) {
+        .thumb { width: 35%; }
+        .desc { display: none; } /* 아주 작은 화면에선 설명 숨김 */
+        .title { -webkit-line-clamp: 3; margin-bottom: 0; }
+        .channel { margin-top: 8px; }
+    }
 </style>
 </head>
 
 <body>
 
 <header>
-  <div class="logo">YouTube</div>
-  <div class="search">
-    <input id="q" placeholder="검색">
-    <button onclick="search()">검색</button>
-  </div>
+    <div class="logo">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/b/b8/YouTube_Logo_2017.svg" alt="YouTube">
+    </div>
+
+    <div class="search">
+        <input id="q" placeholder="검색어를 입력하세요">
+        <button onclick="search()">검색</button>
+    </div>
 </header>
 
 <aside>
-  <div class="menu">홈</div>
-  <div class="menu">Shorts</div>
-  <div class="menu">구독</div>
+    <div class="menu active">홈</div>
+    <div class="menu">Shorts</div>
+    <div class="menu">보관함</div>
+    <div class="menu">설정</div>
 </aside>
 
 <main>
-  <div class="grid" id="results"></div>
+    <div id="empty-state">
+        <div class="empty-box">
+            <div class="empty-icon">🔍</div>
+            <div class="empty-text">시청할 영상을 검색해보세요</div>
+            <div class="empty-sub">상단 검색창에 키워드를 입력하면<br>여기에 결과가 표시됩니다.</div>
+        </div>
+    </div>
+
+    <div class="list-container" id="results"></div>
 </main>
 
-<!-- MODAL -->
 <div id="overlay">
-  <div class="modal">
-    <button class="close-btn" onclick="closePlayer()">닫기</button>
-    <iframe id="player" allowfullscreen></iframe>
-  </div>
+    <div class="modal">
+        <button class="close" onclick="closePlayer()">×</button>
+        <iframe id="player" allowfullscreen></iframe>
+    </div>
 </div>
 
 <script>
-const API_KEY = "AIzaSyDKgbPLHoPoSPAWSW3sGpqg_ZpnsK7Tz_c";
-const API = "https://www.googleapis.com/youtube/v3/search";
+    const API_KEY = "AIzaSyDKgbPLHoPoSPAWSW3sGpqg_ZpnsK7Tz_c"; 
+    const API = "https://www.googleapis.com/youtube/v3/search";
 
-async function search() {
-  const q = document.getElementById("q").value.trim();
-  if (!q) return;
+    async function search(){
+        const q = document.getElementById("q").value.trim();
+        if(!q) return;
 
-  const results = document.getElementById("results");
-  results.innerHTML = "";
+        const emptyState = document.getElementById("empty-state");
+        const resDiv = document.getElementById("results");
+        
+        // 검색 시작 시 UI 전환
+        emptyState.style.display = "none";
+        resDiv.style.display = "flex";
+        resDiv.style.opacity = "0.5"; // 로딩 효과
 
-  const url =
-    `${API}?part=snippet&type=video&maxResults=24&videoDuration=any&q=${encodeURIComponent(q)}&key=${API_KEY}`;
+        try {
+            const url = `${API}?part=snippet&type=video&maxResults=10&videoDuration=any&q=${encodeURIComponent(q)}&key=${API_KEY}`;
+            const res = await fetch(url);
+            const data = await res.json();
+            
+            if(data.error) throw new Error("API 오류");
 
-  const res = await fetch(url);
-  const data = await res.json();
-  if (data.error) return alert("검색 실패");
+            resDiv.innerHTML = "";
+            resDiv.style.opacity = "1";
 
-  data.items.forEach(v => {
-    const id = v.id.videoId;
-    const s = v.snippet;
+            if (data.items.length === 0) {
+                resDiv.innerHTML = "<div style='text-align:center; padding:40px;'>검색 결과가 없습니다.</div>";
+                return;
+            }
 
-    const card = document.createElement("div");
-    card.className = "card";
-    card.innerHTML = `
-      <div class="thumbnail">
-        <img src="${s.thumbnails.high.url}">
-      </div>
-      <div class="meta">
-        <div class="title">${s.title}</div>
-        <div class="channel">${s.channelTitle}</div>
-      </div>
-    `;
-    card.onclick = () => play(id);
+            data.items.forEach(v => {
+                const id = v.id.videoId;
+                const s = v.snippet;
+                
+                const card = document.createElement("div");
+                card.className = "card";
+                card.innerHTML = `
+                    <div class="thumb">
+                        <img src="${s.thumbnails.high.url}">
+                    </div>
+                    <div class="meta">
+                        <div class="title">${s.title}</div>
+                        <div class="desc">${s.description}</div>
+                        <div class="channel">${s.channelTitle}</div>
+                    </div>
+                `;
+                card.onclick = () => play(id);
+                resDiv.appendChild(card);
+            });
+        } catch (e) {
+            alert("검색에 실패했습니다. API 키를 확인해주세요.");
+            resDiv.style.opacity = "1";
+        }
+    }
 
-    results.appendChild(card);
-  });
-}
+    const overlay = document.getElementById("overlay");
+    const player = document.getElementById("player");
 
-function play(id) {
-  document.getElementById("overlay").style.display = "flex";
-  document.getElementById("player").src =
-    `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0`;
-}
+    function play(id){
+        overlay.style.display = "flex";
+        setTimeout(() => overlay.classList.add("show"), 10);
+        player.src = `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0&modestbranding=1`;
+    }
 
-function closePlayer() {
-  document.getElementById("overlay").style.display = "none";
-  document.getElementById("player").src = "";
-}
+    function closePlayer(){
+        overlay.classList.remove("show");
+        setTimeout(() => {
+            overlay.style.display = "none";
+            player.src = "";
+        }, 300);
+    }
 
-document.getElementById("q").addEventListener("keydown", e => {
-  if (e.key === "Enter") search();
-});
+    overlay.addEventListener("click", (e) => {
+        if(e.target === overlay) closePlayer();
+    });
+
+    document.getElementById("q").addEventListener("keydown", e => {
+        if(e.key === "Enter") search();
+    });
 </script>
 
 </body>
