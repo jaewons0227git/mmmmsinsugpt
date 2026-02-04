@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
 <style>
     :root {
@@ -41,8 +42,7 @@
     .chat-container {
         flex: 1;
         width: 100%;
-        /* [수정됨] 입력창 너비(600px)와 라인을 맞추기 위해 max-width 수정 */
-        max-width: 600px;
+        max-width: 600px; /* PC 버전 너비 맞춤 */
         margin: 0 auto;
         padding: 20px;
         padding-bottom: 160px;
@@ -92,7 +92,6 @@
             -webkit-mask-position: 0% 0;
             mask-position: 0% 0;
             opacity: 1;
-            /* 애니메이션 종료 시점에 마스크를 제거하여 비네팅을 없앰 */
             -webkit-mask-image: none;
             mask-image: none;
         }
@@ -121,10 +120,43 @@
         animation: softWipeReveal 1.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
     }
 
-    /* [수정됨] 분석 중 텍스트 애니메이션 (방향 반전: 오른쪽 -> 왼쪽) */
+    /* 마크다운 스타일 적용 */
+    .bot-text p { margin: 0 0 10px 0; }
+    .bot-text p:last-child { margin-bottom: 0; }
+    .bot-text code {
+        background-color: #f3f4f6;
+        padding: 2px 4px;
+        border-radius: 4px;
+        font-family: monospace;
+        font-size: 0.9em;
+    }
+    .bot-text pre {
+        background-color: #1f2937;
+        color: #f3f4f6;
+        padding: 12px;
+        border-radius: 8px;
+        overflow-x: auto;
+        font-family: monospace;
+        margin: 10px 0;
+    }
+    .bot-text pre code {
+        background-color: transparent;
+        padding: 0;
+        color: inherit;
+        font-size: 0.9em;
+    }
+    .bot-text ul, .bot-text ol { margin: 10px 0; padding-left: 24px; }
+    .bot-text blockquote {
+        border-left: 4px solid #e5e7eb;
+        margin: 10px 0;
+        padding-left: 12px;
+        color: #6b7280;
+    }
+
+    /* 분석 중 텍스트 애니메이션 */
     @keyframes textShimmer {
-        0% { background-position: 200% 0; }   /* 시작: 오른쪽 */
-        100% { background-position: -200% 0; } /* 끝: 왼쪽 */
+        0% { background-position: 200% 0; }
+        100% { background-position: -200% 0; }
     }
 
     .analyzing-text {
@@ -132,9 +164,7 @@
         font-weight: 500;
         padding: 8px 0;
         cursor: default; 
-        
-        color: #1F2937; /* Fallback */
-
+        color: #1F2937;
         background: linear-gradient(
             110deg,
             #1F2937 40%,
@@ -142,16 +172,12 @@
             #1F2937 60%
         );
         background-size: 200% 100%;
-        
         background-clip: text;
         -webkit-background-clip: text;
-        
         -webkit-text-fill-color: transparent; 
-
         animation: textShimmer 2s linear infinite;
     }
 
-    /* 호버 시 그라데이션 정지 및 검은색 고정 */
     .analyzing-text:hover {
         animation: none;
         background: none;
@@ -359,6 +385,12 @@
         const attachMenu = document.getElementById('attachMenu');
         const searchBtn = document.getElementById('searchBtn');
 
+        // marked 옵션 설정 (줄바꿈 처리 등)
+        marked.setOptions({
+            breaks: true,
+            sanitize: false
+        });
+
         function adjustHeight() {
             chatInput.style.height = 'auto'; 
             let scrollHeight = chatInput.scrollHeight;
@@ -387,8 +419,8 @@
             const isSearchMode = searchBtn.classList.contains('active');
             const loadingId = 'loading-' + Date.now();
 
-            // 2. 대기 메시지 표시 (조건부 텍스트)
-            addLoadingMessage(loadingId, isSearchMode);
+            // 2. 대기 메시지 표시 (타이머 저장)
+            const timers = addLoadingMessage(loadingId, isSearchMode);
 
             // 3. 백엔드 통신
             const baseUrl = "https://jaewondev.pythonanywhere.com";
@@ -400,33 +432,57 @@
                     headers: {
                         "Content-Type": "application/json"
                     },
-                    body: JSON.stringify({ content: text })
+                    body: JSON.stringify({ message: text }) // 백엔드 스펙에 맞게 'content' -> 'message'로 변경
                 });
 
                 if (!response.ok) {
                     throw new Error("Server error");
                 }
 
-                const data = await response.json();
-                const botReply = data.answer || data.reply || data.message || "응답을 처리하는 중 오류가 발생했습니다.";
-
-                // 로딩 메시지 제거 및 답변 출력
+                // 로딩 메시지 제거 및 타이머 정리
                 const loadingElem = document.getElementById(loadingId);
                 if (loadingElem) loadingElem.remove();
+                if (timers) timers.forEach(t => clearTimeout(t));
 
-                addMessage(botReply, 'bot');
+                // 봇 메시지 컨테이너 생성
+                const botRow = document.createElement('div');
+                botRow.classList.add('message-row', 'bot');
+                const botContent = document.createElement('div');
+                botContent.classList.add('bot-text');
+                botRow.appendChild(botContent);
+                chatContainer.appendChild(botRow);
+
+                // 스트림 리더 생성
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                let accumulatedText = "";
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+
+                    const chunk = decoder.decode(value, { stream: true });
+                    accumulatedText += chunk;
+
+                    // [DONE] 태그 제거
+                    const cleanText = accumulatedText.replace(/\[DONE\]/g, "");
+                    
+                    // 마크다운 렌더링 후 표시
+                    botContent.innerHTML = marked.parse(cleanText);
+                    scrollToBottom();
+                }
 
             } catch (error) {
                 console.error("Fetch error:", error);
                 
                 const loadingElem = document.getElementById(loadingId);
                 if (loadingElem) loadingElem.remove();
+                if (timers) timers.forEach(t => clearTimeout(t));
 
                 addMessage("죄송합니다. 서버와 통신 중 오류가 발생했습니다.", 'bot');
             }
         }
 
-        // 로딩 메시지 전용 함수 (검색모드 시나리오 포함)
         function addLoadingMessage(id, isSearchMode) {
             const rowDiv = document.createElement('div');
             rowDiv.classList.add('message-row', 'bot');
@@ -434,25 +490,29 @@
 
             const contentDiv = document.createElement('div');
             contentDiv.classList.add('analyzing-text'); 
+            
+            let timers = [];
 
             if (isSearchMode) {
                 contentDiv.innerText = "검색을 진행하는 중...";
                 
-                // 3초 후 텍스트 변경
-                setTimeout(() => {
+                // 3초 후
+                const t1 = setTimeout(() => {
                     const elem = document.getElementById(id);
                     if (elem) {
                         elem.querySelector('.analyzing-text').innerText = "검색은 시간이 소요될 수 있습니다.";
                     }
                 }, 3000);
 
-                // 다시 3초 후(총 6초 후) 텍스트 변경
-                setTimeout(() => {
+                // 다시 3초 후(총 6초 후)
+                const t2 = setTimeout(() => {
                     const elem = document.getElementById(id);
                     if (elem) {
                         elem.querySelector('.analyzing-text').innerText = "질문을 분석하는중...";
                     }
                 }, 6000);
+                
+                timers.push(t1, t2);
 
             } else {
                 contentDiv.innerText = "질문을 분석하는중...";
@@ -461,6 +521,8 @@
             rowDiv.appendChild(contentDiv);
             chatContainer.appendChild(rowDiv);
             scrollToBottom();
+
+            return timers; // 타이머 배열 반환하여 응답 시작 시 클리어 가능하게 함
         }
 
         function addMessage(text, sender) {
@@ -472,10 +534,12 @@
             
             if (sender === 'user') {
                 contentDiv.classList.add('user-bubble');
+                // 사용자 메시지는 단순 텍스트 줄바꿈만 처리
                 contentDiv.innerHTML = text.replace(/\n/g, '<br>');
             } else {
                 contentDiv.classList.add('bot-text'); 
-                contentDiv.innerHTML = text.replace(/\n/g, '<br>');
+                // 초기 봇 메시지(에러 등)는 여기서 처리, 스트리밍은 위에서 직접 처리
+                contentDiv.innerHTML = marked.parse(text);
             }
 
             rowDiv.appendChild(contentDiv);
@@ -483,9 +547,7 @@
             scrollToBottom();
         }
 
-        // [추가됨] 스크롤 처리를 위한 함수 (살짝 여백 확보)
         function scrollToBottom() {
-            // 레이아웃 반영을 위해 약간의 지연 후 스크롤
             requestAnimationFrame(() => {
                 chatContainer.scrollTop = chatContainer.scrollHeight;
             });
