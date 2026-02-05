@@ -127,13 +127,13 @@
         max-width: 768px; 
         margin: 0 auto;
         padding: 20px;
-        padding-top: calc(var(--header-height) + 40px);
-        /* 하단 여백 충분히 확보하여 스크롤 포커싱 용이하게 함 */
-        padding-bottom: 400px; 
+        padding-top: calc(var(--header-height) + 20px);
+        /* 하단 여백: 입력창 높이 + 약간의 여유만 남김 (너무 넓지 않게) */
+        padding-bottom: 160px; 
         box-sizing: border-box;
         display: flex;
         flex-direction: column;
-        gap: 40px; 
+        gap: 30px; 
     }
 
     .message-row { display: flex; width: 100%; }
@@ -151,7 +151,7 @@
         line-height: 1.6;
     }
 
-    /* 봇 메시지 기본 스타일 */
+    /* 봇 메시지 컨테이너 */
     .bot-text {
         color: #1F2937;
         padding: 8px 0;
@@ -163,50 +163,52 @@
         will-change: contents;
     }
 
-    /* 핵심 애니메이션: 20글자 청크 단위용 */
-    /* 초기 상태: 투명하고, 마스크가 텍스트를 가린 상태 */
-    .text-chunk {
+    /* ==========================================
+       [핵심] 부드러운 텍스트 등장 애니메이션 
+       ==========================================
+    */
+    .reveal-chunk {
         display: inline;
-        opacity: 0;
-        /* 마스크 그라데이션: 처음에는 투명한 부분이 글자를 덮음 */
-        -webkit-mask-image: linear-gradient(90deg, transparent 0%, transparent 100%); 
-        mask-image: linear-gradient(90deg, transparent 0%, transparent 100%);
+        opacity: 0; /* 시작: 안보임 */
+        filter: blur(2px); /* 약간 흐릿하게 시작 */
+        
+        /* 마스크 설정: 왼쪽(보임) -> 오른쪽(투명) 그라데이션 */
+        -webkit-mask-image: linear-gradient(90deg, black 50%, transparent 90%);
+        mask-image: linear-gradient(90deg, black 50%, transparent 90%);
         -webkit-mask-size: 200% 100%;
         mask-size: 200% 100%;
-        -webkit-mask-position: 100% 0;
+        -webkit-mask-position: 100% 0; /* 마스크가 텍스트를 가린 상태 */
         mask-position: 100% 0;
-        
-        animation: wipeReveal 0.8s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+
+        /* 애니메이션 실행 */
+        animation: textWipe 0.6s cubic-bezier(0.25, 1, 0.5, 1) forwards;
     }
 
-    /* 닦아내기 애니메이션 키프레임 */
-    @keyframes wipeReveal {
+    @keyframes textWipe {
         0% {
             opacity: 0;
-            /* 마스크: 왼쪽(검정=보임)이 아직 안 들어옴 */
-            -webkit-mask-image: linear-gradient(90deg, black 0%, transparent 0%);
-            mask-image: linear-gradient(90deg, black 0%, transparent 0%);
-        }
-        50% {
-            opacity: 1; 
+            filter: blur(2px);
+            -webkit-mask-position: 100% 0; /* 가려짐 */
+            mask-position: 100% 0;
         }
         100% {
             opacity: 1;
-            /* 마스크: 전체가 검정(다 보임) + 끝부분 살짝 페이드(비네팅 느낌) */
-            -webkit-mask-image: linear-gradient(90deg, black 0%, black 85%, transparent 100%);
-            mask-image: linear-gradient(90deg, black 0%, black 85%, transparent 100%);
+            filter: blur(0px);
+            -webkit-mask-position: 0% 0; /* 다 보여줌 */
+            mask-position: 0% 0;
         }
     }
 
-    /* 애니메이션 종료 후 적용할 클래스 (비네팅 완전 제거) */
-    .text-chunk.revealed {
+    /* 애니메이션 종료 후 적용될 클래스: 비네팅(마스크) 완전 제거 */
+    .reveal-chunk.done {
         opacity: 1;
+        filter: none;
         -webkit-mask-image: none !important;
         mask-image: none !important;
         animation: none !important;
     }
 
-    /* 마크다운 스타일 (최종 렌더링 시 적용) */
+    /* 최종 렌더링된 마크다운 스타일 */
     .bot-text p { margin: 0 0 16px 0; } 
     .bot-text p:last-child { margin-bottom: 0; }
     .bot-text code {
@@ -239,6 +241,7 @@
         color: #6b7280;
     }
 
+
     /* 분석 중 텍스트 */
     @keyframes textShimmer {
         0% { background-position: 200% 0; }
@@ -257,14 +260,8 @@
         -webkit-text-fill-color: transparent; 
         animation: textShimmer 3s linear infinite; 
     }
-    .analyzing-text:hover {
-        animation: none;
-        background: none;
-        -webkit-text-fill-color: #1F2937; 
-        color: #1F2937;
-    }
 
-    /* 하단 고정 영역 (비네팅 + 입력창) */
+    /* 하단 고정 영역 (비네팅 최소화 + 입력창) */
     .bottom-fixed-wrapper {
         position: fixed;
         bottom: 0;
@@ -274,9 +271,8 @@
         flex-direction: column;
         align-items: center;
         padding-bottom: 24px;
-        /* 비네팅 영역 줄임: 높이를 줄이고 그라데이션을 더 짧게 처리 */
-        padding-top: 10px; 
-        background: linear-gradient(to top, #ffffff 70%, rgba(255,255,255,0)); 
+        padding-top: 10px; /* 여백 줄임 */
+        background: linear-gradient(to top, #ffffff 80%, rgba(255,255,255,0)); 
         z-index: 900;
         pointer-events: none; 
     }
@@ -424,8 +420,7 @@
         </div>
     </header>
 
-    <div id="chatContainer" class="chat-container">
-        </div>
+    <div id="chatContainer" class="chat-container"></div>
 
     <div class="bottom-fixed-wrapper">
         <div class="chat-input-container">
@@ -455,9 +450,9 @@
         const searchBtn = document.getElementById('searchBtn');
 
         let conversationHistory = [];
-
         marked.setOptions({ breaks: true, sanitize: false });
 
+        // 입력창 높이 조절
         function adjustHeight() {
             chatInput.style.height = 'auto'; 
             let scrollHeight = chatInput.scrollHeight;
@@ -471,11 +466,24 @@
             sendBtn.disabled = chatInput.value.trim().length === 0;
         }
 
+        // 스크롤 포커싱: element가 상단바(56px) 바로 아래에 오도록 이동
+        function scrollToTopFocus(element) {
+            if (!element) return;
+            const headerHeight = 56;
+            const gap = 20; // 상단바와의 간격
+            const elementTop = element.getBoundingClientRect().top + window.scrollY;
+            
+            window.scrollTo({
+                top: elementTop - headerHeight - gap,
+                behavior: 'smooth'
+            });
+        }
+
         async function sendMessage() {
             const text = chatInput.value.trim();
             if (text.length === 0) return;
 
-            // 1. 사용자 메시지 추가 및 히스토리 저장
+            // 1. 사용자 메시지 등록
             const userMsgElement = addMessage(text, 'user');
             conversationHistory.push({ role: "user", content: text });
 
@@ -483,7 +491,7 @@
             adjustHeight();
             sendBtn.disabled = true;
 
-            // 2. 메시지 전송 직후 스크롤 포커싱 (내 메시지가 상단바 아래로 오게)
+            // 2. 중요: 사용자 메시지로 스크롤 이동
             scrollToTopFocus(userMsgElement);
 
             const isSearchMode = searchBtn.classList.contains('active');
@@ -515,79 +523,93 @@
                 const reader = response.body.getReader();
                 const decoder = new TextDecoder();
                 
-                let accumulatedFullText = ""; // 마크다운 파싱을 위한 전체 텍스트
-                let chunkBuffer = "";         // 20글자 단위 렌더링을 위한 버퍼
-                const CHUNK_SIZE = 20;        // 요청하신 20글자 단위
+                let fullText = "";       // 최종 마크다운용 전체 텍스트
+                let buffer = "";         // 화면 출력용 버퍼
+                let isStreaming = true;
+                const CHUNK_SIZE = 15;   // 15~20글자 단위 (부드러움과 덩어리감의 균형)
 
-                while (true) {
-                    const { done, value } = await reader.read();
-                    if (done) break;
-
-                    const chunk = decoder.decode(value, { stream: true });
-                    const cleanChunk = chunk.replace(/\[DONE\]/g, "");
-                    
-                    accumulatedFullText += cleanChunk;
-                    chunkBuffer += cleanChunk;
-
-                    // 버퍼가 20글자 이상 차면 잘라서 렌더링
-                    while (chunkBuffer.length >= CHUNK_SIZE) {
-                        const slice = chunkBuffer.slice(0, CHUNK_SIZE);
-                        chunkBuffer = chunkBuffer.slice(CHUNK_SIZE);
-                        renderChunk(botContent, slice);
+                // 스트리밍 데이터 수신 루프 (백그라운드)
+                (async () => {
+                    while (true) {
+                        const { done, value } = await reader.read();
+                        if (done) {
+                            isStreaming = false;
+                            break;
+                        }
+                        const chunk = decoder.decode(value, { stream: true });
+                        const cleanChunk = chunk.replace(/\[DONE\]/g, "");
+                        fullText += cleanChunk;
+                        buffer += cleanChunk; // 버퍼에 쌓음
                     }
-                    
-                    // 화면 넘어가면 자동 스크롤 (단, 사용자가 보는 위치 유지 위해 조건부)
-                    // 여기서는 봇이 말할때 계속 따라가게 처리
-                    if(document.body.scrollHeight - window.scrollY - window.innerHeight < 200) {
-                         window.scrollTo({ top: document.body.scrollHeight, behavior: 'auto' });
+                })();
+
+                // 화면 렌더링 루프 (UI 업데이트)
+                const renderLoop = setInterval(() => {
+                    // 버퍼에 렌더링할 데이터가 충분하거나, 스트림이 끝났고 남은 데이터가 있을 때
+                    if (buffer.length >= CHUNK_SIZE || (!isStreaming && buffer.length > 0)) {
+                        // CHUNK_SIZE 만큼 잘라냄
+                        const sliceSize = Math.min(buffer.length, CHUNK_SIZE);
+                        const slice = buffer.slice(0, sliceSize);
+                        buffer = buffer.slice(sliceSize); // 버퍼 비우기
+
+                        // 애니메이션 청크 생성 및 추가
+                        createAnimatedChunk(botContent, slice);
+
+                        // 봇 메시지가 화면 밖으로 나가면 자동 스크롤 (읽기 편하게)
+                        const rect = botContent.getBoundingClientRect();
+                        if (rect.bottom > window.innerHeight) {
+                            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+                        }
                     }
-                }
 
-                // 남은 버퍼 처리
-                if (chunkBuffer.length > 0) {
-                    renderChunk(botContent, chunkBuffer);
-                }
-
-                // *** 중요 ***
-                // 스트리밍이 끝나면 애니메이션용 span들을 모두 제거하고
-                // 깨끗한 마크다운 HTML로 교체 (코드블럭 등 서식 적용)
-                botContent.innerHTML = marked.parse(accumulatedFullText);
-                
-                conversationHistory.push({ role: "assistant", content: accumulatedFullText });
+                    // 종료 조건: 스트림도 끝났고 버퍼도 비었을 때
+                    if (!isStreaming && buffer.length === 0) {
+                        clearInterval(renderLoop);
+                        // [중요] 애니메이션이 다 끝난 후, 깔끔한 마크다운으로 교체
+                        // 즉시 바꾸면 애니메이션이 끊기므로 약간의 딜레이(1초) 후 교체하거나
+                        // 여기서는 애니메이션 효과를 위해 텍스트 유지를 원할 수 있으나
+                        // 코드 블럭 등을 위해 최종 변환은 필수입니다.
+                        setTimeout(() => {
+                            botContent.innerHTML = marked.parse(fullText);
+                        }, 1000); // 마지막 청크 애니메이션 시간 고려
+                        
+                        conversationHistory.push({ role: "assistant", content: fullText });
+                    }
+                }, 100); // 0.1초마다 체크하여 부드럽게 출력
 
             } catch (error) {
                 console.error(error);
                 const loadingElem = document.getElementById(loadingId);
                 if (loadingElem) loadingElem.remove();
-                addMessage("오류가 발생했습니다.", 'bot');
+                if (timers) timers.forEach(t => clearTimeout(t));
+                // 에러 메시지도 부드럽게 출력
+                simulateBotError("죄송합니다. 오류가 발생했습니다.");
             }
         }
 
-        // 20글자 청크를 생성하고 애니메이션을 적용하는 함수
-        function renderChunk(container, text) {
+        // 애니메이션 적용된 텍스트 조각 생성
+        function createAnimatedChunk(container, text) {
             const span = document.createElement('span');
-            span.className = 'text-chunk';
-            span.innerText = text; // HTML 태그 방지용 innerText 사용
-
-            // 애니메이션이 끝나면 클래스를 변경하여 마스크/비네팅 제거
+            span.className = 'reveal-chunk';
+            span.innerText = text; 
+            
+            // 애니메이션 끝나면 흐림 효과/마스크 제거
             span.addEventListener('animationend', () => {
-                span.classList.add('revealed');
+                span.classList.add('done');
             });
 
             container.appendChild(span);
         }
 
-        // 요소가 탑바 바로 아래에 오도록 스크롤 (강제성 부여)
-        function scrollToTopFocus(element) {
-            if (!element) return;
-            const offset = 76; // headerHeight(56) + 여유(20)
-            const elementPosition = element.getBoundingClientRect().top + window.scrollY;
-            const offsetPosition = elementPosition - offset;
-            
-            window.scrollTo({
-                top: offsetPosition,
-                behavior: 'smooth'
-            });
+        // 에러 메시지 애니메이션 출력 함수
+        function simulateBotError(msg) {
+            const botRow = document.createElement('div');
+            botRow.classList.add('message-row', 'bot');
+            const botContent = document.createElement('div');
+            botContent.classList.add('bot-text');
+            botRow.appendChild(botContent);
+            chatContainer.appendChild(botRow);
+            createAnimatedChunk(botContent, msg);
         }
 
         function addLoadingMessage(id, isSearchMode) {
