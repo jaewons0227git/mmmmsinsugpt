@@ -22,6 +22,8 @@
         --user-bubble-text: #1F2937;
         
         --header-height: 56px; 
+        --sidebar-width: 260px;
+        --content-max-width: 768px; /* 콘텐츠 최대 너비 변수화 */
     }
 
     html {
@@ -47,99 +49,147 @@
         display: block;
     }
 
+    /* --- 사이드바 (Sidebar) --- */
+    .sidebar-overlay {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background-color: rgba(0,0,0,0.5); z-index: 1900;
+        opacity: 0; visibility: hidden; transition: opacity 0.3s;
+    }
+    @media (max-width: 768px) {
+        .sidebar-overlay.open { opacity: 1; visibility: visible; }
+    }
+
+    .sidebar {
+        position: fixed; top: 0; left: 0; height: 100%; width: var(--sidebar-width);
+        background-color: #f9f9f9; z-index: 2000;
+        transform: translateX(-100%); 
+        transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+        display: flex; flex-direction: column;
+        border-right: 1px solid #E5E7EB;
+    }
+    
+    .sidebar.open { transform: translateX(0); }
+
+    .sidebar-header { padding: 16px; display: flex; align-items: center; justify-content: space-between; }
+    .sidebar-logo { display: flex; align-items: center; gap: 8px; font-weight: 600; color: #1F2937; font-size: 16px; }
+    .sidebar-logo img { width: 28px; height: 28px; object-fit: contain; }
+
+    .sidebar-close-btn { cursor: pointer; color: #6B7280; padding: 4px; border-radius: 4px; }
+    .sidebar-close-btn:hover { background-color: #E5E7EB; }
+
+    .sidebar-content { flex: 1; padding: 12px; overflow-y: auto; }
+    
+    .sidebar-menu-btn {
+        display: flex; align-items: center; gap: 12px; width: 100%;
+        padding: 10px 12px; border: none; background: transparent;
+        color: #1F2937; font-size: 14px; font-weight: 500;
+        border-radius: 8px; cursor: pointer; text-align: left;
+        margin-bottom: 2px;
+    }
+    .sidebar-menu-btn:hover { background-color: #E5E7EB; }
+    .sidebar-menu-btn .material-symbols-rounded { font-size: 20px; color: #374151; }
+
+    .sidebar-section-title {
+        font-size: 12px; color: #9CA3AF; font-weight: 600;
+        margin-top: 24px; margin-bottom: 8px; padding-left: 12px;
+    }
+
+    .sidebar-footer {
+        padding: 16px; border-top: 1px solid #E5E7EB;
+        display: flex; align-items: center; gap: 12px;
+        cursor: pointer; transition: background 0.2s;
+    }
+    .sidebar-footer:hover { background-color: #E5E7EB; }
+    
+    .user-avatar img {
+        width: 36px; height: 36px; border-radius: 50%; object-fit: cover;
+        border: 1px solid #E5E7EB;
+    }
+    
+    .user-info { display: flex; flex-direction: column; }
+    .user-name { font-size: 14px; font-weight: 600; color: #1F2937; }
+    .user-plan { font-size: 12px; color: #6B7280; }
+
+
+    /* --- 상단바 (Header) --- */
     .top-bar {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: var(--header-height);
+        position: fixed; top: 0; left: 0; width: 100%; height: var(--header-height);
         background-color: rgba(255, 255, 255, 0.95);
         backdrop-filter: blur(10px);
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 0 16px;
-        box-sizing: border-box;
-        z-index: 1000;
-        font-size: 1.1rem;
-        color: #1F2937;
+        display: flex; justify-content: space-between; align-items: center;
+        padding: 0 16px; box-sizing: border-box;
+        z-index: 1000; font-size: 1.1rem; color: #1F2937;
+        transition: left 0.3s cubic-bezier(0.25, 1, 0.5, 1), width 0.3s cubic-bezier(0.25, 1, 0.5, 1);
     }
 
     .top-left {
-        display: flex;
-        align-items: center;
-        gap: 4px;
-        font-weight: 600;
-        cursor: pointer;
-        padding: 6px 10px;
-        border-radius: 8px;
+        display: flex; align-items: center; gap: 8px;
+        font-weight: 600; cursor: pointer;
+        padding: 6px 4px; border-radius: 8px;
         transition: background-color 0.2s;
         color: #40414F;
     }
     .top-left:hover { background-color: #F3F4F6; }
-    .top-left .material-symbols-rounded { font-size: 20px; color: #6B7280; }
+    .top-left .material-symbols-rounded { font-size: 24px; color: #6B7280; }
+    
+    .pc-sidebar-open-btn { display: none; cursor: pointer; color: #6B7280; margin-right: 8px; }
+    .pc-sidebar-open-btn:hover { color: #1F2937; }
 
     .top-right { display: flex; align-items: center; gap: 8px; }
 
     .offer-pill {
-        background-color: #EFEEFC;
-        color: #7C3AED;
-        font-size: 13px;
-        font-weight: 500;
-        padding: 6px 12px;
-        border-radius: 999px;
-        display: flex;
-        align-items: center;
-        gap: 4px;
-        cursor: pointer;
-        transition: opacity 0.2s;
+        background-color: #EFEEFC; color: #7C3AED;
+        font-size: 13px; font-weight: 500;
+        padding: 6px 12px; border-radius: 999px;
+        display: flex; align-items: center; gap: 4px;
+        cursor: pointer; transition: opacity 0.2s;
+        white-space: nowrap; 
     }
     .offer-pill:hover { opacity: 0.8; }
     .offer-close { font-size: 16px; margin-left: 4px; color: #7C3AED; cursor: pointer; }
 
     .share-btn {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        padding: 8px 12px;
+        display: flex; align-items: center; gap: 6px;
+        padding: 8px 14px;
         border: 1px solid #E5E7EB;
-        border-radius: 8px;
+        border-radius: 999px;
         background: transparent;
         cursor: pointer;
-        font-size: 14px;
-        color: #374151;
+        font-size: 14px; color: #374151;
         transition: background-color 0.2s;
+        white-space: nowrap; 
     }
     .share-btn:hover { background-color: #F9FAFB; }
     .share-btn .material-symbols-rounded { font-size: 18px; }
 
     .dots-btn {
-        padding: 8px;
-        background: transparent;
-        border: none;
-        cursor: pointer;
-        color: #374151;
-        border-radius: 8px;
+        padding: 8px; background: transparent; border: none;
+        cursor: pointer; color: #374151; border-radius: 8px;
     }
     .dots-btn:hover { background-color: #F3F4F6; }
 
+    /* [모바일 전용 조정] 버튼 텍스트 잘림 방지 */
+    @media (max-width: 768px) {
+        .offer-pill {
+            font-size: 12px; padding: 4px 10px; /* 크기 축소 */
+        }
+        .share-btn {
+            font-size: 12px; padding: 6px 10px; /* 크기 축소 */
+        }
+        .top-right { gap: 4px; } /* 간격 축소 */
+        .top-bar { padding: 0 10px; } /* 상단바 패딩 축소 */
+    }
+
+    /* --- 채팅 영역 --- */
     .chat-container {
-        width: 100%;
-        max-width: 768px; 
-        margin: 0 auto;
-        
+        width: 100%; max-width: var(--content-max-width); margin: 0 auto;
         padding-top: calc(var(--header-height) + 20px);
-        padding-left: 20px;
-        padding-right: 20px;
+        padding-left: 20px; padding-right: 20px;
         padding-bottom: 160px; /* 기본값 */
-        
         box-sizing: border-box;
-        display: flex;
-        flex-direction: column;
-        gap: 30px; 
+        display: flex; flex-direction: column; gap: 30px; 
         
-        /* [핵심] 패딩 변화를 부드럽게 만들어주는 트랜지션 추가 */
-        transition: padding-bottom 0.2s ease-out;
+        transition: padding-bottom 0.2s ease-out, margin-left 0.3s cubic-bezier(0.25, 1, 0.5, 1), width 0.3s cubic-bezier(0.25, 1, 0.5, 1);
     }
 
     .message-row { display: flex; width: 100%; }
@@ -160,15 +210,11 @@
     .bot-text {
         color: #1F2937;
         padding: 8px 0;
-        width: 100%; 
-        max-width: 100%;
-        font-size: 16px;
-        line-height: 1.7; 
-        word-break: break-word;
-        will-change: contents;
+        width: 100%; max-width: 100%;
+        font-size: 16px; line-height: 1.7; 
+        word-break: break-word; will-change: contents;
     }
 
-    /* 텍스트 등장 애니메이션 (살짝 더 빠르게 조정) */
     .bot-text.animate-in {
         animation: textWipe 0.5s cubic-bezier(0.25, 1, 0.5, 1) forwards;
     }
@@ -208,16 +254,18 @@
     }
     .analyzing-text:hover { background: none; -webkit-text-fill-color: #000000; color: #000000; animation: none; }
 
+    /* --- 하단 입력창 및 래퍼 --- */
     .bottom-fixed-wrapper {
         position: fixed; bottom: 0; left: 0; width: 100%;
         display: flex; flex-direction: column; align-items: center;
         padding-bottom: 24px; padding-top: 10px;
         background: linear-gradient(to top, #ffffff 80%, rgba(255,255,255,0)); 
-        z-index: 900; pointer-events: none; 
+        z-index: 900; pointer-events: none;
+        transition: left 0.3s cubic-bezier(0.25, 1, 0.5, 1), width 0.3s cubic-bezier(0.25, 1, 0.5, 1);
     }
 
     .chat-input-container {
-        pointer-events: auto; width: 768px; max-width: 90%;
+        pointer-events: auto; width: var(--content-max-width); max-width: 90%;
         background-color: #F4F4F5; border-radius: var(--radius-input);
         padding: 14px 18px; box-sizing: border-box;
         display: flex; flex-direction: column; position: relative; 
@@ -272,13 +320,100 @@
     }
     .menu-item:hover { background-color: #F3F4F6; }
     .menu-item .material-symbols-rounded { font-size: 20px; color: #4B5563; }
+
+    /* ==========================================================================
+       [PC 레이아웃 (769px 이상)]
+       - 사이드바 기본 열림
+       - 햄버거 메뉴 숨김
+       - 닫으면 채팅창 확장, 열면 밀림 (중앙 정렬 유지)
+       ========================================================================== */
+    @media (min-width: 769px) {
+        .sidebar { box-shadow: none; border-right: 1px solid #E5E7EB; }
+        .mobile-menu-icon { display: none !important; }
+
+        /* [열림] */
+        body.pc-sidebar-open .sidebar { transform: translateX(0); }
+        body.pc-sidebar-open .top-bar { left: var(--sidebar-width); width: calc(100% - var(--sidebar-width)); }
+        body.pc-sidebar-open .bottom-fixed-wrapper { left: var(--sidebar-width); width: calc(100% - var(--sidebar-width)); }
+        
+        /* [중요] 남은 공간의 중앙에 위치하도록 계산식 사용 */
+        body.pc-sidebar-open .chat-container { 
+            /* 왼쪽 여백 = 사이드바 너비(260px) + (남은공간 - 컨텐츠너비)/2
+               = 260px + (100% - 260px - 768px)/2 
+            */
+            margin-left: calc(var(--sidebar-width) + (100% - var(--sidebar-width) - var(--content-max-width)) / 2);
+            /* 화면이 좁아져서 계산 결과가 사이드바보다 작아지면 안됨 -> min-width 확보 필요하지만 calc가 처리 */
+            width: var(--content-max-width);
+            max-width: none; /* 중앙 정렬을 위해 max-width 해제하고 고정 너비 사용 */
+        }
+        
+        /* 화면이 너무 좁아서 (768 + 260 = 1028px 미만) 여백이 없을 때의 처리 */
+        @media (max-width: 1048px) {
+            body.pc-sidebar-open .chat-container {
+                margin-left: var(--sidebar-width);
+                width: calc(100% - var(--sidebar-width));
+                max-width: none;
+                padding-left: 20px; padding-right: 20px;
+            }
+        }
+
+        /* [닫힘] */
+        body:not(.pc-sidebar-open) .sidebar { transform: translateX(-100%); }
+        body:not(.pc-sidebar-open) .top-bar { left: 0; width: 100%; }
+        body:not(.pc-sidebar-open) .bottom-fixed-wrapper { left: 0; width: 100%; }
+        body:not(.pc-sidebar-open) .chat-container { margin-left: auto; margin-right: auto; max-width: var(--content-max-width); width: 100%; }
+        
+        body:not(.pc-sidebar-open) .pc-sidebar-open-btn { display: inline-block; }
+    }
 </style>
 </head>
-<body>
+<body class="pc-sidebar-open"> 
+
+    <div id="sidebarOverlay" class="sidebar-overlay"></div>
+
+    <aside id="sidebar" class="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">
+                <img src="https://i.postimg.cc/LJV3sj3F/logop.png" alt="Logo">
+                MinsuGPT
+            </div>
+            <div id="sidebarCloseBtn" class="sidebar-close-btn" title="사이드바 닫기">
+                <span class="material-symbols-rounded">dock_to_left</span>
+            </div>
+        </div>
+        
+        <div class="sidebar-content">
+            <button class="sidebar-menu-btn">
+                <span class="material-symbols-rounded">edit_square</span> 새 채팅
+            </button>
+            <button class="sidebar-menu-btn">
+                <span class="material-symbols-rounded">search</span> 채팅 검색
+            </button>
+            <button class="sidebar-menu-btn">
+                <span class="material-symbols-rounded">image</span> 이미지
+            </button>
+            
+            <div class="sidebar-section-title">내 채팅</div>
+        </div>
+
+        <div class="sidebar-footer">
+            <div class="user-avatar">
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS7iy-t1yxu4sxSnbqwbSb_8LBpN1ocQKzk8w&s" alt="User">
+            </div>
+            <div class="user-info">
+                <span class="user-name">게스트</span>
+                <span class="user-plan">Free</span>
+            </div>
+        </div>
+    </aside>
+
 
     <header class="top-bar">
-        <div class="top-left">
-            ChatGPT <span class="material-symbols-rounded">expand_more</span>
+        <div class="top-left" id="headerTitleArea">
+            <span id="pcSidebarOpenBtn" class="material-symbols-rounded pc-sidebar-open-btn" title="사이드바 열기">dock_to_right</span>
+            <span id="mobileMenuBtn" class="material-symbols-rounded mobile-menu-icon" style="margin-right: 8px;">menu</span>
+            ChatGPT 
+            <span class="material-symbols-rounded" style="font-size:20px; color:#9CA3AF;">expand_more</span>
         </div>
         <div class="top-right">
             <div class="offer-pill">
@@ -313,8 +448,7 @@
     </div>
 
     <script>
-        // [수정됨] 패딩 보정값 (180으로 변경)
-        const PADDING_SUBTRACTION = 150; 
+        const PADDING_SUBTRACTION = 180; 
 
         const chatContainer = document.getElementById('chatContainer');
         const chatInput = document.getElementById('chatInput');
@@ -322,6 +456,12 @@
         const attachBtn = document.getElementById('attachBtn');
         const attachMenu = document.getElementById('attachMenu');
         const searchBtn = document.getElementById('searchBtn');
+
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const sidebarCloseBtn = document.getElementById('sidebarCloseBtn');
+        const pcSidebarOpenBtn = document.getElementById('pcSidebarOpenBtn');
 
         let conversationHistory = [];
         let abortController = null;
@@ -343,29 +483,49 @@
             if (!isGenerating) sendBtn.disabled = chatInput.value.trim().length === 0;
         }
 
-        // [핵심 로직] 메시지 전송 시 무조건 화면 높이만큼 패딩 확보
+        function toggleSidebar() {
+            if (window.innerWidth > 768) {
+                document.body.classList.toggle('pc-sidebar-open');
+            } else {
+                const isOpen = sidebar.classList.contains('open');
+                if (isOpen) {
+                    sidebar.classList.remove('open');
+                    sidebarOverlay.classList.remove('open');
+                } else {
+                    sidebar.classList.add('open');
+                    sidebarOverlay.classList.add('open');
+                }
+            }
+        }
+
+        mobileMenuBtn.addEventListener('click', toggleSidebar);
+        sidebarCloseBtn.addEventListener('click', toggleSidebar);
+        pcSidebarOpenBtn.addEventListener('click', toggleSidebar);
+        sidebarOverlay.addEventListener('click', toggleSidebar);
+
         function forceScrollToMessage(element) {
-            const headerHeight = 66; 
-            const targetTop = element.offsetTop - headerHeight;
+            const headerHeight = 56; 
+            const topGap = 10; 
+            const headerTotal = headerHeight + topGap;
+
+            const windowHeight = window.innerHeight;
+            const bubbleHeight = element.offsetHeight;
             
-            // 무조건 화면 높이만큼의 공간 확보 (보정값 적용)
-            let massivePadding = window.innerHeight - PADDING_SUBTRACTION;
-            if (massivePadding < 160) massivePadding = 160;
+            let requiredPadding = windowHeight - headerTotal - bubbleHeight;
+            if (requiredPadding < 160) requiredPadding = 160;
             
-            // transition 덕분에 부드럽게 늘어남
-            chatContainer.style.paddingBottom = massivePadding + 'px';
+            chatContainer.style.paddingBottom = requiredPadding + 'px';
             
-            // 스크롤 이동
+            const targetTop = element.offsetTop - headerTotal;
             window.scrollTo({ top: targetTop, behavior: 'smooth' });
             
-            return massivePadding;
+            return requiredPadding;
         }
 
         async function sendMessage() {
             if (isGenerating) {
                 if (abortController) {
                     abortController.abort();
-                    abortController = null;
                 }
                 return;
             }
@@ -388,7 +548,6 @@
             sendBtn.innerHTML = '<div class="stop-icon-square"></div>'; 
             sendBtn.disabled = false;
             
-            // [1] 패딩 추가 및 스크롤 이동
             let allocatedPadding = 160;
             requestAnimationFrame(() => {
                 allocatedPadding = forceScrollToMessage(userMsgElement);
@@ -399,6 +558,7 @@
             const timers = addLoadingMessage(loadingId, isSearchMode);
 
             abortController = new AbortController();
+            let botContent = null; 
 
             try {
                 const response = await fetch(isSearchMode ? "https://jaewondev.pythonanywhere.com/ask" : "https://jaewondev.pythonanywhere.com/askfast", {
@@ -416,7 +576,7 @@
 
                 const botRow = document.createElement('div');
                 botRow.classList.add('message-row', 'bot');
-                const botContent = document.createElement('div');
+                botContent = document.createElement('div');
                 botContent.classList.add('bot-text');
                 botContent.classList.add('animate-in'); 
 
@@ -426,9 +586,8 @@
                 const reader = response.body.getReader();
                 const decoder = new TextDecoder();
                 
-                // [수정] 문장 단위 처리를 위한 변수들
                 let fullText = "";       
-                let buffer = ""; // 화면에 아직 안 나간 텍스트 임시 저장소
+                let buffer = ""; 
 
                 while (true) {
                     const { done, value } = await reader.read();
@@ -437,19 +596,13 @@
                     const chunk = decoder.decode(value, { stream: true });
                     const cleanChunk = chunk.replace(/\[DONE\]/g, "");
                     
-                    fullText += cleanChunk;
                     buffer += cleanChunk;
 
-                    // [핵심] 마침표(.), 물음표(?), 느낌표(!), 줄바꿈(\n)이 포함되어 있는지 확인
-                    // 이 문자들이 있어야만 화면에 렌더링 (즉, 문장이 완성될 때까지 대기)
-                    if (/[.!?\n]/.test(buffer)) {
+                    if (/[.!?\n]/.test(buffer) || buffer.length > 20) {
+                        fullText += buffer;
                         botContent.innerHTML = marked.parse(fullText);
-                        
-                        // 화면에 찍었으니 버퍼 비우지 않고, 그냥 계속 fullText로 렌더링 
-                        // (하지만 조건문 때문에 문장이 완성되어야만 렌더링 됨)
                         buffer = ""; 
 
-                        // [2] 패딩 줄어들기 (CSS transition 덕분에 아주 부드럽게 내려옴)
                         const currentBotHeight = botContent.offsetHeight;
                         let newPadding = allocatedPadding - currentBotHeight;
                         if (newPadding < 160) newPadding = 160;
@@ -457,9 +610,11 @@
                     }
                 }
                 
-                // 루프가 끝났는데 버퍼에 남은 글자가 있다면 마지막으로 렌더링
-                botContent.innerHTML = marked.parse(fullText);
-                
+                if (buffer.length > 0) {
+                    fullText += buffer;
+                    botContent.innerHTML = marked.parse(fullText);
+                }
+
                 const finalBotHeight = botContent.offsetHeight;
                 let finalPadding = allocatedPadding - finalBotHeight;
                 if (finalPadding < 160) finalPadding = 160;
@@ -473,10 +628,13 @@
                 if (timers) timers.forEach(t => clearTimeout(t));
 
                 if (error.name === 'AbortError') {
-                    const botRows = document.getElementsByClassName('message-row bot');
-                    if (botRows.length > 0) {
-                        const lastBotMsg = botRows[botRows.length - 1].querySelector('.bot-text');
-                        if(lastBotMsg) lastBotMsg.innerHTML += "<br><em>[답변중지됨]</em>";
+                    if (botContent) {
+                        const stopMsg = document.createElement('div');
+                        stopMsg.style.color = '#9CA3AF'; 
+                        stopMsg.style.fontSize = '14px';
+                        stopMsg.style.marginTop = '8px';
+                        stopMsg.innerText = "[답변중단됨]";
+                        botContent.appendChild(stopMsg);
                     }
                 } else {
                     console.error(error);
@@ -577,9 +735,8 @@
         });
 
         window.addEventListener('resize', () => {
-             // 리사이즈 로직
+             // 필요시 리사이즈 로직 추가
         });
     </script>
 </body>
 </html>
-
