@@ -9,7 +9,6 @@
 
 <style>
     :root {
-        /* 디자인 변수 */
         --radius-input: 26px;      
         --radius-send-btn: 12px;   
         --radius-window: 16px;     
@@ -22,7 +21,7 @@
         --user-bubble-bg: #F4F4F5; 
         --user-bubble-text: #1F2937;
         
-        --header-height: 56px; /* 상단바 높이 */
+        --header-height: 56px; 
     }
 
     body {
@@ -32,17 +31,12 @@
         display: flex;
         flex-direction: column;
         min-height: 100vh;
-        overflow-y: auto; /* 전체 페이지 스크롤 */
+        overflow-y: auto; 
     }
 
     /* 스크롤바 숨기기 */
-    body::-webkit-scrollbar {
-        display: none;
-    }
-    body {
-        -ms-overflow-style: none;  /* IE and Edge */
-        scrollbar-width: none;  /* Firefox */
-    }
+    body::-webkit-scrollbar { display: none; }
+    body { -ms-overflow-style: none; scrollbar-width: none; }
 
     .material-symbols-rounded {
         font-variation-settings: 'FILL' 0, 'wght' 500, 'GRAD' 0, 'opsz' 24;
@@ -50,14 +44,14 @@
         display: block;
     }
 
-    /* 상단바 (Top Bar) 스타일 - ChatGPT 스타일 */
+    /* 상단바 */
     .top-bar {
         position: fixed;
         top: 0;
         left: 0;
         width: 100%;
         height: var(--header-height);
-        background-color: rgba(255, 255, 255, 0.95); /* 살짝 투명 */
+        background-color: rgba(255, 255, 255, 0.95);
         backdrop-filter: blur(10px);
         display: flex;
         justify-content: space-between;
@@ -80,23 +74,14 @@
         transition: background-color 0.2s;
         color: #40414F;
     }
-    .top-left:hover {
-        background-color: #F3F4F6;
-    }
-    .top-left .material-symbols-rounded {
-        font-size: 20px;
-        color: #6B7280;
-    }
+    .top-left:hover { background-color: #F3F4F6; }
+    .top-left .material-symbols-rounded { font-size: 20px; color: #6B7280; }
 
-    .top-right {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-    }
+    .top-right { display: flex; align-items: center; gap: 8px; }
 
     .offer-pill {
-        background-color: #EFEEFC; /* 연한 보라색 배경 */
-        color: #7C3AED; /* 보라색 텍스트 */
+        background-color: #EFEEFC;
+        color: #7C3AED;
         font-size: 13px;
         font-weight: 500;
         padding: 6px 12px;
@@ -107,15 +92,8 @@
         cursor: pointer;
         transition: opacity 0.2s;
     }
-    .offer-pill:hover {
-        opacity: 0.8;
-    }
-    .offer-close {
-        font-size: 16px;
-        margin-left: 4px;
-        color: #7C3AED;
-        cursor: pointer;
-    }
+    .offer-pill:hover { opacity: 0.8; }
+    .offer-close { font-size: 16px; margin-left: 4px; color: #7C3AED; cursor: pointer; }
 
     .share-btn {
         display: flex;
@@ -130,12 +108,8 @@
         color: #374151;
         transition: background-color 0.2s;
     }
-    .share-btn:hover {
-        background-color: #F9FAFB;
-    }
-    .share-btn .material-symbols-rounded {
-        font-size: 18px;
-    }
+    .share-btn:hover { background-color: #F9FAFB; }
+    .share-btn .material-symbols-rounded { font-size: 18px; }
 
     .dots-btn {
         padding: 8px;
@@ -145,39 +119,27 @@
         color: #374151;
         border-radius: 8px;
     }
-    .dots-btn:hover {
-        background-color: #F3F4F6;
-    }
+    .dots-btn:hover { background-color: #F3F4F6; }
 
     /* 채팅 영역 */
     .chat-container {
         width: 100%;
-        max-width: 768px; /* PC 넓이 유지 */
+        max-width: 768px; 
         margin: 0 auto;
         padding: 20px;
-        padding-top: calc(var(--header-height) + 40px); /* 상단바 공간 확보 */
-        /* 비네팅에 가려지지 않도록 하단 여백 충분히 추가 */
-        padding-bottom: 200px; 
+        padding-top: calc(var(--header-height) + 40px);
+        /* 하단 여백 충분히 확보하여 스크롤 포커싱 용이하게 함 */
+        padding-bottom: 400px; 
         box-sizing: border-box;
         display: flex;
         flex-direction: column;
-        gap: 30px; 
+        gap: 40px; 
     }
 
-    .message-row {
-        display: flex;
-        width: 100%;
-    }
+    .message-row { display: flex; width: 100%; }
+    .message-row.user { justify-content: flex-end; }
+    .message-row.bot { justify-content: flex-start; }
 
-    .message-row.user {
-        justify-content: flex-end;
-    }
-
-    .message-row.bot {
-        justify-content: flex-start;
-    }
-
-    /* 내 메시지 스타일 */
     .user-bubble {
         background-color: var(--user-bubble-bg);
         color: var(--user-bubble-text);          
@@ -189,13 +151,7 @@
         line-height: 1.6;
     }
 
-    /* 2줄씩 덩어리로 나타날 때 부드러운 페이드 효과 */
-    @keyframes fadeInUpChunk {
-        from { opacity: 0; transform: translateY(5px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-
-    /* 봇 메시지 스타일 (최종 답변용) */
+    /* 봇 메시지 기본 스타일 */
     .bot-text {
         color: #1F2937;
         padding: 8px 0;
@@ -204,11 +160,53 @@
         font-size: 16px;
         line-height: 1.7; 
         word-break: break-word;
-        /* 스트리밍 시 텍스트 변경될 때 부드럽게 보이도록 transition 추가 */
-        transition: all 0.2s ease;
+        will-change: contents;
     }
 
-    /* 마크다운 스타일 적용 */
+    /* 핵심 애니메이션: 20글자 청크 단위용 */
+    /* 초기 상태: 투명하고, 마스크가 텍스트를 가린 상태 */
+    .text-chunk {
+        display: inline;
+        opacity: 0;
+        /* 마스크 그라데이션: 처음에는 투명한 부분이 글자를 덮음 */
+        -webkit-mask-image: linear-gradient(90deg, transparent 0%, transparent 100%); 
+        mask-image: linear-gradient(90deg, transparent 0%, transparent 100%);
+        -webkit-mask-size: 200% 100%;
+        mask-size: 200% 100%;
+        -webkit-mask-position: 100% 0;
+        mask-position: 100% 0;
+        
+        animation: wipeReveal 0.8s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+    }
+
+    /* 닦아내기 애니메이션 키프레임 */
+    @keyframes wipeReveal {
+        0% {
+            opacity: 0;
+            /* 마스크: 왼쪽(검정=보임)이 아직 안 들어옴 */
+            -webkit-mask-image: linear-gradient(90deg, black 0%, transparent 0%);
+            mask-image: linear-gradient(90deg, black 0%, transparent 0%);
+        }
+        50% {
+            opacity: 1; 
+        }
+        100% {
+            opacity: 1;
+            /* 마스크: 전체가 검정(다 보임) + 끝부분 살짝 페이드(비네팅 느낌) */
+            -webkit-mask-image: linear-gradient(90deg, black 0%, black 85%, transparent 100%);
+            mask-image: linear-gradient(90deg, black 0%, black 85%, transparent 100%);
+        }
+    }
+
+    /* 애니메이션 종료 후 적용할 클래스 (비네팅 완전 제거) */
+    .text-chunk.revealed {
+        opacity: 1;
+        -webkit-mask-image: none !important;
+        mask-image: none !important;
+        animation: none !important;
+    }
+
+    /* 마크다운 스타일 (최종 렌더링 시 적용) */
     .bot-text p { margin: 0 0 16px 0; } 
     .bot-text p:last-child { margin-bottom: 0; }
     .bot-text code {
@@ -241,32 +239,24 @@
         color: #6b7280;
     }
 
-    /* 분석 중 텍스트 애니메이션 */
+    /* 분석 중 텍스트 */
     @keyframes textShimmer {
         0% { background-position: 200% 0; }
         100% { background-position: -200% 0; }
     }
-
     .analyzing-text {
         font-size: 16px;
         font-weight: 500;
         padding: 8px 0;
         cursor: default; 
         color: #9CA3AF; 
-        background: linear-gradient(
-            110deg,
-            #9CA3AF 40%, 
-            #F3F4F6 50%, 
-            #9CA3AF 60%
-        );
+        background: linear-gradient(110deg, #9CA3AF 40%, #F3F4F6 50%, #9CA3AF 60%);
         background-size: 200% 100%;
         background-clip: text;
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent; 
         animation: textShimmer 3s linear infinite; 
-        transition: color 0.2s, -webkit-text-fill-color 0.2s;
     }
-
     .analyzing-text:hover {
         animation: none;
         background: none;
@@ -284,9 +274,9 @@
         flex-direction: column;
         align-items: center;
         padding-bottom: 24px;
-        /* 비네팅 영역 줄임: padding-top을 60px -> 20px로, 그라데이션 시작점을 조정 */
-        padding-top: 20px; 
-        background: linear-gradient(to top, #ffffff 85%, rgba(255,255,255,0)); 
+        /* 비네팅 영역 줄임: 높이를 줄이고 그라데이션을 더 짧게 처리 */
+        padding-top: 10px; 
+        background: linear-gradient(to top, #ffffff 70%, rgba(255,255,255,0)); 
         z-index: 900;
         pointer-events: none; 
     }
@@ -346,15 +336,8 @@
         color: #6B7280;
         transition: background-color 0.2s, color 0.2s;
     }
-    .icon-btn:hover {
-        background-color: rgba(0,0,0,0.05);
-        color: #374151;
-    }
-
-    #searchBtn.active {
-        color: #0EA5E9; 
-        background-color: rgba(14, 165, 233, 0.1); 
-    }
+    .icon-btn:hover { background-color: rgba(0,0,0,0.05); color: #374151; }
+    #searchBtn.active { color: #0EA5E9; background-color: rgba(14, 165, 233, 0.1); }
     #attachBtn .material-symbols-rounded { transform: rotate(45deg); }
 
     .send-btn {
@@ -446,40 +429,21 @@
 
     <div class="bottom-fixed-wrapper">
         <div class="chat-input-container">
-            
             <div id="attachMenu" class="attach-menu">
-                <div class="menu-item">
-                    <span class="material-symbols-rounded">image</span> <span>이미지</span>
-                </div>
-                <div class="menu-item">
-                    <span class="material-symbols-rounded">description</span> <span>문서</span>
-                </div>
-                <div class="menu-item">
-                    <span class="material-symbols-rounded">folder</span> <span>파일</span>
-                </div>
+                <div class="menu-item"><span class="material-symbols-rounded">image</span> <span>이미지</span></div>
+                <div class="menu-item"><span class="material-symbols-rounded">description</span> <span>문서</span></div>
+                <div class="menu-item"><span class="material-symbols-rounded">folder</span> <span>파일</span></div>
             </div>
-
             <textarea id="chatInput" class="chat-textarea" placeholder="메시지를 입력해주세요." rows="1"></textarea>
-            
             <div class="input-toolbar">
                 <div class="left-tools">
-                    <button id="attachBtn" class="icon-btn" title="첨부하기">
-                        <span class="material-symbols-rounded">attach_file</span>
-                    </button>
-                    <button id="searchBtn" class="icon-btn" title="검색 모드">
-                        <span class="material-symbols-rounded">language</span>
-                    </button>
+                    <button id="attachBtn" class="icon-btn" title="첨부하기"><span class="material-symbols-rounded">attach_file</span></button>
+                    <button id="searchBtn" class="icon-btn" title="검색 모드"><span class="material-symbols-rounded">language</span></button>
                 </div>
-
-                <button id="sendBtn" class="send-btn" disabled>
-                    <span class="material-symbols-rounded">arrow_upward</span>
-                </button>
+                <button id="sendBtn" class="send-btn" disabled><span class="material-symbols-rounded">arrow_upward</span></button>
             </div>
         </div>
-
-        <div class="disclaimer-text">
-            MinsuGPT는 실수할 수 있습니다. 중요한 정보는 한번더 확인하세요.
-        </div>
+        <div class="disclaimer-text">MinsuGPT는 실수할 수 있습니다. 중요한 정보는 한번더 확인하세요.</div>
     </div>
 
     <script>
@@ -492,10 +456,7 @@
 
         let conversationHistory = [];
 
-        marked.setOptions({
-            breaks: true,
-            sanitize: false
-        });
+        marked.setOptions({ breaks: true, sanitize: false });
 
         function adjustHeight() {
             chatInput.style.height = 'auto'; 
@@ -514,8 +475,7 @@
             const text = chatInput.value.trim();
             if (text.length === 0) return;
 
-            // 1. 사용자 메시지 추가
-            // addMessage가 element를 반환하도록 수정하여 참조 가능하게 함
+            // 1. 사용자 메시지 추가 및 히스토리 저장
             const userMsgElement = addMessage(text, 'user');
             conversationHistory.push({ role: "user", content: text });
 
@@ -523,20 +483,15 @@
             adjustHeight();
             sendBtn.disabled = true;
 
+            // 2. 메시지 전송 직후 스크롤 포커싱 (내 메시지가 상단바 아래로 오게)
+            scrollToTopFocus(userMsgElement);
+
             const isSearchMode = searchBtn.classList.contains('active');
             const loadingId = 'loading-' + Date.now();
-
-            // 2. 대기 메시지 표시
             const timers = addLoadingMessage(loadingId, isSearchMode);
-            
-            // 3. 스크롤 처리: 방금 보낸 사용자 메시지를 화면 최상단(헤더 바로 아래)으로 끌어올림
-            smoothScrollToElement(userMsgElement);
 
-            const baseUrl = "https://jaewondev.pythonanywhere.com";
-            const endpoint = isSearchMode ? "/ask" : "/askfast";
-            
             try {
-                const response = await fetch(baseUrl + endpoint, {
+                const response = await fetch(isSearchMode ? "https://jaewondev.pythonanywhere.com/ask" : "https://jaewondev.pythonanywhere.com/askfast", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ message: text, history: conversationHistory }) 
@@ -544,11 +499,12 @@
 
                 if (!response.ok) throw new Error("Server error");
 
+                // 로딩 제거
                 const loadingElem = document.getElementById(loadingId);
                 if (loadingElem) loadingElem.remove();
                 if (timers) timers.forEach(t => clearTimeout(t));
 
-                // 봇 메시지 컨테이너 생성
+                // 봇 메시지 박스 생성
                 const botRow = document.createElement('div');
                 botRow.classList.add('message-row', 'bot');
                 const botContent = document.createElement('div');
@@ -558,62 +514,78 @@
 
                 const reader = response.body.getReader();
                 const decoder = new TextDecoder();
-                let accumulatedText = "";
-                let renderedLength = 0; // 화면에 표시된 텍스트 길이
-
-                // 약 50글자(한글/영어 혼용 시 약 2줄 분량) 단위로 업데이트
-                const CHUNK_SIZE = 50; 
+                
+                let accumulatedFullText = ""; // 마크다운 파싱을 위한 전체 텍스트
+                let chunkBuffer = "";         // 20글자 단위 렌더링을 위한 버퍼
+                const CHUNK_SIZE = 20;        // 요청하신 20글자 단위
 
                 while (true) {
                     const { done, value } = await reader.read();
                     if (done) break;
 
                     const chunk = decoder.decode(value, { stream: true });
-                    accumulatedText += chunk;
-                    const cleanText = accumulatedText.replace(/\[DONE\]/g, "");
+                    const cleanChunk = chunk.replace(/\[DONE\]/g, "");
+                    
+                    accumulatedFullText += cleanChunk;
+                    chunkBuffer += cleanChunk;
 
-                    // 일정량(CHUNK_SIZE) 이상 데이터가 쌓이거나 스트림이 끝났을 때만 DOM 업데이트
-                    if (cleanText.length - renderedLength > CHUNK_SIZE) {
-                        botContent.innerHTML = marked.parse(cleanText);
-                        renderedLength = cleanText.length;
-                        
-                        // 내용이 추가되면 자동으로 아래로 스크롤 (사용자가 읽기 편하도록)
-                        // 단, 사용자가 위를 보고 있을 땐 강제하지 않는 것이 좋으나
-                        // 요청하신 대로 "자동 스크롤" 기능 적용
-                        window.scrollTo({
-                            top: document.body.scrollHeight,
-                            behavior: 'smooth'
-                        });
+                    // 버퍼가 20글자 이상 차면 잘라서 렌더링
+                    while (chunkBuffer.length >= CHUNK_SIZE) {
+                        const slice = chunkBuffer.slice(0, CHUNK_SIZE);
+                        chunkBuffer = chunkBuffer.slice(CHUNK_SIZE);
+                        renderChunk(botContent, slice);
+                    }
+                    
+                    // 화면 넘어가면 자동 스크롤 (단, 사용자가 보는 위치 유지 위해 조건부)
+                    // 여기서는 봇이 말할때 계속 따라가게 처리
+                    if(document.body.scrollHeight - window.scrollY - window.innerHeight < 200) {
+                         window.scrollTo({ top: document.body.scrollHeight, behavior: 'auto' });
                     }
                 }
-                
-                // 스트림 종료 후 남은 잔여 텍스트 최종 렌더링
-                botContent.innerHTML = marked.parse(accumulatedText.replace(/\[DONE\]/g, ""));
-                
-                // 최종 스크롤
-                window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
 
-                conversationHistory.push({ role: "assistant", content: accumulatedText.replace(/\[DONE\]/g, "") });
+                // 남은 버퍼 처리
+                if (chunkBuffer.length > 0) {
+                    renderChunk(botContent, chunkBuffer);
+                }
+
+                // *** 중요 ***
+                // 스트리밍이 끝나면 애니메이션용 span들을 모두 제거하고
+                // 깨끗한 마크다운 HTML로 교체 (코드블럭 등 서식 적용)
+                botContent.innerHTML = marked.parse(accumulatedFullText);
+                
+                conversationHistory.push({ role: "assistant", content: accumulatedFullText });
 
             } catch (error) {
-                console.error("Fetch error:", error);
+                console.error(error);
                 const loadingElem = document.getElementById(loadingId);
                 if (loadingElem) loadingElem.remove();
-                if (timers) timers.forEach(t => clearTimeout(t));
-                addMessage("죄송합니다. 오류가 발생했습니다.", 'bot');
+                addMessage("오류가 발생했습니다.", 'bot');
             }
         }
 
-        // 특정 엘리먼트가 상단바(56px) 바로 아래에 오도록 부드럽게 스크롤
-        function smoothScrollToElement(element) {
+        // 20글자 청크를 생성하고 애니메이션을 적용하는 함수
+        function renderChunk(container, text) {
+            const span = document.createElement('span');
+            span.className = 'text-chunk';
+            span.innerText = text; // HTML 태그 방지용 innerText 사용
+
+            // 애니메이션이 끝나면 클래스를 변경하여 마스크/비네팅 제거
+            span.addEventListener('animationend', () => {
+                span.classList.add('revealed');
+            });
+
+            container.appendChild(span);
+        }
+
+        // 요소가 탑바 바로 아래에 오도록 스크롤 (강제성 부여)
+        function scrollToTopFocus(element) {
             if (!element) return;
-            // 약간의 여유(20px)를 두어 답답하지 않게
-            const headerHeight = 56;
-            const offset = 20; 
-            const topPos = element.offsetTop - headerHeight - offset;
+            const offset = 76; // headerHeight(56) + 여유(20)
+            const elementPosition = element.getBoundingClientRect().top + window.scrollY;
+            const offsetPosition = elementPosition - offset;
             
             window.scrollTo({
-                top: topPos,
+                top: offsetPosition,
                 behavior: 'smooth'
             });
         }
@@ -622,41 +594,29 @@
             const rowDiv = document.createElement('div');
             rowDiv.classList.add('message-row', 'bot');
             rowDiv.id = id; 
-
             const contentDiv = document.createElement('div');
             contentDiv.classList.add('analyzing-text'); 
             
             let timers = [];
-
             if (isSearchMode) {
                 contentDiv.innerText = "검색을 진행하는 중...";
-                const t1 = setTimeout(() => {
-                    const elem = document.getElementById(id);
-                    if (elem) elem.querySelector('.analyzing-text').innerText = "검색은 시간이 소요될 수 있습니다.";
-                }, 3000);
-                const t2 = setTimeout(() => {
-                    const elem = document.getElementById(id);
-                    if (elem) elem.querySelector('.analyzing-text').innerText = "질문을 분석하는중...";
-                }, 6000);
-                timers.push(t1, t2);
+                timers.push(setTimeout(() => {
+                    const el = document.getElementById(id); if(el) el.querySelector('.analyzing-text').innerText = "검색은 시간이 소요될 수 있습니다.";
+                }, 3000));
+                timers.push(setTimeout(() => {
+                    const el = document.getElementById(id); if(el) el.querySelector('.analyzing-text').innerText = "질문을 분석하는중...";
+                }, 6000));
             } else {
                 contentDiv.innerText = "질문을 분석하는중...";
             }
-
             rowDiv.appendChild(contentDiv);
             chatContainer.appendChild(rowDiv);
-            
-            // 로딩 중에도 자동 스크롤
-            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-
             return timers; 
         }
 
         function addMessage(text, sender) {
             const rowDiv = document.createElement('div');
-            rowDiv.classList.add('message-row');
-            rowDiv.classList.add(sender); 
-
+            rowDiv.classList.add('message-row', sender); 
             const contentDiv = document.createElement('div');
             
             if (sender === 'user') {
@@ -666,61 +626,42 @@
                 contentDiv.classList.add('bot-text'); 
                 contentDiv.innerHTML = marked.parse(text);
             }
-
             rowDiv.appendChild(contentDiv);
             chatContainer.appendChild(rowDiv);
-            
-            // 메시지 추가 시 하단 스크롤
-            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-            
-            return rowDiv; // 생성된 요소 반환 (스크롤 위치 계산용)
+            return rowDiv; 
         }
 
         chatInput.addEventListener('input', adjustHeight);
-
         chatInput.addEventListener('keydown', function(event) {
-            if (event.key === 'Enter') {
-                const isMobile = window.innerWidth <= 768;
-                if (isMobile) {
-                } else {
-                    if (!event.shiftKey) {
-                        event.preventDefault(); 
-                        if (!sendBtn.disabled) sendMessage();
-                    }
-                }
+            if (event.key === 'Enter' && !event.shiftKey && window.innerWidth > 768) {
+                event.preventDefault(); 
+                if (!sendBtn.disabled) sendMessage();
             }
         });
-
         sendBtn.addEventListener('click', sendMessage);
-
-        attachBtn.addEventListener('click', function(e) {
-            e.stopPropagation(); 
+        
+        attachBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
             if (attachMenu.classList.contains('open')) {
                 attachMenu.classList.remove('open');
-                setTimeout(() => { attachMenu.style.display = 'none'; }, 200);
+                setTimeout(() => attachMenu.style.display='none', 200);
             } else {
-                attachMenu.style.display = 'flex';
-                setTimeout(() => { attachMenu.classList.add('open'); }, 10);
+                attachMenu.style.display='flex';
+                setTimeout(() => attachMenu.classList.add('open'), 10);
             }
         });
-
-        searchBtn.addEventListener('click', function() {
-            this.classList.toggle('active');
-        });
-
-        document.addEventListener('click', function(e) {
+        searchBtn.addEventListener('click', function() { this.classList.toggle('active'); });
+        document.addEventListener('click', (e) => {
             if (attachMenu.classList.contains('open') && !attachMenu.contains(e.target)) {
                 attachMenu.classList.remove('open');
-                setTimeout(() => { attachMenu.style.display = 'none'; }, 200);
+                setTimeout(() => attachMenu.style.display='none', 200);
             }
         });
-        
-        document.querySelector('.offer-close').addEventListener('click', function(e){
+        document.querySelector('.offer-close').addEventListener('click', (e) => {
             e.stopPropagation();
             document.querySelector('.offer-pill').style.display = 'none';
         });
 
     </script>
-
 </body>
 </html>
