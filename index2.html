@@ -152,15 +152,16 @@
     /* 채팅 영역 */
     .chat-container {
         width: 100%;
-        max-width: 768px; /* PC 넓이 살짝 증가 (기존 600 -> 768) */
+        max-width: 768px; /* PC 넓이 유지 */
         margin: 0 auto;
         padding: 20px;
         padding-top: calc(var(--header-height) + 40px); /* 상단바 공간 확보 */
-        padding-bottom: 160px; /* 입력창 공간 확보 */
+        /* 비네팅에 가려지지 않도록 하단 여백 충분히 추가 */
+        padding-bottom: 200px; 
         box-sizing: border-box;
         display: flex;
         flex-direction: column;
-        gap: 30px; /* 메시지 간 간격 증가 */
+        gap: 30px; 
     }
 
     .message-row {
@@ -188,23 +189,10 @@
         line-height: 1.6;
     }
 
-    /* 부드러운 닦아내기 후 마스크 완전 제거 애니메이션 */
-    @keyframes softWipeReveal {
-        0% {
-            -webkit-mask-position: 100% 0;
-            mask-position: 100% 0;
-            opacity: 0;
-        }
-        80% {
-            opacity: 1;
-        }
-        100% {
-            -webkit-mask-position: 0% 0;
-            mask-position: 0% 0;
-            opacity: 1;
-            -webkit-mask-image: none;
-            mask-image: none;
-        }
+    /* 2줄씩 덩어리로 나타날 때 부드러운 페이드 효과 */
+    @keyframes fadeInUpChunk {
+        from { opacity: 0; transform: translateY(5px); }
+        to { opacity: 1; transform: translateY(0); }
     }
 
     /* 봇 메시지 스타일 (최종 답변용) */
@@ -214,24 +202,14 @@
         width: 100%; 
         max-width: 100%;
         font-size: 16px;
-        line-height: 1.7; /* 가독성을 위해 줄간격 살짝 증가 */
+        line-height: 1.7; 
         word-break: break-word;
-        
-        /* 대각선(135deg) 방향으로 그라데이션 마스크 적용 */
-        -webkit-mask-image: linear-gradient(135deg, black 40%, transparent 60%);
-        mask-image: linear-gradient(135deg, black 40%, transparent 60%);
-        
-        -webkit-mask-size: 250% 100%;
-        mask-size: 250% 100%;
-        
-        -webkit-mask-position: 100% 0;
-        mask-position: 100% 0;
-
-        animation: softWipeReveal 1.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        /* 스트리밍 시 텍스트 변경될 때 부드럽게 보이도록 transition 추가 */
+        transition: all 0.2s ease;
     }
 
     /* 마크다운 스타일 적용 */
-    .bot-text p { margin: 0 0 16px 0; } /* 문단 간격 증가 */
+    .bot-text p { margin: 0 0 16px 0; } 
     .bot-text p:last-child { margin-bottom: 0; }
     .bot-text code {
         background-color: #f3f4f6;
@@ -274,7 +252,7 @@
         font-weight: 500;
         padding: 8px 0;
         cursor: default; 
-        color: #9CA3AF; /* 기본 색상을 훨씬 연하게 변경 (Gray 400) */
+        color: #9CA3AF; 
         background: linear-gradient(
             110deg,
             #9CA3AF 40%, 
@@ -285,14 +263,14 @@
         background-clip: text;
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent; 
-        animation: textShimmer 3s linear infinite; /* 속도를 2s -> 3s로 늦춤 */
+        animation: textShimmer 3s linear infinite; 
         transition: color 0.2s, -webkit-text-fill-color 0.2s;
     }
 
     .analyzing-text:hover {
         animation: none;
         background: none;
-        -webkit-text-fill-color: #1F2937; /* 호버 시 검은색(진한 회색) 유지 */
+        -webkit-text-fill-color: #1F2937; 
         color: #1F2937;
     }
 
@@ -306,20 +284,20 @@
         flex-direction: column;
         align-items: center;
         padding-bottom: 24px;
-        padding-top: 60px; /* 비네팅 영역 확장 */
-        /* 그라데이션 비네팅을 더 부드럽고 길게 처리 */
-        background: linear-gradient(to top, #ffffff 70%, rgba(255,255,255,0)); 
+        /* 비네팅 영역 줄임: padding-top을 60px -> 20px로, 그라데이션 시작점을 조정 */
+        padding-top: 20px; 
+        background: linear-gradient(to top, #ffffff 85%, rgba(255,255,255,0)); 
         z-index: 900;
-        pointer-events: none; /* 배경 클릭 통과 */
+        pointer-events: none; 
     }
 
     .chat-input-container {
-        pointer-events: auto; /* 입력창은 클릭 가능 */
-        width: 768px; /* 채팅창과 동일한 max-width */
+        pointer-events: auto; 
+        width: 768px; 
         max-width: 90%;
         background-color: #F4F4F5;
         border-radius: var(--radius-input);
-        padding: 14px 18px; /* 패딩 살짝 증가 */
+        padding: 14px 18px; 
         box-sizing: border-box;
         display: flex;
         flex-direction: column;
@@ -340,7 +318,7 @@
         padding: 0;
         line-height: var(--line-height);
         height: var(--line-height);
-        max-height: calc(var(--line-height) * 8); /* 최대 높이 증가 */
+        max-height: calc(var(--line-height) * 8); 
         overflow-y: hidden; 
         scrollbar-width: none;
     }
@@ -398,7 +376,7 @@
 
     .disclaimer-text {
         font-size: 12px;
-        color: #9CA3AF; /* 색상 연하게 */
+        color: #9CA3AF; 
         margin-top: 12px;
         text-align: center;
         pointer-events: auto; 
@@ -407,7 +385,7 @@
     .attach-menu {
         display: none; 
         position: absolute;
-        bottom: 60px; /* 위치 조정 */
+        bottom: 60px; 
         left: 0;
         width: 140px;
         background-color: #FFFFFF; 
@@ -512,10 +490,8 @@
         const attachMenu = document.getElementById('attachMenu');
         const searchBtn = document.getElementById('searchBtn');
 
-        // 대화 기억을 위한 배열
         let conversationHistory = [];
 
-        // marked 옵션 설정 (줄바꿈 처리 등)
         marked.setOptions({
             breaks: true,
             sanitize: false
@@ -524,7 +500,7 @@
         function adjustHeight() {
             chatInput.style.height = 'auto'; 
             let scrollHeight = chatInput.scrollHeight;
-            if (scrollHeight > 150) { // 최대 높이 약간 증가
+            if (scrollHeight > 150) { 
                 chatInput.style.height = '150px';
                 chatInput.style.overflowY = 'scroll'; 
             } else {
@@ -539,47 +515,35 @@
             if (text.length === 0) return;
 
             // 1. 사용자 메시지 추가
-            addMessage(text, 'user');
-            
-            // 대화 기록에 사용자 메시지 저장
+            // addMessage가 element를 반환하도록 수정하여 참조 가능하게 함
+            const userMsgElement = addMessage(text, 'user');
             conversationHistory.push({ role: "user", content: text });
 
             chatInput.value = '';
             adjustHeight();
             sendBtn.disabled = true;
 
-            // 검색 모드 확인
             const isSearchMode = searchBtn.classList.contains('active');
             const loadingId = 'loading-' + Date.now();
 
-            // 2. 대기 메시지 표시 및 스크롤 처리
+            // 2. 대기 메시지 표시
             const timers = addLoadingMessage(loadingId, isSearchMode);
             
-            // 질문이 시작되면 화면을 질문 위치로 부드럽게 올림 (Bot의 답변이 상단에 오도록)
-            smoothScrollToBot();
+            // 3. 스크롤 처리: 방금 보낸 사용자 메시지를 화면 최상단(헤더 바로 아래)으로 끌어올림
+            smoothScrollToElement(userMsgElement);
 
-            // 3. 백엔드 통신
             const baseUrl = "https://jaewondev.pythonanywhere.com";
             const endpoint = isSearchMode ? "/ask" : "/askfast";
             
             try {
-                // history 포함하여 전송
                 const response = await fetch(baseUrl + endpoint, {
                     method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({ 
-                        message: text,
-                        history: conversationHistory 
-                    }) 
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ message: text, history: conversationHistory }) 
                 });
 
-                if (!response.ok) {
-                    throw new Error("Server error");
-                }
+                if (!response.ok) throw new Error("Server error");
 
-                // 로딩 메시지 제거 및 타이머 정리
                 const loadingElem = document.getElementById(loadingId);
                 if (loadingElem) loadingElem.remove();
                 if (timers) timers.forEach(t => clearTimeout(t));
@@ -592,10 +556,13 @@
                 botRow.appendChild(botContent);
                 chatContainer.appendChild(botRow);
 
-                // 스트림 리더 생성
                 const reader = response.body.getReader();
                 const decoder = new TextDecoder();
                 let accumulatedText = "";
+                let renderedLength = 0; // 화면에 표시된 텍스트 길이
+
+                // 약 50글자(한글/영어 혼용 시 약 2줄 분량) 단위로 업데이트
+                const CHUNK_SIZE = 50; 
 
                 while (true) {
                     const { done, value } = await reader.read();
@@ -603,45 +570,51 @@
 
                     const chunk = decoder.decode(value, { stream: true });
                     accumulatedText += chunk;
-
-                    // [DONE] 태그 제거
                     const cleanText = accumulatedText.replace(/\[DONE\]/g, "");
-                    
-                    // 마크다운 렌더링 후 표시
-                    botContent.innerHTML = marked.parse(cleanText);
-                    
-                    // 스트리밍 중에는 사용자가 보고 있는 위치 유지 혹은 자연스러운 하단 흐름
-                    // 너무 강제 스크롤하지 않도록 하여 끊김 방지 (필요 시 조정)
-                    // 여기서는 컨텐츠가 늘어남에 따라 자연스럽게 둠
+
+                    // 일정량(CHUNK_SIZE) 이상 데이터가 쌓이거나 스트림이 끝났을 때만 DOM 업데이트
+                    if (cleanText.length - renderedLength > CHUNK_SIZE) {
+                        botContent.innerHTML = marked.parse(cleanText);
+                        renderedLength = cleanText.length;
+                        
+                        // 내용이 추가되면 자동으로 아래로 스크롤 (사용자가 읽기 편하도록)
+                        // 단, 사용자가 위를 보고 있을 땐 강제하지 않는 것이 좋으나
+                        // 요청하신 대로 "자동 스크롤" 기능 적용
+                        window.scrollTo({
+                            top: document.body.scrollHeight,
+                            behavior: 'smooth'
+                        });
+                    }
                 }
                 
-                // 답변 완료 후 히스토리에 봇 메시지 저장
+                // 스트림 종료 후 남은 잔여 텍스트 최종 렌더링
+                botContent.innerHTML = marked.parse(accumulatedText.replace(/\[DONE\]/g, ""));
+                
+                // 최종 스크롤
+                window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+
                 conversationHistory.push({ role: "assistant", content: accumulatedText.replace(/\[DONE\]/g, "") });
 
             } catch (error) {
                 console.error("Fetch error:", error);
-                
                 const loadingElem = document.getElementById(loadingId);
                 if (loadingElem) loadingElem.remove();
                 if (timers) timers.forEach(t => clearTimeout(t));
-
-                addMessage("죄송합니다. 서버와 통신 중 오류가 발생했습니다.", 'bot');
+                addMessage("죄송합니다. 오류가 발생했습니다.", 'bot');
             }
         }
 
-        function smoothScrollToBot() {
-            // 가장 최근 메시지(사용자 질문) 혹은 로딩바 위치로 스크롤을 이동시켜
-            // 답변이 시작될 때 화면 상단바 바로 아래에서 시작되게 함
-            requestAnimationFrame(() => {
-                const lastMsg = chatContainer.lastElementChild;
-                if (lastMsg) {
-                    // 상단바 높이(56px) + 약간의 여유(20px)를 뺀 위치로 스크롤
-                    const topPos = lastMsg.offsetTop - 76; 
-                    window.scrollTo({
-                        top: topPos,
-                        behavior: 'smooth'
-                    });
-                }
+        // 특정 엘리먼트가 상단바(56px) 바로 아래에 오도록 부드럽게 스크롤
+        function smoothScrollToElement(element) {
+            if (!element) return;
+            // 약간의 여유(20px)를 두어 답답하지 않게
+            const headerHeight = 56;
+            const offset = 20; 
+            const topPos = element.offsetTop - headerHeight - offset;
+            
+            window.scrollTo({
+                top: topPos,
+                behavior: 'smooth'
             });
         }
 
@@ -657,25 +630,15 @@
 
             if (isSearchMode) {
                 contentDiv.innerText = "검색을 진행하는 중...";
-                
-                // 3초 후
                 const t1 = setTimeout(() => {
                     const elem = document.getElementById(id);
-                    if (elem) {
-                        elem.querySelector('.analyzing-text').innerText = "검색은 시간이 소요될 수 있습니다.";
-                    }
+                    if (elem) elem.querySelector('.analyzing-text').innerText = "검색은 시간이 소요될 수 있습니다.";
                 }, 3000);
-
-                // 다시 3초 후(총 6초 후)
                 const t2 = setTimeout(() => {
                     const elem = document.getElementById(id);
-                    if (elem) {
-                        elem.querySelector('.analyzing-text').innerText = "질문을 분석하는중...";
-                    }
+                    if (elem) elem.querySelector('.analyzing-text').innerText = "질문을 분석하는중...";
                 }, 6000);
-                
                 timers.push(t1, t2);
-
             } else {
                 contentDiv.innerText = "질문을 분석하는중...";
             }
@@ -683,8 +646,8 @@
             rowDiv.appendChild(contentDiv);
             chatContainer.appendChild(rowDiv);
             
-            // 로딩 메시지 추가 후에도 스크롤 살짝 조정
-            smoothScrollToBot();
+            // 로딩 중에도 자동 스크롤
+            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
 
             return timers; 
         }
@@ -707,10 +670,10 @@
             rowDiv.appendChild(contentDiv);
             chatContainer.appendChild(rowDiv);
             
-            // 메시지 추가 시 페이지 전체 최하단으로 스크롤 (사용자 입력 시)
-            if (sender === 'user') {
-                 window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-            }
+            // 메시지 추가 시 하단 스크롤
+            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+            
+            return rowDiv; // 생성된 요소 반환 (스크롤 위치 계산용)
         }
 
         chatInput.addEventListener('input', adjustHeight);
@@ -752,7 +715,6 @@
             }
         });
         
-        // 오퍼 닫기 버튼 로직 (UI 기능만)
         document.querySelector('.offer-close').addEventListener('click', function(e){
             e.stopPropagation();
             document.querySelector('.offer-pill').style.display = 'none';
