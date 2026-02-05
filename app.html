@@ -1132,7 +1132,8 @@
             if (requiredPadding < 160) requiredPadding = 160;
             
             chatContainer.style.paddingBottom = requiredPadding + 'px';
-            window.scrollTo({ top: targetScrollY, behavior: 'smooth' });
+            // [수정] 사용자의 요구대로 여기서도 무조건 맨 아래로 스크롤
+            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
             
             return requiredPadding;
         }
@@ -1253,6 +1254,8 @@
                 conversationHistory.push({ role: "user", content: text });
                 chatInput.value = '';
                 adjustHeight();
+                // [수정] 메시지 전송 시 무조건 맨 아래로 부드럽게 스크롤
+                window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
             } else {
                 const userRows = document.querySelectorAll('.message-row.user');
                 userMsgElement = userRows[userRows.length - 1];
@@ -1265,15 +1268,15 @@
             sendBtn.disabled = false;
             
             let allocatedPadding = 160;
-
-            // [수정] 스크롤 로직 분리: 충돌 방지
-            // 첫 메시지가 아닐 때는 forceScrollToMessage(여백추가+상단정렬) 만 실행
+            // [수정] 첫 메시지가 아닐 때만 시야 조정(여백 추가) 로직 실행
             if (userMsgElement && conversationHistory.length > 1) { 
                 requestAnimationFrame(() => {
                     allocatedPadding = forceScrollToMessage(userMsgElement);
+                    // [추가] 혹시 forceScrollToMessage의 스크롤이 씹힐 경우를 대비해 한번 더 확실하게 내림
+                    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
                 });
             } else {
-                // 첫 메시지는 여백 추가 로직 없이 맨 아래로 스크롤
+                // 첫 메시지일 경우에도 확실하게 스크롤
                 window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
             }
 
@@ -1370,6 +1373,8 @@
                         let newPadding = allocatedPadding - currentBotHeight;
                         if (newPadding < 160) newPadding = 160;
                         chatContainer.style.paddingBottom = newPadding + 'px';
+                        
+                        // [수정] 답변 생성 중 자동 스크롤 로직 제거
                     }
                 }
                 
@@ -1389,6 +1394,7 @@
 
                 saveCurrentChat();
                 checkScrollPosition();
+                // [수정] 답변 완료 후 자동 스크롤 로직 제거
 
             } catch (error) {
                 const loadingElem = document.getElementById(loadingId);
@@ -1413,6 +1419,7 @@
                 sendBtn.disabled = true; 
                 adjustHeight(); 
                 checkScrollPosition();
+                // [수정] finally에서도 자동 스크롤 로직 제거
             }
         }
 
