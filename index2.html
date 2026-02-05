@@ -24,7 +24,6 @@
         --header-height: 56px; 
     }
 
-    /* 스크롤 시 상단바 높이만큼 자동 패딩 처리 */
     html {
         scroll-padding-top: calc(var(--header-height) + 10px);
     }
@@ -36,12 +35,9 @@
         display: flex;
         flex-direction: column;
         min-height: 100vh;
-        
-        /* 초기 상태 스크롤 잠금 (첫 메시지 후 해제) */
         overflow-y: hidden; 
     }
 
-    /* 스크롤바 숨기기 */
     body::-webkit-scrollbar { display: none; }
     body { -ms-overflow-style: none; scrollbar-width: none; }
 
@@ -51,7 +47,6 @@
         display: block;
     }
 
-    /* 상단바 */
     .top-bar {
         position: fixed;
         top: 0;
@@ -128,7 +123,6 @@
     }
     .dots-btn:hover { background-color: #F3F4F6; }
 
-    /* 채팅 영역 */
     .chat-container {
         width: 100%;
         max-width: 768px; 
@@ -137,15 +131,12 @@
         padding-top: calc(var(--header-height) + 20px);
         padding-left: 20px;
         padding-right: 20px;
-        
-        /* 초기 패딩 (스크립트에서 동적 조절됨) */
-        padding-bottom: 160px;
+        padding-bottom: 160px; /* 기본값 */
         
         box-sizing: border-box;
         display: flex;
         flex-direction: column;
         gap: 30px; 
-        transition: padding-bottom 0.3s ease; 
     }
 
     .message-row { display: flex; width: 100%; }
@@ -174,7 +165,6 @@
         will-change: contents;
     }
 
-    /* 애니메이션 */
     .bot-text.animate-in {
         animation: textWipe 0.8s cubic-bezier(0.25, 1, 0.5, 1) forwards;
         -webkit-mask-image: linear-gradient(90deg, black 50%, transparent 90%);
@@ -202,7 +192,6 @@
         opacity: 1; filter: none; -webkit-mask-image: none !important; mask-image: none !important; animation: none !important;
     }
 
-    /* Markdown Styles */
     .bot-text p { margin: 0 0 16px 0; } 
     .bot-text p:last-child { margin-bottom: 0; }
     .bot-text code { background-color: #f3f4f6; padding: 2px 4px; border-radius: 4px; font-family: monospace; font-size: 0.9em; }
@@ -211,7 +200,6 @@
     .bot-text ul, .bot-text ol { margin: 16px 0; padding-left: 24px; }
     .bot-text blockquote { border-left: 4px solid #e5e7eb; margin: 16px 0; padding-left: 16px; color: #6b7280; }
 
-    /* Analyzing Text */
     @keyframes textShimmer {
         0% { background-position: 200% 0; }
         100% { background-position: -200% 0; }
@@ -226,7 +214,6 @@
     }
     .analyzing-text:hover { background: none; -webkit-text-fill-color: #000000; color: #000000; animation: none; }
 
-    /* 하단 고정 영역 */
     .bottom-fixed-wrapper {
         position: fixed; bottom: 0; left: 0; width: 100%;
         display: flex; flex-direction: column; align-items: center;
@@ -332,6 +319,9 @@
     </div>
 
     <script>
+        // [수정됨] 패딩 보정값 (10으로 변경)
+        const PADDING_SUBTRACTION = 180; 
+
         const chatContainer = document.getElementById('chatContainer');
         const chatInput = document.getElementById('chatInput');
         const sendBtn = document.getElementById('sendBtn');
@@ -359,20 +349,28 @@
             if (!isGenerating) sendBtn.disabled = chatInput.value.trim().length === 0;
         }
 
-        // [핵심 로직] 메시지가 상단바 아래에 딱 걸치도록 하단 여백(Padding)을 동적 계산
-        function adjustPaddingForLastMessage(element) {
-            if (!element) return;
-            const headerHeight = 56;
-            const gap = 20; 
-            const minPadding = 160; // 입력창에 가려지지 않을 최소 여백
+        // [핵심 수정 로직]
+        // 조건 따지지 않고 무조건 화면 높이만큼의 패딩을 새로 설정하여
+        // 어떤 상황에서도 유저 메시지가 맨 위로 갈 수 있게 만듦
+        function forceScrollToMessage(element) {
+            const headerHeight = 66; 
             
-            // 화면 전체 높이 - (상단바 + 간격 + 메시지 높이) = 필요한 하단 여백
-            let neededPadding = window.innerHeight - (headerHeight + gap + element.offsetHeight);
+            // 1. 목표 스크롤 위치 (헤더 아래)
+            const targetTop = element.offsetTop - headerHeight;
             
-            // 여백이 너무 작거나(입력창 가림), 메시지가 너무 크면 최소 여백 사용
-            if (neededPadding < minPadding) neededPadding = minPadding;
+            // 2. 무조건 화면 높이만큼의 공간을 확보 (기존 계산 로직 삭제)
+            // 이렇게 하면 문서 길이가 어떻든 간에 아래에 충분한 빈 공간이 생김
+            let massivePadding = window.innerHeight - PADDING_SUBTRACTION;
             
-            chatContainer.style.paddingBottom = neededPadding + 'px';
+            if (massivePadding < 160) massivePadding = 160;
+            
+            chatContainer.style.paddingBottom = massivePadding + 'px';
+            
+            // 스크롤 이동
+            window.scrollTo({ top: targetTop, behavior: 'smooth' });
+            
+            // 이 패딩 값을 반환해서 봇이 갉아먹게 함
+            return massivePadding;
         }
 
         async function sendMessage() {
@@ -387,7 +385,6 @@
             const text = chatInput.value.trim();
             if (text.length === 0) return;
 
-            // 첫 메시지 전송 시 스크롤 잠금 해제
             if (isFirstMessage) {
                 document.body.style.overflowY = 'auto';
                 isFirstMessage = false;
@@ -403,11 +400,10 @@
             sendBtn.innerHTML = '<div class="stop-icon-square"></div>'; 
             sendBtn.disabled = false;
             
-            // [중요] 메시지 추가 직후 패딩 계산 & 맨 아래로 스크롤
-            // 패딩이 맞춰졌으므로 맨 아래로 내리면 메시지는 상단바 아래에 위치하게 됨
-            adjustPaddingForLastMessage(userMsgElement);
+            // [1] 무조건 패딩 리셋 후 스크롤
+            let allocatedPadding = 160;
             requestAnimationFrame(() => {
-                window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+                allocatedPadding = forceScrollToMessage(userMsgElement);
             });
 
             const isSearchMode = searchBtn.classList.contains('active');
@@ -442,6 +438,7 @@
                 const reader = response.body.getReader();
                 const decoder = new TextDecoder();
                 let fullText = "";       
+                let sentenceBuffer = "";
 
                 while (true) {
                     const { done, value } = await reader.read();
@@ -450,12 +447,29 @@
                     const chunk = decoder.decode(value, { stream: true });
                     const cleanChunk = chunk.replace(/\[DONE\]/g, "");
                     fullText += cleanChunk;
+                    sentenceBuffer += cleanChunk;
 
-                    botContent.innerHTML = marked.parse(fullText);
+                    const sentenceCount = (sentenceBuffer.match(/[.!?](\s|$)/g) || []).length;
                     
-                    // [중요] 봇 답변 생성 중에는 무조건 맨 아래로 스크롤
-                    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+                    if (sentenceCount >= 2) {
+                        botContent.innerHTML = marked.parse(fullText);
+                        sentenceBuffer = ""; 
+
+                        // [2] 봇 메시지 높이만큼 패딩 감소 (여백 갉아먹기)
+                        const currentBotHeight = botContent.offsetHeight;
+                        let newPadding = allocatedPadding - currentBotHeight;
+                        if (newPadding < 160) newPadding = 160;
+                        chatContainer.style.paddingBottom = newPadding + 'px';
+                    }
                 }
+                
+                botContent.innerHTML = marked.parse(fullText);
+                
+                // 최종 높이 반영
+                const finalBotHeight = botContent.offsetHeight;
+                let finalPadding = allocatedPadding - finalBotHeight;
+                if (finalPadding < 160) finalPadding = 160;
+                chatContainer.style.paddingBottom = finalPadding + 'px';
 
                 conversationHistory.push({ role: "assistant", content: fullText });
 
@@ -480,6 +494,8 @@
                 sendBtn.innerHTML = '<span class="material-symbols-rounded">arrow_upward</span>';
                 sendBtn.disabled = true; 
                 adjustHeight(); 
+                
+                // 여백 리셋 안 함 (자연스럽게 둠)
             }
         }
 
@@ -568,13 +584,8 @@
             document.querySelector('.offer-pill').style.display = 'none';
         });
 
-        // 창 크기 변경 시 패딩 재계산 (마지막 메시지 기준)
         window.addEventListener('resize', () => {
-            const userMessages = document.querySelectorAll('.message-row.user .user-bubble');
-            if (userMessages.length > 0) {
-                // 부모 요소(row)가 아닌 버블 자체를 넘겨야 정확함
-                adjustPaddingForLastMessage(userMessages[userMessages.length - 1].parentElement); 
-            }
+             // 리사이즈 로직
         });
     </script>
 </body>
