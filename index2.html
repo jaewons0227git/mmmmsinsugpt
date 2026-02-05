@@ -284,7 +284,7 @@
 
     <header class="top-bar">
         <div class="top-left">
-            ChatGPT <span class="material-symbols-rounded">expand_more</span>
+            MinsuGPT <span class="material-symbols-rounded">expand_more</span>
         </div>
         <div class="top-right">
             <div class="offer-pill">
@@ -319,7 +319,7 @@
     </div>
 
     <script>
-        // [수정됨] 패딩 보정값 (10으로 변경)
+        // [수정됨] 패딩 보정값 (180으로 변경)
         const PADDING_SUBTRACTION = 180; 
 
         const chatContainer = document.getElementById('chatContainer');
@@ -349,19 +349,13 @@
             if (!isGenerating) sendBtn.disabled = chatInput.value.trim().length === 0;
         }
 
-        // [핵심 수정 로직]
-        // 조건 따지지 않고 무조건 화면 높이만큼의 패딩을 새로 설정하여
-        // 어떤 상황에서도 유저 메시지가 맨 위로 갈 수 있게 만듦
+        // [핵심 로직] 메시지 전송 시 무조건 화면 높이만큼 패딩 확보
         function forceScrollToMessage(element) {
             const headerHeight = 66; 
-            
-            // 1. 목표 스크롤 위치 (헤더 아래)
             const targetTop = element.offsetTop - headerHeight;
             
-            // 2. 무조건 화면 높이만큼의 공간을 확보 (기존 계산 로직 삭제)
-            // 이렇게 하면 문서 길이가 어떻든 간에 아래에 충분한 빈 공간이 생김
+            // 무조건 화면 높이만큼의 공간 확보 (보정값 적용)
             let massivePadding = window.innerHeight - PADDING_SUBTRACTION;
-            
             if (massivePadding < 160) massivePadding = 160;
             
             chatContainer.style.paddingBottom = massivePadding + 'px';
@@ -369,7 +363,6 @@
             // 스크롤 이동
             window.scrollTo({ top: targetTop, behavior: 'smooth' });
             
-            // 이 패딩 값을 반환해서 봇이 갉아먹게 함
             return massivePadding;
         }
 
@@ -400,7 +393,7 @@
             sendBtn.innerHTML = '<div class="stop-icon-square"></div>'; 
             sendBtn.disabled = false;
             
-            // [1] 무조건 패딩 리셋 후 스크롤
+            // [1] 패딩 추가 및 스크롤 이동
             let allocatedPadding = 160;
             requestAnimationFrame(() => {
                 allocatedPadding = forceScrollToMessage(userMsgElement);
@@ -438,7 +431,9 @@
                 const reader = response.body.getReader();
                 const decoder = new TextDecoder();
                 let fullText = "";       
-                let sentenceBuffer = "";
+                
+                // [수정] 20글자씩 부드럽게 출력하기 위한 변수
+                let lastRenderedLength = 0;
 
                 while (true) {
                     const { done, value } = await reader.read();
@@ -447,15 +442,13 @@
                     const chunk = decoder.decode(value, { stream: true });
                     const cleanChunk = chunk.replace(/\[DONE\]/g, "");
                     fullText += cleanChunk;
-                    sentenceBuffer += cleanChunk;
 
-                    const sentenceCount = (sentenceBuffer.match(/[.!?](\s|$)/g) || []).length;
-                    
-                    if (sentenceCount >= 2) {
+                    // [수정] 약 20글자마다 화면 갱신
+                    if (fullText.length - lastRenderedLength >= 20) {
                         botContent.innerHTML = marked.parse(fullText);
-                        sentenceBuffer = ""; 
+                        lastRenderedLength = fullText.length;
 
-                        // [2] 봇 메시지 높이만큼 패딩 감소 (여백 갉아먹기)
+                        // [2] 봇 메시지 높이만큼 패딩 감소 (자연스럽게 채워짐)
                         const currentBotHeight = botContent.offsetHeight;
                         let newPadding = allocatedPadding - currentBotHeight;
                         if (newPadding < 160) newPadding = 160;
@@ -463,9 +456,9 @@
                     }
                 }
                 
+                // 루프 종료 후 남은 텍스트 최종 렌더링
                 botContent.innerHTML = marked.parse(fullText);
                 
-                // 최종 높이 반영
                 const finalBotHeight = botContent.offsetHeight;
                 let finalPadding = allocatedPadding - finalBotHeight;
                 if (finalPadding < 160) finalPadding = 160;
@@ -494,8 +487,6 @@
                 sendBtn.innerHTML = '<span class="material-symbols-rounded">arrow_upward</span>';
                 sendBtn.disabled = true; 
                 adjustHeight(); 
-                
-                // 여백 리셋 안 함 (자연스럽게 둠)
             }
         }
 
