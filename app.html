@@ -11,7 +11,6 @@
 
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
 <script src="https://unpkg.com/@phosphor-icons/web"></script>
-
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
 <style>
@@ -59,13 +58,6 @@
         display: block;
     }
 
-    /* Phosphor 아이콘 스타일 */
-    .ph {
-        font-size: 20px;
-        color: #374151;
-        vertical-align: middle;
-    }
-
     /* --- 사이드바 (Sidebar) --- */
     .sidebar-overlay {
         position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -108,19 +100,35 @@
     .sidebar-menu-btn:hover { background-color: #E5E7EB; }
     .sidebar-menu-btn .material-symbols-rounded { font-size: 20px; color: #4B5563; }
 
+    /* 검색창 (숨김 상태 기본) */
+    .sidebar-search-container {
+        display: none;
+        padding: 0 10px 10px 10px;
+    }
+    .sidebar-search-input {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #E5E7EB;
+        border-radius: 6px;
+        font-size: 13px;
+        outline: none;
+        box-sizing: border-box;
+    }
+    .sidebar-search-input:focus { border-color: var(--primary-color); }
+
+
     .sidebar-section-title {
         font-size: 11px; color: #9CA3AF; font-weight: 600;
         margin-top: 20px; margin-bottom: 6px; padding-left: 10px;
     }
 
-    /* 채팅 목록 리스트 스타일 */
     #savedChatList {
         display: flex; flex-direction: column; gap: 2px;
     }
     
     .chat-history-item {
         display: flex; align-items: center; justify-content: space-between;
-        padding: 6px 10px; /* 얇게 조정 */
+        padding: 6px 10px; 
         border-radius: 8px;
         cursor: pointer;
         color: #374151;
@@ -136,18 +144,19 @@
         white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1;
         padding-right: 8px;
     }
+    .chat-history-item.hidden { display: none; } /* 검색 필터링용 */
+
     .chat-item-options {
-        display: none; /* 기본 숨김 */
+        display: none; 
         padding: 2px; border-radius: 4px; color: #6B7280;
     }
     .chat-item-options:hover {
         background-color: #D1D5DB; color: #1F2937;
     }
     .chat-history-item:hover .chat-item-options {
-        display: block; /* 호버 시 노출 */
+        display: block; 
     }
 
-    /* 채팅 목록 옵션 메뉴 (더보기 클릭 시) */
     .history-menu-dropdown {
         position: absolute; right: 10px; top: 30px;
         width: 110px;
@@ -166,7 +175,6 @@
     .history-menu-item.delete { color: #EF4444; }
     .history-menu-item .material-symbols-rounded { font-size: 16px; }
 
-
     .sidebar-footer {
         padding: 10px; 
         margin: 0 8px 8px 8px; 
@@ -175,15 +183,12 @@
         cursor: pointer; 
         transition: all 0.2s;
     }
-    .sidebar-footer:hover { 
-        background-color: #E5E7EB; 
-    }
+    .sidebar-footer:hover { background-color: #E5E7EB; }
     
     .user-avatar img {
         width: 32px; height: 32px; border-radius: 50%; object-fit: cover;
         border: 1px solid #E5E7EB;
     }
-    
     .user-info { display: flex; flex-direction: column; }
     .user-name { font-size: 13px; font-weight: 600; color: #1F2937; }
     .user-plan { font-size: 11px; color: #6B7280; }
@@ -199,7 +204,6 @@
         z-index: 1000; font-size: 1rem; color: #1F2937;
         transition: left 0.3s cubic-bezier(0.25, 1, 0.5, 1), width 0.3s cubic-bezier(0.25, 1, 0.5, 1);
     }
-
     .top-left {
         display: flex; align-items: center; gap: 6px;
         font-weight: 600; cursor: pointer;
@@ -214,7 +218,6 @@
     .pc-sidebar-open-btn:hover { color: #1F2937; }
 
     .top-right { display: flex; align-items: center; gap: 6px; }
-
     .offer-pill {
         background-color: #EFEEFC; color: #7C3AED;
         font-size: 12px; font-weight: 500;
@@ -228,22 +231,15 @@
 
     .share-btn {
         display: flex; align-items: center; gap: 4px;
-        padding: 6px 10px;
-        border: 1px solid #E5E7EB;
-        border-radius: 999px;
-        background: transparent;
-        cursor: pointer;
+        padding: 6px 10px; border: 1px solid #E5E7EB; border-radius: 999px;
+        background: transparent; cursor: pointer;
         font-size: 12px; color: #374151;
-        transition: background-color 0.2s;
-        white-space: nowrap; font-family: inherit;
+        transition: background-color 0.2s; white-space: nowrap; font-family: inherit;
     }
     .share-btn:hover { background-color: #F9FAFB; }
     .share-btn .material-symbols-rounded { font-size: 16px; }
 
-    .dots-btn {
-        padding: 6px; background: transparent; border: none;
-        cursor: pointer; color: #374151; border-radius: 6px;
-    }
+    .dots-btn { padding: 6px; background: transparent; border: none; cursor: pointer; color: #374151; border-radius: 6px; }
     .dots-btn:hover { background-color: #F3F4F6; }
 
     @media (max-width: 768px) {
@@ -272,24 +268,20 @@
     .message-row.user { align-items: flex-end; }
     .message-row.bot { align-items: flex-start; }
 
-    /* 유저 버블 컨테이너 (버튼 포함) */
+    /* 유저 버블 */
     .user-bubble-container {
         display: flex; align-items: center; gap: 8px; flex-direction: row-reverse;
         max-width: 75%;
     }
-
     .user-bubble {
         background-color: var(--user-bubble-bg);
         color: var(--user-bubble-text);          
         padding: 8px 14px;
         border-radius: var(--radius-bubble);
         word-break: break-word;
-        font-size: 14px; 
-        line-height: 1.5;
+        font-size: 14px; line-height: 1.5;
         position: relative;
     }
-
-    /* 유저 복사 버튼 */
     .user-copy-btn {
         opacity: 0; pointer-events: none;
         padding: 4px; background: transparent; border: none; cursor: pointer;
@@ -298,7 +290,6 @@
     .user-copy-btn:hover { background-color: #F3F4F6; color: #4B5563; }
     .user-bubble-container:hover .user-copy-btn { opacity: 1; pointer-events: auto; }
 
-
     .bot-text {
         color: #1F2937;
         padding: 6px 0;
@@ -306,22 +297,11 @@
         font-size: 15px; line-height: 1.6; 
         word-break: break-word; will-change: contents;
     }
-
-    .bot-text.animate-in {
-        animation: textWipe 0.5s cubic-bezier(0.25, 1, 0.5, 1) forwards;
-    }
+    .bot-text.animate-in { animation: textWipe 0.5s cubic-bezier(0.25, 1, 0.5, 1) forwards; }
 
     @keyframes textWipe {
         0% { opacity: 0; filter: blur(2px); }
         100% { opacity: 1; filter: blur(0px); }
-    }
-
-    .reveal-chunk {
-        display: inline; opacity: 0; filter: blur(2px); 
-        animation: textWipe 0.5s cubic-bezier(0.25, 1, 0.5, 1) forwards;
-    }
-    .reveal-chunk.done {
-        opacity: 1; filter: none; animation: none !important;
     }
 
     .bot-text p { margin: 0 0 12px 0; } 
@@ -332,16 +312,14 @@
     .bot-text ul, .bot-text ol { margin: 12px 0; padding-left: 20px; }
     .bot-text blockquote { border-left: 3px solid #e5e7eb; margin: 12px 0; padding-left: 12px; color: #6b7280; }
 
-    /* 봇 답변 아래 버튼 영역 */
+    /* 봇 액션 바 */
     .bot-action-bar {
         display: flex; gap: 6px; margin-top: 6px;
         opacity: 0; transform: translateY(5px);
         transition: opacity 0.4s ease, transform 0.4s ease;
-        pointer-events: none; /* 보이기 전 클릭 방지 */
+        pointer-events: none; 
     }
-    .bot-action-bar.visible {
-        opacity: 1; transform: translateY(0); pointer-events: auto;
-    }
+    .bot-action-bar.visible { opacity: 1; transform: translateY(0); pointer-events: auto; }
 
     .action-btn {
         display: flex; align-items: center; gap: 4px;
@@ -366,9 +344,8 @@
         background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent; 
         animation: textShimmer 3s linear infinite; transition: all 0.2s ease;
     }
-    .analyzing-text:hover { background: none; -webkit-text-fill-color: #000000; color: #000000; animation: none; }
 
-    /* --- 하단 입력창 및 래퍼 --- */
+    /* --- 하단 입력창 --- */
     .bottom-fixed-wrapper {
         position: fixed; bottom: 0; left: 0; width: 100%;
         display: flex; flex-direction: column; align-items: center;
@@ -386,43 +363,26 @@
         transition: height 0.1s ease; box-shadow: none !important;
     }
     
-    /* [NEW] 스크롤 다운 버튼 스타일 */
     .scroll-to-bottom-btn {
-        position: absolute;
-        top: -45px; /* 입력창 바로 위 */
-        left: 50%;
-        transform: translateX(-50%) scale(0); /* 기본 숨김 (scale 0) */
+        position: absolute; top: -45px; left: 50%;
+        transform: translateX(-50%) scale(0); 
         width: 32px; height: 32px;
-        background-color: #fff;
-        border: 1px solid #E5E7EB;
-        border-radius: 50%;
+        background-color: #fff; border: 1px solid #E5E7EB; border-radius: 50%;
         box-shadow: 0 2px 6px rgba(0,0,0,0.1);
         display: flex; justify-content: center; align-items: center;
-        cursor: pointer;
-        z-index: 2100;
-        pointer-events: auto;
+        cursor: pointer; z-index: 2100; pointer-events: auto;
         transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s;
         opacity: 0;
     }
-    /* 버튼 보일 때 클래스 */
-    .scroll-to-bottom-btn.show {
-        transform: translateX(-50%) scale(1);
-        opacity: 1;
-    }
-    .scroll-to-bottom-btn:hover {
-        background-color: #F9FAFB;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    }
-    .scroll-to-bottom-btn i {
-        font-size: 16px;
-        color: #4B5563;
-    }
+    .scroll-to-bottom-btn.show { transform: translateX(-50%) scale(1); opacity: 1; }
+    .scroll-to-bottom-btn:hover { background-color: #F9FAFB; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+    .scroll-to-bottom-btn i { font-size: 16px; color: #4B5563; }
 
     .chat-textarea {
         width: 100%; border: none; background: transparent; resize: none; outline: none;
         font-size: 15px; color: #333; font-family: inherit; padding: 0;
         line-height: var(--line-height); height: var(--line-height);
-        max-height: calc(var(--line-height) * 8); overflow-y: hidden; scrollbar-width: none;
+        max-height: calc(var(--line-height) * 8); overflow-y: hidden;
     }
     .chat-textarea::-webkit-scrollbar { display: none; }
     .chat-textarea::placeholder { color: #9CA3AF; }
@@ -468,7 +428,7 @@
     .menu-item:hover { background-color: #F3F4F6; }
     .menu-item .material-symbols-rounded { font-size: 18px; color: #4B5563; }
 
-    /* 모달 (이름 변경) */
+    /* 모달 */
     .modal-overlay {
         position: fixed; top: 0; left: 0; width: 100%; height: 100%;
         background-color: rgba(0,0,0,0.5); z-index: 3000;
@@ -476,68 +436,101 @@
         opacity: 0; transition: opacity 0.2s;
     }
     .modal-overlay.open { display: flex; opacity: 1; }
-    
     .modal-window {
         background-color: #fff; width: 320px; border-radius: 12px;
         padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1);
         transform: scale(0.95); transition: transform 0.2s;
     }
     .modal-overlay.open .modal-window { transform: scale(1); }
-    
     .modal-title { font-size: 16px; font-weight: 600; margin-bottom: 12px; }
     .modal-input {
         width: 100%; padding: 10px; border: 1px solid #E5E7EB; border-radius: 8px;
         font-size: 14px; box-sizing: border-box; outline: none; margin-bottom: 16px;
     }
     .modal-input:focus { border-color: var(--primary-color); }
-    
     .modal-actions { display: flex; justify-content: flex-end; gap: 8px; }
-    .modal-btn {
-        padding: 8px 14px; border-radius: 6px; font-size: 13px; cursor: pointer; border: none; font-weight: 500;
-    }
+    .modal-btn { padding: 8px 14px; border-radius: 6px; font-size: 13px; cursor: pointer; border: none; font-weight: 500; }
     .btn-cancel { background-color: #F3F4F6; color: #374151; }
     .btn-confirm { background-color: var(--primary-color); color: #fff; }
 
-    /* ==========================================================================
-       [PC 레이아웃 (769px 이상)]
-       ========================================================================== */
+    /* --- 사고과정 / 인용 패널 (Side Panel) --- */
+    .side-panel {
+        position: fixed; top: 0; right: 0; width: 350px; height: 100%;
+        background-color: #fff; border-left: 1px solid #E5E7EB;
+        z-index: 2500; transform: translateX(100%);
+        transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+        display: flex; flex-direction: column;
+        box-shadow: -4px 0 15px rgba(0,0,0,0.05);
+    }
+    .side-panel.open { transform: translateX(0); }
+
+    .side-panel-header {
+        padding: 16px; display: flex; justify-content: space-between; align-items: center;
+        border-bottom: 1px solid #E5E7EB; font-weight: 600; font-size: 15px; color: #1F2937;
+    }
+    .close-panel-btn { cursor: pointer; padding: 4px; border-radius: 4px; color: #6B7280; }
+    .close-panel-btn:hover { background-color: #F3F4F6; }
+
+    .side-panel-content {
+        flex: 1; padding: 16px; overflow-y: auto;
+        font-size: 14px; line-height: 1.6; color: #4B5563;
+    }
+    
+    /* 사고과정 텍스트 스타일 */
+    .thought-content { color: #6B7280; white-space: pre-wrap; font-family: sans-serif; }
+
+    /* 인용(Citation) 카드 그리드 */
+    .citation-grid {
+        display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+    }
+    .citation-card {
+        border: 1px solid #E5E7EB; border-radius: 8px; padding: 10px;
+        cursor: pointer; transition: all 0.2s; display: flex; flex-direction: column; gap: 6px;
+        background-color: #fff; text-decoration: none;
+    }
+    .citation-card:hover { border-color: var(--primary-color); box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+    .citation-title { font-weight: 600; color: #1F2937; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .citation-desc { font-size: 11px; color: #6B7280; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.4; }
+
+    /* 모바일 Bottom Sheet 스타일 */
+    @media (max-width: 768px) {
+        .side-panel {
+            top: auto; bottom: 0; right: 0; left: 0;
+            width: 100%; height: 60vh;
+            border-left: none; border-top: 1px solid #E5E7EB;
+            transform: translateY(100%);
+            border-top-left-radius: 16px; border-top-right-radius: 16px;
+        }
+        .side-panel.open { transform: translateY(0); }
+    }
+
+    /* PC 레이아웃 */
     @media (min-width: 769px) {
         .sidebar { box-shadow: none; border-right: 1px solid #E5E7EB; }
         .mobile-menu-icon { display: none !important; }
 
-        /* [열림 상태] */
         body.pc-sidebar-open .sidebar { transform: translateX(0); }
         body.pc-sidebar-open .top-bar { left: var(--sidebar-width); width: calc(100% - var(--sidebar-width)); }
         body.pc-sidebar-open .bottom-fixed-wrapper { left: var(--sidebar-width); width: calc(100% - var(--sidebar-width)); }
         
         body.pc-sidebar-open .chat-container { 
             margin-left: calc(var(--sidebar-width) + (100% - var(--sidebar-width) - var(--content-max-width)) / 2);
-            margin-right: 0; 
-            width: var(--content-max-width);
-            max-width: none;
+            margin-right: 0; width: var(--content-max-width); max-width: none;
         }
         
         @media (max-width: 1000px) {
             body.pc-sidebar-open .chat-container {
-                margin-left: var(--sidebar-width);
-                width: calc(100% - var(--sidebar-width));
-                max-width: none;
-                padding-left: 20px; padding-right: 20px;
+                margin-left: var(--sidebar-width); width: calc(100% - var(--sidebar-width));
+                max-width: none; padding-left: 20px; padding-right: 20px;
             }
         }
-
-        /* [닫힘 상태] */
         body:not(.pc-sidebar-open) .sidebar { transform: translateX(-100%); }
         body:not(.pc-sidebar-open) .top-bar { left: 0; width: 100%; }
         body:not(.pc-sidebar-open) .bottom-fixed-wrapper { left: 0; width: 100%; }
-        
         body:not(.pc-sidebar-open) .chat-container { 
             margin-left: calc((100% - var(--content-max-width)) / 2);
-            margin-right: 0; 
-            max-width: var(--content-max-width); 
-            width: var(--content-max-width); 
+            margin-right: 0; max-width: var(--content-max-width); width: var(--content-max-width); 
         }
-        
         body:not(.pc-sidebar-open) .pc-sidebar-open-btn { display: inline-block; }
     }
 </style>
@@ -561,9 +554,13 @@
             <button class="sidebar-menu-btn" id="newChatBtn">
                 <span class="material-symbols-rounded">edit_square</span> 새 채팅
             </button>
-            <button class="sidebar-menu-btn">
+            <button class="sidebar-menu-btn" id="sidebarSearchToggle">
                 <span class="material-symbols-rounded">search</span> 채팅 검색
             </button>
+            <div class="sidebar-search-container" id="sidebarSearchContainer">
+                <input type="text" id="chatSearchInput" class="sidebar-search-input" placeholder="채팅 제목 검색...">
+            </div>
+
             <button class="sidebar-menu-btn">
                 <span class="material-symbols-rounded">image</span> 이미지
             </button>
@@ -582,7 +579,6 @@
             </div>
         </div>
     </aside>
-
 
     <header class="top-bar">
         <div class="top-left" id="headerTitleArea">
@@ -640,6 +636,27 @@
         </div>
     </div>
 
+    <div id="thoughtPanel" class="side-panel">
+        <div class="side-panel-header">
+            <span>사고 과정</span>
+            <span class="material-symbols-rounded close-panel-btn" onclick="toggleThoughtPanel(false)">close</span>
+        </div>
+        <div class="side-panel-content" id="thoughtContentArea">
+            </div>
+    </div>
+
+    <div id="citationPanel" class="side-panel">
+        <div class="side-panel-header">
+            <span>참조 자료</span>
+            <span class="material-symbols-rounded close-panel-btn" onclick="toggleCitationPanel(false)">close</span>
+        </div>
+        <div class="side-panel-content">
+            <div class="citation-grid" id="citationGridArea">
+                </div>
+        </div>
+    </div>
+
+
     <script>
         const chatContainer = document.getElementById('chatContainer');
         const chatInput = document.getElementById('chatInput');
@@ -650,6 +667,11 @@
         const scrollToBottomBtn = document.getElementById('scrollToBottomBtn');
         const newChatBtn = document.getElementById('newChatBtn');
         const savedChatList = document.getElementById('savedChatList');
+        
+        // 검색 관련
+        const sidebarSearchToggle = document.getElementById('sidebarSearchToggle');
+        const sidebarSearchContainer = document.getElementById('sidebarSearchContainer');
+        const chatSearchInput = document.getElementById('chatSearchInput');
 
         const sidebar = document.getElementById('sidebar');
         const sidebarOverlay = document.getElementById('sidebarOverlay');
@@ -657,33 +679,34 @@
         const sidebarCloseBtn = document.getElementById('sidebarCloseBtn');
         const pcSidebarOpenBtn = document.getElementById('pcSidebarOpenBtn');
 
-        // 모달 관련 요소
         const renameModalOverlay = document.getElementById('renameModalOverlay');
         const renameInput = document.getElementById('renameInput');
         const renameCancelBtn = document.getElementById('renameCancelBtn');
         const renameConfirmBtn = document.getElementById('renameConfirmBtn');
+
+        // 패널
+        const thoughtPanel = document.getElementById('thoughtPanel');
+        const thoughtContentArea = document.getElementById('thoughtContentArea');
+        const citationPanel = document.getElementById('citationPanel');
+        const citationGridArea = document.getElementById('citationGridArea');
 
         let conversationHistory = [];
         let abortController = null;
         let isGenerating = false;
         let isFirstMessage = true; 
         let currentChatId = null;
-        let renameTargetId = null; // 이름 변경할 타겟 채팅 ID
+        let renameTargetId = null;
 
         marked.setOptions({ breaks: true, sanitize: false });
 
-        // --- 유틸리티 함수: UUID 생성 ---
         function generateUUID() {
-            if (typeof crypto !== 'undefined' && crypto.randomUUID) {
-                return crypto.randomUUID();
-            }
+            if (typeof crypto !== 'undefined' && crypto.randomUUID) return crypto.randomUUID();
             return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
                 var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
                 return v.toString(16);
             });
         }
 
-        // --- 로컬 스토리지 관리 ---
         function getSavedChats() {
             const stored = localStorage.getItem('minsuGptChats');
             return stored ? JSON.parse(stored) : {};
@@ -697,16 +720,11 @@
         function saveCurrentChat() {
             if (!currentChatId) return;
             const chats = getSavedChats();
-            
-            // 제목이 없으면 첫 메시지로 설정
             let title = "새로운 채팅";
             if (conversationHistory.length > 0) {
                 const firstUserMsg = conversationHistory.find(m => m.role === 'user');
-                if (firstUserMsg) {
-                    title = firstUserMsg.content.substring(0, 30);
-                }
+                if (firstUserMsg) title = firstUserMsg.content.substring(0, 30);
             }
-            // 이미 저장된 제목이 있다면 유지
             if (chats[currentChatId] && chats[currentChatId].title) {
                 title = chats[currentChatId].title;
             }
@@ -727,18 +745,23 @@
                 conversationHistory = chats[id].history || [];
                 chatContainer.innerHTML = '';
                 
-                // 화면에 기록 렌더링
                 conversationHistory.forEach(msg => {
-                    addMessage(msg.content, msg.role, false);
+                    // 저장된 기록에는 rawContent(사고과정 포함)가 content에 있을 수 있음.
+                    // 표시할 때는 정제해서 보여주거나, 저장 시 정제된 것만 저장해야 하는데
+                    // 여기서는 렌더링 시 필터링하여 보여주고, 버튼 복원 로직이 필요함.
+                    // 간단화를 위해 addMessage가 [THOUGHT] 제거 후 렌더링하도록 함.
+                    addMessage(msg.content, msg.role, false); 
                 });
                 
                 isFirstMessage = false;
                 document.body.style.overflowY = 'auto';
                 
-                // URL 업데이트 (페이지 이동 없음)
-                history.pushState({ chatId: id }, '', `?chat=${id}`);
-                
-                // 스크롤 맨 아래로
+                // URL 변경 (페이지 이동 없음)
+                const newUrl = window.location.protocol + "//" + window.location.host + "/" + id;
+                window.history.pushState({ chatId: id }, '', newUrl);
+
+                // 스크롤 화살표 제거 및 스크롤 이동
+                scrollToBottomBtn.classList.remove('show');
                 window.scrollTo({ top: document.body.scrollHeight, behavior: 'auto' });
                 
                 renderSidebar();
@@ -749,9 +772,7 @@
             const chats = getSavedChats();
             delete chats[id];
             saveChatsToStorage(chats);
-            if (currentChatId === id) {
-                startNewChat();
-            }
+            if (currentChatId === id) startNewChat();
         }
 
         function openRenameModal(id) {
@@ -763,12 +784,10 @@
                 renameInput.focus();
             }
         }
-
         function closeRenameModal() {
             renameModalOverlay.classList.remove('open');
             renameTargetId = null;
         }
-
         renameCancelBtn.addEventListener('click', closeRenameModal);
         renameConfirmBtn.addEventListener('click', () => {
             if (renameTargetId) {
@@ -784,10 +803,31 @@
             }
         });
 
-        // --- 사이드바 렌더링 ---
+        // 채팅 검색
+        sidebarSearchToggle.addEventListener('click', () => {
+            if (sidebarSearchContainer.style.display === 'block') {
+                sidebarSearchContainer.style.display = 'none';
+            } else {
+                sidebarSearchContainer.style.display = 'block';
+                chatSearchInput.focus();
+            }
+        });
+
+        chatSearchInput.addEventListener('input', (e) => {
+            const query = e.target.value.toLowerCase();
+            const items = savedChatList.querySelectorAll('.chat-history-item');
+            items.forEach(item => {
+                const title = item.querySelector('.chat-title').innerText.toLowerCase();
+                if (title.includes(query)) {
+                    item.classList.remove('hidden');
+                } else {
+                    item.classList.add('hidden');
+                }
+            });
+        });
+
         function renderSidebar() {
             const chats = getSavedChats();
-            // 최신순 정렬
             const sortedChats = Object.values(chats).sort((a, b) => b.lastUpdated - a.lastUpdated);
             
             savedChatList.innerHTML = '';
@@ -800,21 +840,15 @@
                         <span class="material-symbols-rounded" style="font-size:16px;">more_vert</span>
                     </div>
                 `;
-                
-                // 채팅 클릭 시 로드
                 itemDiv.addEventListener('click', (e) => {
-                    // 옵션 버튼 클릭이면 로드하지 않음
                     if (e.target.closest('.chat-item-options') || e.target.closest('.history-menu-dropdown')) return;
                     loadChatFromStorage(chat.id);
                 });
 
-                // 더보기 버튼 클릭 이벤트
                 const optionBtn = itemDiv.querySelector('.chat-item-options');
                 optionBtn.addEventListener('click', (e) => {
                     e.stopPropagation();
-                    // 기존 열린 메뉴 닫기
                     document.querySelectorAll('.history-menu-dropdown').forEach(el => el.remove());
-                    
                     const dropdown = document.createElement('div');
                     dropdown.className = 'history-menu-dropdown show';
                     dropdown.innerHTML = `
@@ -822,31 +856,21 @@
                         <div class="history-menu-item delete" id="menuDelete"><span class="material-symbols-rounded">delete</span> 삭제</div>
                     `;
                     itemDiv.appendChild(dropdown);
-
                     dropdown.querySelector('#menuRename').addEventListener('click', (ev) => {
-                        ev.stopPropagation();
-                        openRenameModal(chat.id);
-                        dropdown.remove();
+                        ev.stopPropagation(); openRenameModal(chat.id); dropdown.remove();
                     });
-                    
                     dropdown.querySelector('#menuDelete').addEventListener('click', (ev) => {
-                        ev.stopPropagation();
-                        deleteChat(chat.id);
+                        ev.stopPropagation(); deleteChat(chat.id);
                     });
                 });
-
                 savedChatList.appendChild(itemDiv);
             });
         }
         
-        // 전역 클릭 시 사이드바 드롭다운 닫기
         document.addEventListener('click', (e) => {
-            if (!e.target.closest('.chat-history-item')) {
-                document.querySelectorAll('.history-menu-dropdown').forEach(el => el.remove());
-            }
+            if (!e.target.closest('.chat-history-item')) document.querySelectorAll('.history-menu-dropdown').forEach(el => el.remove());
         });
 
-        // 새 채팅 시작
         function startNewChat() {
             if (isGenerating && abortController) abortController.abort();
             currentChatId = null;
@@ -857,63 +881,60 @@
             sendBtn.disabled = true;
             adjustHeight();
             
-            // URL 리셋
-            history.pushState({}, '', window.location.pathname);
+            // 주소 초기화
+            const baseUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+            history.pushState({}, '', baseUrl);
+            
+            // [버그수정] 스크롤 버튼 강제 숨김
+            scrollToBottomBtn.classList.remove('show');
+            
             renderSidebar();
         }
 
         newChatBtn.addEventListener('click', startNewChat);
 
-        // --- 초기 로드 ---
         window.addEventListener('load', () => {
             renderSidebar();
-            // URL 파라미터 확인
-            const urlParams = new URLSearchParams(window.location.search);
-            const chatParam = urlParams.get('chat');
-            if (chatParam) {
-                loadChatFromStorage(chatParam);
-            }
-        });
-
-        // 뒤로가기 처리
-        window.addEventListener('popstate', (event) => {
-            if (event.state && event.state.chatId) {
-                loadChatFromStorage(event.state.chatId);
+            // URL path 파싱하여 로드 (예: /uuid)
+            const pathSegments = window.location.pathname.split('/').filter(p => p.length > 0);
+            if (pathSegments.length > 0) {
+                const potentialId = pathSegments[pathSegments.length - 1];
+                // UUID 형식이면 로드 시도
+                if (potentialId.length > 20) { 
+                    loadChatFromStorage(potentialId);
+                }
             } else {
-                startNewChat();
+                // 이전 쿼리스트링 방식 호환
+                const urlParams = new URLSearchParams(window.location.search);
+                const chatParam = urlParams.get('chat');
+                if (chatParam) loadChatFromStorage(chatParam);
             }
         });
 
+        window.addEventListener('popstate', (event) => {
+            if (event.state && event.state.chatId) loadChatFromStorage(event.state.chatId);
+            else startNewChat();
+        });
 
-        // --- 기존 기능 유지 ---
         function adjustHeight() {
             chatInput.style.height = 'auto'; 
             let scrollHeight = chatInput.scrollHeight;
             if (scrollHeight > 150) { 
-                chatInput.style.height = '150px';
-                chatInput.style.overflowY = 'scroll'; 
+                chatInput.style.height = '150px'; chatInput.style.overflowY = 'scroll'; 
             } else {
-                chatInput.style.height = scrollHeight + 'px';
-                chatInput.style.overflowY = 'hidden'; 
+                chatInput.style.height = scrollHeight + 'px'; chatInput.style.overflowY = 'hidden'; 
             }
             if (!isGenerating) sendBtn.disabled = chatInput.value.trim().length === 0;
         }
 
         function toggleSidebar() {
-            if (window.innerWidth > 768) {
-                document.body.classList.toggle('pc-sidebar-open');
-            } else {
+            if (window.innerWidth > 768) document.body.classList.toggle('pc-sidebar-open');
+            else {
                 const isOpen = sidebar.classList.contains('open');
-                if (isOpen) {
-                    sidebar.classList.remove('open');
-                    sidebarOverlay.classList.remove('open');
-                } else {
-                    sidebar.classList.add('open');
-                    sidebarOverlay.classList.add('open');
-                }
+                if (isOpen) { sidebar.classList.remove('open'); sidebarOverlay.classList.remove('open'); }
+                else { sidebar.classList.add('open'); sidebarOverlay.classList.add('open'); }
             }
         }
-
         mobileMenuBtn.addEventListener('click', toggleSidebar);
         sidebarCloseBtn.addEventListener('click', toggleSidebar);
         pcSidebarOpenBtn.addEventListener('click', toggleSidebar);
@@ -922,72 +943,79 @@
         function checkScrollPosition() {
             const scrollBottom = window.scrollY + window.innerHeight;
             const docHeight = document.documentElement.scrollHeight;
-            
-            if (docHeight - scrollBottom > 100) {
-                scrollToBottomBtn.classList.add('show');
-            } else {
-                scrollToBottomBtn.classList.remove('show');
-            }
+            if (docHeight - scrollBottom > 100) scrollToBottomBtn.classList.add('show');
+            else scrollToBottomBtn.classList.remove('show');
         }
         window.addEventListener('scroll', checkScrollPosition);
-
         scrollToBottomBtn.addEventListener('click', () => {
             window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
         });
 
         function forceScrollToMessage(element) {
-            const headerHeight = 50; 
-            const topGap = 20;       
+            const headerHeight = 50; const topGap = 20;       
             const targetVisualTop = headerHeight + topGap; 
-
             const rect = element.getBoundingClientRect();
             const absoluteElementTop = window.scrollY + rect.top;
             const targetScrollY = absoluteElementTop - targetVisualTop;
             const windowHeight = window.innerHeight;
             const elementHeight = element.offsetHeight;
-            
             let requiredPadding = windowHeight - (targetVisualTop + elementHeight);
             if (requiredPadding < 160) requiredPadding = 160;
-            
             chatContainer.style.paddingBottom = requiredPadding + 'px';
             window.scrollTo({ top: targetScrollY, behavior: 'smooth' });
-            
             return requiredPadding;
         }
 
-        // --- 봇 답변 재생성 함수 ---
-        async function regenerateResponse() {
+        function regenerateResponse() {
             if (conversationHistory.length === 0) return;
-
-            // 마지막 메시지가 봇인지 확인
             const lastMsg = conversationHistory[conversationHistory.length - 1];
             if (lastMsg.role === 'assistant') {
-                // 히스토리에서 제거
                 conversationHistory.pop();
-                // UI에서 마지막 봇 메시지 제거
                 const botRows = document.querySelectorAll('.message-row.bot');
-                if (botRows.length > 0) {
-                    botRows[botRows.length - 1].remove();
-                }
+                if (botRows.length > 0) botRows[botRows.length - 1].remove();
             }
-            
-            // 마지막 유저 메시지 찾기
             const lastUserMsg = conversationHistory[conversationHistory.length - 1];
-            if (!lastUserMsg || lastUserMsg.role !== 'user') return; // 유저 메시지 없으면 중단
-            
-            // 재생성 시작 (텍스트 재사용)
-            sendMessage(lastUserMsg.content, true); // true = 재생성 모드 (UI 추가 안함)
+            if (!lastUserMsg || lastUserMsg.role !== 'user') return;
+            sendMessage(lastUserMsg.content, true);
         }
 
-
-        // --- 메시지 전송 로직 수정 ---
-        async function sendMessage(textOverride = null, isRegen = false) {
-            if (isGenerating) {
-                if (abortController) {
-                    abortController.abort();
-                }
-                return;
+        // --- 패널 제어 함수 ---
+        function toggleThoughtPanel(show, content = '') {
+            if (show) {
+                // 인용 패널 닫기
+                toggleCitationPanel(false);
+                thoughtContentArea.innerHTML = `<div class="thought-content">${content}</div>`;
+                thoughtPanel.classList.add('open');
+            } else {
+                thoughtPanel.classList.remove('open');
             }
+        }
+
+        function toggleCitationPanel(show, items = []) {
+            if (show) {
+                // 사고 패널 닫기
+                toggleThoughtPanel(false);
+                citationGridArea.innerHTML = '';
+                items.forEach(item => {
+                    const card = document.createElement('a');
+                    card.className = 'citation-card';
+                    card.href = item.url;
+                    card.target = "_blank";
+                    card.innerHTML = `
+                        <div class="citation-title">${item.title}</div>
+                        <div class="citation-desc">${item.content.length > 80 ? item.content.substring(0,80) + '...' : item.content}</div>
+                    `;
+                    citationGridArea.appendChild(card);
+                });
+                citationPanel.classList.add('open');
+            } else {
+                citationPanel.classList.remove('open');
+            }
+        }
+
+        // --- 메시지 전송 로직 ---
+        async function sendMessage(textOverride = null, isRegen = false) {
+            if (isGenerating) { if (abortController) abortController.abort(); return; }
 
             const text = textOverride || chatInput.value.trim();
             if (text.length === 0) return;
@@ -997,28 +1025,27 @@
                 isFirstMessage = false;
             }
 
-            // 최초 메시지 전송 시 채팅 ID 생성 및 URL 변경
             if (!currentChatId) {
                 currentChatId = generateUUID();
-                history.pushState({ chatId: currentChatId }, '', `?chat=${currentChatId}`);
+                // URL 변경
+                const newUrl = window.location.protocol + "//" + window.location.host + "/" + currentChatId;
+                window.history.pushState({ chatId: currentChatId }, '', newUrl);
             }
 
             let userMsgElement;
-            if (!isRegen) { // 재생성이 아닐 때만 유저 메시지 추가
+            if (!isRegen) {
                 userMsgElement = addMessage(text, 'user');
                 conversationHistory.push({ role: "user", content: text });
                 chatInput.value = '';
                 adjustHeight();
                 
-                // [요청] 메시지 보내면 맨 아래로 즉시 스크롤
+                // [요청 반영] 즉시 맨 아래로 스크롤
                 window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
             } else {
-                // 재생성이면 마지막 유저 메시지 요소 찾기 (스크롤용)
                 const userRows = document.querySelectorAll('.message-row.user');
                 userMsgElement = userRows[userRows.length - 1];
             }
             
-            // 저장 (유저 질문 시점)
             saveCurrentChat();
 
             isGenerating = true;
@@ -1026,12 +1053,8 @@
             sendBtn.disabled = false;
             
             let allocatedPadding = 160;
-            
-            // 답변 시작 시 시야 조정
             if (userMsgElement) {
-                requestAnimationFrame(() => {
-                    allocatedPadding = forceScrollToMessage(userMsgElement);
-                });
+                requestAnimationFrame(() => { allocatedPadding = forceScrollToMessage(userMsgElement); });
             }
 
             const isSearchMode = searchBtn.classList.contains('active');
@@ -1040,7 +1063,8 @@
 
             abortController = new AbortController();
             let botContent = null; 
-            let fullText = ""; 
+            let rawFullText = ""; // 태그 포함 전체 텍스트
+            let visibleText = ""; // 태그 제외 텍스트
 
             try {
                 const response = await fetch(isSearchMode ? "https://jaewondev.pythonanywhere.com/ask" : "https://jaewondev.pythonanywhere.com/askfast", {
@@ -1075,16 +1099,14 @@
                     
                     const chunk = decoder.decode(value, { stream: true });
                     const cleanChunk = chunk.replace(/\[DONE\]/g, "");
-                    
                     buffer += cleanChunk;
+                    rawFullText += cleanChunk; // 원본 누적
+
+                    // 1. [THOUGHT] 태그 제거 로직 (화면 표시용)
+                    visibleText = rawFullText.replace(/\[THOUGHT\][\s\S]*?\[\/THOUGHT\]/g, '');
 
                     if (/[.!?\n]/.test(buffer) || buffer.length > 20) {
-                        const scrollBottom = window.scrollY + window.innerHeight;
-                        const docHeightBefore = document.documentElement.scrollHeight;
-                        const isAtBottom = (docHeightBefore - scrollBottom) < 100;
-
-                        fullText += buffer;
-                        botContent.innerHTML = marked.parse(fullText);
+                        botContent.innerHTML = marked.parse(visibleText);
                         buffer = ""; 
 
                         const currentBotHeight = botContent.offsetHeight;
@@ -1092,38 +1114,26 @@
                         if (newPadding < 160) newPadding = 160;
                         chatContainer.style.paddingBottom = newPadding + 'px';
 
-                        if (isAtBottom) {
+                        // 스크롤 자동 내림
+                        const scrollBottom = window.scrollY + window.innerHeight;
+                        const docHeight = document.documentElement.scrollHeight;
+                        if (docHeight - scrollBottom < 150) {
                              window.scrollTo({ top: document.body.scrollHeight, behavior: 'none' }); 
                         }
                     }
                 }
                 
-                if (buffer.length > 0) {
-                    const scrollBottom = window.scrollY + window.innerHeight;
-                    const docHeightBefore = document.documentElement.scrollHeight;
-                    const isAtBottom = (docHeightBefore - scrollBottom) < 100;
+                // 최종 렌더링
+                visibleText = rawFullText.replace(/\[THOUGHT\][\s\S]*?\[\/THOUGHT\]/g, '');
+                botContent.innerHTML = marked.parse(visibleText);
+                window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
 
-                    fullText += buffer;
-                    botContent.innerHTML = marked.parse(fullText);
-                    
-                    if (isAtBottom) {
-                         window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-                    }
-                }
-
-                const finalBotHeight = botContent.offsetHeight;
-                let finalPadding = allocatedPadding - finalBotHeight;
-                if (finalPadding < 160) finalPadding = 160;
-                chatContainer.style.paddingBottom = finalPadding + 'px';
-
-                conversationHistory.push({ role: "assistant", content: fullText });
+                conversationHistory.push({ role: "assistant", content: rawFullText });
                 
-                // [요청] 봇 답변 완료 후 버튼 추가 (복사, 재생성)
-                addBotButtons(botRow, fullText);
+                // 버튼 추가 (rawFullText를 분석하여 버튼 종류 결정)
+                addBotButtons(botRow, visibleText, rawFullText);
 
-                // 저장 (봇 답변 완료 시점)
                 saveCurrentChat();
-                
                 checkScrollPosition();
 
             } catch (error) {
@@ -1134,12 +1144,10 @@
                 if (error.name === 'AbortError') {
                     if (botContent) {
                         const stopMsg = document.createElement('div');
-                        stopMsg.style.color = '#9CA3AF'; 
-                        stopMsg.style.fontSize = '14px';
-                        stopMsg.style.marginTop = '8px';
+                        stopMsg.style.color = '#9CA3AF'; stopMsg.style.fontSize = '14px'; stopMsg.style.marginTop = '8px';
                         stopMsg.innerText = "[답변중단됨]";
                         botContent.appendChild(stopMsg);
-                        conversationHistory.push({ role: "assistant", content: fullText + "\n[답변중단됨]" });
+                        conversationHistory.push({ role: "assistant", content: rawFullText + "\n[답변중단됨]" });
                         saveCurrentChat();
                     }
                 } else {
@@ -1156,12 +1164,48 @@
             }
         }
 
-        // --- 봇 버튼 추가 함수 ---
-        function addBotButtons(rowElement, textContent) {
+        // --- 사고 과정/인용 파싱 및 버튼 추가 ---
+        function parseThoughtsAndCitations(fullRawText) {
+            const thoughts = [];
+            const citations = [];
+            
+            // 모든 [THOUGHT] 블록 추출
+            const regex = /\[THOUGHT\]([\s\S]*?)\[\/THOUGHT\]/g;
+            let match;
+            
+            while ((match = regex.exec(fullRawText)) !== null) {
+                const content = match[1].trim();
+                
+                // 인용 패턴 확인 (Title, URL, Content 조합)
+                // 간단하게 Title: 과 URL: 이 포함되어 있으면 인용으로 간주
+                if (content.includes('Title:') && content.includes('URL:') && content.includes('Content:')) {
+                    const titleMatch = content.match(/Title:\s*(.*)/);
+                    const urlMatch = content.match(/URL:\s*(.*)/);
+                    const contentMatch = content.match(/Content:\s*(.*)/);
+                    // content가 여러줄일 수 있으므로 좀 더 정교하게 잘라야 하지만, 
+                    // [THOUGHT]안에 하나의 인용만 들어있다고 가정하거나 줄바꿈 기준으로 처리.
+                    // 여기서는 간단히 정규식 매칭 사용 (한 줄 기준)
+                    
+                    if (titleMatch && urlMatch && contentMatch) {
+                        citations.push({
+                            title: titleMatch[1].trim(),
+                            url: urlMatch[1].trim(),
+                            content: contentMatch[1].trim()
+                        });
+                    }
+                } else {
+                    // 일반 사고 과정
+                    thoughts.push(content);
+                }
+            }
+            return { thoughts, citations };
+        }
+
+        function addBotButtons(rowElement, textContent, rawFullText) {
             const actionBar = document.createElement('div');
             actionBar.className = 'bot-action-bar';
             
-            // 복사 버튼
+            // 복사
             const copyBtn = document.createElement('button');
             copyBtn.className = 'action-btn';
             copyBtn.innerHTML = '<span class="material-symbols-rounded">content_copy</span> 복사';
@@ -1173,7 +1217,7 @@
                 });
             });
 
-            // 재생성 버튼
+            // 재생성
             const regenBtn = document.createElement('button');
             regenBtn.className = 'action-btn';
             regenBtn.innerHTML = '<span class="material-symbols-rounded">refresh</span> 재생성';
@@ -1181,16 +1225,35 @@
 
             actionBar.appendChild(copyBtn);
             actionBar.appendChild(regenBtn);
-            
-            // Bot 텍스트 아래에 추가
+
+            // 파싱
+            const { thoughts, citations } = parseThoughtsAndCitations(rawFullText);
+
+            // 사고 과정 버튼
+            if (thoughts.length > 0) {
+                const thoughtBtn = document.createElement('button');
+                thoughtBtn.className = 'action-btn';
+                thoughtBtn.innerHTML = '<span class="material-symbols-rounded">psychology</span> 사고 과정';
+                thoughtBtn.addEventListener('click', () => {
+                    toggleThoughtPanel(true, thoughts.join('\n\n---\n\n'));
+                });
+                actionBar.appendChild(thoughtBtn);
+            }
+
+            // 참조 자료 버튼
+            if (citations.length > 0) {
+                const citationBtn = document.createElement('button');
+                citationBtn.className = 'action-btn';
+                citationBtn.innerHTML = '<span class="material-symbols-rounded">library_books</span> 참조 자료';
+                citationBtn.addEventListener('click', () => {
+                    toggleCitationPanel(true, citations);
+                });
+                actionBar.appendChild(citationBtn);
+            }
+
             rowElement.appendChild(actionBar);
-
-            // 부드럽게 나타나기
-            requestAnimationFrame(() => {
-                actionBar.classList.add('visible');
-            });
+            requestAnimationFrame(() => actionBar.classList.add('visible'));
         }
-
 
         function createAnimatedChunk(container, text) {
             const span = document.createElement('span');
@@ -1212,11 +1275,9 @@
 
         function addLoadingMessage(id, isSearchMode) {
             const rowDiv = document.createElement('div');
-            rowDiv.classList.add('message-row', 'bot');
-            rowDiv.id = id; 
+            rowDiv.classList.add('message-row', 'bot'); rowDiv.id = id; 
             const contentDiv = document.createElement('div');
             contentDiv.classList.add('analyzing-text'); 
-            
             let timers = [];
             if (isSearchMode) {
                 contentDiv.innerText = "검색을 진행하는 중...";
@@ -1231,39 +1292,35 @@
         }
 
         function addMessage(text, sender, withAnimation = true) {
+            // 화면에 뿌릴때는 태그 제거
+            const visibleText = text.replace(/\[THOUGHT\][\s\S]*?\[\/THOUGHT\]/g, '');
+            
             const rowDiv = document.createElement('div');
             rowDiv.classList.add('message-row', sender); 
             
             if (sender === 'user') {
-                // 유저 버블 컨테이너 (복사 버튼 + 버블)
                 const container = document.createElement('div');
                 container.className = 'user-bubble-container';
-
-                // 복사 버튼
                 const copyBtn = document.createElement('button');
                 copyBtn.className = 'user-copy-btn';
                 copyBtn.title = '복사';
                 copyBtn.innerHTML = '<span class="material-symbols-rounded" style="font-size:16px;">content_copy</span>';
-                copyBtn.addEventListener('click', () => {
-                    navigator.clipboard.writeText(text);
-                });
+                copyBtn.addEventListener('click', () => { navigator.clipboard.writeText(visibleText); });
 
                 const contentDiv = document.createElement('div');
                 contentDiv.classList.add('user-bubble');
-                contentDiv.innerHTML = text.replace(/\n/g, '<br>');
+                contentDiv.innerHTML = visibleText.replace(/\n/g, '<br>');
                 
-                container.appendChild(contentDiv);
-                container.appendChild(copyBtn);
+                container.appendChild(contentDiv); container.appendChild(copyBtn);
                 rowDiv.appendChild(container);
             } else {
                 const contentDiv = document.createElement('div');
                 contentDiv.classList.add('bot-text'); 
-                contentDiv.innerHTML = marked.parse(text);
+                contentDiv.innerHTML = marked.parse(visibleText);
                 rowDiv.appendChild(contentDiv);
-                
-                // 히스토리 로딩 시에는 버튼 바로 추가
+                // 히스토리 로드 시 버튼 복구
                 if (!withAnimation) {
-                     addBotButtons(rowDiv, text);
+                     addBotButtons(rowDiv, visibleText, text); // text에는 raw가 들어있음
                 }
             }
             chatContainer.appendChild(rowDiv);
@@ -1295,14 +1352,19 @@
                 attachMenu.classList.remove('open');
                 setTimeout(() => attachMenu.style.display='none', 200);
             }
+            // 패널 외부 클릭 시 닫기 (PC의 경우 편의상)
+            if (window.innerWidth > 768) {
+                if (thoughtPanel.classList.contains('open') && !thoughtPanel.contains(e.target) && !e.target.closest('.action-btn')) {
+                    toggleThoughtPanel(false);
+                }
+                if (citationPanel.classList.contains('open') && !citationPanel.contains(e.target) && !e.target.closest('.action-btn')) {
+                    toggleCitationPanel(false);
+                }
+            }
         });
         document.querySelector('.offer-close').addEventListener('click', (e) => {
             e.stopPropagation();
             document.querySelector('.offer-pill').style.display = 'none';
-        });
-
-        window.addEventListener('resize', () => {
-             // 필요시 리사이즈 로직 추가
         });
     </script>
 </body>
