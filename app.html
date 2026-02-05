@@ -41,7 +41,6 @@
     body {
         background-color: #fff;
         margin: 0;
-        /* 폰트 적용: Google Sans 우선 */
         font-family: "Google Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
         font-size: 14px; 
         display: flex;
@@ -60,7 +59,7 @@
         display: block;
     }
 
-    /* Phosphor 아이콘 스타일 설정 */
+    /* Phosphor 아이콘 스타일 */
     .ph {
         font-size: 20px;
         color: #374151;
@@ -114,7 +113,6 @@
         margin-top: 20px; margin-bottom: 6px; padding-left: 10px;
     }
 
-    /* 프로필 영역: 호버 시 연한 회색 */
     .sidebar-footer {
         padding: 10px; 
         margin: 0 8px 8px 8px; 
@@ -295,6 +293,38 @@
         display: flex; flex-direction: column; position: relative; 
         transition: height 0.1s ease; box-shadow: none !important;
     }
+    
+    /* [NEW] 스크롤 다운 버튼 스타일 */
+    .scroll-to-bottom-btn {
+        position: absolute;
+        top: -45px; /* 입력창 바로 위 */
+        left: 50%;
+        transform: translateX(-50%) scale(0); /* 기본 숨김 (scale 0) */
+        width: 32px; height: 32px;
+        background-color: #fff;
+        border: 1px solid #E5E7EB;
+        border-radius: 50%;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        display: flex; justify-content: center; align-items: center;
+        cursor: pointer;
+        z-index: 2100;
+        pointer-events: auto;
+        transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s;
+        opacity: 0;
+    }
+    /* 버튼 보일 때 클래스 */
+    .scroll-to-bottom-btn.show {
+        transform: translateX(-50%) scale(1);
+        opacity: 1;
+    }
+    .scroll-to-bottom-btn:hover {
+        background-color: #F9FAFB;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    .scroll-to-bottom-btn i {
+        font-size: 16px;
+        color: #4B5563;
+    }
 
     .chat-textarea {
         width: 100%; border: none; background: transparent; resize: none; outline: none;
@@ -455,6 +485,10 @@
 
     <div class="bottom-fixed-wrapper">
         <div class="chat-input-container">
+            <div id="scrollToBottomBtn" class="scroll-to-bottom-btn" title="맨 아래로 이동">
+                <i class="ph ph-arrow-down"></i>
+            </div>
+
             <div id="attachMenu" class="attach-menu">
                 <div class="menu-item"><span class="material-symbols-rounded">image</span> <span>이미지</span></div>
                 <div class="menu-item"><span class="material-symbols-rounded">description</span> <span>문서</span></div>
@@ -479,6 +513,7 @@
         const attachBtn = document.getElementById('attachBtn');
         const attachMenu = document.getElementById('attachMenu');
         const searchBtn = document.getElementById('searchBtn');
+        const scrollToBottomBtn = document.getElementById('scrollToBottomBtn');
 
         const sidebar = document.getElementById('sidebar');
         const sidebarOverlay = document.getElementById('sidebarOverlay');
@@ -526,34 +561,43 @@
         pcSidebarOpenBtn.addEventListener('click', toggleSidebar);
         sidebarOverlay.addEventListener('click', toggleSidebar);
 
-        // [수정됨] 스크롤 계산 로직: 정확히 헤더 아래로 오도록 계산
-        function forceScrollToMessage(element) {
-            const headerHeight = 50; // CSS의 --header-height 값과 일치 (중요)
-            const topGap = 20;       // 헤더 아래 여유 공간
-            const targetVisualTop = headerHeight + topGap; // 화면상 목표 위치
+        // --- 스크롤 감지 및 버튼 표시 로직 ---
+        function checkScrollPosition() {
+            // 현재 스크롤 위치 + 화면 높이
+            const scrollBottom = window.scrollY + window.innerHeight;
+            // 전체 문서 높이
+            const docHeight = document.documentElement.scrollHeight;
+            
+            // 맨 아래에서 100px 이상 떨어져 있으면 버튼 표시
+            if (docHeight - scrollBottom > 100) {
+                scrollToBottomBtn.classList.add('show');
+            } else {
+                scrollToBottomBtn.classList.remove('show');
+            }
+        }
+        window.addEventListener('scroll', checkScrollPosition);
 
-            // 1. 현재 요소의 절대적 위치 계산 (현재 스크롤 위치 + 뷰포트 상대 위치)
+        // 버튼 클릭 시 맨 아래로 스크롤
+        scrollToBottomBtn.addEventListener('click', () => {
+            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+        });
+
+        // 봇 답변 시작 시 헤더 아래로 맞추는 로직
+        function forceScrollToMessage(element) {
+            const headerHeight = 50; 
+            const topGap = 20;       
+            const targetVisualTop = headerHeight + topGap; 
+
             const rect = element.getBoundingClientRect();
             const absoluteElementTop = window.scrollY + rect.top;
-
-            // 2. 목표 스크롤 위치 (요소의 절대 Top - 원하는 화면상 위치)
             const targetScrollY = absoluteElementTop - targetVisualTop;
-
-            // 3. 하단 여백 계산
-            // 타겟 위치까지 스크롤이 가능하려면, 문서 전체 높이가 충분해야 함.
-            // (창 높이) - (화면상 목표 위치 + 요소 높이) 만큼의 공간이 요소 아래에 있어야 함.
             const windowHeight = window.innerHeight;
             const elementHeight = element.offsetHeight;
             
-            // 요소 아래에 필요한 최소 여백
             let requiredPadding = windowHeight - (targetVisualTop + elementHeight);
-            
-            // 너무 작으면 기본값 유지 (입력창 가림 방지)
             if (requiredPadding < 160) requiredPadding = 160;
             
             chatContainer.style.paddingBottom = requiredPadding + 'px';
-
-            // 4. 스크롤 실행 (계산된 절대 좌표로 이동)
             window.scrollTo({ top: targetScrollY, behavior: 'smooth' });
             
             return requiredPadding;
@@ -587,7 +631,6 @@
             
             let allocatedPadding = 160;
             
-            // 메시지 전송 직후 스크롤 계산 실행
             requestAnimationFrame(() => {
                 allocatedPadding = forceScrollToMessage(userMsgElement);
             });
@@ -637,22 +680,44 @@
                     
                     buffer += cleanChunk;
 
+                    // 일정량 데이터가 쌓이면 렌더링
                     if (/[.!?\n]/.test(buffer) || buffer.length > 20) {
+                        
+                        // [중요] 업데이트 전, 사용자가 맨 아래에 가까이 있는지 확인 (오차범위 50px)
+                        const scrollBottom = window.scrollY + window.innerHeight;
+                        const docHeightBefore = document.documentElement.scrollHeight;
+                        const isAtBottom = (docHeightBefore - scrollBottom) < 100;
+
                         fullText += buffer;
                         botContent.innerHTML = marked.parse(fullText);
                         buffer = ""; 
 
-                        // 봇 답변이 길어질수록 여백을 줄여서 자연스럽게 밀어올림
+                        // 줄어든 여백 재계산 (기존 로직)
                         const currentBotHeight = botContent.offsetHeight;
                         let newPadding = allocatedPadding - currentBotHeight;
                         if (newPadding < 160) newPadding = 160;
                         chatContainer.style.paddingBottom = newPadding + 'px';
+
+                        // [중요] 만약 사용자가 맨 아래에 있었다면, 늘어난 길이만큼 자동 스크롤
+                        // (봇 답변 줄 수 계산 효과)
+                        if (isAtBottom) {
+                             window.scrollTo({ top: document.body.scrollHeight, behavior: 'none' }); // behavior: none으로 즉시 반응
+                        }
                     }
                 }
                 
                 if (buffer.length > 0) {
+                    // 마지막 버퍼 처리 시에도 동일한 로직 적용
+                    const scrollBottom = window.scrollY + window.innerHeight;
+                    const docHeightBefore = document.documentElement.scrollHeight;
+                    const isAtBottom = (docHeightBefore - scrollBottom) < 100;
+
                     fullText += buffer;
                     botContent.innerHTML = marked.parse(fullText);
+                    
+                    if (isAtBottom) {
+                         window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+                    }
                 }
 
                 // 완료 후 최종 여백 조정
@@ -662,6 +727,9 @@
                 chatContainer.style.paddingBottom = finalPadding + 'px';
 
                 conversationHistory.push({ role: "assistant", content: fullText });
+                
+                // 생성 완료 후 스크롤 체크 한 번 더 실행 (버튼 상태 갱신)
+                checkScrollPosition();
 
             } catch (error) {
                 const loadingElem = document.getElementById(loadingId);
@@ -687,6 +755,7 @@
                 sendBtn.innerHTML = '<span class="material-symbols-rounded">arrow_upward</span>';
                 sendBtn.disabled = true; 
                 adjustHeight(); 
+                checkScrollPosition();
             }
         }
 
