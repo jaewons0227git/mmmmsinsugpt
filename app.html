@@ -4,26 +4,34 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MinsuGPT</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans:ital,opsz,wght@0,17..18,400..700;1,17..18,400..700&display=swap" rel="stylesheet">
+
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+<script src="https://unpkg.com/@phosphor-icons/web"></script>
+
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
 <style>
     :root {
-        --radius-input: 26px;      
-        --radius-send-btn: 12px;   
-        --radius-window: 16px;     
+        /* 크기 및 반경 변수 */
+        --radius-input: 24px;      
+        --radius-send-btn: 10px;   
+        --radius-window: 14px;     
         --radius-icon-btn: 50%;    
-        --radius-bubble: 20px;     
+        --radius-bubble: 18px;     
         
-        --line-height: 24px;
+        --line-height: 22px;       
         --primary-color: #4F46E5; 
         
         --user-bubble-bg: #F4F4F5; 
         --user-bubble-text: #1F2937;
         
-        --header-height: 56px; 
-        --sidebar-width: 260px;
-        --content-max-width: 768px; /* 콘텐츠 최대 너비 변수화 */
+        --header-height: 50px;     
+        --sidebar-width: 240px;    
+        --content-max-width: 700px; 
     }
 
     html {
@@ -33,11 +41,14 @@
     body {
         background-color: #fff;
         margin: 0;
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        /* 폰트 적용: Google Sans 우선 */
+        font-family: "Google Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        font-size: 14px; 
         display: flex;
         flex-direction: column;
         min-height: 100vh;
         overflow-y: hidden; 
+        color: #1F2937;
     }
 
     body::-webkit-scrollbar { display: none; }
@@ -45,8 +56,15 @@
 
     .material-symbols-rounded {
         font-variation-settings: 'FILL' 0, 'wght' 500, 'GRAD' 0, 'opsz' 24;
-        font-size: 24px;
+        font-size: 22px; 
         display: block;
+    }
+
+    /* Phosphor 아이콘 스타일 설정 */
+    .ph {
+        font-size: 20px;
+        color: #374151;
+        vertical-align: middle;
     }
 
     /* --- 사이드바 (Sidebar) --- */
@@ -66,49 +84,57 @@
         transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1);
         display: flex; flex-direction: column;
         border-right: 1px solid #E5E7EB;
+        font-size: 13px; 
     }
     
     .sidebar.open { transform: translateX(0); }
 
-    .sidebar-header { padding: 16px; display: flex; align-items: center; justify-content: space-between; }
-    .sidebar-logo { display: flex; align-items: center; gap: 8px; font-weight: 600; color: #1F2937; font-size: 16px; }
-    .sidebar-logo img { width: 28px; height: 28px; object-fit: contain; }
+    .sidebar-header { padding: 14px 16px; display: flex; align-items: center; justify-content: space-between; }
+    .sidebar-logo { display: flex; align-items: center; gap: 8px; font-weight: 600; color: #1F2937; font-size: 15px; }
+    .sidebar-logo img { width: 24px; height: 24px; object-fit: contain; }
 
     .sidebar-close-btn { cursor: pointer; color: #6B7280; padding: 4px; border-radius: 4px; }
     .sidebar-close-btn:hover { background-color: #E5E7EB; }
 
-    .sidebar-content { flex: 1; padding: 12px; overflow-y: auto; }
+    .sidebar-content { flex: 1; padding: 10px; overflow-y: auto; }
     
     .sidebar-menu-btn {
-        display: flex; align-items: center; gap: 12px; width: 100%;
-        padding: 10px 12px; border: none; background: transparent;
-        color: #1F2937; font-size: 14px; font-weight: 500;
+        display: flex; align-items: center; gap: 10px; width: 100%;
+        padding: 8px 10px; border: none; background: transparent;
+        color: #1F2937; font-size: 13px; font-weight: 500;
         border-radius: 8px; cursor: pointer; text-align: left;
         margin-bottom: 2px;
+        font-family: inherit;
     }
     .sidebar-menu-btn:hover { background-color: #E5E7EB; }
-    .sidebar-menu-btn .material-symbols-rounded { font-size: 20px; color: #374151; }
+    .sidebar-menu-btn i { font-size: 18px; color: #4B5563; }
 
     .sidebar-section-title {
-        font-size: 12px; color: #9CA3AF; font-weight: 600;
-        margin-top: 24px; margin-bottom: 8px; padding-left: 12px;
+        font-size: 11px; color: #9CA3AF; font-weight: 600;
+        margin-top: 20px; margin-bottom: 6px; padding-left: 10px;
     }
 
+    /* 프로필 영역: 호버 시 연한 회색 */
     .sidebar-footer {
-        padding: 16px; border-top: 1px solid #E5E7EB;
-        display: flex; align-items: center; gap: 12px;
-        cursor: pointer; transition: background 0.2s;
+        padding: 10px; 
+        margin: 0 8px 8px 8px; 
+        border-radius: 12px;   
+        display: flex; align-items: center; gap: 10px;
+        cursor: pointer; 
+        transition: all 0.2s;
     }
-    .sidebar-footer:hover { background-color: #E5E7EB; }
+    .sidebar-footer:hover { 
+        background-color: #E5E7EB; 
+    }
     
     .user-avatar img {
-        width: 36px; height: 36px; border-radius: 50%; object-fit: cover;
+        width: 32px; height: 32px; border-radius: 50%; object-fit: cover;
         border: 1px solid #E5E7EB;
     }
     
     .user-info { display: flex; flex-direction: column; }
-    .user-name { font-size: 14px; font-weight: 600; color: #1F2937; }
-    .user-plan { font-size: 12px; color: #6B7280; }
+    .user-name { font-size: 13px; font-weight: 600; color: #1F2937; }
+    .user-plan { font-size: 11px; color: #6B7280; }
 
 
     /* --- 상단바 (Header) --- */
@@ -118,78 +144,76 @@
         backdrop-filter: blur(10px);
         display: flex; justify-content: space-between; align-items: center;
         padding: 0 16px; box-sizing: border-box;
-        z-index: 1000; font-size: 1.1rem; color: #1F2937;
+        z-index: 1000; font-size: 1rem; color: #1F2937;
         transition: left 0.3s cubic-bezier(0.25, 1, 0.5, 1), width 0.3s cubic-bezier(0.25, 1, 0.5, 1);
     }
 
     .top-left {
-        display: flex; align-items: center; gap: 8px;
+        display: flex; align-items: center; gap: 6px;
         font-weight: 600; cursor: pointer;
-        padding: 6px 4px; border-radius: 8px;
+        padding: 4px 6px; border-radius: 6px;
         transition: background-color 0.2s;
-        color: #40414F;
+        color: #40414F; font-size: 14px;
     }
     .top-left:hover { background-color: #F3F4F6; }
-    .top-left .material-symbols-rounded { font-size: 24px; color: #6B7280; }
+    .top-left .material-symbols-rounded { font-size: 20px; color: #6B7280; }
     
-    .pc-sidebar-open-btn { display: none; cursor: pointer; color: #6B7280; margin-right: 8px; }
+    .pc-sidebar-open-btn { display: none; cursor: pointer; color: #6B7280; margin-right: 6px; }
     .pc-sidebar-open-btn:hover { color: #1F2937; }
 
-    .top-right { display: flex; align-items: center; gap: 8px; }
+    .top-right { display: flex; align-items: center; gap: 6px; }
 
     .offer-pill {
         background-color: #EFEEFC; color: #7C3AED;
-        font-size: 13px; font-weight: 500;
-        padding: 6px 12px; border-radius: 999px;
+        font-size: 12px; font-weight: 500;
+        padding: 4px 10px; border-radius: 999px;
         display: flex; align-items: center; gap: 4px;
         cursor: pointer; transition: opacity 0.2s;
         white-space: nowrap; 
     }
     .offer-pill:hover { opacity: 0.8; }
-    .offer-close { font-size: 16px; margin-left: 4px; color: #7C3AED; cursor: pointer; }
+    .offer-close { font-size: 14px; margin-left: 2px; color: #7C3AED; cursor: pointer; }
 
     .share-btn {
-        display: flex; align-items: center; gap: 6px;
-        padding: 8px 14px;
+        display: flex; align-items: center; gap: 4px;
+        padding: 6px 10px;
         border: 1px solid #E5E7EB;
         border-radius: 999px;
         background: transparent;
         cursor: pointer;
-        font-size: 14px; color: #374151;
+        font-size: 12px; color: #374151;
         transition: background-color 0.2s;
-        white-space: nowrap; 
+        white-space: nowrap; font-family: inherit;
     }
     .share-btn:hover { background-color: #F9FAFB; }
-    .share-btn .material-symbols-rounded { font-size: 18px; }
+    .share-btn .material-symbols-rounded { font-size: 16px; }
 
     .dots-btn {
-        padding: 8px; background: transparent; border: none;
-        cursor: pointer; color: #374151; border-radius: 8px;
+        padding: 6px; background: transparent; border: none;
+        cursor: pointer; color: #374151; border-radius: 6px;
     }
     .dots-btn:hover { background-color: #F3F4F6; }
 
-    /* [모바일 전용 조정] 버튼 텍스트 잘림 방지 */
     @media (max-width: 768px) {
-        .offer-pill {
-            font-size: 12px; padding: 4px 10px; /* 크기 축소 */
-        }
-        .share-btn {
-            font-size: 12px; padding: 6px 10px; /* 크기 축소 */
-        }
-        .top-right { gap: 4px; } /* 간격 축소 */
-        .top-bar { padding: 0 10px; } /* 상단바 패딩 축소 */
+        .offer-pill { display: none; } 
+        .share-btn { font-size: 11px; padding: 4px 8px; }
+        .top-bar { padding: 0 10px; }
     }
 
     /* --- 채팅 영역 --- */
     .chat-container {
-        width: 100%; max-width: var(--content-max-width); margin: 0 auto;
+        width: 100%; 
+        max-width: var(--content-max-width); 
+        margin: 0 auto; 
         padding-top: calc(var(--header-height) + 20px);
         padding-left: 20px; padding-right: 20px;
-        padding-bottom: 160px; /* 기본값 */
+        padding-bottom: 160px;
         box-sizing: border-box;
-        display: flex; flex-direction: column; gap: 30px; 
+        display: flex; flex-direction: column; gap: 24px; 
         
-        transition: padding-bottom 0.2s ease-out, margin-left 0.3s cubic-bezier(0.25, 1, 0.5, 1), width 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+        transition: margin-left 0.3s cubic-bezier(0.25, 1, 0.5, 1), 
+                    width 0.3s cubic-bezier(0.25, 1, 0.5, 1),
+                    padding-bottom 0.2s ease-out;
     }
 
     .message-row { display: flex; width: 100%; }
@@ -199,19 +223,19 @@
     .user-bubble {
         background-color: var(--user-bubble-bg);
         color: var(--user-bubble-text);          
-        padding: 10px 16px;
+        padding: 8px 14px;
         border-radius: var(--radius-bubble);
-        max-width: 70%;
+        max-width: 75%;
         word-break: break-word;
-        font-size: 15px;
-        line-height: 1.6;
+        font-size: 14px; 
+        line-height: 1.5;
     }
 
     .bot-text {
         color: #1F2937;
-        padding: 8px 0;
+        padding: 6px 0;
         width: 100%; max-width: 100%;
-        font-size: 16px; line-height: 1.7; 
+        font-size: 15px; line-height: 1.6; 
         word-break: break-word; will-change: contents;
     }
 
@@ -232,20 +256,20 @@
         opacity: 1; filter: none; animation: none !important;
     }
 
-    .bot-text p { margin: 0 0 16px 0; } 
+    .bot-text p { margin: 0 0 12px 0; } 
     .bot-text p:last-child { margin-bottom: 0; }
-    .bot-text code { background-color: #f3f4f6; padding: 2px 4px; border-radius: 4px; font-family: monospace; font-size: 0.9em; }
-    .bot-text pre { background-color: #1f2937; color: #f3f4f6; padding: 16px; border-radius: 8px; overflow-x: auto; font-family: monospace; margin: 16px 0; }
+    .bot-text code { background-color: #f3f4f6; padding: 2px 4px; border-radius: 4px; font-family: monospace; font-size: 0.85em; }
+    .bot-text pre { background-color: #1f2937; color: #f3f4f6; padding: 12px; border-radius: 8px; overflow-x: auto; font-family: monospace; margin: 12px 0; }
     .bot-text pre code { background-color: transparent; padding: 0; color: inherit; font-size: 0.9em; }
-    .bot-text ul, .bot-text ol { margin: 16px 0; padding-left: 24px; }
-    .bot-text blockquote { border-left: 4px solid #e5e7eb; margin: 16px 0; padding-left: 16px; color: #6b7280; }
+    .bot-text ul, .bot-text ol { margin: 12px 0; padding-left: 20px; }
+    .bot-text blockquote { border-left: 3px solid #e5e7eb; margin: 12px 0; padding-left: 12px; color: #6b7280; }
 
     @keyframes textShimmer {
         0% { background-position: 200% 0; }
         100% { background-position: -200% 0; }
     }
     .analyzing-text {
-        font-size: 16px; font-weight: 500; padding: 8px 0; cursor: default; 
+        font-size: 14px; font-weight: 500; padding: 6px 0; cursor: default; 
         color: #9CA3AF; 
         background: linear-gradient(110deg, #9CA3AF 40%, #F3F4F6 50%, #9CA3AF 60%);
         background-size: 200% 100%;
@@ -258,7 +282,7 @@
     .bottom-fixed-wrapper {
         position: fixed; bottom: 0; left: 0; width: 100%;
         display: flex; flex-direction: column; align-items: center;
-        padding-bottom: 24px; padding-top: 10px;
+        padding-bottom: 20px; padding-top: 10px;
         background: linear-gradient(to top, #ffffff 80%, rgba(255,255,255,0)); 
         z-index: 900; pointer-events: none;
         transition: left 0.3s cubic-bezier(0.25, 1, 0.5, 1), width 0.3s cubic-bezier(0.25, 1, 0.5, 1);
@@ -267,88 +291,81 @@
     .chat-input-container {
         pointer-events: auto; width: var(--content-max-width); max-width: 90%;
         background-color: #F4F4F5; border-radius: var(--radius-input);
-        padding: 14px 18px; box-sizing: border-box;
+        padding: 10px 14px; box-sizing: border-box;
         display: flex; flex-direction: column; position: relative; 
         transition: height 0.1s ease; box-shadow: none !important;
     }
 
     .chat-textarea {
         width: 100%; border: none; background: transparent; resize: none; outline: none;
-        font-size: 16px; color: #333; font-family: inherit; padding: 0;
+        font-size: 15px; color: #333; font-family: inherit; padding: 0;
         line-height: var(--line-height); height: var(--line-height);
         max-height: calc(var(--line-height) * 8); overflow-y: hidden; scrollbar-width: none;
     }
     .chat-textarea::-webkit-scrollbar { display: none; }
     .chat-textarea::placeholder { color: #9CA3AF; }
 
-    .input-toolbar { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; }
-    .left-tools { display: flex; gap: 8px; }
+    .input-toolbar { display: flex; justify-content: space-between; align-items: center; margin-top: 6px; }
+    .left-tools { display: flex; gap: 6px; }
     .icon-btn {
-        background: none; border: none; border-radius: var(--radius-icon-btn); padding: 6px;
+        background: none; border: none; border-radius: var(--radius-icon-btn); padding: 5px;
         cursor: pointer; display: flex; align-items: center; justify-content: center;
         color: #6B7280; transition: background-color 0.2s, color 0.2s;
     }
     .icon-btn:hover { background-color: rgba(0,0,0,0.05); color: #374151; }
+    .icon-btn .material-symbols-rounded { font-size: 20px; }
     #searchBtn.active { color: #0EA5E9; background-color: rgba(14, 165, 233, 0.1); }
     #attachBtn .material-symbols-rounded { transform: rotate(45deg); }
 
     .send-btn {
         background-color: #E5E7EB; border: none; border-radius: var(--radius-send-btn);
-        width: 32px; height: 32px; display: flex; justify-content: center; align-items: center;
+        width: 28px; height: 28px; display: flex; justify-content: center; align-items: center;
         cursor: default; transition: all 0.2s ease-in-out;
     }
-    .send-btn .material-symbols-rounded { font-size: 20px; color: #9CA3AF; }
+    .send-btn .material-symbols-rounded { font-size: 18px; color: #9CA3AF; }
     .send-btn:not(:disabled) { background-color: var(--primary-color); cursor: pointer; }
     .send-btn:not(:disabled) .material-symbols-rounded { color: #ffffff; }
     .send-btn:not(:disabled):hover { background-color: #4338ca; }
-    .stop-icon-square { width: 12px; height: 12px; background-color: #ffffff; border-radius: 2px; display: inline-block; }
+    .stop-icon-square { width: 10px; height: 10px; background-color: #ffffff; border-radius: 2px; display: inline-block; }
 
-    .disclaimer-text { font-size: 12px; color: #9CA3AF; margin-top: 12px; text-align: center; pointer-events: auto; }
+    .disclaimer-text { font-size: 11px; color: #9CA3AF; margin-top: 10px; text-align: center; pointer-events: auto; }
 
     .attach-menu {
-        display: none; position: absolute; bottom: 60px; left: 0; width: 140px;
+        display: none; position: absolute; bottom: 50px; left: 0; width: 130px;
         background-color: #FFFFFF; border: 1px solid #E5E7EB; border-radius: var(--radius-window);
-        padding: 6px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08); z-index: 2000;
+        padding: 4px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08); z-index: 2000;
         flex-direction: column; gap: 2px; opacity: 0; transform: translateY(10px);
         transition: opacity 0.2s ease, transform 0.2s ease;
     }
     .attach-menu.open { display: flex; opacity: 1; transform: translateY(0); }
     .menu-item {
-        display: flex; align-items: center; gap: 10px; padding: 10px 12px;
-        color: #374151; font-size: 14px; border-radius: 8px; cursor: pointer;
+        display: flex; align-items: center; gap: 8px; padding: 8px 10px;
+        color: #374151; font-size: 13px; border-radius: 6px; cursor: pointer;
         transition: background-color 0.2s; text-decoration: none; font-weight: 500;
     }
     .menu-item:hover { background-color: #F3F4F6; }
-    .menu-item .material-symbols-rounded { font-size: 20px; color: #4B5563; }
+    .menu-item .material-symbols-rounded { font-size: 18px; color: #4B5563; }
 
     /* ==========================================================================
        [PC 레이아웃 (769px 이상)]
-       - 사이드바 기본 열림
-       - 햄버거 메뉴 숨김
-       - 닫으면 채팅창 확장, 열면 밀림 (중앙 정렬 유지)
        ========================================================================== */
     @media (min-width: 769px) {
         .sidebar { box-shadow: none; border-right: 1px solid #E5E7EB; }
         .mobile-menu-icon { display: none !important; }
 
-        /* [열림] */
+        /* [열림 상태] */
         body.pc-sidebar-open .sidebar { transform: translateX(0); }
         body.pc-sidebar-open .top-bar { left: var(--sidebar-width); width: calc(100% - var(--sidebar-width)); }
         body.pc-sidebar-open .bottom-fixed-wrapper { left: var(--sidebar-width); width: calc(100% - var(--sidebar-width)); }
         
-        /* [중요] 남은 공간의 중앙에 위치하도록 계산식 사용 */
         body.pc-sidebar-open .chat-container { 
-            /* 왼쪽 여백 = 사이드바 너비(260px) + (남은공간 - 컨텐츠너비)/2
-               = 260px + (100% - 260px - 768px)/2 
-            */
             margin-left: calc(var(--sidebar-width) + (100% - var(--sidebar-width) - var(--content-max-width)) / 2);
-            /* 화면이 좁아져서 계산 결과가 사이드바보다 작아지면 안됨 -> min-width 확보 필요하지만 calc가 처리 */
+            margin-right: 0; 
             width: var(--content-max-width);
-            max-width: none; /* 중앙 정렬을 위해 max-width 해제하고 고정 너비 사용 */
+            max-width: none;
         }
         
-        /* 화면이 너무 좁아서 (768 + 260 = 1028px 미만) 여백이 없을 때의 처리 */
-        @media (max-width: 1048px) {
+        @media (max-width: 1000px) {
             body.pc-sidebar-open .chat-container {
                 margin-left: var(--sidebar-width);
                 width: calc(100% - var(--sidebar-width));
@@ -357,11 +374,17 @@
             }
         }
 
-        /* [닫힘] */
+        /* [닫힘 상태] */
         body:not(.pc-sidebar-open) .sidebar { transform: translateX(-100%); }
         body:not(.pc-sidebar-open) .top-bar { left: 0; width: 100%; }
         body:not(.pc-sidebar-open) .bottom-fixed-wrapper { left: 0; width: 100%; }
-        body:not(.pc-sidebar-open) .chat-container { margin-left: auto; margin-right: auto; max-width: var(--content-max-width); width: 100%; }
+        
+        body:not(.pc-sidebar-open) .chat-container { 
+            margin-left: calc((100% - var(--content-max-width)) / 2);
+            margin-right: 0; 
+            max-width: var(--content-max-width); 
+            width: var(--content-max-width); 
+        }
         
         body:not(.pc-sidebar-open) .pc-sidebar-open-btn { display: inline-block; }
     }
@@ -378,19 +401,19 @@
                 MinsuGPT
             </div>
             <div id="sidebarCloseBtn" class="sidebar-close-btn" title="사이드바 닫기">
-                <span class="material-symbols-rounded">dock_to_left</span>
+                <i class="ph ph-sidebar-simple" style="font-size: 20px;"></i>
             </div>
         </div>
         
         <div class="sidebar-content">
             <button class="sidebar-menu-btn">
-                <span class="material-symbols-rounded">edit_square</span> 새 채팅
+                <i class="ph ph-pencil-simple"></i> 새 채팅
             </button>
             <button class="sidebar-menu-btn">
-                <span class="material-symbols-rounded">search</span> 채팅 검색
+                <i class="ph ph-magnifying-glass"></i> 채팅 검색
             </button>
             <button class="sidebar-menu-btn">
-                <span class="material-symbols-rounded">image</span> 이미지
+                <i class="ph ph-image"></i> 이미지
             </button>
             
             <div class="sidebar-section-title">내 채팅</div>
@@ -410,14 +433,16 @@
 
     <header class="top-bar">
         <div class="top-left" id="headerTitleArea">
-            <span id="pcSidebarOpenBtn" class="material-symbols-rounded pc-sidebar-open-btn" title="사이드바 열기">dock_to_right</span>
+            <span id="pcSidebarOpenBtn" class="pc-sidebar-open-btn" title="사이드바 열기">
+                <i class="ph ph-sidebar-simple" style="font-size: 20px;"></i>
+            </span>
             <span id="mobileMenuBtn" class="material-symbols-rounded mobile-menu-icon" style="margin-right: 8px;">menu</span>
-            ChatGPT 
+            MinsuGPT 
             <span class="material-symbols-rounded" style="font-size:20px; color:#9CA3AF;">expand_more</span>
         </div>
         <div class="top-right">
             <div class="offer-pill">
-                <span class="material-symbols-rounded" style="font-size:18px;">redeem</span>
+                <span class="material-symbols-rounded" style="font-size:16px;">redeem</span>
                 무료 오퍼
                 <span class="offer-close">&times;</span>
             </div>
@@ -448,8 +473,6 @@
     </div>
 
     <script>
-        const PADDING_SUBTRACTION = 180; 
-
         const chatContainer = document.getElementById('chatContainer');
         const chatInput = document.getElementById('chatInput');
         const sendBtn = document.getElementById('sendBtn');
@@ -503,21 +526,35 @@
         pcSidebarOpenBtn.addEventListener('click', toggleSidebar);
         sidebarOverlay.addEventListener('click', toggleSidebar);
 
+        // [수정됨] 스크롤 계산 로직: 정확히 헤더 아래로 오도록 계산
         function forceScrollToMessage(element) {
-            const headerHeight = 56; 
-            const topGap = 10; 
-            const headerTotal = headerHeight + topGap;
+            const headerHeight = 50; // CSS의 --header-height 값과 일치 (중요)
+            const topGap = 20;       // 헤더 아래 여유 공간
+            const targetVisualTop = headerHeight + topGap; // 화면상 목표 위치
 
+            // 1. 현재 요소의 절대적 위치 계산 (현재 스크롤 위치 + 뷰포트 상대 위치)
+            const rect = element.getBoundingClientRect();
+            const absoluteElementTop = window.scrollY + rect.top;
+
+            // 2. 목표 스크롤 위치 (요소의 절대 Top - 원하는 화면상 위치)
+            const targetScrollY = absoluteElementTop - targetVisualTop;
+
+            // 3. 하단 여백 계산
+            // 타겟 위치까지 스크롤이 가능하려면, 문서 전체 높이가 충분해야 함.
+            // (창 높이) - (화면상 목표 위치 + 요소 높이) 만큼의 공간이 요소 아래에 있어야 함.
             const windowHeight = window.innerHeight;
-            const bubbleHeight = element.offsetHeight;
+            const elementHeight = element.offsetHeight;
             
-            let requiredPadding = windowHeight - headerTotal - bubbleHeight;
+            // 요소 아래에 필요한 최소 여백
+            let requiredPadding = windowHeight - (targetVisualTop + elementHeight);
+            
+            // 너무 작으면 기본값 유지 (입력창 가림 방지)
             if (requiredPadding < 160) requiredPadding = 160;
             
             chatContainer.style.paddingBottom = requiredPadding + 'px';
-            
-            const targetTop = element.offsetTop - headerTotal;
-            window.scrollTo({ top: targetTop, behavior: 'smooth' });
+
+            // 4. 스크롤 실행 (계산된 절대 좌표로 이동)
+            window.scrollTo({ top: targetScrollY, behavior: 'smooth' });
             
             return requiredPadding;
         }
@@ -549,6 +586,8 @@
             sendBtn.disabled = false;
             
             let allocatedPadding = 160;
+            
+            // 메시지 전송 직후 스크롤 계산 실행
             requestAnimationFrame(() => {
                 allocatedPadding = forceScrollToMessage(userMsgElement);
             });
@@ -603,6 +642,7 @@
                         botContent.innerHTML = marked.parse(fullText);
                         buffer = ""; 
 
+                        // 봇 답변이 길어질수록 여백을 줄여서 자연스럽게 밀어올림
                         const currentBotHeight = botContent.offsetHeight;
                         let newPadding = allocatedPadding - currentBotHeight;
                         if (newPadding < 160) newPadding = 160;
@@ -615,6 +655,7 @@
                     botContent.innerHTML = marked.parse(fullText);
                 }
 
+                // 완료 후 최종 여백 조정
                 const finalBotHeight = botContent.offsetHeight;
                 let finalPadding = allocatedPadding - finalBotHeight;
                 if (finalPadding < 160) finalPadding = 160;
