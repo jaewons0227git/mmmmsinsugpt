@@ -24,6 +24,11 @@
         --header-height: 56px; 
     }
 
+    /* 스크롤 시 상단바 높이만큼 자동 패딩 처리 */
+    html {
+        scroll-padding-top: calc(var(--header-height) + 10px);
+    }
+
     body {
         background-color: #fff;
         margin: 0;
@@ -31,7 +36,9 @@
         display: flex;
         flex-direction: column;
         min-height: 100vh;
-        overflow-y: auto; 
+        
+        /* 초기 상태 스크롤 잠금 (첫 메시지 후 해제) */
+        overflow-y: hidden; 
     }
 
     /* 스크롤바 숨기기 */
@@ -126,14 +133,19 @@
         width: 100%;
         max-width: 768px; 
         margin: 0 auto;
-        padding: 20px;
+        
         padding-top: calc(var(--header-height) + 20px);
-        /* [중요] 최신 메시지를 상단으로 올리기 위해 하단 여백을 충분히 확보 */
-        padding-bottom: 80vh; 
+        padding-left: 20px;
+        padding-right: 20px;
+        
+        /* 초기 패딩 (스크립트에서 동적 조절됨) */
+        padding-bottom: 160px;
+        
         box-sizing: border-box;
         display: flex;
         flex-direction: column;
         gap: 30px; 
+        transition: padding-bottom 0.3s ease; 
     }
 
     .message-row { display: flex; width: 100%; }
@@ -151,7 +163,6 @@
         line-height: 1.6;
     }
 
-    /* 봇 메시지 컨테이너 */
     .bot-text {
         color: #1F2937;
         padding: 8px 0;
@@ -163,9 +174,7 @@
         will-change: contents;
     }
 
-    /* [요청사항] 오류 메시지처럼 부드럽게 등장하는 애니메이션 
-       봇 메시지 전체에 적용하여 부드럽게 나타나게 함
-    */
+    /* 애니메이션 */
     .bot-text.animate-in {
         animation: textWipe 0.8s cubic-bezier(0.25, 1, 0.5, 1) forwards;
         -webkit-mask-image: linear-gradient(90deg, black 50%, transparent 90%);
@@ -177,248 +186,111 @@
     }
 
     @keyframes textWipe {
-        0% {
-            opacity: 0;
-            filter: blur(2px);
-            -webkit-mask-position: 100% 0;
-            mask-position: 100% 0;
-        }
-        100% {
-            opacity: 1;
-            filter: blur(0px);
-            -webkit-mask-position: 0% 0;
-            mask-position: 0% 0;
-        }
+        0% { opacity: 0; filter: blur(2px); -webkit-mask-position: 100% 0; mask-position: 100% 0; }
+        100% { opacity: 1; filter: blur(0px); -webkit-mask-position: 0% 0; mask-position: 0% 0; }
     }
 
     .reveal-chunk {
-        display: inline;
-        opacity: 0; 
-        filter: blur(2px); 
+        display: inline; opacity: 0; filter: blur(2px); 
         -webkit-mask-image: linear-gradient(90deg, black 50%, transparent 90%);
         mask-image: linear-gradient(90deg, black 50%, transparent 90%);
-        -webkit-mask-size: 200% 100%;
-        mask-size: 200% 100%;
-        -webkit-mask-position: 100% 0; 
-        mask-position: 100% 0;
+        -webkit-mask-size: 200% 100%; mask-size: 200% 100%;
+        -webkit-mask-position: 100% 0; mask-position: 100% 0;
         animation: textWipe 0.6s cubic-bezier(0.25, 1, 0.5, 1) forwards;
     }
-
     .reveal-chunk.done {
-        opacity: 1;
-        filter: none;
-        -webkit-mask-image: none !important;
-        mask-image: none !important;
-        animation: none !important;
+        opacity: 1; filter: none; -webkit-mask-image: none !important; mask-image: none !important; animation: none !important;
     }
 
-    /* 최종 렌더링된 마크다운 스타일 */
+    /* Markdown Styles */
     .bot-text p { margin: 0 0 16px 0; } 
     .bot-text p:last-child { margin-bottom: 0; }
-    .bot-text code {
-        background-color: #f3f4f6;
-        padding: 2px 4px;
-        border-radius: 4px;
-        font-family: monospace;
-        font-size: 0.9em;
-    }
-    .bot-text pre {
-        background-color: #1f2937;
-        color: #f3f4f6;
-        padding: 16px;
-        border-radius: 8px;
-        overflow-x: auto;
-        font-family: monospace;
-        margin: 16px 0;
-    }
-    .bot-text pre code {
-        background-color: transparent;
-        padding: 0;
-        color: inherit;
-        font-size: 0.9em;
-    }
+    .bot-text code { background-color: #f3f4f6; padding: 2px 4px; border-radius: 4px; font-family: monospace; font-size: 0.9em; }
+    .bot-text pre { background-color: #1f2937; color: #f3f4f6; padding: 16px; border-radius: 8px; overflow-x: auto; font-family: monospace; margin: 16px 0; }
+    .bot-text pre code { background-color: transparent; padding: 0; color: inherit; font-size: 0.9em; }
     .bot-text ul, .bot-text ol { margin: 16px 0; padding-left: 24px; }
-    .bot-text blockquote {
-        border-left: 4px solid #e5e7eb;
-        margin: 16px 0;
-        padding-left: 16px;
-        color: #6b7280;
-    }
+    .bot-text blockquote { border-left: 4px solid #e5e7eb; margin: 16px 0; padding-left: 16px; color: #6b7280; }
 
-
-    /* 분석 중 텍스트 */
+    /* Analyzing Text */
     @keyframes textShimmer {
         0% { background-position: 200% 0; }
         100% { background-position: -200% 0; }
     }
     .analyzing-text {
-        font-size: 16px;
-        font-weight: 500;
-        padding: 8px 0;
-        cursor: default; 
+        font-size: 16px; font-weight: 500; padding: 8px 0; cursor: default; 
         color: #9CA3AF; 
         background: linear-gradient(110deg, #9CA3AF 40%, #F3F4F6 50%, #9CA3AF 60%);
         background-size: 200% 100%;
-        background-clip: text;
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent; 
-        animation: textShimmer 3s linear infinite;
-        transition: all 0.2s ease;
+        background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent; 
+        animation: textShimmer 3s linear infinite; transition: all 0.2s ease;
     }
-
-    /* 마우스 호버 시 검정색으로 변경 */
-    .analyzing-text:hover {
-        background: none;
-        -webkit-text-fill-color: #000000;
-        color: #000000;
-        animation: none;
-    }
+    .analyzing-text:hover { background: none; -webkit-text-fill-color: #000000; color: #000000; animation: none; }
 
     /* 하단 고정 영역 */
     .bottom-fixed-wrapper {
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        width: 100%;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        padding-bottom: 24px;
-        padding-top: 10px;
+        position: fixed; bottom: 0; left: 0; width: 100%;
+        display: flex; flex-direction: column; align-items: center;
+        padding-bottom: 24px; padding-top: 10px;
         background: linear-gradient(to top, #ffffff 80%, rgba(255,255,255,0)); 
-        z-index: 900;
-        pointer-events: none; 
+        z-index: 900; pointer-events: none; 
     }
 
     .chat-input-container {
-        pointer-events: auto; 
-        width: 768px; 
-        max-width: 90%;
-        background-color: #F4F4F5;
-        border-radius: var(--radius-input);
-        padding: 14px 18px; 
-        box-sizing: border-box;
-        display: flex;
-        flex-direction: column;
-        position: relative; 
-        transition: height 0.1s ease;
-        box-shadow: none !important;
+        pointer-events: auto; width: 768px; max-width: 90%;
+        background-color: #F4F4F5; border-radius: var(--radius-input);
+        padding: 14px 18px; box-sizing: border-box;
+        display: flex; flex-direction: column; position: relative; 
+        transition: height 0.1s ease; box-shadow: none !important;
     }
 
     .chat-textarea {
-        width: 100%;
-        border: none;
-        background: transparent;
-        resize: none;
-        outline: none;
-        font-size: 16px;
-        color: #333;
-        font-family: inherit;
-        padding: 0;
-        line-height: var(--line-height);
-        height: var(--line-height);
-        max-height: calc(var(--line-height) * 8); 
-        overflow-y: hidden; 
-        scrollbar-width: none;
+        width: 100%; border: none; background: transparent; resize: none; outline: none;
+        font-size: 16px; color: #333; font-family: inherit; padding: 0;
+        line-height: var(--line-height); height: var(--line-height);
+        max-height: calc(var(--line-height) * 8); overflow-y: hidden; scrollbar-width: none;
     }
     .chat-textarea::-webkit-scrollbar { display: none; }
     .chat-textarea::placeholder { color: #9CA3AF; }
 
-    .input-toolbar {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-top: 8px; 
-    }
-
+    .input-toolbar { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; }
     .left-tools { display: flex; gap: 8px; }
-
     .icon-btn {
-        background: none;
-        border: none;
-        border-radius: var(--radius-icon-btn);
-        padding: 6px;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: #6B7280;
-        transition: background-color 0.2s, color 0.2s;
+        background: none; border: none; border-radius: var(--radius-icon-btn); padding: 6px;
+        cursor: pointer; display: flex; align-items: center; justify-content: center;
+        color: #6B7280; transition: background-color 0.2s, color 0.2s;
     }
     .icon-btn:hover { background-color: rgba(0,0,0,0.05); color: #374151; }
     #searchBtn.active { color: #0EA5E9; background-color: rgba(14, 165, 233, 0.1); }
     #attachBtn .material-symbols-rounded { transform: rotate(45deg); }
 
     .send-btn {
-        background-color: #E5E7EB; 
-        border: none;
-        border-radius: var(--radius-send-btn);
-        width: 32px;
-        height: 32px;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        cursor: default;
-        transition: all 0.2s ease-in-out;
+        background-color: #E5E7EB; border: none; border-radius: var(--radius-send-btn);
+        width: 32px; height: 32px; display: flex; justify-content: center; align-items: center;
+        cursor: default; transition: all 0.2s ease-in-out;
     }
     .send-btn .material-symbols-rounded { font-size: 20px; color: #9CA3AF; }
     .send-btn:not(:disabled) { background-color: var(--primary-color); cursor: pointer; }
     .send-btn:not(:disabled) .material-symbols-rounded { color: #ffffff; }
     .send-btn:not(:disabled):hover { background-color: #4338ca; }
+    .stop-icon-square { width: 12px; height: 12px; background-color: #ffffff; border-radius: 2px; display: inline-block; }
 
-    /* [수정됨] 정지 버튼을 위한 꽉 찬 사각형 스타일 */
-    .stop-icon-square {
-        width: 12px;
-        height: 12px;
-        background-color: #ffffff;
-        border-radius: 2px;
-        display: inline-block;
-    }
-
-    .disclaimer-text {
-        font-size: 12px;
-        color: #9CA3AF; 
-        margin-top: 12px;
-        text-align: center;
-        pointer-events: auto; 
-    }
+    .disclaimer-text { font-size: 12px; color: #9CA3AF; margin-top: 12px; text-align: center; pointer-events: auto; }
 
     .attach-menu {
-        display: none; 
-        position: absolute;
-        bottom: 60px; 
-        left: 0;
-        width: 140px;
-        background-color: #FFFFFF; 
-        border: 1px solid #E5E7EB; 
-        border-radius: var(--radius-window);
-        padding: 6px;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08); 
-        z-index: 2000;
-        flex-direction: column;
-        gap: 2px;
-        opacity: 0;
-        transform: translateY(10px);
+        display: none; position: absolute; bottom: 60px; left: 0; width: 140px;
+        background-color: #FFFFFF; border: 1px solid #E5E7EB; border-radius: var(--radius-window);
+        padding: 6px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08); z-index: 2000;
+        flex-direction: column; gap: 2px; opacity: 0; transform: translateY(10px);
         transition: opacity 0.2s ease, transform 0.2s ease;
     }
     .attach-menu.open { display: flex; opacity: 1; transform: translateY(0); }
-
     .menu-item {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        padding: 10px 12px;
-        color: #374151; 
-        font-size: 14px;
-        border-radius: 8px; 
-        cursor: pointer;
-        transition: background-color 0.2s;
-        text-decoration: none;
-        font-weight: 500;
+        display: flex; align-items: center; gap: 10px; padding: 10px 12px;
+        color: #374151; font-size: 14px; border-radius: 8px; cursor: pointer;
+        transition: background-color 0.2s; text-decoration: none; font-weight: 500;
     }
     .menu-item:hover { background-color: #F3F4F6; }
     .menu-item .material-symbols-rounded { font-size: 20px; color: #4B5563; }
-
 </style>
 </head>
 <body>
@@ -433,12 +305,8 @@
                 무료 오퍼
                 <span class="offer-close">&times;</span>
             </div>
-            <button class="share-btn">
-                <span class="material-symbols-rounded">ios_share</span> 공유하기
-            </button>
-            <button class="dots-btn">
-                <span class="material-symbols-rounded">more_horiz</span>
-            </button>
+            <button class="share-btn"><span class="material-symbols-rounded">ios_share</span> 공유하기</button>
+            <button class="dots-btn"><span class="material-symbols-rounded">more_horiz</span></button>
         </div>
     </header>
 
@@ -474,10 +342,10 @@
         let conversationHistory = [];
         let abortController = null;
         let isGenerating = false;
+        let isFirstMessage = true; 
 
         marked.setOptions({ breaks: true, sanitize: false });
 
-        // 입력창 높이 조절
         function adjustHeight() {
             chatInput.style.height = 'auto'; 
             let scrollHeight = chatInput.scrollHeight;
@@ -488,27 +356,26 @@
                 chatInput.style.height = scrollHeight + 'px';
                 chatInput.style.overflowY = 'hidden'; 
             }
-            if (!isGenerating) {
-                sendBtn.disabled = chatInput.value.trim().length === 0;
-            }
+            if (!isGenerating) sendBtn.disabled = chatInput.value.trim().length === 0;
         }
 
-        // 스크롤 포커싱
-        function scrollToTopFocus(element) {
+        // [핵심 로직] 메시지가 상단바 아래에 딱 걸치도록 하단 여백(Padding)을 동적 계산
+        function adjustPaddingForLastMessage(element) {
             if (!element) return;
             const headerHeight = 56;
             const gap = 20; 
-            const elementTop = element.getBoundingClientRect().top + window.scrollY;
+            const minPadding = 160; // 입력창에 가려지지 않을 최소 여백
             
-            // padding-bottom이 충분히(80vh) 있어야 맨 아래 요소도 위로 올라갈 수 있음
-            window.scrollTo({
-                top: elementTop - headerHeight - gap,
-                behavior: 'smooth'
-            });
+            // 화면 전체 높이 - (상단바 + 간격 + 메시지 높이) = 필요한 하단 여백
+            let neededPadding = window.innerHeight - (headerHeight + gap + element.offsetHeight);
+            
+            // 여백이 너무 작거나(입력창 가림), 메시지가 너무 크면 최소 여백 사용
+            if (neededPadding < minPadding) neededPadding = minPadding;
+            
+            chatContainer.style.paddingBottom = neededPadding + 'px';
         }
 
         async function sendMessage() {
-            // 중단 기능
             if (isGenerating) {
                 if (abortController) {
                     abortController.abort();
@@ -520,20 +387,28 @@
             const text = chatInput.value.trim();
             if (text.length === 0) return;
 
-            // 1. 사용자 메시지 등록
+            // 첫 메시지 전송 시 스크롤 잠금 해제
+            if (isFirstMessage) {
+                document.body.style.overflowY = 'auto';
+                isFirstMessage = false;
+            }
+
             const userMsgElement = addMessage(text, 'user');
             conversationHistory.push({ role: "user", content: text });
 
             chatInput.value = '';
             adjustHeight();
             
-            // [수정됨] UI를 정지 버튼으로 변경 (꽉 찬 사각형 div 사용)
             isGenerating = true;
             sendBtn.innerHTML = '<div class="stop-icon-square"></div>'; 
             sendBtn.disabled = false;
             
-            // 2. [핵심] 사용자 메시지를 상단바 아래로 강제 스크롤
-            requestAnimationFrame(() => scrollToTopFocus(userMsgElement));
+            // [중요] 메시지 추가 직후 패딩 계산 & 맨 아래로 스크롤
+            // 패딩이 맞춰졌으므로 맨 아래로 내리면 메시지는 상단바 아래에 위치하게 됨
+            adjustPaddingForLastMessage(userMsgElement);
+            requestAnimationFrame(() => {
+                window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+            });
 
             const isSearchMode = searchBtn.classList.contains('active');
             const loadingId = 'loading-' + Date.now();
@@ -555,13 +430,10 @@
                 if (loadingElem) loadingElem.remove();
                 if (timers) timers.forEach(t => clearTimeout(t));
 
-                // 봇 메시지 박스 생성
                 const botRow = document.createElement('div');
                 botRow.classList.add('message-row', 'bot');
                 const botContent = document.createElement('div');
                 botContent.classList.add('bot-text');
-                
-                // [수정됨] 부드러운 등장을 위한 애니메이션 클래스 추가
                 botContent.classList.add('animate-in'); 
 
                 botRow.appendChild(botContent);
@@ -569,9 +441,8 @@
 
                 const reader = response.body.getReader();
                 const decoder = new TextDecoder();
-                
                 let fullText = "";       
-                
+
                 while (true) {
                     const { done, value } = await reader.read();
                     if (done) break;
@@ -581,7 +452,9 @@
                     fullText += cleanChunk;
 
                     botContent.innerHTML = marked.parse(fullText);
-                    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }); 
+                    
+                    // [중요] 봇 답변 생성 중에는 무조건 맨 아래로 스크롤
+                    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
                 }
 
                 conversationHistory.push({ role: "assistant", content: fullText });
@@ -592,13 +465,10 @@
                 if (timers) timers.forEach(t => clearTimeout(t));
 
                 if (error.name === 'AbortError') {
-                    // [수정됨] 중단 시 처리
                     const botRows = document.getElementsByClassName('message-row bot');
                     if (botRows.length > 0) {
                         const lastBotMsg = botRows[botRows.length - 1].querySelector('.bot-text');
-                        if(lastBotMsg) {
-                            lastBotMsg.innerHTML += "<br><em>[답변중지됨]</em>";
-                        }
+                        if(lastBotMsg) lastBotMsg.innerHTML += "<br><em>[답변중지됨]</em>";
                     }
                 } else {
                     console.error(error);
@@ -613,18 +483,14 @@
             }
         }
 
-        // 애니메이션 적용된 텍스트 조각 생성
         function createAnimatedChunk(container, text) {
             const span = document.createElement('span');
             span.className = 'reveal-chunk';
             span.innerText = text; 
-            span.addEventListener('animationend', () => {
-                span.classList.add('done');
-            });
+            span.addEventListener('animationend', () => span.classList.add('done'));
             container.appendChild(span);
         }
 
-        // 에러 메시지
         function simulateBotError(msg) {
             const botRow = document.createElement('div');
             botRow.classList.add('message-row', 'bot');
@@ -645,12 +511,8 @@
             let timers = [];
             if (isSearchMode) {
                 contentDiv.innerText = "검색을 진행하는 중...";
-                timers.push(setTimeout(() => {
-                    const el = document.getElementById(id); if(el) el.querySelector('.analyzing-text').innerText = "검색은 시간이 소요될 수 있습니다.";
-                }, 3000));
-                timers.push(setTimeout(() => {
-                    const el = document.getElementById(id); if(el) el.querySelector('.analyzing-text').innerText = "질문을 분석하는중...";
-                }, 6000));
+                timers.push(setTimeout(() => { const el = document.getElementById(id); if(el) el.querySelector('.analyzing-text').innerText = "검색은 시간이 소요될 수 있습니다."; }, 3000));
+                timers.push(setTimeout(() => { const el = document.getElementById(id); if(el) el.querySelector('.analyzing-text').innerText = "질문을 분석하는중..."; }, 6000));
             } else {
                 contentDiv.innerText = "질문을 분석하는중...";
             }
@@ -663,7 +525,6 @@
             const rowDiv = document.createElement('div');
             rowDiv.classList.add('message-row', sender); 
             const contentDiv = document.createElement('div');
-            
             if (sender === 'user') {
                 contentDiv.classList.add('user-bubble');
                 contentDiv.innerHTML = text.replace(/\n/g, '<br>');
@@ -707,6 +568,14 @@
             document.querySelector('.offer-pill').style.display = 'none';
         });
 
+        // 창 크기 변경 시 패딩 재계산 (마지막 메시지 기준)
+        window.addEventListener('resize', () => {
+            const userMessages = document.querySelectorAll('.message-row.user .user-bubble');
+            if (userMessages.length > 0) {
+                // 부모 요소(row)가 아닌 버블 자체를 넘겨야 정확함
+                adjustPaddingForLastMessage(userMessages[userMessages.length - 1].parentElement); 
+            }
+        });
     </script>
 </body>
 </html>
