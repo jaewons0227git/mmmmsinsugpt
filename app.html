@@ -1132,8 +1132,12 @@
             if (requiredPadding < 160) requiredPadding = 160;
             
             chatContainer.style.paddingBottom = requiredPadding + 'px';
-            // [수정] 사용자의 요구대로 여기서도 무조건 맨 아래로 스크롤
-            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+            
+            // [수정] 아래 화살표 버튼과 동일한 로직 실행 (맨 아래로 스크롤)
+            // requestAnimationFrame을 사용하여 DOM 업데이트 후 확실하게 실행
+            requestAnimationFrame(() => {
+                 window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+            });
             
             return requiredPadding;
         }
@@ -1254,8 +1258,11 @@
                 conversationHistory.push({ role: "user", content: text });
                 chatInput.value = '';
                 adjustHeight();
-                // [수정] 메시지 전송 시 무조건 맨 아래로 부드럽게 스크롤
-                window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+                
+                // [수정] 즉시 스크롤하되, DOM 업데이트 타이밍을 위해 setTimeout 사용
+                setTimeout(() => {
+                    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+                }, 10);
             } else {
                 const userRows = document.querySelectorAll('.message-row.user');
                 userMsgElement = userRows[userRows.length - 1];
@@ -1268,16 +1275,17 @@
             sendBtn.disabled = false;
             
             let allocatedPadding = 160;
-            // [수정] 첫 메시지가 아닐 때만 시야 조정(여백 추가) 로직 실행
+            
+            // [수정] 여백 추가 로직은 유지하되, 스크롤 실행은 DOM 업데이트 후 확실하게 처리
             if (userMsgElement && conversationHistory.length > 1) { 
-                requestAnimationFrame(() => {
+                setTimeout(() => {
                     allocatedPadding = forceScrollToMessage(userMsgElement);
-                    // [추가] 혹시 forceScrollToMessage의 스크롤이 씹힐 경우를 대비해 한번 더 확실하게 내림
                     window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-                });
+                }, 10);
             } else {
-                // 첫 메시지일 경우에도 확실하게 스크롤
-                window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+                setTimeout(() => {
+                    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+                }, 10);
             }
 
             const isSearchMode = searchBtn.classList.contains('active');
@@ -1527,8 +1535,14 @@
                 copyBtn.className = 'user-copy-btn';
                 copyBtn.title = '복사';
                 copyBtn.innerHTML = '<span class="material-symbols-rounded" style="font-size:16px;">content_copy</span>';
+                
+                // [수정] 복사 버튼 클릭 시 체크표시 이펙트 추가
                 copyBtn.addEventListener('click', () => {
-                    navigator.clipboard.writeText(text);
+                    navigator.clipboard.writeText(text).then(() => {
+                        const originalHTML = copyBtn.innerHTML;
+                        copyBtn.innerHTML = '<span class="material-symbols-rounded" style="font-size:16px;">check</span>';
+                        setTimeout(() => copyBtn.innerHTML = originalHTML, 2000);
+                    });
                 });
 
                 const contentDiv = document.createElement('div');
