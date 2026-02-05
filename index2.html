@@ -128,8 +128,8 @@
         margin: 0 auto;
         padding: 20px;
         padding-top: calc(var(--header-height) + 20px);
-        /* 하단 여백: 입력창 높이 + 약간의 여유만 남김 (너무 넓지 않게) */
-        padding-bottom: 160px; 
+        /* [중요] 최신 메시지를 상단으로 올리기 위해 하단 여백을 충분히 확보 */
+        padding-bottom: 80vh; 
         box-sizing: border-box;
         display: flex;
         flex-direction: column;
@@ -163,43 +163,47 @@
         will-change: contents;
     }
 
-    /* ==========================================
-       [핵심] 부드러운 텍스트 등장 애니메이션 
-       ==========================================
+    /* [요청사항] 오류 메시지처럼 부드럽게 등장하는 애니메이션 
+       봇 메시지 전체에 적용하여 부드럽게 나타나게 함
     */
-    .reveal-chunk {
-        display: inline;
-        opacity: 0; /* 시작: 안보임 */
-        filter: blur(2px); /* 약간 흐릿하게 시작 */
-        
-        /* 마스크 설정: 왼쪽(보임) -> 오른쪽(투명) 그라데이션 */
+    .bot-text.animate-in {
+        animation: textWipe 0.8s cubic-bezier(0.25, 1, 0.5, 1) forwards;
         -webkit-mask-image: linear-gradient(90deg, black 50%, transparent 90%);
         mask-image: linear-gradient(90deg, black 50%, transparent 90%);
         -webkit-mask-size: 200% 100%;
         mask-size: 200% 100%;
-        -webkit-mask-position: 100% 0; /* 마스크가 텍스트를 가린 상태 */
-        mask-position: 100% 0;
-
-        /* 애니메이션 실행 */
-        animation: textWipe 0.6s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+        -webkit-mask-position: 100% 0;
+        opacity: 0;
     }
 
     @keyframes textWipe {
         0% {
             opacity: 0;
             filter: blur(2px);
-            -webkit-mask-position: 100% 0; /* 가려짐 */
+            -webkit-mask-position: 100% 0;
             mask-position: 100% 0;
         }
         100% {
             opacity: 1;
             filter: blur(0px);
-            -webkit-mask-position: 0% 0; /* 다 보여줌 */
+            -webkit-mask-position: 0% 0;
             mask-position: 0% 0;
         }
     }
 
-    /* 애니메이션 종료 후 적용될 클래스: 비네팅(마스크) 완전 제거 */
+    .reveal-chunk {
+        display: inline;
+        opacity: 0; 
+        filter: blur(2px); 
+        -webkit-mask-image: linear-gradient(90deg, black 50%, transparent 90%);
+        mask-image: linear-gradient(90deg, black 50%, transparent 90%);
+        -webkit-mask-size: 200% 100%;
+        mask-size: 200% 100%;
+        -webkit-mask-position: 100% 0; 
+        mask-position: 100% 0;
+        animation: textWipe 0.6s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+    }
+
     .reveal-chunk.done {
         opacity: 1;
         filter: none;
@@ -259,10 +263,10 @@
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent; 
         animation: textShimmer 3s linear infinite;
-        transition: all 0.2s ease; /* 호버 전환 효과 */
+        transition: all 0.2s ease;
     }
 
-    /* [수정됨] 마우스 호버 시 검정색으로 변경 */
+    /* 마우스 호버 시 검정색으로 변경 */
     .analyzing-text:hover {
         background: none;
         -webkit-text-fill-color: #000000;
@@ -270,7 +274,7 @@
         animation: none;
     }
 
-    /* 하단 고정 영역 (비네팅 최소화 + 입력창) */
+    /* 하단 고정 영역 */
     .bottom-fixed-wrapper {
         position: fixed;
         bottom: 0;
@@ -280,7 +284,7 @@
         flex-direction: column;
         align-items: center;
         padding-bottom: 24px;
-        padding-top: 10px; /* 여백 줄임 */
+        padding-top: 10px;
         background: linear-gradient(to top, #ffffff 80%, rgba(255,255,255,0)); 
         z-index: 900;
         pointer-events: none; 
@@ -361,6 +365,15 @@
     .send-btn:not(:disabled) { background-color: var(--primary-color); cursor: pointer; }
     .send-btn:not(:disabled) .material-symbols-rounded { color: #ffffff; }
     .send-btn:not(:disabled):hover { background-color: #4338ca; }
+
+    /* [수정됨] 정지 버튼을 위한 꽉 찬 사각형 스타일 */
+    .stop-icon-square {
+        width: 12px;
+        height: 12px;
+        background-color: #ffffff;
+        border-radius: 2px;
+        display: inline-block;
+    }
 
     .disclaimer-text {
         font-size: 12px;
@@ -459,8 +472,8 @@
         const searchBtn = document.getElementById('searchBtn');
 
         let conversationHistory = [];
-        let abortController = null; // [수정됨] 중단 컨트롤러 추가
-        let isGenerating = false;   // [수정됨] 생성 중 상태 변수 추가
+        let abortController = null;
+        let isGenerating = false;
 
         marked.setOptions({ breaks: true, sanitize: false });
 
@@ -475,28 +488,27 @@
                 chatInput.style.height = scrollHeight + 'px';
                 chatInput.style.overflowY = 'hidden'; 
             }
-            // 생성 중이 아닐 때만 버튼 활성화 여부 결정
             if (!isGenerating) {
                 sendBtn.disabled = chatInput.value.trim().length === 0;
             }
         }
 
-        // 스크롤 포커싱: element가 상단바(56px) 바로 아래에 오도록 이동
+        // 스크롤 포커싱
         function scrollToTopFocus(element) {
             if (!element) return;
             const headerHeight = 56;
-            const gap = 20; // 상단바와의 간격
+            const gap = 20; 
             const elementTop = element.getBoundingClientRect().top + window.scrollY;
             
+            // padding-bottom이 충분히(80vh) 있어야 맨 아래 요소도 위로 올라갈 수 있음
             window.scrollTo({
                 top: elementTop - headerHeight - gap,
                 behavior: 'smooth'
             });
         }
 
-        // [수정됨] 메세지 전송 함수 (중단 로직 및 UI 변경 포함)
         async function sendMessage() {
-            // 생성 중이면 중지 기능으로 동작
+            // 중단 기능
             if (isGenerating) {
                 if (abortController) {
                     abortController.abort();
@@ -515,32 +527,30 @@
             chatInput.value = '';
             adjustHeight();
             
-            // [수정됨] UI를 정지 버튼으로 변경 (생성 시작)
+            // [수정됨] UI를 정지 버튼으로 변경 (꽉 찬 사각형 div 사용)
             isGenerating = true;
-            sendBtn.innerHTML = '<span class="material-symbols-rounded">stop</span>';
-            sendBtn.disabled = false; // 정지 버튼은 항상 활성화
+            sendBtn.innerHTML = '<div class="stop-icon-square"></div>'; 
+            sendBtn.disabled = false;
             
-            // 2. 중요: 사용자 메시지로 스크롤 이동
-            // 딜레이 없이 즉시 실행하되, DOM 렌더링 확보를 위해 아주 짧은 requestAnimationFrame 사용
+            // 2. [핵심] 사용자 메시지를 상단바 아래로 강제 스크롤
             requestAnimationFrame(() => scrollToTopFocus(userMsgElement));
 
             const isSearchMode = searchBtn.classList.contains('active');
             const loadingId = 'loading-' + Date.now();
             const timers = addLoadingMessage(loadingId, isSearchMode);
 
-            abortController = new AbortController(); // 컨트롤러 초기화
+            abortController = new AbortController();
 
             try {
                 const response = await fetch(isSearchMode ? "https://jaewondev.pythonanywhere.com/ask" : "https://jaewondev.pythonanywhere.com/askfast", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ message: text, history: conversationHistory }),
-                    signal: abortController.signal // [수정됨] 시그널 전달
+                    signal: abortController.signal
                 });
 
                 if (!response.ok) throw new Error("Server error");
 
-                // 로딩 제거
                 const loadingElem = document.getElementById(loadingId);
                 if (loadingElem) loadingElem.remove();
                 if (timers) timers.forEach(t => clearTimeout(t));
@@ -550,6 +560,10 @@
                 botRow.classList.add('message-row', 'bot');
                 const botContent = document.createElement('div');
                 botContent.classList.add('bot-text');
+                
+                // [수정됨] 부드러운 등장을 위한 애니메이션 클래스 추가
+                botContent.classList.add('animate-in'); 
+
                 botRow.appendChild(botContent);
                 chatContainer.appendChild(botRow);
 
@@ -566,15 +580,13 @@
                     const cleanChunk = chunk.replace(/\[DONE\]/g, "");
                     fullText += cleanChunk;
 
-                    // [수정됨] 즉시 마크다운 적용 및 자동 스크롤
                     botContent.innerHTML = marked.parse(fullText);
-                    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }); // 최하단으로 자동 스크롤
+                    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }); 
                 }
 
                 conversationHistory.push({ role: "assistant", content: fullText });
 
             } catch (error) {
-                // 로딩 제거
                 const loadingElem = document.getElementById(loadingId);
                 if (loadingElem) loadingElem.remove();
                 if (timers) timers.forEach(t => clearTimeout(t));
@@ -584,13 +596,6 @@
                     const botRows = document.getElementsByClassName('message-row bot');
                     if (botRows.length > 0) {
                         const lastBotMsg = botRows[botRows.length - 1].querySelector('.bot-text');
-                        // 현재까지 생성된 텍스트에 중단 문구 추가
-                        let currentText = conversationHistory[conversationHistory.length - 1]?.role === 'assistant' 
-                                          ? conversationHistory[conversationHistory.length - 1].content 
-                                          : (lastBotMsg ? lastBotMsg.innerText : ""); 
-                        
-                        // 마크다운 파싱 전 텍스트가 있다면 그것을 사용, 없다면 UI에서 가져옴
-                        // 여기서는 스트리밍 중 conversationHistory에 아직 안넣었을 수 있으므로 UI 업데이트
                         if(lastBotMsg) {
                             lastBotMsg.innerHTML += "<br><em>[답변중지됨]</em>";
                         }
@@ -600,30 +605,26 @@
                     simulateBotError("죄송합니다. 오류가 발생했습니다.");
                 }
             } finally {
-                // [수정됨] 상태 초기화 및 전송 버튼 복구
                 isGenerating = false;
                 abortController = null;
                 sendBtn.innerHTML = '<span class="material-symbols-rounded">arrow_upward</span>';
-                sendBtn.disabled = true; // 입력창 비었으면 비활성화
-                adjustHeight(); // 입력창 상태에 따라 버튼 상태 재확인
+                sendBtn.disabled = true; 
+                adjustHeight(); 
             }
         }
 
-        // 애니메이션 적용된 텍스트 조각 생성 (원래 기능 유지를 위해 남겨둠, 현재 스트리밍엔 미사용)
+        // 애니메이션 적용된 텍스트 조각 생성
         function createAnimatedChunk(container, text) {
             const span = document.createElement('span');
             span.className = 'reveal-chunk';
             span.innerText = text; 
-            
-            // 애니메이션 끝나면 흐림 효과/마스크 제거
             span.addEventListener('animationend', () => {
                 span.classList.add('done');
             });
-
             container.appendChild(span);
         }
 
-        // 에러 메시지 애니메이션 출력 함수
+        // 에러 메시지
         function simulateBotError(msg) {
             const botRow = document.createElement('div');
             botRow.classList.add('message-row', 'bot');
@@ -679,7 +680,6 @@
         chatInput.addEventListener('keydown', function(event) {
             if (event.key === 'Enter' && !event.shiftKey && window.innerWidth > 768) {
                 event.preventDefault(); 
-                // 생성 중이 아닐 때만 엔터키 전송 허용, 생성 중일 땐 버튼 클릭(중단) 유도
                 if (!sendBtn.disabled && !isGenerating) sendMessage();
             }
         });
