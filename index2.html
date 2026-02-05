@@ -258,7 +258,16 @@
         background-clip: text;
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent; 
-        animation: textShimmer 3s linear infinite; 
+        animation: textShimmer 3s linear infinite;
+        transition: all 0.2s ease; /* 호버 전환 효과 */
+    }
+
+    /* [수정됨] 마우스 호버 시 검정색으로 변경 */
+    .analyzing-text:hover {
+        background: none;
+        -webkit-text-fill-color: #000000;
+        color: #000000;
+        animation: none;
     }
 
     /* 하단 고정 영역 (비네팅 최소화 + 입력창) */
@@ -450,6 +459,9 @@
         const searchBtn = document.getElementById('searchBtn');
 
         let conversationHistory = [];
+        let abortController = null; // [수정됨] 중단 컨트롤러 추가
+        let isGenerating = false;   // [수정됨] 생성 중 상태 변수 추가
+
         marked.setOptions({ breaks: true, sanitize: false });
 
         // 입력창 높이 조절
@@ -463,7 +475,10 @@
                 chatInput.style.height = scrollHeight + 'px';
                 chatInput.style.overflowY = 'hidden'; 
             }
-            sendBtn.disabled = chatInput.value.trim().length === 0;
+            // 생성 중이 아닐 때만 버튼 활성화 여부 결정
+            if (!isGenerating) {
+                sendBtn.disabled = chatInput.value.trim().length === 0;
+            }
         }
 
         // 스크롤 포커싱: element가 상단바(56px) 바로 아래에 오도록 이동
@@ -479,7 +494,17 @@
             });
         }
 
+        // [수정됨] 메세지 전송 함수 (중단 로직 및 UI 변경 포함)
         async function sendMessage() {
+            // 생성 중이면 중지 기능으로 동작
+            if (isGenerating) {
+                if (abortController) {
+                    abortController.abort();
+                    abortController = null;
+                }
+                return;
+            }
+
             const text = chatInput.value.trim();
             if (text.length === 0) return;
 
@@ -489,20 +514,28 @@
 
             chatInput.value = '';
             adjustHeight();
-            sendBtn.disabled = true;
-
+            
+            // [수정됨] UI를 정지 버튼으로 변경 (생성 시작)
+            isGenerating = true;
+            sendBtn.innerHTML = '<span class="material-symbols-rounded">stop</span>';
+            sendBtn.disabled = false; // 정지 버튼은 항상 활성화
+            
             // 2. 중요: 사용자 메시지로 스크롤 이동
-            scrollToTopFocus(userMsgElement);
+            // 딜레이 없이 즉시 실행하되, DOM 렌더링 확보를 위해 아주 짧은 requestAnimationFrame 사용
+            requestAnimationFrame(() => scrollToTopFocus(userMsgElement));
 
             const isSearchMode = searchBtn.classList.contains('active');
             const loadingId = 'loading-' + Date.now();
             const timers = addLoadingMessage(loadingId, isSearchMode);
 
+            abortController = new AbortController(); // 컨트롤러 초기화
+
             try {
                 const response = await fetch(isSearchMode ? "https://jaewondev.pythonanywhere.com/ask" : "https://jaewondev.pythonanywhere.com/askfast", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ message: text, history: conversationHistory }) 
+                    body: JSON.stringify({ message: text, history: conversationHistory }),
+                    signal: abortController.signal // [수정됨] 시그널 전달
                 });
 
                 if (!response.ok) throw new Error("Server error");
@@ -523,71 +556,60 @@
                 const reader = response.body.getReader();
                 const decoder = new TextDecoder();
                 
-                let fullText = "";       // 최종 마크다운용 전체 텍스트
-                let buffer = "";         // 화면 출력용 버퍼
-                let isStreaming = true;
-                const CHUNK_SIZE = 15;   // 15~20글자 단위 (부드러움과 덩어리감의 균형)
+                let fullText = "";       
+                
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+                    
+                    const chunk = decoder.decode(value, { stream: true });
+                    const cleanChunk = chunk.replace(/\[DONE\]/g, "");
+                    fullText += cleanChunk;
 
-                // 스트리밍 데이터 수신 루프 (백그라운드)
-                (async () => {
-                    while (true) {
-                        const { done, value } = await reader.read();
-                        if (done) {
-                            isStreaming = false;
-                            break;
-                        }
-                        const chunk = decoder.decode(value, { stream: true });
-                        const cleanChunk = chunk.replace(/\[DONE\]/g, "");
-                        fullText += cleanChunk;
-                        buffer += cleanChunk; // 버퍼에 쌓음
-                    }
-                })();
+                    // [수정됨] 즉시 마크다운 적용 및 자동 스크롤
+                    botContent.innerHTML = marked.parse(fullText);
+                    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }); // 최하단으로 자동 스크롤
+                }
 
-                // 화면 렌더링 루프 (UI 업데이트)
-                const renderLoop = setInterval(() => {
-                    // 버퍼에 렌더링할 데이터가 충분하거나, 스트림이 끝났고 남은 데이터가 있을 때
-                    if (buffer.length >= CHUNK_SIZE || (!isStreaming && buffer.length > 0)) {
-                        // CHUNK_SIZE 만큼 잘라냄
-                        const sliceSize = Math.min(buffer.length, CHUNK_SIZE);
-                        const slice = buffer.slice(0, sliceSize);
-                        buffer = buffer.slice(sliceSize); // 버퍼 비우기
-
-                        // 애니메이션 청크 생성 및 추가
-                        createAnimatedChunk(botContent, slice);
-
-                        // 봇 메시지가 화면 밖으로 나가면 자동 스크롤 (읽기 편하게)
-                        const rect = botContent.getBoundingClientRect();
-                        if (rect.bottom > window.innerHeight) {
-                            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-                        }
-                    }
-
-                    // 종료 조건: 스트림도 끝났고 버퍼도 비었을 때
-                    if (!isStreaming && buffer.length === 0) {
-                        clearInterval(renderLoop);
-                        // [중요] 애니메이션이 다 끝난 후, 깔끔한 마크다운으로 교체
-                        // 즉시 바꾸면 애니메이션이 끊기므로 약간의 딜레이(1초) 후 교체하거나
-                        // 여기서는 애니메이션 효과를 위해 텍스트 유지를 원할 수 있으나
-                        // 코드 블럭 등을 위해 최종 변환은 필수입니다.
-                        setTimeout(() => {
-                            botContent.innerHTML = marked.parse(fullText);
-                        }, 1000); // 마지막 청크 애니메이션 시간 고려
-                        
-                        conversationHistory.push({ role: "assistant", content: fullText });
-                    }
-                }, 100); // 0.1초마다 체크하여 부드럽게 출력
+                conversationHistory.push({ role: "assistant", content: fullText });
 
             } catch (error) {
-                console.error(error);
+                // 로딩 제거
                 const loadingElem = document.getElementById(loadingId);
                 if (loadingElem) loadingElem.remove();
                 if (timers) timers.forEach(t => clearTimeout(t));
-                // 에러 메시지도 부드럽게 출력
-                simulateBotError("죄송합니다. 오류가 발생했습니다.");
+
+                if (error.name === 'AbortError') {
+                    // [수정됨] 중단 시 처리
+                    const botRows = document.getElementsByClassName('message-row bot');
+                    if (botRows.length > 0) {
+                        const lastBotMsg = botRows[botRows.length - 1].querySelector('.bot-text');
+                        // 현재까지 생성된 텍스트에 중단 문구 추가
+                        let currentText = conversationHistory[conversationHistory.length - 1]?.role === 'assistant' 
+                                          ? conversationHistory[conversationHistory.length - 1].content 
+                                          : (lastBotMsg ? lastBotMsg.innerText : ""); 
+                        
+                        // 마크다운 파싱 전 텍스트가 있다면 그것을 사용, 없다면 UI에서 가져옴
+                        // 여기서는 스트리밍 중 conversationHistory에 아직 안넣었을 수 있으므로 UI 업데이트
+                        if(lastBotMsg) {
+                            lastBotMsg.innerHTML += "<br><em>[답변중지됨]</em>";
+                        }
+                    }
+                } else {
+                    console.error(error);
+                    simulateBotError("죄송합니다. 오류가 발생했습니다.");
+                }
+            } finally {
+                // [수정됨] 상태 초기화 및 전송 버튼 복구
+                isGenerating = false;
+                abortController = null;
+                sendBtn.innerHTML = '<span class="material-symbols-rounded">arrow_upward</span>';
+                sendBtn.disabled = true; // 입력창 비었으면 비활성화
+                adjustHeight(); // 입력창 상태에 따라 버튼 상태 재확인
             }
         }
 
-        // 애니메이션 적용된 텍스트 조각 생성
+        // 애니메이션 적용된 텍스트 조각 생성 (원래 기능 유지를 위해 남겨둠, 현재 스트리밍엔 미사용)
         function createAnimatedChunk(container, text) {
             const span = document.createElement('span');
             span.className = 'reveal-chunk';
@@ -657,7 +679,8 @@
         chatInput.addEventListener('keydown', function(event) {
             if (event.key === 'Enter' && !event.shiftKey && window.innerWidth > 768) {
                 event.preventDefault(); 
-                if (!sendBtn.disabled) sendMessage();
+                // 생성 중이 아닐 때만 엔터키 전송 허용, 생성 중일 땐 버튼 클릭(중단) 유도
+                if (!sendBtn.disabled && !isGenerating) sendMessage();
             }
         });
         sendBtn.addEventListener('click', sendMessage);
