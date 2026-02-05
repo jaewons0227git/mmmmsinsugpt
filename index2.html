@@ -128,7 +128,7 @@
         margin: 0 auto;
         padding: 20px;
         padding-top: calc(var(--header-height) + 20px);
-        /* 하단 여백: 입력창 높이에 맞춰서 적절히 */
+        /* 하단 여백: 입력창 높이 + 약간의 여유만 남김 (너무 넓지 않게) */
         padding-bottom: 160px; 
         box-sizing: border-box;
         display: flex;
@@ -163,53 +163,52 @@
         will-change: contents;
     }
 
-    /* =========================================================
-       [핵심] 20글자 단위 닦아내기 + 비네팅 애니메이션 
-       =========================================================
+    /* ==========================================
+       [핵심] 부드러운 텍스트 등장 애니메이션 
+       ==========================================
     */
-    .chunk-animate {
+    .reveal-chunk {
         display: inline;
-        opacity: 0; /* 시작은 안보임 */
+        opacity: 0; /* 시작: 안보임 */
+        filter: blur(2px); /* 약간 흐릿하게 시작 */
         
-        /* 마스크: 왼쪽은 보이고(black), 오른쪽 끝은 투명(transparent) + 그라데이션 */
-        /* 애니메이션 중에는 이 마스크가 이동하면서 글자를 보여줍니다 */
-        -webkit-mask-image: linear-gradient(90deg, black 0%, black 50%, transparent 100%);
-        mask-image: linear-gradient(90deg, black 0%, black 50%, transparent 100%);
-        
+        /* 마스크 설정: 왼쪽(보임) -> 오른쪽(투명) 그라데이션 */
+        -webkit-mask-image: linear-gradient(90deg, black 50%, transparent 90%);
+        mask-image: linear-gradient(90deg, black 50%, transparent 90%);
         -webkit-mask-size: 200% 100%;
         mask-size: 200% 100%;
-        
-        -webkit-mask-position: 100% 0; /* 처음엔 가려진 상태 */
+        -webkit-mask-position: 100% 0; /* 마스크가 텍스트를 가린 상태 */
         mask-position: 100% 0;
-        
-        animation: wipeVignette 0.8s ease-out forwards;
+
+        /* 애니메이션 실행 */
+        animation: textWipe 0.6s cubic-bezier(0.25, 1, 0.5, 1) forwards;
     }
 
-    @keyframes wipeVignette {
+    @keyframes textWipe {
         0% {
             opacity: 0;
-            -webkit-mask-position: 100% 0;
+            filter: blur(2px);
+            -webkit-mask-position: 100% 0; /* 가려짐 */
             mask-position: 100% 0;
-        }
-        10% {
-            opacity: 1; /* 페이드 인 */
         }
         100% {
             opacity: 1;
-            -webkit-mask-position: 0% 0; /* 닦아내기 완료 */
+            filter: blur(0px);
+            -webkit-mask-position: 0% 0; /* 다 보여줌 */
             mask-position: 0% 0;
         }
     }
 
-    /* 애니메이션 종료 후 적용: 마스크(비네팅)를 완전히 제거하여 글자를 선명하게 */
-    .chunk-animate.finished {
+    /* 애니메이션 종료 후 적용될 클래스: 비네팅(마스크) 완전 제거 */
+    .reveal-chunk.done {
+        opacity: 1;
+        filter: none;
         -webkit-mask-image: none !important;
         mask-image: none !important;
         animation: none !important;
-        opacity: 1 !important;
     }
 
-    /* 마크다운 스타일 (최종 변환 후 적용) */
+    /* 최종 렌더링된 마크다운 스타일 */
     .bot-text p { margin: 0 0 16px 0; } 
     .bot-text p:last-child { margin-bottom: 0; }
     .bot-text code {
@@ -241,13 +240,7 @@
         padding-left: 16px;
         color: #6b7280;
     }
-    
-    .stop-msg {
-        color: #9CA3AF;
-        font-style: italic;
-        display: inline-block;
-        margin-top: 5px;
-    }
+
 
     /* 분석 중 텍스트 */
     @keyframes textShimmer {
@@ -268,7 +261,7 @@
         animation: textShimmer 3s linear infinite; 
     }
 
-    /* 하단 고정 영역 */
+    /* 하단 고정 영역 (비네팅 최소화 + 입력창) */
     .bottom-fixed-wrapper {
         position: fixed;
         bottom: 0;
@@ -278,7 +271,7 @@
         flex-direction: column;
         align-items: center;
         padding-bottom: 24px;
-        padding-top: 10px;
+        padding-top: 10px; /* 여백 줄임 */
         background: linear-gradient(to top, #ffffff 80%, rgba(255,255,255,0)); 
         z-index: 900;
         pointer-events: none; 
@@ -343,7 +336,6 @@
     #searchBtn.active { color: #0EA5E9; background-color: rgba(14, 165, 233, 0.1); }
     #attachBtn .material-symbols-rounded { transform: rotate(45deg); }
 
-    /* 전송 버튼 & 정지 버튼 */
     .send-btn {
         background-color: #E5E7EB; 
         border: none;
@@ -357,32 +349,9 @@
         transition: all 0.2s ease-in-out;
     }
     .send-btn .material-symbols-rounded { font-size: 20px; color: #9CA3AF; }
-    
-    /* 전송 활성 상태 */
-    .send-btn:not(:disabled).send-mode { 
-        background-color: var(--primary-color); 
-        cursor: pointer; 
-    }
-    .send-btn:not(:disabled).send-mode .material-symbols-rounded { 
-        color: #ffffff; 
-    }
-    .send-btn:not(:disabled).send-mode:hover { 
-        background-color: #4338ca; 
-    }
-
-    /* 정지 버튼 상태 (검은색 사각형) */
-    .send-btn.stop-mode {
-        background-color: #1F2937; /* 다크 그레이/블랙 */
-        cursor: pointer;
-        opacity: 1 !important;
-    }
-    .send-btn.stop-mode .material-symbols-rounded {
-        color: #ffffff;
-        font-variation-settings: 'FILL' 1; /* 아이콘 채움 */
-    }
-    .send-btn.stop-mode:hover {
-        background-color: #000000;
-    }
+    .send-btn:not(:disabled) { background-color: var(--primary-color); cursor: pointer; }
+    .send-btn:not(:disabled) .material-symbols-rounded { color: #ffffff; }
+    .send-btn:not(:disabled):hover { background-color: #4338ca; }
 
     .disclaimer-text {
         font-size: 12px;
@@ -466,9 +435,7 @@
                     <button id="attachBtn" class="icon-btn" title="첨부하기"><span class="material-symbols-rounded">attach_file</span></button>
                     <button id="searchBtn" class="icon-btn" title="검색 모드"><span class="material-symbols-rounded">language</span></button>
                 </div>
-                <button id="sendBtn" class="send-btn send-mode" disabled>
-                    <span class="material-symbols-rounded">arrow_upward</span>
-                </button>
+                <button id="sendBtn" class="send-btn" disabled><span class="material-symbols-rounded">arrow_upward</span></button>
             </div>
         </div>
         <div class="disclaimer-text">MinsuGPT는 실수할 수 있습니다. 중요한 정보는 한번더 확인하세요.</div>
@@ -483,12 +450,9 @@
         const searchBtn = document.getElementById('searchBtn');
 
         let conversationHistory = [];
-        let abortController = null; // 중지 기능을 위한 컨트롤러
-        let isGenerating = false;   // 생성 중 상태 확인
-
         marked.setOptions({ breaks: true, sanitize: false });
 
-        // 입력창 높이 자동 조절
+        // 입력창 높이 조절
         function adjustHeight() {
             chatInput.style.height = 'auto'; 
             let scrollHeight = chatInput.scrollHeight;
@@ -499,78 +463,35 @@
                 chatInput.style.height = scrollHeight + 'px';
                 chatInput.style.overflowY = 'hidden'; 
             }
-            updateButtonState();
+            sendBtn.disabled = chatInput.value.trim().length === 0;
         }
 
-        // 버튼 상태 업데이트 (전송 vs 정지)
-        function updateButtonState() {
-            const hasText = chatInput.value.trim().length > 0;
-            const iconSpan = sendBtn.querySelector('.material-symbols-rounded');
-
-            if (isGenerating) {
-                // 생성 중일 때: 정지 버튼 활성화
-                sendBtn.disabled = false; 
-                sendBtn.classList.remove('send-mode');
-                sendBtn.classList.add('stop-mode');
-                iconSpan.innerText = 'stop'; // 네모 아이콘
-            } else {
-                // 대기 중일 때: 전송 버튼
-                sendBtn.classList.remove('stop-mode');
-                sendBtn.classList.add('send-mode');
-                iconSpan.innerText = 'arrow_upward';
-                sendBtn.disabled = !hasText; 
-            }
-        }
-
-        // 스크롤 포커싱
+        // 스크롤 포커싱: element가 상단바(56px) 바로 아래에 오도록 이동
         function scrollToTopFocus(element) {
             if (!element) return;
             const headerHeight = 56;
-            const gap = 20; 
+            const gap = 20; // 상단바와의 간격
             const elementTop = element.getBoundingClientRect().top + window.scrollY;
+            
             window.scrollTo({
                 top: elementTop - headerHeight - gap,
                 behavior: 'smooth'
             });
         }
 
-        // 최하단 자동 스크롤
-        function scrollToBottom() {
-            // 부드러운 스크롤은 애니메이션과 겹치면 끊겨보일 수 있어 auto로 설정하거나
-            // 현재 스크롤 위치가 바닥 근처일 때만 스크롤하게 할 수 있습니다.
-            window.scrollTo({
-                top: document.body.scrollHeight,
-                behavior: 'smooth'
-            });
-        }
-
-        async function handleSendClick() {
-            if (isGenerating) {
-                // 정지 버튼 클릭 시
-                if (abortController) {
-                    abortController.abort(); 
-                    abortController = null;
-                }
-                return;
-            }
-            // 전송 버튼 클릭 시
-            sendMessage();
-        }
-
         async function sendMessage() {
             const text = chatInput.value.trim();
             if (text.length === 0) return;
 
-            // 1. 상태 설정
-            isGenerating = true;
-            abortController = new AbortController();
-            
+            // 1. 사용자 메시지 등록
             const userMsgElement = addMessage(text, 'user');
             conversationHistory.push({ role: "user", content: text });
 
             chatInput.value = '';
-            adjustHeight(); // 버튼 상태를 Stop으로 변경
+            adjustHeight();
+            sendBtn.disabled = true;
 
+            // 2. 중요: 사용자 메시지로 스크롤 이동
             scrollToTopFocus(userMsgElement);
 
             const isSearchMode = searchBtn.classList.contains('active');
@@ -581,15 +502,17 @@
                 const response = await fetch(isSearchMode ? "https://jaewondev.pythonanywhere.com/ask" : "https://jaewondev.pythonanywhere.com/askfast", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ message: text, history: conversationHistory }),
-                    signal: abortController.signal
+                    body: JSON.stringify({ message: text, history: conversationHistory }) 
                 });
 
                 if (!response.ok) throw new Error("Server error");
 
-                removeLoadingMessage(loadingId, timers);
+                // 로딩 제거
+                const loadingElem = document.getElementById(loadingId);
+                if (loadingElem) loadingElem.remove();
+                if (timers) timers.forEach(t => clearTimeout(t));
 
-                // 봇 메시지 영역 생성
+                // 봇 메시지 박스 생성
                 const botRow = document.createElement('div');
                 botRow.classList.add('message-row', 'bot');
                 const botContent = document.createElement('div');
@@ -600,113 +523,93 @@
                 const reader = response.body.getReader();
                 const decoder = new TextDecoder();
                 
-                let fullText = "";
-                let buffer = "";
-                const CHUNK_SIZE = 20; // 요청하신 20글자 단위
+                let fullText = "";       // 최종 마크다운용 전체 텍스트
+                let buffer = "";         // 화면 출력용 버퍼
+                let isStreaming = true;
+                const CHUNK_SIZE = 15;   // 15~20글자 단위 (부드러움과 덩어리감의 균형)
 
-                while (true) {
-                    const { done, value } = await reader.read();
-                    if (done) break;
-
-                    const chunk = decoder.decode(value, { stream: true });
-                    const cleanChunk = chunk.replace(/\[DONE\]/g, "");
-                    fullText += cleanChunk;
-                    buffer += cleanChunk;
-
-                    // 버퍼에 20글자 이상 차면 잘라서 애니메이션 렌더링
-                    while (buffer.length >= CHUNK_SIZE) {
-                        const slice = buffer.slice(0, CHUNK_SIZE);
-                        buffer = buffer.slice(CHUNK_SIZE);
-                        renderAnimatedChunk(botContent, slice);
-                        scrollToBottom();
+                // 스트리밍 데이터 수신 루프 (백그라운드)
+                (async () => {
+                    while (true) {
+                        const { done, value } = await reader.read();
+                        if (done) {
+                            isStreaming = false;
+                            break;
+                        }
+                        const chunk = decoder.decode(value, { stream: true });
+                        const cleanChunk = chunk.replace(/\[DONE\]/g, "");
+                        fullText += cleanChunk;
+                        buffer += cleanChunk; // 버퍼에 쌓음
                     }
-                }
+                })();
 
-                // 남은 버퍼 처리
-                if (buffer.length > 0) {
-                    renderAnimatedChunk(botContent, buffer);
-                    scrollToBottom();
-                }
+                // 화면 렌더링 루프 (UI 업데이트)
+                const renderLoop = setInterval(() => {
+                    // 버퍼에 렌더링할 데이터가 충분하거나, 스트림이 끝났고 남은 데이터가 있을 때
+                    if (buffer.length >= CHUNK_SIZE || (!isStreaming && buffer.length > 0)) {
+                        // CHUNK_SIZE 만큼 잘라냄
+                        const sliceSize = Math.min(buffer.length, CHUNK_SIZE);
+                        const slice = buffer.slice(0, sliceSize);
+                        buffer = buffer.slice(sliceSize); // 버퍼 비우기
 
-                // [중요] 모든 스트리밍이 끝나면 깔끔한 마크다운으로 교체
-                // 애니메이션 효과가 끝날 쯤(잠시 후)에 변환하여 끊김 방지
-                setTimeout(() => {
-                    botContent.innerHTML = marked.parse(fullText);
-                }, 100);
+                        // 애니메이션 청크 생성 및 추가
+                        createAnimatedChunk(botContent, slice);
 
-                conversationHistory.push({ role: "assistant", content: fullText });
-
-            } catch (error) {
-                removeLoadingMessage(loadingId, timers);
-
-                if (error.name === 'AbortError') {
-                    // 사용자 중단 시 처리
-                    const botMsgs = chatContainer.querySelectorAll('.message-row.bot');
-                    const lastBotMsg = botMsgs[botMsgs.length - 1];
-                    if (lastBotMsg) {
-                        const contentDiv = lastBotMsg.querySelector('.bot-text');
-                        // 현재까지 내용을 유지하고 중단 메시지 추가
-                        if (contentDiv) {
-                            renderAnimatedChunk(contentDiv, " [답변 중지됨]", true); 
-                            // 현재까지 내용을 히스토리에 저장
-                            conversationHistory.push({ role: "assistant", content: contentDiv.innerText });
+                        // 봇 메시지가 화면 밖으로 나가면 자동 스크롤 (읽기 편하게)
+                        const rect = botContent.getBoundingClientRect();
+                        if (rect.bottom > window.innerHeight) {
+                            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
                         }
                     }
-                } else {
-                    console.error(error);
-                    // [핵심] 에러 메시지도 부드럽게 출력
-                    simulateSmoothError("죄송합니다. 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
-                }
-            } finally {
-                isGenerating = false;
-                abortController = null;
-                updateButtonState(); // 전송 버튼으로 복귀
+
+                    // 종료 조건: 스트림도 끝났고 버퍼도 비었을 때
+                    if (!isStreaming && buffer.length === 0) {
+                        clearInterval(renderLoop);
+                        // [중요] 애니메이션이 다 끝난 후, 깔끔한 마크다운으로 교체
+                        // 즉시 바꾸면 애니메이션이 끊기므로 약간의 딜레이(1초) 후 교체하거나
+                        // 여기서는 애니메이션 효과를 위해 텍스트 유지를 원할 수 있으나
+                        // 코드 블럭 등을 위해 최종 변환은 필수입니다.
+                        setTimeout(() => {
+                            botContent.innerHTML = marked.parse(fullText);
+                        }, 1000); // 마지막 청크 애니메이션 시간 고려
+                        
+                        conversationHistory.push({ role: "assistant", content: fullText });
+                    }
+                }, 100); // 0.1초마다 체크하여 부드럽게 출력
+
+            } catch (error) {
+                console.error(error);
+                const loadingElem = document.getElementById(loadingId);
+                if (loadingElem) loadingElem.remove();
+                if (timers) timers.forEach(t => clearTimeout(t));
+                // 에러 메시지도 부드럽게 출력
+                simulateBotError("죄송합니다. 오류가 발생했습니다.");
             }
         }
 
-        // [핵심 함수] 20글자 단위 애니메이션 렌더링
-        function renderAnimatedChunk(container, text, isStopMsg = false) {
+        // 애니메이션 적용된 텍스트 조각 생성
+        function createAnimatedChunk(container, text) {
             const span = document.createElement('span');
-            span.className = 'chunk-animate'; // 페이드+닦아내기+비네팅 클래스
-            if(isStopMsg) span.classList.add('stop-msg');
-            
+            span.className = 'reveal-chunk';
             span.innerText = text; 
             
-            // 애니메이션 종료 후 비네팅(마스크) 제거
+            // 애니메이션 끝나면 흐림 효과/마스크 제거
             span.addEventListener('animationend', () => {
-                span.classList.add('finished');
+                span.classList.add('done');
             });
-            
+
             container.appendChild(span);
         }
 
-        // 에러 메시지도 부드럽게 20글자씩 잘라서 출력하는 함수
-        function simulateSmoothError(errorMsg) {
+        // 에러 메시지 애니메이션 출력 함수
+        function simulateBotError(msg) {
             const botRow = document.createElement('div');
             botRow.classList.add('message-row', 'bot');
             const botContent = document.createElement('div');
             botContent.classList.add('bot-text');
             botRow.appendChild(botContent);
             chatContainer.appendChild(botRow);
-
-            let index = 0;
-            const CHUNK = 20;
-            const interval = setInterval(() => {
-                const slice = errorMsg.slice(index, index + CHUNK);
-                if (!slice) {
-                    clearInterval(interval);
-                    return;
-                }
-                renderAnimatedChunk(botContent, slice);
-                scrollToBottom();
-                index += CHUNK;
-            }, 100); // 0.1초 간격으로 20글자씩 투입
-        }
-
-        function removeLoadingMessage(id, timers) {
-            const loadingElem = document.getElementById(id);
-            if (loadingElem) loadingElem.remove();
-            if (timers) timers.forEach(t => clearTimeout(t));
+            createAnimatedChunk(botContent, msg);
         }
 
         function addLoadingMessage(id, isSearchMode) {
@@ -729,7 +632,7 @@
                 contentDiv.innerText = "질문을 분석하는중...";
             }
             rowDiv.appendChild(contentDiv);
-            scrollToBottom();
+            chatContainer.appendChild(rowDiv);
             return timers; 
         }
 
@@ -747,7 +650,6 @@
             }
             rowDiv.appendChild(contentDiv);
             chatContainer.appendChild(rowDiv);
-            scrollToBottom();
             return rowDiv; 
         }
 
@@ -755,13 +657,10 @@
         chatInput.addEventListener('keydown', function(event) {
             if (event.key === 'Enter' && !event.shiftKey && window.innerWidth > 768) {
                 event.preventDefault(); 
-                // 생성 중이 아닐 때만 엔터로 전송 (생성 중일 땐 버튼 클릭 유도)
-                if (!isGenerating && !sendBtn.disabled) {
-                    handleSendClick();
-                }
+                if (!sendBtn.disabled) sendMessage();
             }
         });
-        sendBtn.addEventListener('click', handleSendClick);
+        sendBtn.addEventListener('click', sendMessage);
         
         attachBtn.addEventListener('click', (e) => {
             e.stopPropagation();
