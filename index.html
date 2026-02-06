@@ -213,6 +213,7 @@
         display: flex; align-items: center; gap: 10px;
         cursor: pointer; 
         transition: all 0.2s;
+        position: relative; /* 메뉴 위치 기준 */
     }
     .sidebar-footer:hover { 
         background-color: #E5E7EB; 
@@ -226,6 +227,36 @@
     .user-info { display: flex; flex-direction: column; }
     .user-name { font-size: 13px; font-weight: 600; color: #1F2937; }
     .user-plan { font-size: 11px; color: #6B7280; }
+
+    /* [NEW] 프로필 메뉴 */
+    .profile-menu {
+        position: absolute; 
+        bottom: 70px; /* footer 위쪽 */
+        left: 10px;
+        width: 220px; 
+        background-color: #fff; 
+        border: 1px solid #E5E7EB;
+        border-radius: 16px; /* 높은 곡률 */
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        display: none; 
+        flex-direction: column; 
+        padding: 6px; 
+        z-index: 2200;
+    }
+    .profile-menu.show { display: flex; }
+    
+    /* [NEW] 공통 메뉴 아이템 스타일 */
+    .menu-action-item {
+        display: flex; align-items: center; gap: 10px;
+        padding: 10px 12px; font-size: 13px; color: #374151;
+        cursor: pointer; border-radius: 10px; /* 버튼 높은 곡률 */
+        transition: background 0.2s;
+        font-weight: 500;
+    }
+    .menu-action-item:hover { background-color: #F3F4F6; }
+    .menu-action-item.delete { color: #EF4444; }
+    .menu-action-item .material-symbols-rounded { font-size: 18px; color: #6B7280; }
+    .menu-action-item.delete .material-symbols-rounded { color: #EF4444; }
 
 
     /* --- 상단바 (Header) --- */
@@ -252,7 +283,24 @@
     .pc-sidebar-open-btn { display: none; cursor: pointer; color: #6B7280; margin-right: 6px; }
     .pc-sidebar-open-btn:hover { color: #1F2937; }
 
-    .top-right { display: flex; align-items: center; gap: 6px; }
+    .top-right { display: flex; align-items: center; gap: 6px; position: relative; }
+
+    /* [NEW] 상단 더보기 메뉴 */
+    .top-more-menu {
+        position: absolute; 
+        top: 45px; 
+        right: 0;
+        width: 160px; 
+        background-color: #fff; 
+        border: 1px solid #E5E7EB;
+        border-radius: 16px; /* 높은 곡률 */
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        display: none; 
+        flex-direction: column; 
+        padding: 6px; 
+        z-index: 2200;
+    }
+    .top-more-menu.show { display: flex; }
 
     .offer-pill {
         background-color: #EFEEFC; color: #7C3AED;
@@ -701,6 +749,12 @@
             <div id="savedChatList"></div>
         </div>
 
+        <div id="profileMenu" class="profile-menu">
+            <div class="menu-action-item"><span class="material-symbols-rounded">update</span> 패치노트</div>
+            <div class="menu-action-item"><span class="material-symbols-rounded">settings_applications</span> 채팅 설정</div>
+            <div class="menu-action-item"><span class="material-symbols-rounded">settings</span> 전체 설정</div>
+        </div>
+
         <div class="sidebar-footer">
             <div class="user-avatar">
                 <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS7iy-t1yxu4sxSnbqwbSb_8LBpN1ocQKzk8w&s" alt="User">
@@ -729,7 +783,12 @@
                 <span class="offer-close">&times;</span>
             </div>
             <button class="share-btn"><span class="material-symbols-rounded">ios_share</span> 공유하기</button>
-            <button class="dots-btn"><span class="material-symbols-rounded">more_horiz</span></button>
+            <button class="dots-btn" id="topDotsBtn"><span class="material-symbols-rounded">more_horiz</span></button>
+            
+            <div id="topMoreMenu" class="top-more-menu">
+                <div class="menu-action-item" id="topRenameBtn"><span class="material-symbols-rounded">edit</span> 이름 변경</div>
+                <div class="menu-action-item delete" id="topDeleteBtn"><span class="material-symbols-rounded">delete</span> 삭제</div>
+            </div>
         </div>
     </header>
 
@@ -816,6 +875,15 @@
         const detailsCloseBtn = document.getElementById('detailsCloseBtn');
         const detailsTabs = document.getElementById('detailsTabs');
         const detailsContent = document.getElementById('detailsContent');
+
+        // [NEW] 상단 더보기 및 프로필 메뉴 관련
+        const topDotsBtn = document.getElementById('topDotsBtn');
+        const topMoreMenu = document.getElementById('topMoreMenu');
+        const topRenameBtn = document.getElementById('topRenameBtn');
+        const topDeleteBtn = document.getElementById('topDeleteBtn');
+        
+        const sidebarFooter = document.querySelector('.sidebar-footer');
+        const profileMenu = document.getElementById('profileMenu');
 
         let conversationHistory = [];
         let abortController = null;
@@ -1017,11 +1085,51 @@
             renderSidebar(e.target.value);
         });
 
+        // [NEW] 상단 더보기 메뉴 토글
+        topDotsBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (topMoreMenu.classList.contains('show')) {
+                topMoreMenu.classList.remove('show');
+            } else {
+                topMoreMenu.classList.add('show');
+            }
+        });
+
+        // [NEW] 상단 메뉴 동작 (현재 채팅 대상)
+        topRenameBtn.addEventListener('click', () => {
+            if (currentChatId) openRenameModal(currentChatId);
+            topMoreMenu.classList.remove('show');
+        });
+        topDeleteBtn.addEventListener('click', () => {
+            if (currentChatId) deleteChat(currentChatId);
+            topMoreMenu.classList.remove('show');
+        });
+
+        // [NEW] 프로필 메뉴 토글
+        sidebarFooter.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (profileMenu.classList.contains('show')) {
+                profileMenu.classList.remove('show');
+            } else {
+                profileMenu.classList.add('show');
+            }
+        });
+
         // 전역 클릭 이벤트 (검색창 외부 클릭 감지 등)
         document.addEventListener('click', (e) => {
             // 채팅 옵션 메뉴 닫기
             if (!e.target.closest('.chat-history-item')) {
                 document.querySelectorAll('.history-menu-dropdown').forEach(el => el.remove());
+            }
+
+            // [NEW] 상단 더보기 메뉴 닫기
+            if (!topMoreMenu.contains(e.target) && e.target !== topDotsBtn) {
+                topMoreMenu.classList.remove('show');
+            }
+
+            // [NEW] 프로필 메뉴 닫기
+            if (!profileMenu.contains(e.target) && !sidebarFooter.contains(e.target)) {
+                profileMenu.classList.remove('show');
             }
 
             // 검색창 외부 클릭 시 되돌리기
@@ -1123,14 +1231,11 @@
             window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
         });
 
-        function forceScrollToMessage(element) {
+        function applyMessagePadding(element) {
             const headerHeight = 50; 
             const topGap = 20;       
             const targetVisualTop = headerHeight + topGap; 
 
-            const rect = element.getBoundingClientRect();
-            const absoluteElementTop = window.scrollY + rect.top;
-            const targetScrollY = absoluteElementTop - targetVisualTop;
             const windowHeight = window.innerHeight;
             const elementHeight = element.offsetHeight;
             
@@ -1138,7 +1243,6 @@
             if (requiredPadding < 160) requiredPadding = 160;
             
             chatContainer.style.paddingBottom = requiredPadding + 'px';
-            return requiredPadding; // 반환값으로 계산된 패딩 전달
         }
 
         async function regenerateResponse() {
@@ -1280,7 +1384,7 @@
             // 첫 메세지가 아닐 때만 계산
             if (userMsgElement && conversationHistory.length > 1) { 
                 requestAnimationFrame(() => {
-                    allocatedPadding = forceScrollToMessage(userMsgElement); // 여백 적용 및 값 저장
+                    applyMessagePadding(userMsgElement); // 여백 적용
                     
                     // 스크롤 계산 로직
                     setTimeout(() => {
