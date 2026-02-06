@@ -355,6 +355,16 @@
                     padding-bottom 0.2s ease-out;
     }
 
+    /* [NEW] 빈 상태 텍스트 (무엇을 도와드릴까요?) */
+    .empty-state {
+        position: absolute; top: 50%; left: 50%; 
+        transform: translate(-50%, -50%);
+        font-size: 24px; font-weight: 600; color: #E5E7EB; 
+        pointer-events: none; text-align: center; width: 100%;
+        display: none; /* 기본 숨김, JS로 제어 */
+    }
+    .empty-state.show { display: block; }
+
     .message-row { display: flex; width: 100%; flex-direction: column; position: relative; }
     .message-row.user { align-items: flex-end; }
     .message-row.bot { align-items: flex-start; }
@@ -439,7 +449,7 @@
         padding: 6px; 
         border-radius: 4px;
         color: #6B7280; 
-        font-size: 13px; font-weight: 500; font-family: inherit; /* [수정] 텍스트 스타일 */
+        font-size: 13px; font-weight: 500; font-family: inherit; 
         transition: background-color 0.2s, color 0.2s;
     }
     .action-btn:hover { background-color: #F3F4F6; color: #374151; }
@@ -793,7 +803,9 @@
         </div>
     </header>
 
-    <div id="chatContainer" class="chat-container"></div>
+    <div id="chatContainer" class="chat-container">
+        <div id="emptyState" class="empty-state">무엇을 도와드릴까요?</div>
+    </div>
 
     <div class="bottom-fixed-wrapper">
         <div class="chat-input-container">
@@ -841,7 +853,7 @@
     </div>
 
     <script>
-        // [수정] 스크롤 보정값 (강력한 스크롤을 위해 큰 값 설정)
+        // [수정] 스크롤 보정값 설정 변수 (강력한 스크롤)
         const SCROLL_CORRECTION_VALUE = 999999999999; 
 
         const chatContainer = document.getElementById('chatContainer');
@@ -885,6 +897,8 @@
         
         const sidebarFooter = document.querySelector('.sidebar-footer');
         const profileMenu = document.getElementById('profileMenu');
+        
+        const emptyState = document.getElementById('emptyState');
 
         let conversationHistory = [];
         let abortController = null;
@@ -954,12 +968,29 @@
                 
                 chatContainer.innerHTML = '';
                 
+                // [NEW] 기록이 있으면 empty state 숨김
+                if (conversationHistory.length > 0) {
+                    emptyState.classList.remove('show');
+                } else {
+                    emptyState.classList.add('show');
+                }
+                
                 conversationHistory.forEach((msg, index) => {
                     const row = addMessage(msg.content, msg.role, false);
                     if (msg.role === 'assistant') {
-                         // [수정] 메타데이터 키를 인덱스로 매핑 (새로고침 시 버튼 복원)
-                         if (messageMetadata[index]) {
-                             addBotButtons(row, msg.content, messageMetadata[index]);
+                         // [수정] 메타데이터 인덱스를 1-based로 관리중이므로, 현재 loop index(0-based)를 보정
+                         // conversationHistory index: 0(user), 1(bot), 2(user), 3(bot)...
+                         // save 시점에서 metadata[conversationHistory.length]로 저장했으므로,
+                         // bot message의 index는 (msgIndex + 1)과 매칭되어야 함.
+                         // 하지만 단순하게 생각해서 저장 로직을 다시 보면:
+                         // sendMessage -> push user -> push bot. 
+                         // Metadata key is `conversationHistory.length + 1` (bot push 직전).
+                         // 예: User(idx 0) -> Bot(idx 1). Metadata key = 2.
+                         // 복원 시: forEach index 1 (bot). metadata key should be 2.
+                         // 따라서 key = index + 1
+                         const key = index + 1;
+                         if (messageMetadata[key]) {
+                             addBotButtons(row, msg.content, messageMetadata[key]);
                          } else {
                              addBotButtons(row, msg.content, null);
                          }
@@ -1156,6 +1187,9 @@
             sendBtn.disabled = true;
             adjustHeight();
             scrollToBottomBtn.classList.remove('show'); 
+            
+            // [NEW] 새 채팅 시작 시 empty state 보이기
+            emptyState.classList.add('show');
 
             history.pushState({}, '', '/');
             renderSidebar();
@@ -1165,6 +1199,11 @@
 
         // --- 초기 로드 및 URL 처리 ---
         window.addEventListener('load', () => {
+            // 초기 empty state 표시
+            if (!window.location.search && !window.location.pathname.includes('/chat/')) {
+                emptyState.classList.add('show');
+            }
+            
             renderSidebar();
             
             const path = window.location.pathname;
@@ -1325,6 +1364,7 @@
                     
                     const c = document.createElement('div');
                     c.className = 'citation-snippet';
+                    // [수정] 긴 내용 잘라서 표시
                     c.innerText = cit.content.length > 100 ? cit.content.substring(0, 100) + '...' : cit.content;
                     
                     card.appendChild(t);
@@ -1343,7 +1383,9 @@
                 return;
             }
 
-            // [추가] 초기 패딩값 설정
+            // [NEW] 메시지 전송 시 empty state 숨김
+            emptyState.classList.remove('show');
+
             let allocatedPadding = 160;
 
             const text = textOverride || chatInput.value.trim();
@@ -1354,7 +1396,6 @@
                 isFirstMessage = false;
             }
 
-            // 채팅 ID 및 URL 설정
             if (!currentChatId) {
                 currentChatId = generateUUID();
                 history.pushState({ chatId: currentChatId }, '', `/chat/${currentChatId}`);
@@ -1367,7 +1408,7 @@
                 chatInput.value = '';
                 adjustHeight();
                 
-                // [수정] 무조건 즉시 스크롤 (DOM 반영 시간 고려)
+                // [수정] 무조건 즉시 스크롤
                 setTimeout(() => {
                     window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
                 }, 10);
@@ -1382,20 +1423,16 @@
             sendBtn.innerHTML = '<div class="stop-icon-square"></div>'; 
             sendBtn.disabled = false;
             
-            // [수정] 스크롤 로직 개편: 이전 메세지 높이만큼 내리기 + 보정값
-            // 첫 메세지가 아닐 때만 계산
+            // [수정] 스크롤 로직: 이전 메세지 높이 + 보정값
             if (userMsgElement && conversationHistory.length > 1) { 
                 requestAnimationFrame(() => {
-                    applyMessagePadding(userMsgElement); // 여백 적용
+                    applyMessagePadding(userMsgElement); 
                     
-                    // 스크롤 계산 로직
                     setTimeout(() => {
                         const messages = document.querySelectorAll('.message-row');
-                        // 현재 유저 메세지 바로 전 요소 (이전 봇 답변)
                         if (messages.length >= 2) {
                             const prevMsg = messages[messages.length - 2];
                             const height = prevMsg.offsetHeight;
-                            // 현재 위치에서 이전 메세지 높이만큼 더 내림 + 보정값
                             window.scrollBy({ top: height + SCROLL_CORRECTION_VALUE, behavior: 'smooth' });
                         } else {
                             window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
@@ -1403,7 +1440,6 @@
                     }, 50);
                 });
             } else {
-                // 첫 메시지일 경우
                 setTimeout(() => {
                     window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
                 }, 10);
@@ -1451,22 +1487,26 @@
                     let citations = [];
                     
                     let tempText = fullText.replace(/\[THOUGHT\]([\s\S]*?)\[\/THOUGHT\]/g, (match, p1) => {
-                        if (p1.includes("Title:") && p1.includes("URL:") && p1.includes("Content:")) {
-                            let titleMatch = p1.match(/Title:\s*(.*?)(?=\n|$)/);
-                            let urlMatch = p1.match(/URL:\s*(.*?)(?=\n|$)/);
-                            let contentMatch = p1.match(/Content:\s*(.*?)(?=\nScore:|$)/s); 
-                            
-                            if (titleMatch && urlMatch) {
-                                citations.push({
-                                    title: titleMatch[1].trim(),
-                                    url: urlMatch[1].trim(),
-                                    content: contentMatch ? contentMatch[1].trim() : ""
-                                });
-                            }
+                        // [수정] 줄바꿈을 포함한 Title, URL, Content, Score 파싱을 위한 정규식
+                        // p1은 [THOUGHT] 내부의 전체 텍스트
+                        
+                        // 인용구조인지 확인 (단순 포함 여부보다 정규식으로 추출 시도)
+                        const citationRegex = /Title:\s*(.+?)\n\s*URL:\s*(.+?)\n\s*Content:\s*([\s\S]*?)\n\s*Score:/;
+                        const citMatch = p1.match(citationRegex);
+
+                        if (citMatch) {
+                            citations.push({
+                                title: citMatch[1].trim(),
+                                url: citMatch[2].trim(),
+                                content: citMatch[3].trim()
+                            });
+                            // 인용 카드 정보로 추출했으므로, 텍스트에서는 제거 (빈 문자열 반환)
+                            return "";
                         } else {
+                            // 일반 사고 과정
                             extractedThoughts += p1 + "\n\n";
+                            return ""; // 사고 과정도 본문에서 숨김
                         }
-                        return ""; 
                     });
 
                     const openTagIndex = tempText.indexOf("[THOUGHT]");
@@ -1492,17 +1532,18 @@
                     const parsed = parseStream(rawFullText);
                     cleanTextDisplay = parsed.cleanText;
                     currentMetadata.thought = parsed.thoughts;
+                    // [수정] 기존 citations에 새로 파싱된 것 추가 (중복 방지 로직 필요시 추가)
+                    // 여기서는 매번 전체 텍스트를 파싱하므로 덮어쓰기 방식이 적합
                     currentMetadata.citations = parsed.citations;
 
 
                     if (cleanTextDisplay.length > 0) {
                         botContent.innerHTML = marked.parse(cleanTextDisplay);
                         
-                        // [NEW] 봇 답변 생성 시 패딩 덮어쓰기 로직
-                        const currentBotHeight = botContent.offsetHeight;
-                        let newPadding = allocatedPadding - currentBotHeight;
-                        if (newPadding < 160) newPadding = 160; // 최소 패딩 유지
-                        chatContainer.style.paddingBottom = newPadding + 'px';
+                        // [수정] 봇 답변 생성 시 패딩 덮어쓰기 로직 (줄이지 않음, 그냥 둠)
+                        // 사용자가 "여백을 줄이지말고 봇의 답변을 그냥 그 위에 덮게 해줘" 라고 했으므로,
+                        // paddingBottom 값을 줄이는 로직을 제거합니다. 
+                        // 초기 설정된 paddingBottom이 유지되고, 내용이 길어지면 자연스럽게 스크롤 영역이 늘어남.
                     }
                 }
                 
@@ -1513,7 +1554,7 @@
 
                 botContent.innerHTML = marked.parse(cleanTextDisplay);
 
-                // [수정] 메타데이터 저장 인덱스 (현재 히스토리 길이 = 새 메시지 인덱스)
+                // [수정] 메타데이터 저장 (현재 히스토리 길이 + 1 = 봇 메시지 인덱스)
                 const msgIndex = conversationHistory.length + 1; 
                 messageMetadata[msgIndex] = currentMetadata;
 
@@ -1550,7 +1591,7 @@
             }
         }
 
-        // --- 봇 버튼 추가 함수 (수정됨: 텍스트 제거 및 아이콘만 표시) ---
+        // --- 봇 버튼 추가 함수 ---
         function addBotButtons(rowElement, textContent, metadata) {
             if (rowElement.querySelector('.bot-action-bar')) return;
 
@@ -1561,12 +1602,10 @@
             const copyBtn = document.createElement('button');
             copyBtn.className = 'action-btn';
             copyBtn.title = '복사';
-            // 텍스트 제거하고 아이콘만
             copyBtn.innerHTML = '<span class="material-symbols-rounded">content_copy</span>';
             copyBtn.addEventListener('click', () => {
                 navigator.clipboard.writeText(textContent).then(() => {
                     const originalHTML = copyBtn.innerHTML;
-                    // 체크 아이콘으로 변경
                     copyBtn.innerHTML = '<span class="material-symbols-rounded">check</span>';
                     setTimeout(() => copyBtn.innerHTML = originalHTML, 2000);
                 });
@@ -1576,29 +1615,28 @@
             const regenBtn = document.createElement('button');
             regenBtn.className = 'action-btn';
             regenBtn.title = '재생성';
-            // 텍스트 제거하고 아이콘만
             regenBtn.innerHTML = '<span class="material-symbols-rounded">refresh</span>';
             regenBtn.addEventListener('click', regenerateResponse);
 
             actionBar.appendChild(copyBtn);
             actionBar.appendChild(regenBtn);
             
-            // [수정] 사고 과정 버튼 (텍스트 표시)
+            // [수정] 사고 과정 버튼 (텍스트)
             if (metadata && metadata.thought && metadata.thought.trim().length > 0) {
                 const thoughtBtn = document.createElement('button');
                 thoughtBtn.className = 'action-btn';
-                thoughtBtn.innerHTML = '사고 과정'; // [수정] 텍스트로 변경
+                thoughtBtn.innerHTML = '사고 과정'; 
                 thoughtBtn.addEventListener('click', () => {
                     openDetailsPanel(metadata, 'thought');
                 });
                 actionBar.appendChild(thoughtBtn);
             }
 
-            // [수정] 인용 버튼 (텍스트 표시, 별도 버튼)
+            // [수정] 인용 버튼 (텍스트)
             if (metadata && metadata.citations && metadata.citations.length > 0) {
                 const citationBtn = document.createElement('button');
                 citationBtn.className = 'action-btn';
-                citationBtn.innerHTML = '인용'; // [수정] 텍스트로 변경
+                citationBtn.innerHTML = '인용'; 
                 citationBtn.addEventListener('click', () => {
                     openDetailsPanel(metadata, 'citations');
                 });
