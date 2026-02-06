@@ -78,7 +78,7 @@
 
     .sidebar {
         position: fixed; top: 0; left: 0; height: 100%; width: var(--sidebar-width);
-        background-color: #FAFAFA; /* [수정] 조금 더 밝은 색상으로 변경 */
+        background-color: #FAFAFA; 
         z-index: 2000;
         transform: translateX(-100%); 
         transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1);
@@ -171,10 +171,9 @@
         padding-right: 8px;
     }
     
-    /* [수정] 호버 시 흔들림 방지 로직: 공간은 차지하되 투명하게 처리 */
     .chat-item-options {
-        display: flex; /* 항상 공간 차지 */
-        opacity: 0;    /* 기본적으로 투명 */
+        display: flex; 
+        opacity: 0;    
         padding: 2px; border-radius: 4px; color: #6B7280;
         transition: opacity 0.2s;
     }
@@ -182,7 +181,7 @@
         background-color: #D1D5DB; color: #1F2937;
     }
     .chat-history-item:hover .chat-item-options {
-        opacity: 1; /* 호버 시에만 보임 */
+        opacity: 1; 
     }
 
     /* 채팅 목록 옵션 메뉴 (더보기 클릭 시) */
@@ -190,7 +189,7 @@
         position: absolute; right: 10px; top: 30px;
         width: 120px;
         background-color: #fff; border: 1px solid #E5E7EB;
-        border-radius: 12px; /* [수정] 창 곡률 증가 */
+        border-radius: 12px; 
         box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         z-index: 2100; display: none; flex-direction: column;
         padding: 6px;
@@ -200,7 +199,7 @@
         display: flex; align-items: center; gap: 6px;
         padding: 8px 10px; font-size: 12px; color: #374151;
         cursor: pointer; 
-        border-radius: 8px; /* [수정] 버튼 곡률 증가 */
+        border-radius: 8px; 
     }
     .history-menu-item:hover { background-color: #F3F4F6; }
     .history-menu-item.delete { color: #EF4444; }
@@ -783,7 +782,7 @@
 
     <script>
         // [수정] 스크롤 보정값 설정 변수 (양수: 더 내림, 음수: 덜 내림)
-        const SCROLL_CORRECTION_VALUE = 3000; 
+        const SCROLL_CORRECTION_VALUE = 9999999999999999; 
 
         const chatContainer = document.getElementById('chatContainer');
         const chatInput = document.getElementById('chatInput');
