@@ -782,7 +782,7 @@
 
     <script>
         // [수정] 스크롤 보정값 설정 변수 (양수: 더 내림, 음수: 덜 내림)
-        const SCROLL_CORRECTION_VALUE = 9999999999999999; 
+        const SCROLL_CORRECTION_VALUE = 999999999999; 
 
         const chatContainer = document.getElementById('chatContainer');
         const chatInput = document.getElementById('chatInput');
@@ -1123,11 +1123,14 @@
             window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
         });
 
-        function applyMessagePadding(element) {
+        function forceScrollToMessage(element) {
             const headerHeight = 50; 
             const topGap = 20;       
             const targetVisualTop = headerHeight + topGap; 
 
+            const rect = element.getBoundingClientRect();
+            const absoluteElementTop = window.scrollY + rect.top;
+            const targetScrollY = absoluteElementTop - targetVisualTop;
             const windowHeight = window.innerHeight;
             const elementHeight = element.offsetHeight;
             
@@ -1135,6 +1138,7 @@
             if (requiredPadding < 160) requiredPadding = 160;
             
             chatContainer.style.paddingBottom = requiredPadding + 'px';
+            return requiredPadding; // 반환값으로 계산된 패딩 전달
         }
 
         async function regenerateResponse() {
@@ -1233,6 +1237,9 @@
                 return;
             }
 
+            // [추가] 초기 패딩값 설정
+            let allocatedPadding = 160;
+
             const text = textOverride || chatInput.value.trim();
             if (text.length === 0) return;
 
@@ -1254,7 +1261,7 @@
                 chatInput.value = '';
                 adjustHeight();
                 
-                // [수정] 무조건 즉시 스크롤
+                // [수정] 무조건 즉시 스크롤 (DOM 반영 시간 고려)
                 setTimeout(() => {
                     window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
                 }, 10);
@@ -1273,7 +1280,7 @@
             // 첫 메세지가 아닐 때만 계산
             if (userMsgElement && conversationHistory.length > 1) { 
                 requestAnimationFrame(() => {
-                    applyMessagePadding(userMsgElement); // 여백 적용
+                    allocatedPadding = forceScrollToMessage(userMsgElement); // 여백 적용 및 값 저장
                     
                     // 스크롤 계산 로직
                     setTimeout(() => {
@@ -1384,6 +1391,12 @@
 
                     if (cleanTextDisplay.length > 0) {
                         botContent.innerHTML = marked.parse(cleanTextDisplay);
+                        
+                        // [NEW] 봇 답변 생성 시 패딩 덮어쓰기 로직
+                        const currentBotHeight = botContent.offsetHeight;
+                        let newPadding = allocatedPadding - currentBotHeight;
+                        if (newPadding < 160) newPadding = 160; // 최소 패딩 유지
+                        chatContainer.style.paddingBottom = newPadding + 'px';
                     }
                 }
                 
