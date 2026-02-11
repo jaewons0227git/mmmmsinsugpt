@@ -182,7 +182,16 @@
         .action-icon { width: 18px; height: 18px; stroke-width: 2.2; }
 
         /* Bottom Interface */
-        #bottom-interface { position: absolute; bottom: 0; left: 0; width: 100%; display: flex; flex-direction: column; align-items: center; padding: 0 20px 20px 20px; opacity: 0; transform: translateY(50px); transition: opacity 0.5s ease, transform 0.5s cubic-bezier(0.25, 1, 0.5, 1); z-index: 5; pointer-events: none; background: linear-gradient(to top, var(--bg-color) 40%, transparent); }
+        /* 수정됨: 패딩을 더 줄여 입력창을 화면 하단에 닿을 듯 말 듯 배치 (5px) */
+        #bottom-interface { 
+            position: absolute; bottom: 0; left: 0; width: 100%; 
+            display: flex; flex-direction: column; align-items: center; 
+            padding: 0 20px 5px 20px; 
+            opacity: 0; transform: translateY(50px); 
+            transition: opacity 0.5s ease, transform 0.5s cubic-bezier(0.25, 1, 0.5, 1); 
+            z-index: 5; pointer-events: none; 
+            background: linear-gradient(to top, var(--bg-color) 40%, transparent); 
+        }
         #bottom-interface.visible { opacity: 1; transform: translateY(0); pointer-events: auto; }
         
         .bottom-input-wrapper { width: 100%; max-width: 760px; position: relative; }
@@ -221,7 +230,9 @@
         .model-selector { display: flex; align-items: center; justify-content: center; gap: 4px; background-color: var(--bg-color); padding: 0 12px; height: 32px; border-radius: 16px; font-size: 13px; color: var(--text-color); cursor: pointer; transition: background-color 0.3s; }
         .model-selector:hover { background-color: var(--sidebar-hover); }
 
-        .bottom-disclaimer { text-align: center; font-size: 11px; color: #9ca3af; margin-top: 8px; margin-bottom: 20px; width: 100%; max-width: 760px; }
+        /* Disclaimer Footer */
+        /* 수정됨: 하단 마진도 줄여서 더 내림 */
+        .bottom-disclaimer { text-align: center; font-size: 11px; color: #9ca3af; margin-top: 8px; margin-bottom: 5px; width: 100%; max-width: 760px; }
 
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.4); backdrop-filter: blur(5px); display: flex; align-items: center; justify-content: center; z-index: 9999; opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s; }
         .modal-overlay.open { opacity: 1; visibility: visible; }
@@ -295,7 +306,6 @@
         .dialog-btn.delete-confirm { background: var(--danger-color); color: #fff; }
         .dialog-btn:hover { opacity: 0.8; }
 
-        /* [수정됨] 모바일 설정창 모던 스타일 & 닫기 버튼 추가 */
         .settings-mobile-header { display: none; }
 
         @media (max-width: 768px) {
@@ -303,8 +313,8 @@
             .sidebar.collapsed { width: 220px !important; transform: translateX(-100%); border-right: none; }
             .sidebar-content { opacity: 1 !important; width: 220px !important; }
             .message-bubble { max-width: 100%; }
-            /* [수정됨] 입력창 위치 더 아래로 */
-            #bottom-interface { padding-bottom: 10px; }
+            /* [수정됨] 입력창 위치 더 아래로 (패딩 조정 - 5px) */
+            #bottom-interface { padding-bottom: 5px; } 
             .center-logo-img { width: 60px; margin-bottom: 20px; }
             .dialog-window { width: 90%; }
 
@@ -317,7 +327,6 @@
             .settings-back-btn { display: block; }
             .setting-desc { font-size: 13px; margin-bottom: 4px;}
             
-            /* [수정됨] 모바일 전용 설정 헤더 (닫기 버튼용) */
             .settings-mobile-header {
                 display: flex; justify-content: space-between; align-items: center;
                 margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid var(--border-color);
@@ -424,6 +433,7 @@
                         </div>
                     </div>
                 </div>
+                <div class="bottom-disclaimer">MinsuGPT는 실수를 할 수 있습니다. 중요한 정보는 재차 확인하세요.</div>
             </div>
         </div>
     </div>
@@ -638,6 +648,8 @@
         const hiddenFileInput = document.getElementById('hiddenFileInput');
         const imageLightbox = document.getElementById('image-lightbox');
         const lightboxImg = document.getElementById('lightbox-img');
+        const settingsSidebar = document.getElementById('settingsSidebar');
+        const settingsContent = document.getElementById('settingsContent');
 
         const icons = {
             send: '<svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path></svg>',
@@ -849,7 +861,6 @@
             newChatBtn.classList.remove('active');
             chatContent.innerHTML = '';
             
-            // Re-render history messages
             currentMessages.forEach((msg, index) => {
                 if (msg.role === 'user') appendMessageUI('user', msg.content, false, msg.attachments);
                 else if (msg.role === 'bot') {
@@ -926,7 +937,6 @@
             instructions += "]\n(This is a system setup message. Do NOT respond to this message. Just set your persona.)";
 
             try {
-                // Send dummy message just to set context (Backend logic dependent)
                 fetch(endpoint, {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
@@ -1032,6 +1042,7 @@
                     displayedText += charsToAdd;
                     bubble.innerHTML = marked.parse(displayedText);
                     scrollToBottom();
+                    triggerHaptic(); // Continuous Haptic on Mobile
                 } else if (!isGenerating && displayedText.length === fullText.length) {
                      clearInterval(typeWriter);
                 }
@@ -1121,12 +1132,26 @@
                     const lastUserMsg = currentMessages.slice().reverse().find(m => m.role === 'user');
                     if(lastUserMsg) {
                         const endpoint = isSearchActive ? 'https://jaewondev6.pythonanywhere.com/ask' : 'https://jaewondev6.pythonanywhere.com/askfast';
-                        const body = JSON.stringify({ 
-                            message: lastUserMsg.content,
+                        
+                        // REGENERATE: Extract attachments from lastUserMsg to include them
+                        let regenImages = [];
+                        if (lastUserMsg.attachments) {
+                            regenImages = lastUserMsg.attachments.filter(a => a.type === 'image').map(a => a.base64);
+                        }
+                        
+                        let hiddenInst = "";
+                        if (systemPrompt) hiddenInst += `[System: ${systemPrompt}] `;
+                        hiddenInst += `[Tone: ${botTone}] `;
+                        if (['friendly', 'soft', 'stiff'].includes(botTone)) hiddenInst += "[Use honorifics] ";
+                        else if (botTone === 'friend') hiddenInst += "[Use banmal] ";
+                        
+                        const regenBody = JSON.stringify({
+                            message: `${hiddenInst}\n${lastUserMsg.content}`,
                             history: currentMessages.map(m => ({ role: m.role==='bot'?'model':'user', content: m.content })),
-                            image_base64: [] 
+                            image_base64: regenImages
                         });
-                        streamResponse(endpoint, {'Content-Type': 'application/json'}, body);
+
+                        streamResponse(endpoint, {'Content-Type': 'application/json'}, regenBody);
                     }
                 };
                 actionsDiv.appendChild(regenBtn);
