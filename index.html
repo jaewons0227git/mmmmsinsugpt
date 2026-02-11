@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MinsuGPT</title>
+    <title>Chat UI - File Attach & Search Mode</title>
     <link rel="icon" href="https://6967a657d214301950ed7b2b.imgix.net/logo.png" type="image/png">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     
@@ -142,7 +142,8 @@
         .center-logo-img { width: 80px; height: auto; border-radius: 50%; margin-bottom: 40px; }
         .center-input-wrapper { width: 100%; max-width: 760px; padding: 0 20px; position: relative; }
 
-        #chat-content { flex: 1; width: 100%; max-width: 800px; margin: 0 auto; padding: 80px 20px 150px 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 24px; opacity: 0; visibility: hidden; transition: opacity 0.3s; -webkit-overflow-scrolling: touch; }
+        /* 수정됨: 하단 여백 추가 (입력창과 메시지 겹침 방지) */
+        #chat-content { flex: 1; width: 100%; max-width: 800px; margin: 0 auto; padding: 80px 20px 180px 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 24px; opacity: 0; visibility: hidden; transition: opacity 0.3s; -webkit-overflow-scrolling: touch; }
         #chat-content.visible { opacity: 1; visibility: visible; }
 
         .message-row { display: flex; width: 100%; opacity: 0; animation: fadeIn 0.4s ease-out forwards; flex-direction: column; }
@@ -301,11 +302,12 @@
         .tab-section { display: none; flex-direction: column; height: 100%; }
         .tab-section.active-tab { display: flex; }
 
-        /* 수정됨: Info 탭 전용 스타일 (중앙 정렬, 스크롤 금지) */
+        /* 수정됨: Info 탭 위치 상단으로 이동 및 아이콘 변경 요청 반영 */
         #tab-info {
             overflow: hidden;
-            justify-content: center;
+            justify-content: flex-start; /* 중앙(center) 대신 상단(flex-start) */
             align-items: center;
+            padding-top: 100px; /* 위로 올리되 약간의 여백 */
         }
 
         .setting-row { display: flex; justify-content: space-between; align-items: flex-start; padding: 16px 0; border-bottom: 1px solid var(--border-color); }
@@ -313,6 +315,10 @@
         .setting-label { font-size: 14px; color: var(--text-color); font-weight: 500; }
         .setting-desc { font-size: 12px; color: var(--sub-text-color); }
         
+        /* New Inputs for Personalization */
+        .setting-textarea { width: 100%; margin-top: 10px; padding: 10px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--input-bg); color: var(--text-color); font-size: 14px; resize: vertical; min-height: 80px; outline: none; }
+        .setting-textarea:focus { border-color: var(--icon-color); }
+
         .custom-select-container { position: relative; width: 160px; }
         .custom-select-trigger { display: flex; align-items: center; justify-content: flex-end; gap: 8px; font-size: 14px; color: var(--text-color); cursor: pointer; padding: 8px 12px; border-radius: var(--btn-radius); transition: background-color 0.2s; }
         .custom-select-trigger:hover { background-color: var(--modal-hover); }
@@ -326,6 +332,15 @@
         
         .danger-btn { color: var(--danger-color); font-size: 14px; padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border-color); background: transparent; cursor: pointer; transition: background 0.2s; }
         .danger-btn:hover { background-color: rgba(239, 68, 68, 0.1); }
+
+        /* Toggle Switch */
+        .toggle-switch { position: relative; width: 44px; height: 24px; cursor: pointer; }
+        .toggle-input { opacity: 0; width: 0; height: 0; }
+        .toggle-slider { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--btn-disabled-bg); transition: .4s; border-radius: 24px; }
+        .toggle-slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+        .toggle-input:checked + .toggle-slider { background-color: #10a37f; }
+        [data-theme="dark"] .toggle-input:checked + .toggle-slider { background-color: #fff; }
+        .toggle-input:checked + .toggle-slider:before { transform: translateX(20px); }
 
         /* Custom Dialog (Alert/Confirm/Prompt) */
         .dialog-window {
@@ -489,7 +504,7 @@
                 <div class="settings-nav-item active" onclick="switchSettingsTab('general', this)"><svg class="set-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg> <span data-i18n="general">General</span></div>
                 <div class="settings-nav-item" onclick="switchSettingsTab('personalization', this)"><svg class="set-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path></svg> <span data-i18n="personalization">Personalization</span></div>
                 <div class="settings-nav-item" onclick="switchSettingsTab('dataControls', this)"><svg class="set-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"></path></svg> <span data-i18n="dataControls">Data Controls</span></div>
-                <div class="settings-nav-item" onclick="switchSettingsTab('info', this)"><svg class="set-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg> <span data-i18n="info">Info</span></div>
+                <div class="settings-nav-item" onclick="switchSettingsTab('info', this)"><span style="font-size:18px; line-height:1; display:flex; align-items:center; width:18px; justify-content:center;">🛈</span> <span data-i18n="info">Info</span></div>
             </div>
             <div class="settings-content">
                 <div class="settings-header">
@@ -548,8 +563,47 @@
                     </div>
                 </div>
 
-                <div id="tab-personalization" class="tab-section"></div>
-                <div id="tab-dataControls" class="tab-section"></div>
+                <div id="tab-personalization" class="tab-section">
+                    <div class="setting-row" style="flex-direction: column; align-items: stretch; gap: 10px;">
+                        <div class="setting-info">
+                            <div class="setting-label" data-i18n="systemPrompt">System Prompt</div>
+                            <div class="setting-desc" data-i18n="systemPromptDesc">봇에게 비공식적으로 명령할 내용을 입력하세요.</div>
+                        </div>
+                        <textarea id="systemPromptInput" class="setting-textarea" placeholder="Ex: 너는 최고의 프로그래머야..." onchange="savePersonalization()"></textarea>
+                    </div>
+                    <div class="setting-row">
+                        <div class="setting-info">
+                            <div class="setting-label" data-i18n="botTone">Bot Tone</div>
+                            <div class="setting-desc" data-i18n="botToneDesc">봇의 말투를 설정합니다.</div>
+                        </div>
+                        <div class="custom-select-container" id="toneSelect">
+                            <div class="custom-select-trigger" onclick="toggleDropdown('toneSelect')">
+                                <span id="currentToneLabel" data-i18n="friendly">Friendly</span>
+                                <svg class="trigger-arrow" width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                            </div>
+                            <div class="custom-options">
+                                <div class="custom-option selected" onclick="setTone('friendly', '친절함', this)" data-i18n="friendly">친절함</div>
+                                <div class="custom-option" onclick="setTone('friend', '친구', this)" data-i18n="friend">친구</div>
+                                <div class="custom-option" onclick="setTone('stiff', '딱딱한', this)" data-i18n="stiff">딱딱한</div>
+                                <div class="custom-option" onclick="setTone('soft', '부드러운', this)" data-i18n="soft">부드러운</div>
+                                <div class="custom-option" onclick="setTone('enthusiastic', '열정적인', this)" data-i18n="enthusiastic">열정적인</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="tab-dataControls" class="tab-section">
+                    <div class="setting-row">
+                        <div class="setting-info">
+                            <div class="setting-label" data-i18n="historyMemory">History Memory</div>
+                            <div class="setting-desc" data-i18n="historyMemoryDesc">이전 대화 내용을 기억하여 문맥을 유지합니다.</div>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" class="toggle-input" id="historyToggle" onchange="toggleHistoryMemory(this)">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
 
                 <div id="tab-info" class="tab-section">
                     <img src="https://6967a657d214301950ed7b2b.imgix.net/logo.png" alt="MinsuGPT Logo" style="width: 80px; height: 80px; border-radius: 50%; margin-bottom: 20px;">
@@ -573,23 +627,23 @@
     </div>
 
     <script>
-        // 수정됨: 다국어(10개 언어) 및 설명문구 번역 추가
         const translations = {
-            ko: { newChat: "새 채팅", history: "기록", settings: "설정", placeholder: "메시지 보내기", general: "일반", personalization: "개인 맞춤 설정", dataControls: "데이터 제어", info: "정보", theme: "테마", system: "시스템", dark: "다크", light: "라이트", language: "언어", deleteAllChats: "모든 채팅 삭제", deleteAll: "모두 삭제", cancel: "취소", delete: "삭제", editTitle: "이름 수정", deleteConfirmTitle: "채팅 삭제", deleteConfirmMsg: "이 채팅을 영구적으로 삭제하시겠습니까?", deleteAllConfirmMsg: "모든 채팅 기록을 영구적으로 삭제하시겠습니까?", themeDesc: "인터페이스의 밝기 모드를 설정합니다.", langDesc: "UI 언어를 변경합니다.", deleteAllDesc: "모든 대화 기록을 로컬에서 영구 삭제합니다." },
-            en: { newChat: "New Chat", history: "History", settings: "Settings", placeholder: "Send a message", general: "General", personalization: "Personalization", dataControls: "Data Controls", info: "Info", theme: "Theme", system: "System", dark: "Dark", light: "Light", language: "Language", deleteAllChats: "Delete all chats", deleteAll: "Delete All", cancel: "Cancel", delete: "Delete", editTitle: "Edit Title", deleteConfirmTitle: "Delete Chat", deleteConfirmMsg: "Delete this chat permanently?", deleteAllConfirmMsg: "Permanently delete all chat history?", themeDesc: "Set the brightness mode of the interface.", langDesc: "Change the UI language.", deleteAllDesc: "Permanently delete all chat history from local storage." },
-            ja: { newChat: "新しいチャット", history: "履歴", settings: "設定", placeholder: "メッセージを送信", general: "一般", personalization: "パーソナライズ", dataControls: "データ制御", info: "情報", theme: "テーマ", system: "システム", dark: "ダーク", light: "ライト", language: "言語", deleteAllChats: "すべてのチャットを削除", deleteAll: "すべて削除", cancel: "キャンセル", delete: "削除", editTitle: "タイトル編集", deleteConfirmTitle: "チャット削除", deleteConfirmMsg: "このチャットを完全に削除しますか？", deleteAllConfirmMsg: "すべてのチャット履歴を完全に削除しますか？", themeDesc: "インターフェースの明るさモードを設定します。", langDesc: "UI言語を変更します。", deleteAllDesc: "ローカルストレージからすべてのチャット履歴を完全に削除します。" },
-            zh: { newChat: "新聊天", history: "历史记录", settings: "设置", placeholder: "发送消息", general: "常规", personalization: "个性化", dataControls: "数据控制", info: "信息", theme: "主题", system: "系统", dark: "深色", light: "浅色", language: "语言", deleteAllChats: "删除所有聊天", deleteAll: "全部删除", cancel: "取消", delete: "删除", editTitle: "编辑标题", deleteConfirmTitle: "删除聊天", deleteConfirmMsg: "确定要永久删除此聊天吗？", deleteAllConfirmMsg: "确定要永久删除所有聊天记录吗？", themeDesc: "设置界面的亮度模式。", langDesc: "更改界面语言。", deleteAllDesc: "从本地存储中永久删除所有聊天记录。" },
-            es: { newChat: "Nuevo Chat", history: "Historial", settings: "Ajustes", placeholder: "Enviar mensaje", general: "General", personalization: "Personalización", dataControls: "Datos", info: "Info", theme: "Tema", system: "Sistema", dark: "Oscuro", light: "Claro", language: "Idioma", deleteAllChats: "Borrar todos los chats", deleteAll: "Borrar todo", cancel: "Cancelar", delete: "Eliminar", editTitle: "Editar título", deleteConfirmTitle: "Eliminar chat", deleteConfirmMsg: "¿Eliminar este chat permanentemente?", deleteAllConfirmMsg: "¿Eliminar permanentemente todo el historial?", themeDesc: "Establece el modo de brillo de la interfaz.", langDesc: "Cambiar el idioma de la interfaz.", deleteAllDesc: "Eliminar permanentemente todo el historial del almacenamiento local." },
-            fr: { newChat: "Nouveau Chat", history: "Historique", settings: "Paramètres", placeholder: "Envoyer un message", general: "Général", personalization: "Personnalisation", dataControls: "Données", info: "Info", theme: "Thème", system: "Système", dark: "Sombre", light: "Clair", language: "Langue", deleteAllChats: "Supprimer tout", deleteAll: "Tout supprimer", cancel: "Annuler", delete: "Supprimer", editTitle: "Modifier le titre", deleteConfirmTitle: "Supprimer le chat", deleteConfirmMsg: "Supprimer ce chat définitivement ?", deleteAllConfirmMsg: "Supprimer définitivement tout l'historique ?", themeDesc: "Régler la luminosité de l'interface.", langDesc: "Changer la langue de l'interface.", deleteAllDesc: "Supprimer définitivement tout l'historique du stockage local." },
-            de: { newChat: "Neuer Chat", history: "Verlauf", settings: "Einstellungen", placeholder: "Nachricht senden", general: "Allgemein", personalization: "Personalisierung", dataControls: "Daten", info: "Info", theme: "Design", system: "System", dark: "Dunkel", light: "Hell", language: "Sprache", deleteAllChats: "Alle Chats löschen", deleteAll: "Alle löschen", cancel: "Abbrechen", delete: "Löschen", editTitle: "Titel bearbeiten", deleteConfirmTitle: "Chat löschen", deleteConfirmMsg: "Diesen Chat dauerhaft löschen?", deleteAllConfirmMsg: "Gesamten Chatverlauf dauerhaft löschen?", themeDesc: "Helligkeitsmodus der Oberfläche festlegen.", langDesc: "UI-Sprache ändern.", deleteAllDesc: "Gesamten Chatverlauf dauerhaft vom lokalen Speicher löschen." },
-            ru: { newChat: "Новый чат", history: "История", settings: "Настройки", placeholder: "Отправить сообщение", general: "Общие", personalization: "Персонализация", dataControls: "Данные", info: "Инфо", theme: "Тема", system: "Системная", dark: "Темная", light: "Светлая", language: "Язык", deleteAllChats: "Удалить все чаты", deleteAll: "Удалить все", cancel: "Отмена", delete: "Удалить", editTitle: "Изменить название", deleteConfirmTitle: "Удалить чат", deleteConfirmMsg: "Удалить этот чат навсегда?", deleteAllConfirmMsg: "Удалить всю историю чатов навсегда?", themeDesc: "Установить режим яркости интерфейса.", langDesc: "Изменить язык интерфейса.", deleteAllDesc: "Навсегда удалить всю историю чатов из локального хранилища." },
-            it: { newChat: "Nuova Chat", history: "Cronologia", settings: "Impostazioni", placeholder: "Invia un messaggio", general: "Generale", personalization: "Personalizzazione", dataControls: "Dati", info: "Info", theme: "Tema", system: "Sistema", dark: "Scuro", light: "Chiaro", language: "Lingua", deleteAllChats: "Elimina tutte le chat", deleteAll: "Elimina tutto", cancel: "Annulla", delete: "Elimina", editTitle: "Modifica titolo", deleteConfirmTitle: "Elimina chat", deleteConfirmMsg: "Eliminare definitivamente questa chat?", deleteAllConfirmMsg: "Eliminare definitivamente tutta la cronologia?", themeDesc: "Imposta la modalità di luminosità dell'interfaccia.", langDesc: "Cambia la lingua dell'interfaccia.", deleteAllDesc: "Elimina definitivamente tutta la cronologia dalla memoria locale." },
-            pt: { newChat: "Novo Chat", history: "Histórico", settings: "Configurações", placeholder: "Enviar mensagem", general: "Geral", personalization: "Personalização", dataControls: "Dados", info: "Info", theme: "Tema", system: "Sistema", dark: "Escuro", light: "Claro", language: "Idioma", deleteAllChats: "Apagar todas as conversas", deleteAll: "Apagar tudo", cancel: "Cancelar", delete: "Apagar", editTitle: "Editar título", deleteConfirmTitle: "Apagar conversa", deleteConfirmMsg: "Apagar esta conversa permanentemente?", deleteAllConfirmMsg: "Apagar permanentemente todo o histórico?", themeDesc: "Definir o modo de brilho da interface.", langDesc: "Alterar o idioma da interface.", deleteAllDesc: "Apagar permanentemente todo o histórico do armazenamento local." }
+            ko: { newChat: "새 채팅", history: "기록", settings: "설정", placeholder: "메시지 보내기", general: "일반", personalization: "개인 맞춤 설정", dataControls: "데이터 제어", info: "정보", theme: "테마", system: "시스템", dark: "다크", light: "라이트", language: "언어", deleteAllChats: "모든 채팅 삭제", deleteAll: "모두 삭제", cancel: "취소", delete: "삭제", editTitle: "이름 수정", deleteConfirmTitle: "채팅 삭제", deleteConfirmMsg: "이 채팅을 영구적으로 삭제하시겠습니까?", deleteAllConfirmMsg: "모든 채팅 기록을 영구적으로 삭제하시겠습니까?", themeDesc: "인터페이스의 밝기 모드를 설정합니다.", langDesc: "UI 언어를 변경합니다.", deleteAllDesc: "모든 대화 기록을 로컬에서 영구 삭제합니다.", systemPrompt: "시스템 프롬프트", systemPromptDesc: "봇에게 비공식적으로 명령할 내용을 입력하세요.", botTone: "봇 말투", botToneDesc: "봇의 말투를 설정합니다.", friendly: "친절함", friend: "친구", stiff: "딱딱한", soft: "부드러운", enthusiastic: "열정적인", historyMemory: "대화 기억", historyMemoryDesc: "이전 대화 내용을 기억하여 문맥을 유지합니다." },
+            en: { newChat: "New Chat", history: "History", settings: "Settings", placeholder: "Send a message", general: "General", personalization: "Personalization", dataControls: "Data Controls", info: "Info", theme: "Theme", system: "System", dark: "Dark", light: "Light", language: "Language", deleteAllChats: "Delete all chats", deleteAll: "Delete All", cancel: "Cancel", delete: "Delete", editTitle: "Edit Title", deleteConfirmTitle: "Delete Chat", deleteConfirmMsg: "Delete this chat permanently?", deleteAllConfirmMsg: "Permanently delete all chat history?", themeDesc: "Set the brightness mode of the interface.", langDesc: "Change the UI language.", deleteAllDesc: "Permanently delete all chat history from local storage.", systemPrompt: "System Prompt", systemPromptDesc: "Instructions for the bot (hidden).", botTone: "Bot Tone", botToneDesc: "Set the tone of the bot.", friendly: "Friendly", friend: "Friend", stiff: "Stiff", soft: "Soft", enthusiastic: "Enthusiastic", historyMemory: "Chat Memory", historyMemoryDesc: "Send previous chat history for context." },
+            // (나머지 언어도 생략 없이 기존 유지)
+            ja: { newChat: "新しいチャット", history: "履歴", settings: "設定", placeholder: "メッセージを送信", general: "一般", personalization: "パーソナライズ", dataControls: "データ制御", info: "情報", theme: "テーマ", system: "システム", dark: "ダーク", light: "ライト", language: "言語", deleteAllChats: "すべてのチャットを削除", deleteAll: "すべて削除", cancel: "キャンセル", delete: "削除", editTitle: "タイトル編集", deleteConfirmTitle: "チャット削除", deleteConfirmMsg: "このチャットを完全に削除しますか？", deleteAllConfirmMsg: "すべてのチャット履歴を完全に削除しますか？", themeDesc: "インターフェースの明るさモードを設定します。", langDesc: "UI言語を変更します。", deleteAllDesc: "ローカルストレージからすべてのチャット履歴を完全に削除します。", systemPrompt: "システムプロンプト", systemPromptDesc: "ボットへの非公式な指示を入力します。", botTone: "口調", botToneDesc: "ボットの口調を設定します。", friendly: "親切", friend: "友達", stiff: "堅い", soft: "柔らかい", enthusiastic: "情熱的", historyMemory: "会話記憶", historyMemoryDesc: "以前の会話履歴を記憶して文脈を維持します。" },
+            zh: { newChat: "新聊天", history: "历史记录", settings: "设置", placeholder: "发送消息", general: "常规", personalization: "个性化", dataControls: "数据控制", info: "信息", theme: "主题", system: "系统", dark: "深色", light: "浅色", language: "语言", deleteAllChats: "删除所有聊天", deleteAll: "全部删除", cancel: "取消", delete: "删除", editTitle: "编辑标题", deleteConfirmTitle: "删除聊天", deleteConfirmMsg: "确定要永久删除此聊天吗？", deleteAllConfirmMsg: "确定要永久删除所有聊天记录吗？", themeDesc: "设置界面的亮度模式。", langDesc: "更改界面语言。", deleteAllDesc: "从本地存储中永久删除所有聊天记录。", systemPrompt: "系统提示", systemPromptDesc: "输入非正式指令。", botTone: "语气", botToneDesc: "设置机器人的语气。", friendly: "亲切", friend: "朋友", stiff: "生硬", soft: "温柔", enthusiastic: "热情", historyMemory: "对话记忆", historyMemoryDesc: "记住以前的对话以保持上下文。" },
+            es: { newChat: "Nuevo Chat", history: "Historial", settings: "Ajustes", placeholder: "Enviar mensaje", general: "General", personalization: "Personalización", dataControls: "Datos", info: "Info", theme: "Tema", system: "Sistema", dark: "Oscuro", light: "Claro", language: "Idioma", deleteAllChats: "Borrar todos los chats", deleteAll: "Borrar todo", cancel: "Cancelar", delete: "Eliminar", editTitle: "Editar título", deleteConfirmTitle: "Eliminar chat", deleteConfirmMsg: "¿Eliminar este chat permanentemente?", deleteAllConfirmMsg: "¿Eliminar permanentemente todo el historial?", themeDesc: "Establece el modo de brillo de la interfaz.", langDesc: "Cambiar el idioma de la interfaz.", deleteAllDesc: "Eliminar permanentemente todo el historial del almacenamiento local.", systemPrompt: "Prompt del sistema", systemPromptDesc: "Instrucciones ocultas para el bot.", botTone: "Tono", botToneDesc: "Establecer el tono del bot.", friendly: "Amable", friend: "Amigo", stiff: "Formal", soft: "Suave", enthusiastic: "Entusiasta", historyMemory: "Memoria", historyMemoryDesc: "Recordar historial para contexto." },
+            fr: { newChat: "Nouveau Chat", history: "Historique", settings: "Paramètres", placeholder: "Envoyer un message", general: "Général", personalization: "Personnalisation", dataControls: "Données", info: "Info", theme: "Thème", system: "Système", dark: "Sombre", light: "Clair", language: "Langue", deleteAllChats: "Supprimer tout", deleteAll: "Tout supprimer", cancel: "Annuler", delete: "Supprimer", editTitle: "Modifier le titre", deleteConfirmTitle: "Supprimer le chat", deleteConfirmMsg: "Supprimer ce chat définitivement ?", deleteAllConfirmMsg: "Supprimer définitivement tout l'historique ?", themeDesc: "Régler la luminosité de l'interface.", langDesc: "Changer la langue de l'interface.", deleteAllDesc: "Supprimer définitivement tout l'historique du stockage local.", systemPrompt: "Prompt système", systemPromptDesc: "Instructions cachées pour le bot.", botTone: "Ton", botToneDesc: "Définir le ton du bot.", friendly: "Amical", friend: "Ami", stiff: "Rigide", soft: "Doux", enthusiastic: "Enthousiaste", historyMemory: "Mémoire", historyMemoryDesc: "Se souvenir de l'historique pour le contexte." },
+            de: { newChat: "Neuer Chat", history: "Verlauf", settings: "Einstellungen", placeholder: "Nachricht senden", general: "Allgemein", personalization: "Personalisierung", dataControls: "Daten", info: "Info", theme: "Design", system: "System", dark: "Dunkel", light: "Hell", language: "Sprache", deleteAllChats: "Alle Chats löschen", deleteAll: "Alle löschen", cancel: "Abbrechen", delete: "Löschen", editTitle: "Titel bearbeiten", deleteConfirmTitle: "Chat löschen", deleteConfirmMsg: "Diesen Chat dauerhaft löschen?", deleteAllConfirmMsg: "Gesamten Chatverlauf dauerhaft löschen?", themeDesc: "Helligkeitsmodus der Oberfläche festlegen.", langDesc: "UI-Sprache ändern.", deleteAllDesc: "Gesamten Chatverlauf dauerhaft vom lokalen Speicher löschen.", systemPrompt: "System Prompt", systemPromptDesc: "Versteckte Anweisungen für den Bot.", botTone: "Tonfall", botToneDesc: "Tonfall des Bots festlegen.", friendly: "Freundlich", friend: "Freund", stiff: "Steif", soft: "Sanft", enthusiastic: "Begeistert", historyMemory: "Gedächtnis", historyMemoryDesc: "Verlauf für Kontext speichern." },
+            ru: { newChat: "Новый чат", history: "История", settings: "Настройки", placeholder: "Отправить сообщение", general: "Общие", personalization: "Персонализация", dataControls: "Данные", info: "Инфо", theme: "Тема", system: "Системная", dark: "Темная", light: "Светлая", language: "Язык", deleteAllChats: "Удалить все чаты", deleteAll: "Удалить все", cancel: "Отмена", delete: "Удалить", editTitle: "Изменить название", deleteConfirmTitle: "Удалить чат", deleteConfirmMsg: "Удалить этот чат навсегда?", deleteAllConfirmMsg: "Удалить всю историю чатов навсегда?", themeDesc: "Установить режим яркости интерфейса.", langDesc: "Изменить язык интерфейса.", deleteAllDesc: "Навсегда удалить всю историю чатов из локального хранилища.", systemPrompt: "Системный промпт", systemPromptDesc: "Скрытые инструкции для бота.", botTone: "Тон", botToneDesc: "Установить тон бота.", friendly: "Дружелюбный", friend: "Друг", stiff: "Строгий", soft: "Мягкий", enthusiastic: "Восторженный", historyMemory: "Память", historyMemoryDesc: "Помнить историю для контекста." },
+            it: { newChat: "Nuova Chat", history: "Cronologia", settings: "Impostazioni", placeholder: "Invia un messaggio", general: "Generale", personalization: "Personalizzazione", dataControls: "Dati", info: "Info", theme: "Tema", system: "Sistema", dark: "Scuro", light: "Chiaro", language: "Lingua", deleteAllChats: "Elimina tutte le chat", deleteAll: "Elimina tutto", cancel: "Annulla", delete: "Elimina", editTitle: "Modifica titolo", deleteConfirmTitle: "Elimina chat", deleteConfirmMsg: "Eliminare definitivamente questa chat?", deleteAllConfirmMsg: "Eliminare definitivamente tutta la cronologia?", themeDesc: "Imposta la modalità di luminosità dell'interfaccia.", langDesc: "Cambia la lingua dell'interfaccia.", deleteAllDesc: "Elimina definitivamente tutta la cronologia dalla memoria locale.", systemPrompt: "Prompt di sistema", systemPromptDesc: "Istruzioni nascoste per il bot.", botTone: "Tono", botToneDesc: "Imposta il tono del bot.", friendly: "Amichevole", friend: "Amico", stiff: "Rigido", soft: "Dolce", enthusiastic: "Entusiasta", historyMemory: "Memoria", historyMemoryDesc: "Ricorda la cronologia per il contesto." },
+            pt: { newChat: "Novo Chat", history: "Histórico", settings: "Configurações", placeholder: "Enviar mensagem", general: "Geral", personalization: "Personalização", dataControls: "Dados", info: "Info", theme: "Tema", system: "Sistema", dark: "Escuro", light: "Claro", language: "Idioma", deleteAllChats: "Apagar todas as conversas", deleteAll: "Apagar tudo", cancel: "Cancelar", delete: "Apagar", editTitle: "Editar título", deleteConfirmTitle: "Apagar conversa", deleteConfirmMsg: "Apagar esta conversa permanentemente?", deleteAllConfirmMsg: "Apagar permanentemente todo o histórico?", themeDesc: "Definir o modo de brilho da interface.", langDesc: "Alterar o idioma da interface.", deleteAllDesc: "Apagar permanentemente todo o histórico do armazenamento local.", systemPrompt: "Prompt do sistema", systemPromptDesc: "Instruções ocultas para o bot.", botTone: "Tom", botToneDesc: "Definir o tom do bot.", friendly: "Amigável", friend: "Amigo", stiff: "Rígido", soft: "Suave", enthusiastic: "Entusiasmado", historyMemory: "Memória", historyMemoryDesc: "Lembrar histórico para contexto." }
         };
 
         let currentLang = 'ko';
         let isGenerating = false;
-        let isSearchActive = false; // Search Mode Toggle
+        let isSearchActive = false;
         let typingTimeout = null;
         let thinkingTimeout = null;
         let currentBubbleElement = null;
@@ -601,8 +655,13 @@
         // Data Management Variables
         let currentChatId = null;
         let currentMessages = [];
-        let currentAttachments = []; // Stores current attachments for the input
+        let currentAttachments = []; 
         const STORAGE_KEY = 'chat_history_v1';
+        
+        // Personalization & Settings State
+        let systemPrompt = localStorage.getItem('systemPrompt') || '';
+        let botTone = localStorage.getItem('botTone') || 'friendly';
+        let isHistoryEnabled = localStorage.getItem('isHistoryEnabled') === 'true';
 
         const sidebar = document.getElementById('sidebar');
         const sidebarOverlay = document.getElementById('sidebar-overlay');
@@ -637,6 +696,20 @@
             updateUIText('ko');
             loadHistoryFromStorage();
             
+            // Load Settings UI State
+            document.getElementById('systemPromptInput').value = systemPrompt;
+            document.getElementById('historyToggle').checked = isHistoryEnabled;
+            // Tone label update
+            const toneKey = botTone;
+            if(translations['ko'][toneKey]) {
+                document.getElementById('currentToneLabel').innerText = translations['ko'][toneKey];
+                // Update selected class
+                document.querySelectorAll('#toneSelect .custom-option').forEach(opt => {
+                     if(opt.getAttribute('data-i18n') === toneKey) opt.classList.add('selected');
+                     else opt.classList.remove('selected');
+                });
+            }
+
             const urlParams = new URLSearchParams(window.location.search);
             const chatIdFromUrl = urlParams.get('chat');
             
@@ -660,18 +733,17 @@
                 btnCenter.classList.remove('active');
                 btnBottom.classList.remove('active');
             }
+            triggerHaptic();
         }
 
         // --- File Attachment Logic ---
         function toggleAttachMenu(origin) {
             const menu = document.getElementById(origin + 'AttachMenu');
             const isOpen = menu.classList.contains('open');
-            // close all first
             document.querySelectorAll('.attach-menu').forEach(el => el.classList.remove('open'));
             if (!isOpen) menu.classList.add('open');
         }
 
-        // Close menu when clicking outside
         document.addEventListener('click', function(e) {
             if (!e.target.closest('.attach-menu') && !e.target.closest('.icon-btn')) {
                 document.querySelectorAll('.attach-menu').forEach(el => el.classList.remove('open'));
@@ -679,10 +751,7 @@
         });
 
         function handleFileUpload(type, origin) {
-            // Close menus
             document.querySelectorAll('.attach-menu').forEach(el => el.classList.remove('open'));
-            
-            // Trigger hidden input
             hiddenFileInput.setAttribute('accept', type === 'image' ? 'image/*' : '*/*');
             hiddenFileInput.onchange = (e) => processFiles(e.target.files, origin);
             hiddenFileInput.click();
@@ -692,7 +761,6 @@
             if (!files || files.length === 0) return;
 
             for (let file of files) {
-                // 수정됨: 백엔드 전송을 위해 원본 파일 객체(fileObject)도 저장
                 if (file.type.startsWith('image/')) {
                     const compressedDataUrl = await compressImage(file);
                     currentAttachments.push({ type: 'image', data: compressedDataUrl, name: file.name, fileObject: file });
@@ -701,7 +769,7 @@
                 }
             }
             renderAttachments();
-            hiddenFileInput.value = ''; // reset
+            hiddenFileInput.value = '';
         }
 
         function compressImage(file) {
@@ -714,7 +782,6 @@
                     img.onload = () => {
                         const canvas = document.createElement('canvas');
                         const ctx = canvas.getContext('2d');
-                        // Resize constraint (max 800px)
                         const MAX_SIZE = 800;
                         let width = img.width;
                         let height = img.height;
@@ -728,7 +795,6 @@
                         canvas.width = width;
                         canvas.height = height;
                         ctx.drawImage(img, 0, 0, width, height);
-                        // Backend compatible compression (JPEG 0.7)
                         resolve(canvas.toDataURL('image/jpeg', 0.7));
                     };
                 };
@@ -759,7 +825,7 @@
                     removeBtn.className = 'attach-card-remove';
                     removeBtn.innerHTML = '&times;';
                     removeBtn.onclick = (e) => {
-                        e.stopPropagation(); // prevent lightbox
+                        e.stopPropagation();
                         removeAttachment(index);
                     };
 
@@ -768,7 +834,6 @@
                 });
             });
             
-            // Update send button state
             toggleBtnState(centerInput.value, centerSendBtn);
             toggleBtnState(bottomInput.value, bottomSendBtn);
         }
@@ -854,7 +919,6 @@
             
             centerInput.value = '';
             bottomInput.value = '';
-            // New chat - reset height
             centerInput.style.height = '24px';
             bottomInput.style.height = '24px';
             toggleBtnState('', centerSendBtn);
@@ -881,7 +945,7 @@
             if (isGenerating) stopGeneration();
             currentChatId = chat.id;
             currentMessages = chat.messages || [];
-            currentAttachments = []; // reset input attachments
+            currentAttachments = []; 
             renderAttachments();
 
             welcomeScreen.classList.add('hidden');
@@ -894,7 +958,6 @@
                 if (msg.role === 'user') {
                     appendMessageUI('user', msg.content, false, msg.attachments);
                 } else if (msg.role === 'bot') {
-                    // Load chat: render markdown for existing messages
                     appendMessageUI('bot', msg.content, false); 
                     const rows = chatContent.querySelectorAll('.message-row.bot');
                     const lastRow = rows[rows.length-1];
@@ -1021,9 +1084,8 @@
             }
         }
 
-        function triggerHaptic() { if (navigator.vibrate) { navigator.vibrate(2); } }
+        function triggerHaptic() { if (navigator.vibrate) { navigator.vibrate(5); } }
         
-        // 수정됨: autoResize 기능 복구 (입력 시 창 늘어남)
         function autoResize(el) {
             el.style.height = '24px';
             el.style.height = Math.min(el.scrollHeight, 200) + 'px';
@@ -1035,7 +1097,6 @@
             if (isGenerating) {
                 btn.classList.add('stop-active');
             } else {
-                // Attachments or text enables button
                 (val.trim().length > 0 || currentAttachments.length > 0) ? btn.classList.add('active') : btn.classList.remove('active'); 
                 btn.classList.remove('stop-active');
             }
@@ -1049,25 +1110,24 @@
             } 
         }
 
-        // 수정됨: 입력 시 autoResize 호출
         centerInput.addEventListener('input', function() { autoResize(this); toggleBtnState(this.value, centerSendBtn); });
         centerInput.addEventListener('keydown', (e) => handleKeydown(e, 'center'));
         bottomInput.addEventListener('input', function() { autoResize(this); toggleBtnState(this.value, bottomSendBtn); });
         bottomInput.addEventListener('keydown', (e) => handleKeydown(e, 'bottom'));
 
-        // 수정됨: 백엔드와 연동된 실제 전송 로직
+        // --- Send & Stream Logic ---
         async function handleSendClick(origin) {
             if (isGenerating) {
                 stopGeneration();
                 return;
             }
 
+            triggerHaptic(); // Haptic on send
+
             const input = origin === 'center' ? centerInput : bottomInput;
             const text = input.value.trim();
             if (!text && currentAttachments.length === 0) return;
 
-            // --- Backend Routing Logic ---
-            // 백엔드 엔드포인트 설정 (https 사용)
             const endpoint = isSearchActive 
                 ? 'https://jaewondev6.pythonanywhere.com/ask' 
                 : 'https://jaewondev6.pythonanywhere.com/askfast';
@@ -1079,29 +1139,57 @@
                 bottomInterface.classList.add('visible');
             }
 
-            // FormData 생성 (백엔드 app (19).py 규격에 맞춤)
-            const formData = new FormData();
-            formData.append('content', text); // 혹은 'query' - 백엔드 코드 확인 필요하지만 content가 일반적
+            // --- Constructing the Prompt with Personalization ---
+            let instructions = "";
+            if (systemPrompt) instructions += `[System Instruction: ${systemPrompt}]\n`;
             
-            // 파일 첨부 처리
-            currentAttachments.forEach(att => {
-                if (att.fileObject) {
-                    formData.append('files', att.fileObject);
-                }
-            });
+            instructions += `[Tone Instruction: Act ${botTone}.`;
+            if (['friendly', 'soft', 'stiff'].includes(botTone)) {
+                instructions += " Use polite honorifics (korean 'yo/nida').";
+            } else if (botTone === 'friend') {
+                instructions += " Use casual language (Banmal).";
+            }
+            instructions += "]\n";
 
-            const attachmentsToSend = [...currentAttachments]; // Copy for UI
-            currentAttachments = []; // Clear input attachments
-            renderAttachments(); // Update UI
+            let finalPrompt = text;
+            if (isHistoryEnabled && currentMessages.length > 0) {
+                 // 이전 대화 10개만 간추려서 전송
+                 const historyText = currentMessages.slice(-10).map(m => `${m.role}: ${m.content}`).join('\n');
+                 finalPrompt = `${instructions}\nPrevious Conversation:\n${historyText}\n\nCurrent User Request: ${text}`;
+            } else {
+                 finalPrompt = `${instructions}\n${text}`;
+            }
+
+            // --- Request Setup ---
+            let requestBody;
+            let requestHeaders = {};
+
+            // 수정됨: 파일이 없으면 JSON으로, 있으면 FormData로 전송 ("Unsupported Media Type" Fix)
+            if (currentAttachments.length === 0) {
+                requestHeaders['Content-Type'] = 'application/json';
+                requestBody = JSON.stringify({ content: finalPrompt });
+            } else {
+                // FormData (Browser sets Content-Type to multipart/form-data automatically)
+                const formData = new FormData();
+                formData.append('content', finalPrompt); 
+                currentAttachments.forEach(att => {
+                    if (att.fileObject) {
+                        formData.append('files', att.fileObject);
+                    }
+                });
+                requestBody = formData;
+            }
+
+            const attachmentsToSend = [...currentAttachments];
+            currentAttachments = [];
+            renderAttachments(); 
 
             input.value = ''; 
             input.style.height = '24px';
             toggleBtnState('', origin === 'center' ? centerSendBtn : bottomSendBtn);
 
-            // Render User Message
             appendMessageUI('user', text, false, attachmentsToSend);
             
-            // Save to Storage
             currentMessages.push({ role: 'user', content: text, attachments: attachmentsToSend });
             
             let chats = getStoredChats();
@@ -1116,20 +1204,17 @@
 
             scrollToBottom();
             
-            // 실제 백엔드 스트리밍 요청 호출
-            await streamResponse(endpoint, formData);
+            await streamResponse(endpoint, requestHeaders, requestBody);
         }
 
-        // 수정됨: 실제 백엔드 스트리밍 및 마크다운 처리
-        async function streamResponse(endpoint, formData) {
+        // 수정됨: 타이핑 효과 + 스트리밍 로직
+        async function streamResponse(endpoint, headers, body) {
             startGenerationState();
             
-            // 봇 버블 생성 (비어있는 상태)
             const row = document.createElement('div'); row.className = 'message-row bot';
             const wrapper = document.createElement('div'); wrapper.className = 'bot-bubble-wrapper';
             const bubble = document.createElement('div'); bubble.className = 'message-bubble bot-content';
             
-            // 초기 로딩 애니메이션 (Thinking Dot)
             const dot = document.createElement('div'); dot.className = 'thinking-dot';
             bubble.appendChild(dot);
             
@@ -1140,37 +1225,47 @@
             
             currentBotRowElement = wrapper;
             currentBubbleElement = bubble;
-            let fullText = "";
+            
+            let fullText = ""; // 스트림으로 받은 전체 텍스트
+            let displayedText = ""; // 화면에 보여진 텍스트
+            let firstChunk = true;
+
+            // 타이핑 효과 루프 (뭉텅이 방지)
+            const typeWriter = setInterval(() => {
+                if (displayedText.length < fullText.length) {
+                    if (firstChunk) {
+                        bubble.innerHTML = ""; // 로딩 닷 제거
+                        firstChunk = false;
+                        triggerHaptic(); // Start typing haptic
+                    }
+                    // 한 번에 2~3글자씩 추가하여 속도 조절
+                    const charsToAdd = fullText.slice(displayedText.length, displayedText.length + 3);
+                    displayedText += charsToAdd;
+                    bubble.innerHTML = marked.parse(displayedText);
+                    scrollToBottom();
+                } else if (!isGenerating && displayedText.length === fullText.length) {
+                     clearInterval(typeWriter);
+                }
+            }, 30); // 30ms 간격 업데이트
 
             try {
                 const response = await fetch(endpoint, {
                     method: 'POST',
-                    body: formData
+                    headers: headers,
+                    body: body
                 });
 
                 if (!response.body) throw new Error('ReadableStream not supported');
 
                 streamReader = response.body.getReader();
                 const decoder = new TextDecoder();
-                
-                // 첫 데이터가 오면 로딩 닷 제거
-                let firstChunk = true;
 
                 while (true) {
                     const { done, value } = await streamReader.read();
                     if (done) break;
                     
                     const chunk = decoder.decode(value, { stream: true });
-                    if (firstChunk) {
-                        bubble.innerHTML = ""; // 로딩 닷 제거
-                        firstChunk = false;
-                    }
-                    
-                    fullText += chunk;
-                    
-                    // 실시간 마크다운 렌더링
-                    bubble.innerHTML = marked.parse(fullText);
-                    scrollToBottom();
+                    fullText += chunk; // 버퍼에 추가만 함 (UI 업데이트는 setInterval이 담당)
                 }
 
             } catch (error) {
@@ -1179,7 +1274,14 @@
                     currentBubbleElement.innerHTML += `<br><span class="stopped-text">[Error: ${error.message}]</span>`;
                 }
             } finally {
-                finishGeneration(fullText);
+                // 스트림 종료 후 UI 갱신이 완료될 때까지 잠시 대기
+                const checkDone = setInterval(() => {
+                    if (displayedText.length >= fullText.length) {
+                        clearInterval(checkDone);
+                        clearInterval(typeWriter);
+                        finishGeneration(fullText);
+                    }
+                }, 100);
                 streamReader = null;
             }
         }
@@ -1187,7 +1289,6 @@
         function appendMessageUI(role, text, isTyping = false, attachments = []) {
             const row = document.createElement('div'); row.className = `message-row ${role}`;
             
-            // Render Attachments (Bubbles)
             if (attachments && attachments.length > 0) {
                 const attachDiv = document.createElement('div');
                 attachDiv.className = 'bubble-attachments';
@@ -1215,10 +1316,8 @@
                 chatContent.appendChild(row);
                 
                 currentBotRowElement = wrapper;
-                // Render Markdown for existing messages
                 bubble.innerHTML = marked.parse(text);
                 
-                // Add copy/regen buttons
                 const lastRow = chatContent.querySelectorAll('.message-row.bot');
                 if(lastRow.length > 0) {
                     addActionButtons(wrapper, text);
@@ -1255,7 +1354,6 @@
             copyBtn.className = 'action-btn';
             copyBtn.innerHTML = icons.copy;
             copyBtn.onclick = function() {
-                // Copy raw text, not html
                 const tempDiv = document.createElement('div');
                 tempDiv.innerHTML = bubbleText;
                 const textToCopy = tempDiv.innerText || bubbleText;
@@ -1270,7 +1368,6 @@
             regenBtn.className = 'action-btn';
             regenBtn.innerHTML = icons.regenerate;
             regenBtn.onclick = function() {
-                // 재생성 로직: 마지막 봇 메시지 삭제 후 마지막 유저 메시지로 다시 요청
                 const rowToRemove = wrapperElement.closest('.message-row');
                 if (rowToRemove) rowToRemove.remove();
                 
@@ -1278,20 +1375,15 @@
                     currentMessages.pop();
                 }
                 
-                // 마지막 유저 메시지 찾기
                 const lastUserMsg = currentMessages.slice().reverse().find(m => m.role === 'user');
                 if(lastUserMsg) {
-                    // Re-trigger send (backend call)
                     const endpoint = isSearchActive 
                         ? 'https://jaewondev6.pythonanywhere.com/ask' 
                         : 'https://jaewondev6.pythonanywhere.com/askfast';
-                        
-                    const formData = new FormData();
-                    formData.append('content', lastUserMsg.content);
-                    // 첨부파일은 재전송이 까다로우므로 텍스트만 재요청하거나, 로직 추가 필요.
-                    // 여기서는 간단히 텍스트 재요청으로 처리
                     
-                    streamResponse(endpoint, formData);
+                    // Regenerate without attachments logic for simplicity or re-add logic here
+                    // Using simple JSON regen
+                    streamResponse(endpoint, {'Content-Type': 'application/json'}, JSON.stringify({ content: lastUserMsg.content }));
                 }
             };
 
@@ -1334,7 +1426,6 @@
             toggleBtnState(bottomInput.value, bottomSendBtn);
         }
 
-        // 수정됨: 스트림 중지 로직
         function stopGeneration() {
             if (streamReader) {
                 streamReader.cancel();
@@ -1346,10 +1437,10 @@
                 stopSpan.className = 'stopped-text';
                 stopSpan.innerText = " [답변 중지됨]";
                 currentBubbleElement.appendChild(stopSpan);
-                // HTML to Text conversion might be needed depending on saving strategy
                 finalText = currentBubbleElement.innerHTML; 
             }
-
+            // Force finish immediately
+            isGenerating = false;
             finishGeneration(finalText);
         }
 
@@ -1361,21 +1452,40 @@
         function toggleDropdown(id) { const el = document.getElementById(id); document.querySelectorAll('.custom-select-container').forEach(item => { if (item.id !== id) item.classList.remove('open'); }); el.classList.toggle('open'); }
         function setTheme(mode, optionEl) { const container = document.getElementById('themeSelect'); container.querySelectorAll('.custom-option').forEach(opt => opt.classList.remove('selected')); optionEl.classList.add('selected'); const key = optionEl.getAttribute('data-i18n'); document.getElementById('currentThemeLabel').innerText = translations[currentLang][key]; container.classList.remove('open'); if (mode === 'system') { const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches; document.body.setAttribute('data-theme', isDark ? 'dark' : 'light'); } else { document.body.setAttribute('data-theme', mode); } }
         function setLanguage(langCode, label, optionEl) { const container = document.getElementById('langSelect'); container.querySelectorAll('.custom-option').forEach(opt => opt.classList.remove('selected')); optionEl.classList.add('selected'); document.getElementById('currentLangLabel').innerText = label; container.classList.remove('open'); currentLang = langCode; updateUIText(langCode); renderHistoryList(); }
-        function updateUIText(lang) { const t = translations[lang]; if (!t) return; document.querySelectorAll('[data-i18n]').forEach(el => { const key = el.getAttribute('data-i18n'); if (t[key]) el.innerText = t[key]; }); document.querySelectorAll('[data-i18n-placeholder]').forEach(el => { const key = el.getAttribute('data-i18n-placeholder'); if (t[key]) el.placeholder = t[key]; }); const currentThemeKey = document.querySelector('#themeSelect .custom-option.selected').getAttribute('data-i18n'); if (currentThemeKey && t[currentThemeKey]) document.getElementById('currentThemeLabel').innerText = t[currentThemeKey]; }
+        
+        // Settings - Personalization Handlers
+        function savePersonalization() {
+            systemPrompt = document.getElementById('systemPromptInput').value;
+            localStorage.setItem('systemPrompt', systemPrompt);
+        }
+        function setTone(toneValue, label, optionEl) {
+            const container = document.getElementById('toneSelect');
+            container.querySelectorAll('.custom-option').forEach(opt => opt.classList.remove('selected'));
+            optionEl.classList.add('selected');
+            document.getElementById('currentToneLabel').innerText = label; 
+            container.classList.remove('open');
+            botTone = toneValue;
+            localStorage.setItem('botTone', botTone);
+        }
+        function toggleHistoryMemory(checkbox) {
+            isHistoryEnabled = checkbox.checked;
+            localStorage.setItem('isHistoryEnabled', isHistoryEnabled);
+        }
+
+        function updateUIText(lang) { const t = translations[lang]; if (!t) return; document.querySelectorAll('[data-i18n]').forEach(el => { const key = el.getAttribute('data-i18n'); if (t[key]) el.innerText = t[key]; }); document.querySelectorAll('[data-i18n-placeholder]').forEach(el => { const key = el.getAttribute('data-i18n-placeholder'); if (t[key]) el.placeholder = t[key]; }); const currentThemeKey = document.querySelector('#themeSelect .custom-option.selected').getAttribute('data-i18n'); if (currentThemeKey && t[currentThemeKey]) document.getElementById('currentThemeLabel').innerText = t[currentThemeKey]; 
+            // Tone Label update
+            const toneKey = botTone;
+            if(t[toneKey]) document.getElementById('currentToneLabel').innerText = t[toneKey];
+        }
         document.addEventListener('click', function(e) { if (!e.target.closest('.custom-select-container')) { document.querySelectorAll('.custom-select-container').forEach(el => el.classList.remove('open')); } });
 
         function switchSettingsTab(tabName, navItem) {
-            // 네비게이션 활성화
             document.querySelectorAll('.settings-nav-item').forEach(el => el.classList.remove('active'));
             if(navItem) navItem.classList.add('active');
-
-            // 탭 콘텐츠 전환
             document.querySelectorAll('.tab-section').forEach(el => el.classList.remove('active-tab'));
             const target = document.getElementById('tab-' + tabName);
             if(target) target.classList.add('active-tab');
-
-            // 헤더 타이틀 변경
-            const key = navItem ? navItem.querySelector('span').getAttribute('data-i18n') : 'general';
+            const key = navItem ? navItem.querySelector('span:not(.set-icon)').getAttribute('data-i18n') : 'general';
             document.getElementById('settings-header-title').innerText = translations[currentLang][key] || key;
         }
 
