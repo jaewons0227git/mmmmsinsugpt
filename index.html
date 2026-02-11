@@ -90,14 +90,13 @@
 
         /* --- UI Components --- */
         
-        /* 메뉴 버튼: 배경 불투명 및 그림자 적용 */
         #toggle-btn-wrapper { 
             position: fixed; top: 10px; left: 10px; 
             width: 40px; height: 40px; 
             display: flex; align-items: center; justify-content: center; 
             border-radius: 8px; cursor: pointer; 
-            background-color: var(--bg-color); /* 배경색 지정 */
-            box-shadow: 0 2px 5px var(--shadow-color); /* 그림자 */
+            background-color: var(--bg-color); 
+            box-shadow: 0 2px 5px var(--shadow-color);
             border: 1px solid var(--border-color);
             z-index: 2000; 
             transition: background-color 0.3s;
@@ -137,7 +136,6 @@
         .center-logo-img { width: 80px; height: auto; border-radius: 50%; margin-bottom: 40px; }
         .center-input-wrapper { width: 100%; max-width: 760px; padding: 0 20px; position: relative; }
 
-        /* 채팅창 하단 여백 추가 (입력창과 겹침 방지) */
         #chat-content { flex: 1; width: 100%; max-width: 800px; margin: 0 auto; padding: 80px 20px 200px 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 24px; opacity: 0; visibility: hidden; transition: opacity 0.3s; -webkit-overflow-scrolling: touch; }
         #chat-content.visible { opacity: 1; visibility: visible; }
 
@@ -156,11 +154,9 @@
         .bot-bubble-wrapper { display: flex; flex-direction: column; align-items: flex-start; width: 100%; }
         
         .message-bubble { max-width: 100%; line-height: 1.6; word-break: break-word; border-radius: 20px; }
-        /* 사용자 버블 모서리 4개 모두 둥글게 */
         .message-bubble.user-content { background-color: var(--user-bubble-bg); color: var(--user-bubble-text); font-size: 15px; padding: 10px 14px; border-radius: 20px !important; }
         .message-bubble.bot-content { background-color: transparent; color: var(--bot-bubble-text); font-size: 16px; padding: 12px 16px; padding-left: 0; }
         
-        /* Markdown Styles */
         .message-bubble.bot-content p { margin-bottom: 10px; }
         .message-bubble.bot-content p:last-child { margin-bottom: 0; }
         .message-bubble.bot-content pre { background: var(--input-bg); padding: 10px; border-radius: 8px; overflow-x: auto; margin-bottom: 10px; }
@@ -186,7 +182,6 @@
         .action-icon { width: 18px; height: 18px; stroke-width: 2.2; }
 
         /* Bottom Interface */
-        /* 입력창 위치 아래로 더 내림 (padding-bottom 증가) */
         #bottom-interface { position: absolute; bottom: 0; left: 0; width: 100%; display: flex; flex-direction: column; align-items: center; padding: 0 20px 20px 20px; opacity: 0; transform: translateY(50px); transition: opacity 0.5s ease, transform 0.5s cubic-bezier(0.25, 1, 0.5, 1); z-index: 5; pointer-events: none; background: linear-gradient(to top, var(--bg-color) 40%, transparent); }
         #bottom-interface.visible { opacity: 1; transform: translateY(0); pointer-events: auto; }
         
@@ -300,16 +295,19 @@
         .dialog-btn.delete-confirm { background: var(--danger-color); color: #fff; }
         .dialog-btn:hover { opacity: 0.8; }
 
+        /* [수정됨] 모바일 설정창 모던 스타일 & 닫기 버튼 추가 */
+        .settings-mobile-header { display: none; }
+
         @media (max-width: 768px) {
             .sidebar { position: fixed; left: 0; top: 0; bottom: 0; height: 100%; width: 220px !important; z-index: 1500; transform: translateX(0); transition: transform 0.3s ease; border-top-right-radius: 20px; border-bottom-right-radius: 20px; box-shadow: 4px 0 15px rgba(0,0,0,0.1); }
             .sidebar.collapsed { width: 220px !important; transform: translateX(-100%); border-right: none; }
             .sidebar-content { opacity: 1 !important; width: 220px !important; }
             .message-bubble { max-width: 100%; }
-            #bottom-interface { padding-bottom: 20px; }
+            /* [수정됨] 입력창 위치 더 아래로 */
+            #bottom-interface { padding-bottom: 10px; }
             .center-logo-img { width: 60px; margin-bottom: 20px; }
             .dialog-window { width: 90%; }
 
-            /* Modern Mobile Settings Layout */
             .settings-window { width: 100%; height: 100%; border-radius: 0; flex-direction: column; transform: scale(1) !important; }
             .settings-sidebar { width: 100%; height: 100%; border-right: none; padding: 20px; display: flex; flex-direction: column; }
             .settings-sidebar.hidden { display: none; }
@@ -318,6 +316,12 @@
             .settings-content.active { display: flex; }
             .settings-back-btn { display: block; }
             .setting-desc { font-size: 13px; margin-bottom: 4px;}
+            
+            /* [수정됨] 모바일 전용 설정 헤더 (닫기 버튼용) */
+            .settings-mobile-header {
+                display: flex; justify-content: space-between; align-items: center;
+                margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid var(--border-color);
+            }
         }
     </style>
 </head>
@@ -420,7 +424,6 @@
                         </div>
                     </div>
                 </div>
-                <div class="bottom-disclaimer">MinsuGPT는 실수를 할 수 있습니다. 중요한 정보는 재차 확인하세요.</div>
             </div>
         </div>
     </div>
@@ -430,6 +433,11 @@
     <div id="settings-modal" class="modal-overlay">
         <div class="settings-window">
             <div class="settings-sidebar" id="settingsSidebar">
+                <div class="settings-mobile-header">
+                    <span style="font-size: 18px; font-weight: 600;">설정</span>
+                    <div class="close-modal-btn" onclick="closeSettings()"><svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></div>
+                </div>
+
                 <div class="settings-nav-item active" onclick="switchSettingsTab('general', this)">
                     <span style="display:flex; align-items:center; gap:10px;">
                         <svg class="set-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg> 
@@ -612,7 +620,7 @@
         
         let systemPrompt = localStorage.getItem('systemPrompt') || '';
         let botTone = localStorage.getItem('botTone') || 'friendly';
-        let isHistoryEnabled = localStorage.getItem('isHistoryEnabled') !== 'false'; // Default true (기본 켜짐)
+        let isHistoryEnabled = localStorage.getItem('isHistoryEnabled') !== 'false';
 
         const sidebar = document.getElementById('sidebar');
         const sidebarOverlay = document.getElementById('sidebar-overlay');
@@ -709,9 +717,8 @@
             for (let file of files) {
                 if (file.type.startsWith('image/')) {
                     const compressedDataUrl = await compressImage(file);
-                    // Base64 string for JSON payload (remove header)
                     const base64String = compressedDataUrl.split(',')[1];
-                    currentAttachments.push({ type: 'image', data: compressedDataUrl, base64: base64String, name: file.name });
+                    currentAttachments.push({ type: 'image', data: compressedDataUrl, base64: base64String, name: file.name, fileObject: file });
                 } else {
                     currentAttachments.push({ type: 'file', name: file.name, size: file.size, fileObject: file });
                 }
@@ -824,7 +831,6 @@
             if (updateUrl) { const url = new URL(window.location); url.searchParams.set('chat', currentChatId); window.history.pushState({}, '', url); }
             if (window.innerWidth <= 768) { sidebar.classList.add('collapsed'); sidebarOverlay.classList.remove('visible'); }
             
-            // New chat start -> Send System Config silently
             sendSystemConfig();
         }
 
@@ -850,7 +856,6 @@
                     appendMessageUI('bot', msg.content, false);
                     const rows = chatContent.querySelectorAll('.message-row.bot');
                     const lastRow = rows[rows.length-1];
-                    // Add regen button ONLY if it's the very last message of the chat
                     const isLastMessage = (index === currentMessages.length - 1);
                     if(lastRow) addActionButtons(lastRow.querySelector('.bot-bubble-wrapper'), msg.content, isLastMessage);
                 }
@@ -920,9 +925,8 @@
             else if (botTone === 'friend') instructions += " Use casual language (Banmal).";
             instructions += "]\n(This is a system setup message. Do NOT respond to this message. Just set your persona.)";
 
-            // Fire and forget (Just setting context if backend supported it, but also prepending to msg)
             try {
-                // We send it as a simple text message but ignore response
+                // Send dummy message just to set context (Backend logic dependent)
                 fetch(endpoint, {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
@@ -950,19 +954,17 @@
                 bottomInterface.classList.add('visible');
             }
 
-            // Construct Final Prompt (Implicitly add system instructions to ensure they persist)
-            let finalPrompt = "";
+            // --- Construct Final Prompt with Hidden Instructions ---
             let hiddenInst = "";
             if (systemPrompt) hiddenInst += `[System: ${systemPrompt}] `;
             hiddenInst += `[Tone: ${botTone}] `;
             if (['friendly', 'soft', 'stiff'].includes(botTone)) hiddenInst += "[Use honorifics] ";
             else if (botTone === 'friend') hiddenInst += "[Use banmal] ";
 
-            // The user wants to hide this from the bubble, but send it to backend.
-            // We prepend it to the message sent to backend.
+            // Actual message sent to backend (Hidden instructions + User text)
             const messageToSend = `${hiddenInst}\n${text}`;
 
-            // Prepare History (Map 'bot' -> 'model')
+            // Prepare History
             let historyPayload = [];
             if (isHistoryEnabled) {
                 historyPayload = currentMessages.map(m => ({
@@ -971,7 +973,7 @@
                 }));
             }
 
-            // Prepare Images
+            // Prepare Images (Base64 only)
             let imagePayload = currentAttachments.filter(a => a.type === 'image').map(a => a.base64);
 
             // Construct JSON Body
@@ -981,7 +983,7 @@
                 image_base64: imagePayload
             });
 
-            // Clean up UI
+            // UI Update
             const attachmentsToSend = [...currentAttachments];
             currentAttachments = [];
             renderAttachments(); 
@@ -989,7 +991,6 @@
             input.value = ''; input.style.height = '24px';
             toggleBtnState('', origin === 'center' ? centerSendBtn : bottomSendBtn);
 
-            // Display User Message (Show ONLY text, not hidden prompt)
             appendMessageUI('user', text, false, attachmentsToSend);
             currentMessages.push({ role: 'user', content: text, attachments: attachmentsToSend });
             
@@ -1000,8 +1001,8 @@
 
             scrollToBottom();
             
-            // Remove previous regeneration buttons
-            document.querySelectorAll('.action-btn.regenerate').forEach(el => el.closest('.message-actions') ? el.remove() : null);
+            // Remove previous regeneration buttons (keeping copy buttons)
+            document.querySelectorAll('.action-btn.regenerate').forEach(btn => btn.closest('.message-actions').remove());
 
             await streamResponse(endpoint, {'Content-Type': 'application/json'}, requestBody);
         }
@@ -1046,7 +1047,7 @@
                     const { done, value } = await streamReader.read();
                     if (done) break;
                     const chunk = decoder.decode(value, { stream: true });
-                    const cleanChunk = chunk.replace(/\[DONE\]/g, ''); // Hide [DONE]
+                    const cleanChunk = chunk.replace(/\[DONE\]/g, ''); 
                     fullText += cleanChunk;
                 }
             } catch (error) {
@@ -1139,7 +1140,7 @@
             isGenerating = false;
             
             // Remove regeneration button from ALL previous messages
-            document.querySelectorAll('.action-btn.regenerate').forEach(btn => btn.remove());
+            document.querySelectorAll('.action-btn.regenerate').forEach(btn => btn.closest('.message-actions').remove());
 
             if (currentBotRowElement && currentBubbleElement) {
                 // Add buttons to current (newest) message with regen button
