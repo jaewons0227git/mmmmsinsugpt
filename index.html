@@ -90,15 +90,17 @@
 
         /* --- UI Components --- */
         
-        /* 수정됨: 배경 불투명 및 그림자 추가 */
+        /* 메뉴 버튼: 배경 불투명 및 그림자 적용 */
         #toggle-btn-wrapper { 
             position: fixed; top: 10px; left: 10px; 
             width: 40px; height: 40px; 
             display: flex; align-items: center; justify-content: center; 
             border-radius: 8px; cursor: pointer; 
-            background: var(--bg-color); /* 배경색 추가 */
-            box-shadow: 0 1px 3px var(--shadow-color); /* 그림자 추가 */
-            z-index: 2000; border: 1px solid var(--border-color);
+            background-color: var(--bg-color); /* 배경색 지정 */
+            box-shadow: 0 2px 5px var(--shadow-color); /* 그림자 */
+            border: 1px solid var(--border-color);
+            z-index: 2000; 
+            transition: background-color 0.3s;
         }
         #toggle-btn-wrapper:hover { background-color: var(--sidebar-hover); }
         .sidebar-icon { width: 24px; height: 24px; color: var(--text-color); }
@@ -118,26 +120,12 @@
         .history-label { font-size: 12px; font-weight: 600; color: var(--icon-color); padding: 0 14px; margin-bottom: 8px; margin-top: 10px; }
         .chat-history { flex: 1; overflow-y: auto; margin-bottom: 10px; padding-bottom: 10px; }
         
-        .history-item { 
-            display: flex; align-items: center; justify-content: space-between;
-            width: 100%; padding: 10px 14px; border-radius: var(--btn-radius); 
-            font-size: 14px; color: var(--text-color); cursor: pointer; 
-            transition: background 0.2s; margin-bottom: 2px; position: relative;
-            height: 40px;
-        }
+        .history-item { display: flex; align-items: center; justify-content: space-between; width: 100%; padding: 10px 14px; border-radius: var(--btn-radius); font-size: 14px; color: var(--text-color); cursor: pointer; transition: background 0.2s; margin-bottom: 2px; position: relative; height: 40px; }
         .history-item:hover, .history-item.active { background-color: var(--sidebar-hover); }
         .history-title { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; padding-right: 10px; pointer-events: none; }
-        .history-actions {
-            display: flex; gap: 4px; opacity: 0; transition: opacity 0.2s;
-            position: absolute; right: 5px; top: 50%; transform: translateY(-50%);
-            background: linear-gradient(to right, transparent, var(--sidebar-hover) 20%);
-            padding-left: 10px;
-        }
+        .history-actions { display: flex; gap: 4px; opacity: 0; transition: opacity 0.2s; position: absolute; right: 5px; top: 50%; transform: translateY(-50%); background: linear-gradient(to right, transparent, var(--sidebar-hover) 20%); padding-left: 10px; }
         .history-item:hover .history-actions { opacity: 1; background-color: var(--sidebar-hover); }
-        .history-action-btn {
-            width: 24px; height: 24px; display: flex; align-items: center; justify-content: center;
-            border-radius: 4px; color: var(--icon-color); cursor: pointer;
-        }
+        .history-action-btn { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; border-radius: 4px; color: var(--icon-color); cursor: pointer; }
         .history-action-btn:hover { color: var(--text-color); background-color: rgba(0,0,0,0.05); }
         .history-action-btn.delete:hover { color: var(--danger-color); }
 
@@ -149,7 +137,8 @@
         .center-logo-img { width: 80px; height: auto; border-radius: 50%; margin-bottom: 40px; }
         .center-input-wrapper { width: 100%; max-width: 760px; padding: 0 20px; position: relative; }
 
-        #chat-content { flex: 1; width: 100%; max-width: 800px; margin: 0 auto; padding: 80px 20px 180px 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 24px; opacity: 0; visibility: hidden; transition: opacity 0.3s; -webkit-overflow-scrolling: touch; }
+        /* 채팅창 하단 여백 추가 (입력창과 겹침 방지) */
+        #chat-content { flex: 1; width: 100%; max-width: 800px; margin: 0 auto; padding: 80px 20px 200px 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 24px; opacity: 0; visibility: hidden; transition: opacity 0.3s; -webkit-overflow-scrolling: touch; }
         #chat-content.visible { opacity: 1; visibility: visible; }
 
         .message-row { display: flex; width: 100%; opacity: 0; animation: fadeIn 0.4s ease-out forwards; flex-direction: column; }
@@ -167,10 +156,11 @@
         .bot-bubble-wrapper { display: flex; flex-direction: column; align-items: flex-start; width: 100%; }
         
         .message-bubble { max-width: 100%; line-height: 1.6; word-break: break-word; border-radius: 20px; }
-        /* 수정됨: 유저 버블 완전 둥글게 */
-        .message-bubble.user-content { background-color: var(--user-bubble-bg); color: var(--user-bubble-text); font-size: 15px; padding: 10px 14px; border-radius: 20px; }
+        /* 사용자 버블 모서리 4개 모두 둥글게 */
+        .message-bubble.user-content { background-color: var(--user-bubble-bg); color: var(--user-bubble-text); font-size: 15px; padding: 10px 14px; border-radius: 20px !important; }
         .message-bubble.bot-content { background-color: transparent; color: var(--bot-bubble-text); font-size: 16px; padding: 12px 16px; padding-left: 0; }
         
+        /* Markdown Styles */
         .message-bubble.bot-content p { margin-bottom: 10px; }
         .message-bubble.bot-content p:last-child { margin-bottom: 0; }
         .message-bubble.bot-content pre { background: var(--input-bg); padding: 10px; border-radius: 8px; overflow-x: auto; margin-bottom: 10px; }
@@ -196,8 +186,8 @@
         .action-icon { width: 18px; height: 18px; stroke-width: 2.2; }
 
         /* Bottom Interface */
-        /* 수정됨: padding-bottom 10px로 조정하여 조금 더 내림 */
-        #bottom-interface { position: absolute; bottom: 0; left: 0; width: 100%; display: flex; flex-direction: column; align-items: center; padding: 0 20px 10px 20px; opacity: 0; transform: translateY(50px); transition: opacity 0.5s ease, transform 0.5s cubic-bezier(0.25, 1, 0.5, 1); z-index: 5; pointer-events: none; background: linear-gradient(to top, var(--bg-color) 40%, transparent); }
+        /* 입력창 위치 아래로 더 내림 (padding-bottom 증가) */
+        #bottom-interface { position: absolute; bottom: 0; left: 0; width: 100%; display: flex; flex-direction: column; align-items: center; padding: 0 20px 20px 20px; opacity: 0; transform: translateY(50px); transition: opacity 0.5s ease, transform 0.5s cubic-bezier(0.25, 1, 0.5, 1); z-index: 5; pointer-events: none; background: linear-gradient(to top, var(--bg-color) 40%, transparent); }
         #bottom-interface.visible { opacity: 1; transform: translateY(0); pointer-events: auto; }
         
         .bottom-input-wrapper { width: 100%; max-width: 760px; position: relative; }
@@ -257,7 +247,6 @@
         .set-icon { width: 18px; height: 18px; flex-shrink: 0; }
         .settings-content { flex: 1; padding: 40px; background-color: var(--modal-bg); position: relative; overflow-y: auto; }
         
-        /* Mobile Settings Back Button (Hidden on Desktop) */
         .settings-back-btn { display: none; cursor: pointer; margin-right: 10px; padding: 5px; }
         
         .settings-header { font-size: 18px; font-weight: 600; margin-bottom: 24px; padding-bottom: 12px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
@@ -267,7 +256,6 @@
         .tab-section { display: none; flex-direction: column; height: 100%; }
         .tab-section.active-tab { display: flex; }
 
-        /* 수정됨: Info 탭 위치 상단으로 이동 */
         #tab-info { overflow: hidden; justify-content: flex-start; align-items: center; padding-top: 100px; }
 
         .setting-row { display: flex; justify-content: space-between; align-items: flex-start; padding: 16px 0; border-bottom: 1px solid var(--border-color); }
@@ -323,27 +311,12 @@
 
             /* Modern Mobile Settings Layout */
             .settings-window { width: 100%; height: 100%; border-radius: 0; flex-direction: column; transform: scale(1) !important; }
-            /* Sidebar becomes the main list view on mobile */
-            .settings-sidebar { 
-                width: 100%; height: 100%; border-right: none; padding: 20px; 
-                display: flex; /* Default state: show list */
-            }
-            .settings-sidebar.hidden { display: none; } /* Hide when detail open */
-            
-            .settings-nav-item { 
-                padding: 16px; border-radius: 12px; background-color: var(--input-bg); 
-                margin-bottom: 10px; font-size: 16px; 
-            }
-            
-            /* Content becomes detail view */
-            .settings-content { 
-                padding: 20px; display: none; /* Hidden by default */
-                flex-direction: column; height: 100%;
-            }
+            .settings-sidebar { width: 100%; height: 100%; border-right: none; padding: 20px; display: flex; flex-direction: column; }
+            .settings-sidebar.hidden { display: none; }
+            .settings-nav-item { padding: 16px; border-radius: 12px; background-color: var(--input-bg); margin-bottom: 10px; font-size: 16px; display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
+            .settings-content { padding: 20px; display: none; flex-direction: column; height: 100%; }
             .settings-content.active { display: flex; }
-            
             .settings-back-btn { display: block; }
-            
             .setting-desc { font-size: 13px; margin-bottom: 4px;}
         }
     </style>
@@ -457,17 +430,33 @@
     <div id="settings-modal" class="modal-overlay">
         <div class="settings-window">
             <div class="settings-sidebar" id="settingsSidebar">
-                <div class="settings-nav-item active" onclick="switchSettingsTab('general', this)"><svg class="set-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg> <span data-i18n="general">General</span>
-                    <div class="setting-desc" style="display:none; font-size:12px; margin-top:4px;" data-i18n="generalDesc">테마, 언어, 채팅 삭제</div>
+                <div class="settings-nav-item active" onclick="switchSettingsTab('general', this)">
+                    <span style="display:flex; align-items:center; gap:10px;">
+                        <svg class="set-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg> 
+                        <span data-i18n="general">General</span>
+                    </span>
+                    <div class="setting-desc" style="display:none; margin-left:28px;" data-i18n="generalDesc">테마, 언어, 채팅 삭제</div>
                 </div>
-                <div class="settings-nav-item" onclick="switchSettingsTab('personalization', this)"><svg class="set-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path></svg> <span data-i18n="personalization">Personalization</span>
-                    <div class="setting-desc" style="display:none; font-size:12px; margin-top:4px;" data-i18n="persDesc">시스템 프롬프트, 봇 말투</div>
+                <div class="settings-nav-item" onclick="switchSettingsTab('personalization', this)">
+                    <span style="display:flex; align-items:center; gap:10px;">
+                        <svg class="set-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path></svg> 
+                        <span data-i18n="personalization">Personalization</span>
+                    </span>
+                    <div class="setting-desc" style="display:none; margin-left:28px;" data-i18n="persDesc">시스템 프롬프트, 봇 말투</div>
                 </div>
-                <div class="settings-nav-item" onclick="switchSettingsTab('dataControls', this)"><svg class="set-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"></path></svg> <span data-i18n="dataControls">Data Controls</span>
-                    <div class="setting-desc" style="display:none; font-size:12px; margin-top:4px;" data-i18n="dataDesc">대화 기억 설정</div>
+                <div class="settings-nav-item" onclick="switchSettingsTab('dataControls', this)">
+                    <span style="display:flex; align-items:center; gap:10px;">
+                        <svg class="set-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"></path></svg> 
+                        <span data-i18n="dataControls">Data Controls</span>
+                    </span>
+                    <div class="setting-desc" style="display:none; margin-left:28px;" data-i18n="dataDesc">대화 기억 설정</div>
                 </div>
-                <div class="settings-nav-item" onclick="switchSettingsTab('info', this)"><span style="font-size:18px; line-height:1; display:flex; align-items:center; width:18px; justify-content:center;">🛈</span> <span data-i18n="info">Info</span>
-                    <div class="setting-desc" style="display:none; font-size:12px; margin-top:4px;" data-i18n="infoDesc">앱 정보 및 저작권</div>
+                <div class="settings-nav-item" onclick="switchSettingsTab('info', this)">
+                    <span style="display:flex; align-items:center; gap:10px;">
+                        <span style="font-size:18px; line-height:1; display:flex; align-items:center; width:18px; justify-content:center;">🛈</span> 
+                        <span data-i18n="info">Info</span>
+                    </span>
+                    <div class="setting-desc" style="display:none; margin-left:28px;" data-i18n="infoDesc">앱 정보 및 저작권</div>
                 </div>
             </div>
             <div class="settings-content" id="settingsContent">
@@ -623,7 +612,7 @@
         
         let systemPrompt = localStorage.getItem('systemPrompt') || '';
         let botTone = localStorage.getItem('botTone') || 'friendly';
-        let isHistoryEnabled = localStorage.getItem('isHistoryEnabled') !== 'false'; // Default true
+        let isHistoryEnabled = localStorage.getItem('isHistoryEnabled') !== 'false'; // Default true (기본 켜짐)
 
         const sidebar = document.getElementById('sidebar');
         const sidebarOverlay = document.getElementById('sidebar-overlay');
@@ -641,8 +630,6 @@
         const hiddenFileInput = document.getElementById('hiddenFileInput');
         const imageLightbox = document.getElementById('image-lightbox');
         const lightboxImg = document.getElementById('lightbox-img');
-        const settingsSidebar = document.getElementById('settingsSidebar');
-        const settingsContent = document.getElementById('settingsContent');
 
         const icons = {
             send: '<svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path></svg>',
@@ -722,7 +709,9 @@
             for (let file of files) {
                 if (file.type.startsWith('image/')) {
                     const compressedDataUrl = await compressImage(file);
-                    currentAttachments.push({ type: 'image', data: compressedDataUrl, name: file.name, fileObject: file });
+                    // Base64 string for JSON payload (remove header)
+                    const base64String = compressedDataUrl.split(',')[1];
+                    currentAttachments.push({ type: 'image', data: compressedDataUrl, base64: base64String, name: file.name });
                 } else {
                     currentAttachments.push({ type: 'file', name: file.name, size: file.size, fileObject: file });
                 }
@@ -835,7 +824,7 @@
             if (updateUrl) { const url = new URL(window.location); url.searchParams.set('chat', currentChatId); window.history.pushState({}, '', url); }
             if (window.innerWidth <= 768) { sidebar.classList.add('collapsed'); sidebarOverlay.classList.remove('visible'); }
             
-            // New chat start -> Send System Config (no wait)
+            // New chat start -> Send System Config silently
             sendSystemConfig();
         }
 
@@ -853,13 +842,17 @@
             bottomInterface.classList.add('visible');
             newChatBtn.classList.remove('active');
             chatContent.innerHTML = '';
-            currentMessages.forEach(msg => {
+            
+            // Re-render history messages
+            currentMessages.forEach((msg, index) => {
                 if (msg.role === 'user') appendMessageUI('user', msg.content, false, msg.attachments);
                 else if (msg.role === 'bot') {
                     appendMessageUI('bot', msg.content, false);
                     const rows = chatContent.querySelectorAll('.message-row.bot');
                     const lastRow = rows[rows.length-1];
-                    if(lastRow) addActionButtons(lastRow.querySelector('.bot-bubble-wrapper'), msg.content, true); // true = load mode
+                    // Add regen button ONLY if it's the very last message of the chat
+                    const isLastMessage = (index === currentMessages.length - 1);
+                    if(lastRow) addActionButtons(lastRow.querySelector('.bot-bubble-wrapper'), msg.content, isLastMessage);
                 }
             });
             const url = new URL(window.location); url.searchParams.set('chat', currentChatId); window.history.pushState({}, '', url);
@@ -867,7 +860,6 @@
             if (window.innerWidth <= 768) { sidebar.classList.add('collapsed'); sidebarOverlay.classList.remove('visible'); }
             scrollToBottom();
             
-            // Chat loaded -> Send System Config just in case
             sendSystemConfig();
         }
 
@@ -928,16 +920,15 @@
             else if (botTone === 'friend') instructions += " Use casual language (Banmal).";
             instructions += "]\n(This is a system setup message. Do NOT respond to this message. Just set your persona.)";
 
+            // Fire and forget (Just setting context if backend supported it, but also prepending to msg)
             try {
-                await fetch(endpoint, {
+                // We send it as a simple text message but ignore response
+                fetch(endpoint, {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ content: instructions })
-                });
-                console.log("System config sent.");
-            } catch (e) {
-                console.log("System config send failed (silent).");
-            }
+                    body: JSON.stringify({ message: instructions, history: [], image_base64: [] })
+                }).catch(() => {}); 
+            } catch (e) {}
         }
 
         async function handleSendClick(origin) {
@@ -959,37 +950,38 @@
                 bottomInterface.classList.add('visible');
             }
 
-            // Construct Final Prompt
+            // Construct Final Prompt (Implicitly add system instructions to ensure they persist)
             let finalPrompt = "";
-            // Add tone/persona instruction implicitly to every message to ensure persistence
             let hiddenInst = "";
             if (systemPrompt) hiddenInst += `[System: ${systemPrompt}] `;
             hiddenInst += `[Tone: ${botTone}] `;
             if (['friendly', 'soft', 'stiff'].includes(botTone)) hiddenInst += "[Use honorifics] ";
             else if (botTone === 'friend') hiddenInst += "[Use banmal] ";
 
-            if (isHistoryEnabled && currentMessages.length > 0) {
-                 const historyText = currentMessages.slice(-10).map(m => `${m.role}: ${m.content}`).join('\n');
-                 finalPrompt = `${hiddenInst}\nPrevious Context:\n${historyText}\n\nCurrent Request: ${text}`;
-            } else {
-                 finalPrompt = `${hiddenInst}\n${text}`;
+            // The user wants to hide this from the bubble, but send it to backend.
+            // We prepend it to the message sent to backend.
+            const messageToSend = `${hiddenInst}\n${text}`;
+
+            // Prepare History (Map 'bot' -> 'model')
+            let historyPayload = [];
+            if (isHistoryEnabled) {
+                historyPayload = currentMessages.map(m => ({
+                    role: m.role === 'bot' ? 'model' : 'user',
+                    content: m.content
+                }));
             }
 
-            let requestBody;
-            let requestHeaders = {};
+            // Prepare Images
+            let imagePayload = currentAttachments.filter(a => a.type === 'image').map(a => a.base64);
 
-            if (currentAttachments.length === 0) {
-                requestHeaders['Content-Type'] = 'application/json';
-                requestBody = JSON.stringify({ content: finalPrompt });
-            } else {
-                const formData = new FormData();
-                formData.append('content', finalPrompt); 
-                currentAttachments.forEach(att => {
-                    if (att.fileObject) formData.append('files', att.fileObject);
-                });
-                requestBody = formData;
-            }
+            // Construct JSON Body
+            const requestBody = JSON.stringify({
+                message: messageToSend,
+                history: historyPayload,
+                image_base64: imagePayload
+            });
 
+            // Clean up UI
             const attachmentsToSend = [...currentAttachments];
             currentAttachments = [];
             renderAttachments(); 
@@ -997,6 +989,7 @@
             input.value = ''; input.style.height = '24px';
             toggleBtnState('', origin === 'center' ? centerSendBtn : bottomSendBtn);
 
+            // Display User Message (Show ONLY text, not hidden prompt)
             appendMessageUI('user', text, false, attachmentsToSend);
             currentMessages.push({ role: 'user', content: text, attachments: attachmentsToSend });
             
@@ -1006,7 +999,11 @@
             saveChatToStorage({ id: currentChatId, title: title, messages: currentMessages });
 
             scrollToBottom();
-            await streamResponse(endpoint, requestHeaders, requestBody);
+            
+            // Remove previous regeneration buttons
+            document.querySelectorAll('.action-btn.regenerate').forEach(el => el.closest('.message-actions') ? el.remove() : null);
+
+            await streamResponse(endpoint, {'Content-Type': 'application/json'}, requestBody);
         }
 
         async function streamResponse(endpoint, headers, body) {
@@ -1049,8 +1046,7 @@
                     const { done, value } = await streamReader.read();
                     if (done) break;
                     const chunk = decoder.decode(value, { stream: true });
-                    // Remove [DONE] if present
-                    const cleanChunk = chunk.replace(/\[DONE\]/g, '');
+                    const cleanChunk = chunk.replace(/\[DONE\]/g, ''); // Hide [DONE]
                     fullText += cleanChunk;
                 }
             } catch (error) {
@@ -1099,14 +1095,8 @@
             centerSendBtn.classList.add('stop-active'); bottomSendBtn.classList.add('stop-active');
         }
 
-        function addActionButtons(wrapperElement, bubbleText, loadMode = false) {
+        function addActionButtons(wrapperElement, bubbleText, showRegen = false) {
             if (!wrapperElement) return;
-            // Remove ANY existing regenerate buttons first
-            const existingRegen = document.querySelectorAll('.action-btn.regenerate');
-            existingRegen.forEach(btn => btn.parentElement.remove()); 
-            // If loading history, don't add regen to old messages, only if it's the very last one (handled in loadChat logic)
-            // But here we enforce clearing.
-            // Check if this wrapper already has actions (copy check)
             if (wrapperElement.querySelector('.message-actions')) return; 
 
             const actionsDiv = document.createElement('div'); actionsDiv.className = 'message-actions';
@@ -1119,37 +1109,41 @@
                     copyBtn.innerHTML = icons.check; setTimeout(() => { copyBtn.innerHTML = icons.copy; }, 2000);
                 });
             };
-
-            const regenBtn = document.createElement('div'); regenBtn.className = 'action-btn regenerate'; regenBtn.innerHTML = icons.regenerate;
-            regenBtn.onclick = function() {
-                const rowToRemove = wrapperElement.closest('.message-row');
-                if (rowToRemove) rowToRemove.remove();
-                if (currentMessages.length > 0 && currentMessages[currentMessages.length-1].role === 'bot') currentMessages.pop();
-                const lastUserMsg = currentMessages.slice().reverse().find(m => m.role === 'user');
-                if(lastUserMsg) {
-                    const endpoint = isSearchActive ? 'https://jaewondev6.pythonanywhere.com/ask' : 'https://jaewondev6.pythonanywhere.com/askfast';
-                    // Regenerate Logic: Re-send last user message content
-                    // For simplicity, we assume no files for regen or reuse logic needed
-                    const headers = {'Content-Type': 'application/json'};
-                    const body = JSON.stringify({ content: lastUserMsg.content });
-                    streamResponse(endpoint, headers, body);
-                }
-            };
-
             actionsDiv.appendChild(copyBtn);
-            // Add regen button only if it is the latest message being generated or loaded as last
-            actionsDiv.appendChild(regenBtn);
+
+            if (showRegen) {
+                const regenBtn = document.createElement('div'); regenBtn.className = 'action-btn regenerate'; regenBtn.innerHTML = icons.regenerate;
+                regenBtn.onclick = function() {
+                    const rowToRemove = wrapperElement.closest('.message-row');
+                    if (rowToRemove) rowToRemove.remove();
+                    if (currentMessages.length > 0 && currentMessages[currentMessages.length-1].role === 'bot') currentMessages.pop();
+                    const lastUserMsg = currentMessages.slice().reverse().find(m => m.role === 'user');
+                    if(lastUserMsg) {
+                        const endpoint = isSearchActive ? 'https://jaewondev6.pythonanywhere.com/ask' : 'https://jaewondev6.pythonanywhere.com/askfast';
+                        const body = JSON.stringify({ 
+                            message: lastUserMsg.content,
+                            history: currentMessages.map(m => ({ role: m.role==='bot'?'model':'user', content: m.content })),
+                            image_base64: [] 
+                        });
+                        streamResponse(endpoint, {'Content-Type': 'application/json'}, body);
+                    }
+                };
+                actionsDiv.appendChild(regenBtn);
+            }
+
             wrapperElement.appendChild(actionsDiv);
             requestAnimationFrame(() => { actionsDiv.classList.add('visible'); scrollToBottom(); });
         }
 
         function finishGeneration(finalText) {
             isGenerating = false;
-            // Remove regen buttons from previous messages again to be safe
-            document.querySelectorAll('.action-btn.regenerate').forEach(btn => btn.closest('.message-actions').remove());
+            
+            // Remove regeneration button from ALL previous messages
+            document.querySelectorAll('.action-btn.regenerate').forEach(btn => btn.remove());
 
             if (currentBotRowElement && currentBubbleElement) {
-                addActionButtons(currentBotRowElement, finalText);
+                // Add buttons to current (newest) message with regen button
+                addActionButtons(currentBotRowElement, finalText, true);
             }
 
             if (finalText) {
@@ -1193,22 +1187,14 @@
         document.addEventListener('click', function(e) { if (!e.target.closest('.custom-select-container')) { document.querySelectorAll('.custom-select-container').forEach(el => el.classList.remove('open')); } });
 
         function switchSettingsTab(tabName, navItem) {
-            // Desktop behavior
             document.querySelectorAll('.settings-nav-item').forEach(el => el.classList.remove('active'));
             if(navItem) navItem.classList.add('active');
-            
             document.querySelectorAll('.tab-section').forEach(el => el.classList.remove('active-tab'));
             const target = document.getElementById('tab-' + tabName);
             if(target) target.classList.add('active-tab');
-            
             const key = navItem ? navItem.querySelector('span:not(.set-icon)').getAttribute('data-i18n') : 'general';
             document.getElementById('settings-header-title').innerText = translations[currentLang][key] || key;
-
-            // Mobile behavior
-            if (window.innerWidth <= 768) {
-                document.getElementById('settingsSidebar').classList.add('hidden');
-                document.getElementById('settingsContent').classList.add('active');
-            }
+            if (window.innerWidth <= 768) { document.getElementById('settingsSidebar').classList.add('hidden'); document.getElementById('settingsContent').classList.add('active'); }
         }
 
         function backToSettingsList() {
