@@ -182,7 +182,6 @@
         .action-icon { width: 18px; height: 18px; stroke-width: 2.2; }
 
         /* Bottom Interface */
-        /* 수정됨: 패딩을 더 줄여 입력창을 화면 하단에 닿을 듯 말 듯 배치 (5px) */
         #bottom-interface { 
             position: absolute; bottom: 0; left: 0; width: 100%; 
             display: flex; flex-direction: column; align-items: center; 
@@ -230,8 +229,6 @@
         .model-selector { display: flex; align-items: center; justify-content: center; gap: 4px; background-color: var(--bg-color); padding: 0 12px; height: 32px; border-radius: 16px; font-size: 13px; color: var(--text-color); cursor: pointer; transition: background-color 0.3s; }
         .model-selector:hover { background-color: var(--sidebar-hover); }
 
-        /* Disclaimer Footer */
-        /* 수정됨: 하단 마진도 줄여서 더 내림 */
         .bottom-disclaimer { text-align: center; font-size: 11px; color: #9ca3af; margin-top: 8px; margin-bottom: 5px; width: 100%; max-width: 760px; }
 
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.4); backdrop-filter: blur(5px); display: flex; align-items: center; justify-content: center; z-index: 9999; opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s; }
@@ -312,8 +309,10 @@
             .sidebar { position: fixed; left: 0; top: 0; bottom: 0; height: 100%; width: 220px !important; z-index: 1500; transform: translateX(0); transition: transform 0.3s ease; border-top-right-radius: 20px; border-bottom-right-radius: 20px; box-shadow: 4px 0 15px rgba(0,0,0,0.1); }
             .sidebar.collapsed { width: 220px !important; transform: translateX(-100%); border-right: none; }
             .sidebar-content { opacity: 1 !important; width: 220px !important; }
-            .message-bubble { max-width: 100%; }
-            /* [수정됨] 입력창 위치 더 아래로 (패딩 조정 - 5px) */
+            /* [수정됨] 모바일에서 글씨 크기 및 패딩 축소 */
+            .message-bubble.user-content { font-size: 14px; padding: 8px 12px; }
+            .message-bubble.bot-content { font-size: 15px; padding: 10px 12px; }
+            
             #bottom-interface { padding-bottom: 5px; } 
             .center-logo-img { width: 60px; margin-bottom: 20px; }
             .dialog-window { width: 90%; }
@@ -489,6 +488,14 @@
                 <div id="tab-general" class="tab-section active-tab">
                     <div class="setting-row">
                         <div class="setting-info">
+                            <div class="setting-label" data-i18n="hapticStrength">Haptic Strength</div>
+                            <div class="setting-desc" data-i18n="hapticDesc">진동의 세기를 조절합니다.</div>
+                        </div>
+                        <input type="range" id="hapticRange" min="0" max="20" step="1" value="2" oninput="updateHapticStrength(this.value)">
+                    </div>
+                    
+                    <div class="setting-row">
+                        <div class="setting-info">
                             <div class="setting-label" data-i18n="theme">Theme</div>
                             <div class="setting-desc" data-i18n="themeDesc">인터페이스의 밝기 모드를 설정합니다.</div>
                         </div>
@@ -602,16 +609,17 @@
 
     <script>
         const translations = {
-            ko: { newChat: "새 채팅", history: "기록", settings: "설정", placeholder: "메시지 보내기", general: "일반", personalization: "개인 맞춤 설정", dataControls: "데이터 제어", info: "정보", theme: "테마", system: "시스템", dark: "다크", light: "라이트", language: "언어", deleteAllChats: "모든 채팅 삭제", deleteAll: "모두 삭제", cancel: "취소", delete: "삭제", editTitle: "이름 수정", deleteConfirmTitle: "채팅 삭제", deleteConfirmMsg: "이 채팅을 영구적으로 삭제하시겠습니까?", deleteAllConfirmMsg: "모든 채팅 기록을 영구적으로 삭제하시겠습니까?", themeDesc: "인터페이스의 밝기 모드를 설정합니다.", langDesc: "UI 언어를 변경합니다.", deleteAllDesc: "모든 대화 기록을 로컬에서 영구 삭제합니다.", systemPrompt: "시스템 프롬프트", systemPromptDesc: "봇에게 비공식적으로 명령할 내용을 입력하세요.", botTone: "봇 말투", botToneDesc: "봇의 말투를 설정합니다.", friendly: "친절함", friend: "친구", stiff: "딱딱한", soft: "부드러운", enthusiastic: "열정적인", historyMemory: "대화 기억", historyMemoryDesc: "이전 대화 내용을 기억하여 문맥을 유지합니다.", generalDesc: "테마, 언어, 채팅 삭제", persDesc: "시스템 프롬프트, 봇 말투", dataDesc: "대화 기억 설정", infoDesc: "앱 정보 및 저작권" },
-            en: { newChat: "New Chat", history: "History", settings: "Settings", placeholder: "Send a message", general: "General", personalization: "Personalization", dataControls: "Data Controls", info: "Info", theme: "Theme", system: "System", dark: "Dark", light: "Light", language: "Language", deleteAllChats: "Delete all chats", deleteAll: "Delete All", cancel: "Cancel", delete: "Delete", editTitle: "Edit Title", deleteConfirmTitle: "Delete Chat", deleteConfirmMsg: "Delete this chat permanently?", deleteAllConfirmMsg: "Permanently delete all chat history?", themeDesc: "Set the brightness mode of the interface.", langDesc: "Change the UI language.", deleteAllDesc: "Permanently delete all chat history from local storage.", systemPrompt: "System Prompt", systemPromptDesc: "Instructions for the bot (hidden).", botTone: "Bot Tone", botToneDesc: "Set the tone of the bot.", friendly: "Friendly", friend: "Friend", stiff: "Stiff", soft: "Soft", enthusiastic: "Enthusiastic", historyMemory: "Chat Memory", historyMemoryDesc: "Send previous chat history for context.", generalDesc: "Theme, Language, Delete Chat", persDesc: "System Prompt, Bot Tone", dataDesc: "Chat Memory Settings", infoDesc: "App Info & Copyright" },
-            ja: { newChat: "新しいチャット", history: "履歴", settings: "設定", placeholder: "メッセージを送信", general: "一般", personalization: "パーソナライズ", dataControls: "データ制御", info: "情報", theme: "テーマ", system: "システム", dark: "ダーク", light: "ライト", language: "言語", deleteAllChats: "すべてのチャットを削除", deleteAll: "すべて削除", cancel: "キャンセル", delete: "削除", editTitle: "タイトル編集", deleteConfirmTitle: "チャット削除", deleteConfirmMsg: "このチャットを完全に削除しますか？", deleteAllConfirmMsg: "すべてのチャット履歴を完全に削除しますか？", themeDesc: "インターフェースの明るさモードを設定します。", langDesc: "UI言語を変更します。", deleteAllDesc: "ローカルストレージからすべてのチャット履歴を完全に削除します。", systemPrompt: "システムプロンプト", systemPromptDesc: "ボットへの非公式な指示を入力します。", botTone: "口調", botToneDesc: "ボットの口調を設定します。", friendly: "親切", friend: "友達", stiff: "堅い", soft: "柔らかい", enthusiastic: "情熱的", historyMemory: "会話記憶", historyMemoryDesc: "以前の会話履歴を記憶して文脈を維持します。", generalDesc: "テーマ、言語、チャット削除", persDesc: "システムプロンプト、ボットの口調", dataDesc: "会話記憶設定", infoDesc: "アプリ情報と著作権" },
-            zh: { newChat: "新聊天", history: "历史记录", settings: "设置", placeholder: "发送消息", general: "常规", personalization: "个性化", dataControls: "数据控制", info: "信息", theme: "主题", system: "系统", dark: "深色", light: "浅色", language: "语言", deleteAllChats: "删除所有聊天", deleteAll: "全部删除", cancel: "取消", delete: "删除", editTitle: "编辑标题", deleteConfirmTitle: "删除聊天", deleteConfirmMsg: "确定要永久删除此聊天吗？", deleteAllConfirmMsg: "确定要永久删除所有聊天记录吗？", themeDesc: "设置界面的亮度模式。", langDesc: "更改界面语言。", deleteAllDesc: "从本地存储中永久删除所有聊天记录。", systemPrompt: "系统提示", systemPromptDesc: "输入非正式指令。", botTone: "语气", botToneDesc: "设置机器人的语气。", friendly: "亲切", friend: "朋友", stiff: "生硬", soft: "温柔", enthusiastic: "热情", historyMemory: "对话记忆", historyMemoryDesc: "记住以前的对话以保持上下文。", generalDesc: "主题，语言，删除聊天", persDesc: "系统提示，机器人语气", dataDesc: "对话记忆设置", infoDesc: "应用信息与版权" },
-            es: { newChat: "Nuevo Chat", history: "Historial", settings: "Ajustes", placeholder: "Enviar mensaje", general: "General", personalization: "Personalización", dataControls: "Datos", info: "Info", theme: "Tema", system: "Sistema", dark: "Oscuro", light: "Claro", language: "Idioma", deleteAllChats: "Borrar todos los chats", deleteAll: "Borrar todo", cancel: "Cancelar", delete: "Eliminar", editTitle: "Editar título", deleteConfirmTitle: "Eliminar chat", deleteConfirmMsg: "¿Eliminar este chat permanentemente?", deleteAllConfirmMsg: "¿Eliminar permanentemente todo el historial?", themeDesc: "Establece el modo de brillo de la interfaz.", langDesc: "Cambiar el idioma de la interfaz.", deleteAllDesc: "Eliminar permanentemente todo el historial del almacenamiento local.", systemPrompt: "Prompt del sistema", systemPromptDesc: "Instrucciones ocultas para el bot.", botTone: "Tono", botToneDesc: "Establecer el tono del bot.", friendly: "Amable", friend: "Amigo", stiff: "Formal", soft: "Suave", enthusiastic: "Entusiasta", historyMemory: "Memoria", historyMemoryDesc: "Recordar historial para contexto.", generalDesc: "Tema, Idioma, Borrar Chat", persDesc: "Prompt del sistema, Tono del bot", dataDesc: "Ajustes de memoria", infoDesc: "Info de la app y copyright" },
-            fr: { newChat: "Nouveau Chat", history: "Historique", settings: "Paramètres", placeholder: "Envoyer un message", general: "Général", personalization: "Personnalisation", dataControls: "Données", info: "Info", theme: "Thème", system: "Système", dark: "Sombre", light: "Clair", language: "Langue", deleteAllChats: "Supprimer tout", deleteAll: "Tout supprimer", cancel: "Annuler", delete: "Supprimer", editTitle: "Modifier le titre", deleteConfirmTitle: "Supprimer le chat", deleteConfirmMsg: "Supprimer ce chat définitivement ?", deleteAllConfirmMsg: "Supprimer définitivement tout l'historique ?", themeDesc: "Régler la luminosité de l'interface.", langDesc: "Changer la langue de l'interface.", deleteAllDesc: "Supprimer définitivement tout l'historique du stockage local.", systemPrompt: "Prompt système", systemPromptDesc: "Instructions cachées pour le bot.", botTone: "Ton", botToneDesc: "Définir le ton du bot.", friendly: "Amical", friend: "Ami", stiff: "Rigide", soft: "Doux", enthusiastic: "Enthousiaste", historyMemory: "Mémoire", historyMemoryDesc: "Se souvenir de l'historique pour le contexte.", generalDesc: "Thème, Langue, Supprimer Chat", persDesc: "Prompt système, Ton du bot", dataDesc: "Paramètres de mémoire", infoDesc: "Infos app & copyright" },
-            de: { newChat: "Neuer Chat", history: "Verlauf", settings: "Einstellungen", placeholder: "Nachricht senden", general: "Allgemein", personalization: "Personalisierung", dataControls: "Daten", info: "Info", theme: "Design", system: "System", dark: "Dunkel", light: "Hell", language: "Sprache", deleteAllChats: "Alle Chats löschen", deleteAll: "Alle löschen", cancel: "Abbrechen", delete: "Löschen", editTitle: "Titel bearbeiten", deleteConfirmTitle: "Chat löschen", deleteConfirmMsg: "Diesen Chat dauerhaft löschen?", deleteAllConfirmMsg: "Gesamten Chatverlauf dauerhaft löschen?", themeDesc: "Helligkeitsmodus der Oberfläche festlegen.", langDesc: "UI-Sprache ändern.", deleteAllDesc: "Gesamten Chatverlauf dauerhaft vom lokalen Speicher löschen.", systemPrompt: "System Prompt", systemPromptDesc: "Versteckte Anweisungen für den Bot.", botTone: "Tonfall", botToneDesc: "Tonfall des Bots festlegen.", friendly: "Freundlich", friend: "Freund", stiff: "Steif", soft: "Sanft", enthusiastic: "Begeistert", historyMemory: "Gedächtnis", historyMemoryDesc: "Verlauf für Kontext speichern.", generalDesc: "Thema, Sprache, Chat löschen", persDesc: "System Prompt, Bot Tonfall", dataDesc: "Speichereinstellungen", infoDesc: "App Info & Copyright" },
-            ru: { newChat: "Новый чат", history: "История", settings: "Настройки", placeholder: "Отправить сообщение", general: "Общие", personalization: "Персонализация", dataControls: "Данные", info: "Инфо", theme: "Тема", system: "Системная", dark: "Темная", light: "Светлая", language: "Язык", deleteAllChats: "Удалить все чаты", deleteAll: "Удалить все", cancel: "Отмена", delete: "Удалить", editTitle: "Изменить название", deleteConfirmTitle: "Удалить чат", deleteConfirmMsg: "Удалить этот чат навсегда?", deleteAllConfirmMsg: "Удалить всю историю чатов навсегда?", themeDesc: "Установить режим яркости интерфейса.", langDesc: "Изменить язык интерфейса.", deleteAllDesc: "Навсегда удалить всю историю чатов из локального хранилища.", systemPrompt: "Системный промпт", systemPromptDesc: "Скрытые инструкции для бота.", botTone: "Тон", botToneDesc: "Установить тон бота.", friendly: "Дружелюбный", friend: "Друг", stiff: "Строгий", soft: "Мягкий", enthusiastic: "Восторженный", historyMemory: "Память", historyMemoryDesc: "Помнить историю для контекста.", generalDesc: "Тема, Язык, Удалить чат", persDesc: "Системный промпт, Тон бота", dataDesc: "Настройки памяти", infoDesc: "Информация о приложении" },
-            it: { newChat: "Nuova Chat", history: "Cronologia", settings: "Impostazioni", placeholder: "Invia un messaggio", general: "Generale", personalization: "Personalizzazione", dataControls: "Dati", info: "Info", theme: "Tema", system: "Sistema", dark: "Scuro", light: "Chiaro", language: "Lingua", deleteAllChats: "Elimina tutte le chat", deleteAll: "Elimina tutto", cancel: "Annulla", delete: "Elimina", editTitle: "Modifica titolo", deleteConfirmTitle: "Elimina chat", deleteConfirmMsg: "Eliminare definitivamente questa chat?", deleteAllConfirmMsg: "Eliminare definitivamente tutta la cronologia?", themeDesc: "Imposta la modalità di luminosità dell'interfaccia.", langDesc: "Cambia la lingua dell'interfaccia.", deleteAllDesc: "Elimina definitivamente tutta la cronologia dalla memoria locale.", systemPrompt: "Prompt di sistema", systemPromptDesc: "Istruzioni nascoste per il bot.", botTone: "Tono", botToneDesc: "Imposta il tono del bot.", friendly: "Amichevole", friend: "Amico", stiff: "Rigido", soft: "Dolce", enthusiastic: "Entusiasta", historyMemory: "Memoria", historyMemoryDesc: "Ricorda la cronologia per il contesto.", generalDesc: "Tema, Lingua, Elimina chat", persDesc: "Prompt di sistema, Tono", dataDesc: "Impostazioni memoria", infoDesc: "Info app & copyright" },
-            pt: { newChat: "Novo Chat", history: "Histórico", settings: "Configurações", placeholder: "Enviar mensagem", general: "Geral", personalization: "Personalização", dataControls: "Dados", info: "Info", theme: "Tema", system: "Sistema", dark: "Escuro", light: "Claro", language: "Idioma", deleteAllChats: "Apagar todas as conversas", deleteAll: "Apagar tudo", cancel: "Cancelar", delete: "Apagar", editTitle: "Editar título", deleteConfirmTitle: "Apagar conversa", deleteConfirmMsg: "Apagar esta conversa permanentemente?", deleteAllConfirmMsg: "Apagar permanentemente todo o histórico?", themeDesc: "Definir o modo de brilho da interface.", langDesc: "Alterar o idioma da interface.", deleteAllDesc: "Apagar permanentemente todo o histórico do armazenamento local.", systemPrompt: "Prompt do sistema", systemPromptDesc: "Instruções ocultas para o bot.", botTone: "Tom", botToneDesc: "Definir o tom do bot.", friendly: "Amigável", friend: "Amigo", stiff: "Rígido", soft: "Suave", enthusiastic: "Entusiasmado", historyMemory: "Memória", historyMemoryDesc: "Lembrar histórico para contexto.", generalDesc: "Tema, Idioma, Apagar conversa", persDesc: "Prompt do sistema, Tom", dataDesc: "Configurações de memória", infoDesc: "Info do app e copyright" }
+            ko: { newChat: "새 채팅", history: "기록", settings: "설정", placeholder: "메시지 보내기", general: "일반", personalization: "개인 맞춤 설정", dataControls: "데이터 제어", info: "정보", theme: "테마", system: "시스템", dark: "다크", light: "라이트", language: "언어", deleteAllChats: "모든 채팅 삭제", deleteAll: "모두 삭제", cancel: "취소", delete: "삭제", editTitle: "이름 수정", deleteConfirmTitle: "채팅 삭제", deleteConfirmMsg: "이 채팅을 영구적으로 삭제하시겠습니까?", deleteAllConfirmMsg: "모든 채팅 기록을 영구적으로 삭제하시겠습니까?", themeDesc: "인터페이스의 밝기 모드를 설정합니다.", langDesc: "UI 언어를 변경합니다.", deleteAllDesc: "모든 대화 기록을 로컬에서 영구 삭제합니다.", systemPrompt: "시스템 프롬프트", systemPromptDesc: "봇에게 비공식적으로 명령할 내용을 입력하세요.", botTone: "봇 말투", botToneDesc: "봇의 말투를 설정합니다.", friendly: "친절함", friend: "친구", stiff: "딱딱한", soft: "부드러운", enthusiastic: "열정적인", historyMemory: "대화 기억", historyMemoryDesc: "이전 대화 내용을 기억하여 문맥을 유지합니다.", generalDesc: "테마, 언어, 채팅 삭제", persDesc: "시스템 프롬프트, 봇 말투", dataDesc: "대화 기억 설정", infoDesc: "앱 정보 및 저작권", hapticStrength: "햅틱 세기", hapticDesc: "진동의 세기를 조절합니다." },
+            en: { newChat: "New Chat", history: "History", settings: "Settings", placeholder: "Send a message", general: "General", personalization: "Personalization", dataControls: "Data Controls", info: "Info", theme: "Theme", system: "System", dark: "Dark", light: "Light", language: "Language", deleteAllChats: "Delete all chats", deleteAll: "Delete All", cancel: "Cancel", delete: "Delete", editTitle: "Edit Title", deleteConfirmTitle: "Delete Chat", deleteConfirmMsg: "Delete this chat permanently?", deleteAllConfirmMsg: "Permanently delete all chat history?", themeDesc: "Set the brightness mode of the interface.", langDesc: "Change the UI language.", deleteAllDesc: "Permanently delete all chat history from local storage.", systemPrompt: "System Prompt", systemPromptDesc: "Instructions for the bot (hidden).", botTone: "Bot Tone", botToneDesc: "Set the tone of the bot.", friendly: "Friendly", friend: "Friend", stiff: "Stiff", soft: "Soft", enthusiastic: "Enthusiastic", historyMemory: "Chat Memory", historyMemoryDesc: "Send previous chat history for context.", generalDesc: "Theme, Language, Delete Chat", persDesc: "System Prompt, Bot Tone", dataDesc: "Chat Memory Settings", infoDesc: "App Info & Copyright", hapticStrength: "Haptic Strength", hapticDesc: "Adjust vibration intensity." },
+            // (나머지 언어 생략 없이 포함 - 기존 유지)
+            ja: { newChat: "新しいチャット", history: "履歴", settings: "設定", placeholder: "メッセージを送信", general: "一般", personalization: "パーソナライズ", dataControls: "データ制御", info: "情報", theme: "テーマ", system: "システム", dark: "ダーク", light: "ライト", language: "言語", deleteAllChats: "すべてのチャットを削除", deleteAll: "すべて削除", cancel: "キャンセル", delete: "削除", editTitle: "タイトル編集", deleteConfirmTitle: "チャット削除", deleteConfirmMsg: "このチャットを完全に削除しますか？", deleteAllConfirmMsg: "すべてのチャット履歴を完全に削除しますか？", themeDesc: "インターフェースの明るさモードを設定します。", langDesc: "UI言語を変更します。", deleteAllDesc: "ローカルストレージからすべてのチャット履歴を完全に削除します。", systemPrompt: "システムプロンプト", systemPromptDesc: "ボットへの非公式な指示を入力します。", botTone: "口調", botToneDesc: "ボットの口調を設定します。", friendly: "親切", friend: "友達", stiff: "堅い", soft: "柔らかい", enthusiastic: "情熱的", historyMemory: "会話記憶", historyMemoryDesc: "以前の会話履歴を記憶して文脈を維持します。", generalDesc: "テーマ、言語、チャット削除", persDesc: "システムプロンプト、ボットの口調", dataDesc: "会話記憶設定", infoDesc: "アプリ情報と著作権", hapticStrength: "触覚強度", hapticDesc: "振動の強度を調整します。" },
+            zh: { newChat: "新聊天", history: "历史记录", settings: "设置", placeholder: "发送消息", general: "常规", personalization: "个性化", dataControls: "数据控制", info: "信息", theme: "主题", system: "系统", dark: "深色", light: "浅色", language: "语言", deleteAllChats: "删除所有聊天", deleteAll: "全部删除", cancel: "取消", delete: "删除", editTitle: "编辑标题", deleteConfirmTitle: "删除聊天", deleteConfirmMsg: "确定要永久删除此聊天吗？", deleteAllConfirmMsg: "确定要永久删除所有聊天记录吗？", themeDesc: "设置界面的亮度模式。", langDesc: "更改界面语言。", deleteAllDesc: "从本地存储中永久删除所有聊天记录。", systemPrompt: "系统提示", systemPromptDesc: "输入非正式指令。", botTone: "语气", botToneDesc: "设置机器人的语气。", friendly: "亲切", friend: "朋友", stiff: "生硬", soft: "温柔", enthusiastic: "热情", historyMemory: "对话记忆", historyMemoryDesc: "记住以前的对话以保持上下文。", generalDesc: "主题，语言，删除聊天", persDesc: "系统提示，机器人语气", dataDesc: "对话记忆设置", infoDesc: "应用信息与版权", hapticStrength: "触觉强度", hapticDesc: "调整振动强度。" },
+            es: { newChat: "Nuevo Chat", history: "Historial", settings: "Ajustes", placeholder: "Enviar mensaje", general: "General", personalization: "Personalización", dataControls: "Datos", info: "Info", theme: "Tema", system: "Sistema", dark: "Oscuro", light: "Claro", language: "Idioma", deleteAllChats: "Borrar todos los chats", deleteAll: "Borrar todo", cancel: "Cancelar", delete: "Eliminar", editTitle: "Editar título", deleteConfirmTitle: "Eliminar chat", deleteConfirmMsg: "¿Eliminar este chat permanentemente?", deleteAllConfirmMsg: "¿Eliminar permanentemente todo el historial?", themeDesc: "Establece el modo de brillo de la interfaz.", langDesc: "Cambiar el idioma de la interfaz.", deleteAllDesc: "Eliminar permanentemente todo el historial del almacenamiento local.", systemPrompt: "Prompt del sistema", systemPromptDesc: "Instrucciones ocultas para el bot.", botTone: "Tono", botToneDesc: "Establecer el tono del bot.", friendly: "Amable", friend: "Amigo", stiff: "Formal", soft: "Suave", enthusiastic: "Entusiasta", historyMemory: "Memoria", historyMemoryDesc: "Recordar historial para contexto.", generalDesc: "Tema, Idioma, Borrar Chat", persDesc: "Prompt del sistema, Tono del bot", dataDesc: "Ajustes de memoria", infoDesc: "Info de la app y copyright", hapticStrength: "Fuerza háptica", hapticDesc: "Ajustar la intensidad de la vibración." },
+            fr: { newChat: "Nouveau Chat", history: "Historique", settings: "Paramètres", placeholder: "Envoyer un message", general: "Général", personalization: "Personnalisation", dataControls: "Données", info: "Info", theme: "Thème", system: "Système", dark: "Sombre", light: "Clair", language: "Langue", deleteAllChats: "Supprimer tout", deleteAll: "Tout supprimer", cancel: "Annuler", delete: "Supprimer", editTitle: "Modifier le titre", deleteConfirmTitle: "Supprimer le chat", deleteConfirmMsg: "Supprimer ce chat définitivement ?", deleteAllConfirmMsg: "Supprimer définitivement tout l'historique ?", themeDesc: "Régler la luminosité de l'interface.", langDesc: "Changer la langue de l'interface.", deleteAllDesc: "Supprimer définitivement tout l'historique du stockage local.", systemPrompt: "Prompt système", systemPromptDesc: "Instructions cachées pour le bot.", botTone: "Ton", botToneDesc: "Définir le ton du bot.", friendly: "Amical", friend: "Ami", stiff: "Rigide", soft: "Doux", enthusiastic: "Enthousiaste", historyMemory: "Mémoire", historyMemoryDesc: "Se souvenir de l'historique pour le contexte.", generalDesc: "Thème, Langue, Supprimer Chat", persDesc: "Prompt système, Ton du bot", dataDesc: "Paramètres de mémoire", infoDesc: "Infos app & copyright", hapticStrength: "Force haptique", hapticDesc: "Régler l'intensité des vibrations." },
+            de: { newChat: "Neuer Chat", history: "Verlauf", settings: "Einstellungen", placeholder: "Nachricht senden", general: "Allgemein", personalization: "Personalisierung", dataControls: "Daten", info: "Info", theme: "Design", system: "System", dark: "Dunkel", light: "Hell", language: "Sprache", deleteAllChats: "Alle Chats löschen", deleteAll: "Alle löschen", cancel: "Abbrechen", delete: "Löschen", editTitle: "Titel bearbeiten", deleteConfirmTitle: "Chat löschen", deleteConfirmMsg: "Diesen Chat dauerhaft löschen?", deleteAllConfirmMsg: "Gesamten Chatverlauf dauerhaft löschen?", themeDesc: "Helligkeitsmodus der Oberfläche festlegen.", langDesc: "UI-Sprache ändern.", deleteAllDesc: "Gesamten Chatverlauf dauerhaft vom lokalen Speicher löschen.", systemPrompt: "System Prompt", systemPromptDesc: "Versteckte Anweisungen für den Bot.", botTone: "Tonfall", botToneDesc: "Tonfall des Bots festlegen.", friendly: "Freundlich", friend: "Freund", stiff: "Steif", soft: "Sanft", enthusiastic: "Begeistert", historyMemory: "Gedächtnis", historyMemoryDesc: "Verlauf für Kontext speichern.", generalDesc: "Thema, Sprache, Chat löschen", persDesc: "System Prompt, Bot Tonfall", dataDesc: "Speichereinstellungen", infoDesc: "App Info & Copyright", hapticStrength: "Haptische Stärke", hapticDesc: "Vibrationsintensität einstellen." },
+            ru: { newChat: "Новый чат", history: "История", settings: "Настройки", placeholder: "Отправить сообщение", general: "Общие", personalization: "Персонализация", dataControls: "Данные", info: "Инфо", theme: "Тема", system: "Системная", dark: "Темная", light: "Светлая", language: "Язык", deleteAllChats: "Удалить все чаты", deleteAll: "Удалить все", cancel: "Отмена", delete: "Удалить", editTitle: "Изменить название", deleteConfirmTitle: "Удалить чат", deleteConfirmMsg: "Удалить этот чат навсегда?", deleteAllConfirmMsg: "Удалить всю историю чатов навсегда?", themeDesc: "Установить режим яркости интерфейса.", langDesc: "Изменить язык интерфейса.", deleteAllDesc: "Навсегда удалить всю историю чатов из локального хранилища.", systemPrompt: "Системный промпт", systemPromptDesc: "Скрытые инструкции для бота.", botTone: "Тон", botToneDesc: "Установить тон бота.", friendly: "Дружелюбный", friend: "Друг", stiff: "Строгий", soft: "Мягкий", enthusiastic: "Восторженный", historyMemory: "Память", historyMemoryDesc: "Помнить историю для контекста.", generalDesc: "Тема, Язык, Удалить чат", persDesc: "Системный промпт, Тон бота", dataDesc: "Настройки памяти", infoDesc: "Информация о приложении", hapticStrength: "Сила тактильного отклика", hapticDesc: "Настроить интенсивность вибрации." },
+            it: { newChat: "Nuova Chat", history: "Cronologia", settings: "Impostazioni", placeholder: "Invia un messaggio", general: "Generale", personalization: "Personalizzazione", dataControls: "Dati", info: "Info", theme: "Tema", system: "Sistema", dark: "Scuro", light: "Chiaro", language: "Lingua", deleteAllChats: "Elimina tutte le chat", deleteAll: "Elimina tutto", cancel: "Annulla", delete: "Elimina", editTitle: "Modifica titolo", deleteConfirmTitle: "Elimina chat", deleteConfirmMsg: "Eliminare definitivamente questa chat?", deleteAllConfirmMsg: "Eliminare definitivamente tutta la cronologia?", themeDesc: "Imposta la modalità di luminosità dell'interfaccia.", langDesc: "Cambia la lingua dell'interfaccia.", deleteAllDesc: "Elimina definitivamente tutta la cronologia dalla memoria locale.", systemPrompt: "Prompt di sistema", systemPromptDesc: "Istruzioni nascoste per il bot.", botTone: "Tono", botToneDesc: "Imposta il tono del bot.", friendly: "Amichevole", friend: "Amico", stiff: "Rigido", soft: "Dolce", enthusiastic: "Entusiasta", historyMemory: "Memoria", historyMemoryDesc: "Ricorda la cronologia per il contesto.", generalDesc: "Tema, Lingua, Elimina chat", persDesc: "Prompt di sistema, Tono", dataDesc: "Impostazioni memoria", infoDesc: "Info app & copyright", hapticStrength: "Intensità tattile", hapticDesc: "Regola l'intensità della vibrazione." },
+            pt: { newChat: "Novo Chat", history: "Histórico", settings: "Configurações", placeholder: "Enviar mensagem", general: "Geral", personalization: "Personalização", dataControls: "Dados", info: "Info", theme: "Tema", system: "Sistema", dark: "Escuro", light: "Claro", language: "Idioma", deleteAllChats: "Apagar todas as conversas", deleteAll: "Apagar tudo", cancel: "Cancelar", delete: "Apagar", editTitle: "Editar título", deleteConfirmTitle: "Apagar conversa", deleteConfirmMsg: "Apagar esta conversa permanentemente?", deleteAllConfirmMsg: "Apagar permanentemente todo o histórico?", themeDesc: "Definir o modo de brilho da interface.", langDesc: "Alterar o idioma da interface.", deleteAllDesc: "Apagar permanentemente todo o histórico do armazenamento local.", systemPrompt: "Prompt do sistema", systemPromptDesc: "Instruções ocultas para o bot.", botTone: "Tom", botToneDesc: "Definir o tom do bot.", friendly: "Amigável", friend: "Amigo", stiff: "Rígido", soft: "Suave", enthusiastic: "Entusiasmado", historyMemory: "Memória", historyMemoryDesc: "Lembrar histórico para contexto.", generalDesc: "Tema, Idioma, Apagar conversa", persDesc: "Prompt do sistema, Tom", dataDesc: "Configurações de memória", infoDesc: "Info do app e copyright", hapticStrength: "Força tátil", hapticDesc: "Ajustar a intensidade da vibração." }
         };
 
         let currentLang = 'ko';
@@ -631,6 +639,9 @@
         let systemPrompt = localStorage.getItem('systemPrompt') || '';
         let botTone = localStorage.getItem('botTone') || 'friendly';
         let isHistoryEnabled = localStorage.getItem('isHistoryEnabled') !== 'false';
+        
+        // Haptic Setting Initialization
+        let hapticStrength = parseInt(localStorage.getItem('hapticStrength')) || 2; // Default 2ms
 
         const sidebar = document.getElementById('sidebar');
         const sidebarOverlay = document.getElementById('sidebar-overlay');
@@ -668,6 +679,7 @@
             
             document.getElementById('systemPromptInput').value = systemPrompt;
             document.getElementById('historyToggle').checked = isHistoryEnabled;
+            document.getElementById('hapticRange').value = hapticStrength; // Set slider value
             
             const toneKey = botTone;
             if(translations['ko'][toneKey]) {
@@ -911,7 +923,11 @@
         function confirmDeleteAllChats() { openDialog(translations[currentLang].deleteAllConfirmMsg, null, () => { localStorage.removeItem(STORAGE_KEY); startNewChat(); renderHistoryList(); closeSettings(); }); }
 
         function toggleSidebar() { const isCollapsed = sidebar.classList.toggle('collapsed'); if (window.innerWidth <= 768) { if (!isCollapsed) sidebarOverlay.classList.add('visible'); else sidebarOverlay.classList.remove('visible'); } }
-        function triggerHaptic() { if (navigator.vibrate) navigator.vibrate(5); }
+        
+        function triggerHaptic() { 
+            if (navigator.vibrate && hapticStrength > 0) navigator.vibrate(hapticStrength); 
+        }
+        
         function autoResize(el) { el.style.height = '24px'; el.style.height = Math.min(el.scrollHeight, 200) + 'px'; }
         function scrollToBottom() { chatContent.scrollTop = chatContent.scrollHeight; }
         function toggleBtnState(val, btn) { if (isGenerating) { btn.classList.add('stop-active'); } else { (val.trim().length > 0 || currentAttachments.length > 0) ? btn.classList.add('active') : btn.classList.remove('active'); btn.classList.remove('stop-active'); } }
@@ -971,10 +987,8 @@
             if (['friendly', 'soft', 'stiff'].includes(botTone)) hiddenInst += "[Use honorifics] ";
             else if (botTone === 'friend') hiddenInst += "[Use banmal] ";
 
-            // Actual message sent to backend (Hidden instructions + User text)
             const messageToSend = `${hiddenInst}\n${text}`;
 
-            // Prepare History
             let historyPayload = [];
             if (isHistoryEnabled) {
                 historyPayload = currentMessages.map(m => ({
@@ -983,17 +997,14 @@
                 }));
             }
 
-            // Prepare Images (Base64 only)
             let imagePayload = currentAttachments.filter(a => a.type === 'image').map(a => a.base64);
 
-            // Construct JSON Body
             const requestBody = JSON.stringify({
                 message: messageToSend,
                 history: historyPayload,
                 image_base64: imagePayload
             });
 
-            // UI Update
             const attachmentsToSend = [...currentAttachments];
             currentAttachments = [];
             renderAttachments(); 
@@ -1011,7 +1022,6 @@
 
             scrollToBottom();
             
-            // Remove previous regeneration buttons (keeping copy buttons)
             document.querySelectorAll('.action-btn.regenerate').forEach(btn => btn.closest('.message-actions').remove());
 
             await streamResponse(endpoint, {'Content-Type': 'application/json'}, requestBody);
@@ -1042,7 +1052,7 @@
                     displayedText += charsToAdd;
                     bubble.innerHTML = marked.parse(displayedText);
                     scrollToBottom();
-                    triggerHaptic(); // Continuous Haptic on Mobile
+                    triggerHaptic(); // Continuous Haptic while typing
                 } else if (!isGenerating && displayedText.length === fullText.length) {
                      clearInterval(typeWriter);
                 }
@@ -1133,7 +1143,6 @@
                     if(lastUserMsg) {
                         const endpoint = isSearchActive ? 'https://jaewondev6.pythonanywhere.com/ask' : 'https://jaewondev6.pythonanywhere.com/askfast';
                         
-                        // REGENERATE: Extract attachments from lastUserMsg to include them
                         let regenImages = [];
                         if (lastUserMsg.attachments) {
                             regenImages = lastUserMsg.attachments.filter(a => a.type === 'image').map(a => a.base64);
@@ -1163,12 +1172,9 @@
 
         function finishGeneration(finalText) {
             isGenerating = false;
-            
-            // Remove regeneration button from ALL previous messages
             document.querySelectorAll('.action-btn.regenerate').forEach(btn => btn.closest('.message-actions').remove());
 
             if (currentBotRowElement && currentBubbleElement) {
-                // Add buttons to current (newest) message with regen button
                 addActionButtons(currentBotRowElement, finalText, true);
             }
 
@@ -1208,6 +1214,7 @@
         function savePersonalization() { systemPrompt = document.getElementById('systemPromptInput').value; localStorage.setItem('systemPrompt', systemPrompt); sendSystemConfig(); }
         function setTone(toneValue, label, optionEl) { const container = document.getElementById('toneSelect'); container.querySelectorAll('.custom-option').forEach(opt => opt.classList.remove('selected')); optionEl.classList.add('selected'); document.getElementById('currentToneLabel').innerText = label; container.classList.remove('open'); botTone = toneValue; localStorage.setItem('botTone', botTone); sendSystemConfig(); }
         function toggleHistoryMemory(checkbox) { isHistoryEnabled = checkbox.checked; localStorage.setItem('isHistoryEnabled', isHistoryEnabled); }
+        function updateHapticStrength(val) { hapticStrength = parseInt(val); localStorage.setItem('hapticStrength', hapticStrength); triggerHaptic(); }
 
         function updateUIText(lang) { const t = translations[lang]; if (!t) return; document.querySelectorAll('[data-i18n]').forEach(el => { const key = el.getAttribute('data-i18n'); if (t[key]) el.innerText = t[key]; }); document.querySelectorAll('[data-i18n-placeholder]').forEach(el => { const key = el.getAttribute('data-i18n-placeholder'); if (t[key]) el.placeholder = t[key]; }); const currentThemeKey = document.querySelector('#themeSelect .custom-option.selected').getAttribute('data-i18n'); if (currentThemeKey && t[currentThemeKey]) document.getElementById('currentThemeLabel').innerText = t[currentThemeKey]; const toneKey = botTone; if(t[toneKey]) document.getElementById('currentToneLabel').innerText = t[toneKey]; }
         document.addEventListener('click', function(e) { if (!e.target.closest('.custom-select-container')) { document.querySelectorAll('.custom-select-container').forEach(el => el.classList.remove('open')); } });
