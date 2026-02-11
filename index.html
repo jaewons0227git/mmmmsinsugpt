@@ -1,1766 +1,1385 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MinsuGPT</title>
-
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Google+Sans:ital,opsz,wght@0,17..18,400..700;1,17..18,400..700&display=swap" rel="stylesheet">
-
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
-<script src="https://unpkg.com/@phosphor-icons/web"></script>
-
-<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-
-<style>
-    :root {
-        /* 크기 및 반경 변수 */
-        --radius-input: 24px;      
-        --radius-send-btn: 10px;   
-        --radius-window: 14px;     
-        --radius-icon-btn: 50%;    
-        --radius-bubble: 18px;     
-        
-        --line-height: 22px;       
-        --primary-color: #4F46E5; 
-        
-        --user-bubble-bg: #F4F4F5; 
-        --user-bubble-text: #1F2937;
-        
-        --header-height: 50px;     
-        --sidebar-width: 240px;    
-        --content-max-width: 700px; 
-    }
-
-    html {
-        scroll-padding-top: calc(var(--header-height) + 10px);
-    }
-
-    body {
-        background-color: #fff;
-        margin: 0;
-        font-family: "Google Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-        font-size: 14px; 
-        display: flex;
-        flex-direction: column;
-        min-height: 100vh;
-        overflow-y: hidden; 
-        color: #1F2937;
-    }
-
-    body::-webkit-scrollbar { display: none; }
-    body { -ms-overflow-style: none; scrollbar-width: none; }
-
-    .material-symbols-rounded {
-        font-variation-settings: 'FILL' 0, 'wght' 500, 'GRAD' 0, 'opsz' 24;
-        font-size: 22px; 
-        display: block;
-    }
-
-    /* Phosphor 아이콘 스타일 */
-    .ph {
-        font-size: 20px;
-        color: #374151;
-        vertical-align: middle;
-    }
-
-    /* --- 사이드바 (Sidebar) --- */
-    .sidebar-overlay {
-        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-        background-color: rgba(0,0,0,0.5); z-index: 1900;
-        opacity: 0; visibility: hidden; transition: opacity 0.3s;
-    }
-    @media (max-width: 768px) {
-        .sidebar-overlay.open { opacity: 1; visibility: visible; }
-    }
-
-    .sidebar {
-        position: fixed; top: 0; left: 0; height: 100%; width: var(--sidebar-width);
-        background-color: #FAFAFA; 
-        z-index: 2000;
-        transform: translateX(-100%); 
-        transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1);
-        display: flex; flex-direction: column;
-        border-right: 1px solid #E5E7EB;
-        font-size: 13px; 
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>MinsuGPT</title>
+    <link rel="icon" href="https://6967a657d214301950ed7b2b.imgix.net/logo.png" type="image/png">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     
-    .sidebar.open { transform: translateX(0); }
+    <style>
+        :root {
+            /* UI Colors */
+            --bg-color: #ffffff;
+            --text-color: #374151;
+            --sub-text-color: #6b7280; /* 설명 텍스트용 */
+            
+            --sidebar-bg: #f9fafb; 
+            --sidebar-hover: #eceef1;
+            
+            --input-bg: #f4f4f4;
+            --icon-color: #9ca3af;
+            --btn-disabled-bg: #e5e7eb;
+            --btn-disabled-text: #9ca3af;
 
-    .sidebar-header { padding: 14px 16px; display: flex; align-items: center; justify-content: space-between; }
-    .sidebar-logo { display: flex; align-items: center; gap: 8px; font-weight: 600; color: #1F2937; font-size: 15px; }
-    .sidebar-logo img { width: 24px; height: 24px; object-fit: contain; }
+            --user-bubble-bg: #f3f4f6;
+            --user-bubble-text: #1f2937;
+            --bot-bubble-text: #111827;
 
-    .sidebar-close-btn { cursor: pointer; color: #6B7280; padding: 4px; border-radius: 4px; }
-    .sidebar-close-btn:hover { background-color: #E5E7EB; }
+            --modal-bg: #ffffff;
+            --modal-text: #374151;
+            --modal-sidebar-bg: #f9fafb;
+            --modal-hover: #eceef1;
+            
+            --border-color: #e5e7eb; 
+            --shadow-color: rgba(0, 0, 0, 0.1);
+            --stopped-text-color: #9ca3af;
+            --danger-color: #ef4444;
+            --active-search-bg: rgba(56, 189, 248, 0.15); /* 하늘색 배경 */
+            --active-search-text: #0ea5e9; /* 하늘색 텍스트 */
 
-    .sidebar-content { flex: 1; padding: 10px; overflow-y: auto; }
-    
-    .sidebar-menu-btn {
-        display: flex; align-items: center; gap: 10px; width: 100%;
-        padding: 8px 10px; border: none; background: transparent;
-        color: #1F2937; font-size: 13px; font-weight: 500;
-        border-radius: 8px; cursor: pointer; text-align: left;
-        margin-bottom: 2px;
-        font-family: inherit;
-    }
-    .sidebar-menu-btn:hover { background-color: #E5E7EB; }
-    .sidebar-menu-btn .material-symbols-rounded { font-size: 20px; color: #4B5563; }
-
-    #sidebarSearchContainer {
-        display: none; 
-        padding: 0 0 2px 0; 
-        margin-bottom: 2px;
-    }
-    .search-input-wrapper {
-        position: relative;
-        width: 100%;
-        padding: 0 4px; 
-        box-sizing: border-box;
-    }
-    #sidebarSearchInput {
-        width: 100%; 
-        padding: 8px 10px 8px 34px; 
-        border: 1px solid #E5E7EB; 
-        border-radius: 8px;
-        font-size: 13px; outline: none; box-sizing: border-box;
-        font-family: inherit;
-        background-color: #fff;
-        transition: border-color 0.2s;
-    }
-    #sidebarSearchInput:focus { border-color: var(--primary-color); }
-    
-    .search-icon-inside {
-        position: absolute;
-        left: 14px;
-        top: 50%;
-        transform: translateY(-50%);
-        font-size: 18px;
-        color: #9CA3AF;
-        pointer-events: none;
-    }
-
-    .sidebar-section-title {
-        font-size: 11px; color: #9CA3AF; font-weight: 600;
-        margin-top: 20px; margin-bottom: 6px; padding-left: 10px;
-    }
-
-    /* 채팅 목록 리스트 스타일 */
-    #savedChatList {
-        display: flex; flex-direction: column; gap: 2px;
-    }
-    
-    .chat-history-item {
-        display: flex; align-items: center; justify-content: space-between;
-        padding: 6px 10px; 
-        border-radius: 8px;
-        cursor: pointer;
-        color: #374151;
-        text-decoration: none;
-        font-size: 13px;
-        transition: background-color 0.2s;
-        position: relative;
-    }
-    .chat-history-item:hover, .chat-history-item.active {
-        background-color: #E5E7EB;
-    }
-    .chat-history-item .chat-title {
-        white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1;
-        padding-right: 8px;
-    }
-    
-    .chat-item-options {
-        display: flex; 
-        opacity: 0;    
-        padding: 2px; border-radius: 4px; color: #6B7280;
-        transition: opacity 0.2s;
-    }
-    .chat-item-options:hover {
-        background-color: #D1D5DB; color: #1F2937;
-    }
-    .chat-history-item:hover .chat-item-options {
-        opacity: 1; 
-    }
-
-    /* 채팅 목록 옵션 메뉴 (더보기 클릭 시) */
-    .history-menu-dropdown {
-        position: absolute; right: 10px; top: 30px;
-        width: 120px;
-        background-color: #fff; border: 1px solid #E5E7EB;
-        border-radius: 12px; 
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        z-index: 2100; display: none; flex-direction: column;
-        padding: 6px;
-    }
-    .history-menu-dropdown.show { display: flex; }
-    .history-menu-item {
-        display: flex; align-items: center; gap: 6px;
-        padding: 8px 10px; font-size: 12px; color: #374151;
-        cursor: pointer; 
-        border-radius: 8px; 
-    }
-    .history-menu-item:hover { background-color: #F3F4F6; }
-    .history-menu-item.delete { color: #EF4444; }
-    .history-menu-item .material-symbols-rounded { font-size: 16px; }
-
-
-    .sidebar-footer {
-        padding: 10px; 
-        margin: 0 8px 8px 8px; 
-        border-radius: 12px;   
-        display: flex; align-items: center; gap: 10px;
-        cursor: pointer; 
-        transition: all 0.2s;
-        position: relative; 
-    }
-    .sidebar-footer:hover { 
-        background-color: #E5E7EB; 
-    }
-    
-    .user-avatar img {
-        width: 32px; height: 32px; border-radius: 50%; object-fit: cover;
-        border: 1px solid #E5E7EB;
-    }
-    
-    .user-info { display: flex; flex-direction: column; }
-    .user-name { font-size: 13px; font-weight: 600; color: #1F2937; }
-    .user-plan { font-size: 11px; color: #6B7280; }
-
-    /* [NEW] 프로필 메뉴 */
-    .profile-menu {
-        position: absolute; 
-        bottom: 70px; 
-        left: 10px;
-        width: 220px; 
-        background-color: #fff; 
-        border: 1px solid #E5E7EB;
-        border-radius: 16px; 
-        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-        display: none; 
-        flex-direction: column; 
-        padding: 6px; 
-        z-index: 2200;
-    }
-    .profile-menu.show { display: flex; }
-    
-    /* [NEW] 공통 메뉴 아이템 스타일 */
-    .menu-action-item {
-        display: flex; align-items: center; gap: 10px;
-        padding: 10px 12px; font-size: 13px; color: #374151;
-        cursor: pointer; border-radius: 10px; 
-        transition: background 0.2s;
-        font-weight: 500;
-    }
-    .menu-action-item:hover { background-color: #F3F4F6; }
-    .menu-action-item.delete { color: #EF4444; }
-    .menu-action-item .material-symbols-rounded { font-size: 18px; color: #6B7280; }
-    .menu-action-item.delete .material-symbols-rounded { color: #EF4444; }
-
-
-    /* --- 상단바 (Header) --- */
-    .top-bar {
-        position: fixed; top: 0; left: 0; width: 100%; height: var(--header-height);
-        background-color: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(10px);
-        display: flex; justify-content: space-between; align-items: center;
-        padding: 0 16px; box-sizing: border-box;
-        z-index: 1000; font-size: 1rem; color: #1F2937;
-        transition: left 0.3s cubic-bezier(0.25, 1, 0.5, 1), width 0.3s cubic-bezier(0.25, 1, 0.5, 1);
-    }
-
-    .top-left {
-        display: flex; align-items: center; gap: 6px;
-        font-weight: 600; cursor: pointer;
-        padding: 4px 6px; border-radius: 6px;
-        transition: background-color 0.2s;
-        color: #40414F; font-size: 14px;
-    }
-    .top-left:hover { background-color: #F3F4F6; }
-    .top-left .material-symbols-rounded { font-size: 20px; color: #6B7280; }
-    
-    .pc-sidebar-open-btn { display: none; cursor: pointer; color: #6B7280; margin-right: 6px; }
-    .pc-sidebar-open-btn:hover { color: #1F2937; }
-
-    .top-right { display: flex; align-items: center; gap: 6px; position: relative; }
-
-    /* [NEW] 상단 더보기 메뉴 */
-    .top-more-menu {
-        position: absolute; 
-        top: 45px; 
-        right: 0;
-        width: 160px; 
-        background-color: #fff; 
-        border: 1px solid #E5E7EB;
-        border-radius: 16px; 
-        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-        display: none; 
-        flex-direction: column; 
-        padding: 6px; 
-        z-index: 2200;
-    }
-    .top-more-menu.show { display: flex; }
-
-    .offer-pill {
-        background-color: #EFEEFC; color: #7C3AED;
-        font-size: 12px; font-weight: 500;
-        padding: 4px 10px; border-radius: 999px;
-        display: flex; align-items: center; gap: 4px;
-        cursor: pointer; transition: opacity 0.2s;
-        white-space: nowrap; 
-    }
-    .offer-pill:hover { opacity: 0.8; }
-    .offer-close { font-size: 14px; margin-left: 2px; color: #7C3AED; cursor: pointer; }
-
-    .share-btn {
-        display: flex; align-items: center; gap: 4px;
-        padding: 6px 10px;
-        border: 1px solid #E5E7EB;
-        border-radius: 999px;
-        background: transparent;
-        cursor: pointer;
-        font-size: 12px; color: #374151;
-        transition: background-color 0.2s;
-        white-space: nowrap; font-family: inherit;
-    }
-    .share-btn:hover { background-color: #F9FAFB; }
-    .share-btn .material-symbols-rounded { font-size: 16px; }
-
-    .dots-btn {
-        padding: 6px; background: transparent; border: none;
-        cursor: pointer; color: #374151; border-radius: 6px;
-    }
-    .dots-btn:hover { background-color: #F3F4F6; }
-
-    @media (max-width: 768px) {
-        .offer-pill { display: none; } 
-        .share-btn { font-size: 11px; padding: 4px 8px; }
-        .top-bar { padding: 0 10px; }
-    }
-
-    /* --- 채팅 영역 --- */
-    .chat-container {
-        width: 100%; 
-        max-width: var(--content-max-width); 
-        margin: 0 auto; 
-        padding-top: calc(var(--header-height) + 20px);
-        padding-left: 20px; padding-right: 20px;
-        padding-bottom: 160px;
-        box-sizing: border-box;
-        display: flex; flex-direction: column; gap: 24px; 
-        
-        transition: margin-left 0.3s cubic-bezier(0.25, 1, 0.5, 1), 
-                    width 0.3s cubic-bezier(0.25, 1, 0.5, 1),
-                    padding-bottom 0.2s ease-out;
-    }
-
-    /* [NEW] 빈 상태 텍스트 (무엇을 도와드릴까요?) */
-    .empty-state {
-        position: absolute; top: 50%; left: 50%; 
-        transform: translate(-50%, -50%);
-        font-size: 24px; font-weight: 600; color: #E5E7EB; 
-        pointer-events: none; text-align: center; width: 100%;
-        display: none; /* 기본 숨김, JS로 제어 */
-    }
-    .empty-state.show { display: block; }
-
-    .message-row { display: flex; width: 100%; flex-direction: column; position: relative; }
-    .message-row.user { align-items: flex-end; }
-    .message-row.bot { align-items: flex-start; }
-
-    /* 유저 버블 컨테이너 (버튼 포함) */
-    .user-bubble-container {
-        display: flex; align-items: center; gap: 8px; flex-direction: row-reverse;
-        max-width: 75%;
-    }
-
-    .user-bubble {
-        background-color: var(--user-bubble-bg);
-        color: var(--user-bubble-text);          
-        padding: 8px 14px;
-        border-radius: var(--radius-bubble);
-        word-break: break-word;
-        font-size: 14px; 
-        line-height: 1.5;
-        position: relative;
-    }
-
-    /* 유저 복사 버튼 */
-    .user-copy-btn {
-        opacity: 0; pointer-events: none;
-        padding: 4px; background: transparent; border: none; cursor: pointer;
-        border-radius: 4px; color: #9CA3AF; transition: all 0.2s;
-    }
-    .user-copy-btn:hover { background-color: #F3F4F6; color: #4B5563; }
-    .user-bubble-container:hover .user-copy-btn { opacity: 1; pointer-events: auto; }
-
-
-    .bot-text {
-        color: #1F2937;
-        padding: 6px 0;
-        width: 100%; max-width: 100%;
-        font-size: 15px; line-height: 1.6; 
-        word-break: break-word; will-change: contents;
-    }
-
-    .bot-text.animate-in {
-        animation: textWipe 0.5s cubic-bezier(0.25, 1, 0.5, 1) forwards;
-    }
-
-    @keyframes textWipe {
-        0% { opacity: 0; filter: blur(2px); }
-        100% { opacity: 1; filter: blur(0px); }
-    }
-
-    .reveal-chunk {
-        display: inline; opacity: 0; filter: blur(2px); 
-        animation: textWipe 0.5s cubic-bezier(0.25, 1, 0.5, 1) forwards;
-    }
-    .reveal-chunk.done {
-        opacity: 1; filter: none; animation: none !important;
-    }
-
-    .bot-text p { margin: 0 0 12px 0; } 
-    .bot-text p:last-child { margin-bottom: 0; }
-    .bot-text code { background-color: #f3f4f6; padding: 2px 4px; border-radius: 4px; font-family: monospace; font-size: 0.85em; }
-    .bot-text pre { background-color: #1f2937; color: #f3f4f6; padding: 12px; border-radius: 8px; overflow-x: auto; font-family: monospace; margin: 12px 0; }
-    .bot-text pre code { background-color: transparent; padding: 0; color: inherit; font-size: 0.9em; }
-    .bot-text ul, .bot-text ol { margin: 12px 0; padding-left: 20px; }
-    .bot-text blockquote { border-left: 3px solid #e5e7eb; margin: 12px 0; padding-left: 12px; color: #6b7280; }
-
-    /* 봇 답변 아래 버튼 영역 */
-    .bot-action-bar {
-        display: flex; gap: 6px; 
-        margin-top: 6px;
-        margin-left: -6px; 
-        opacity: 0; transform: translateY(5px);
-        transition: opacity 0.4s ease, transform 0.4s ease;
-        pointer-events: none; 
-    }
-    .bot-action-bar.visible {
-        opacity: 1; transform: translateY(0); pointer-events: auto;
-    }
-
-    .action-btn {
-        display: flex; align-items: center; justify-content: center;
-        gap: 4px;
-        background: transparent; border: none; cursor: pointer;
-        padding: 6px; 
-        border-radius: 4px;
-        color: #6B7280; 
-        font-size: 13px; font-weight: 500; font-family: inherit; 
-        transition: background-color 0.2s, color 0.2s;
-    }
-    .action-btn:hover { background-color: #F3F4F6; color: #374151; }
-    .action-btn .material-symbols-rounded { font-size: 16px; }
-
-
-    @keyframes textShimmer {
-        0% { background-position: 200% 0; }
-        100% { background-position: -200% 0; }
-    }
-    .analyzing-text {
-        font-size: 14px; font-weight: 500; padding: 6px 0; cursor: default; 
-        color: #9CA3AF; 
-        background: linear-gradient(110deg, #9CA3AF 40%, #F3F4F6 50%, #9CA3AF 60%);
-        background-size: 200% 100%;
-        background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent; 
-        animation: textShimmer 3s linear infinite; transition: all 0.2s ease;
-    }
-    .analyzing-text:hover { background: none; -webkit-text-fill-color: #000000; color: #000000; animation: none; }
-
-    /* --- 하단 입력창 및 래퍼 --- */
-    .bottom-fixed-wrapper {
-        position: fixed; bottom: 0; left: 0; width: 100%;
-        display: flex; flex-direction: column; align-items: center;
-        padding-bottom: 20px; padding-top: 10px;
-        background: linear-gradient(to top, #ffffff 80%, rgba(255,255,255,0)); 
-        z-index: 900; pointer-events: none;
-        transition: left 0.3s cubic-bezier(0.25, 1, 0.5, 1), width 0.3s cubic-bezier(0.25, 1, 0.5, 1);
-    }
-
-    .chat-input-container {
-        pointer-events: auto; width: var(--content-max-width); max-width: 90%;
-        background-color: #F4F4F5; border-radius: var(--radius-input);
-        padding: 10px 14px; box-sizing: border-box;
-        display: flex; flex-direction: column; position: relative; 
-        transition: height 0.1s ease; box-shadow: none !important;
-    }
-    
-    .scroll-to-bottom-btn {
-        position: absolute;
-        top: -45px; /* 입력창 바로 위 */
-        left: 50%;
-        transform: translateX(-50%) scale(0); /* 기본 숨김 (scale 0) */
-        width: 32px; height: 32px;
-        background-color: #fff;
-        border: 1px solid #E5E7EB;
-        border-radius: 50%;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-        display: flex; justify-content: center; align-items: center;
-        cursor: pointer;
-        z-index: 2100;
-        pointer-events: auto;
-        transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s;
-        opacity: 0;
-    }
-    .scroll-to-bottom-btn.show {
-        transform: translateX(-50%) scale(1);
-        opacity: 1;
-    }
-    .scroll-to-bottom-btn:hover {
-        background-color: #F9FAFB;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    }
-    .scroll-to-bottom-btn i {
-        font-size: 16px;
-        color: #4B5563;
-    }
-
-    .chat-textarea {
-        width: 100%; border: none; background: transparent; resize: none; outline: none;
-        font-size: 15px; color: #333; font-family: inherit; padding: 0;
-        line-height: var(--line-height); height: var(--line-height);
-        max-height: calc(var(--line-height) * 8); overflow-y: hidden; scrollbar-width: none;
-    }
-    .chat-textarea::-webkit-scrollbar { display: none; }
-    .chat-textarea::placeholder { color: #9CA3AF; }
-
-    .input-toolbar { display: flex; justify-content: space-between; align-items: center; margin-top: 6px; }
-    .left-tools { display: flex; gap: 6px; }
-    .icon-btn {
-        background: none; border: none; border-radius: var(--radius-icon-btn); padding: 5px;
-        cursor: pointer; display: flex; align-items: center; justify-content: center;
-        color: #6B7280; transition: background-color 0.2s, color 0.2s;
-    }
-    .icon-btn:hover { background-color: rgba(0,0,0,0.05); color: #374151; }
-    .icon-btn .material-symbols-rounded { font-size: 20px; }
-    #searchBtn.active { color: #0EA5E9; background-color: rgba(14, 165, 233, 0.1); }
-    #attachBtn .material-symbols-rounded { transform: rotate(45deg); }
-
-    .send-btn {
-        background-color: #E5E7EB; border: none; border-radius: var(--radius-send-btn);
-        width: 28px; height: 28px; display: flex; justify-content: center; align-items: center;
-        cursor: default; transition: all 0.2s ease-in-out;
-    }
-    .send-btn .material-symbols-rounded { font-size: 18px; color: #9CA3AF; }
-    .send-btn:not(:disabled) { background-color: var(--primary-color); cursor: pointer; }
-    .send-btn:not(:disabled) .material-symbols-rounded { color: #ffffff; }
-    .send-btn:not(:disabled):hover { background-color: #4338ca; }
-    .stop-icon-square { width: 10px; height: 10px; background-color: #ffffff; border-radius: 2px; display: inline-block; }
-
-    .disclaimer-text { font-size: 11px; color: #9CA3AF; margin-top: 10px; text-align: center; pointer-events: auto; }
-
-    .attach-menu {
-        display: none; position: absolute; bottom: 50px; left: 0; width: 130px;
-        background-color: #FFFFFF; border: 1px solid #E5E7EB; border-radius: var(--radius-window);
-        padding: 4px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08); z-index: 2000;
-        flex-direction: column; gap: 2px; opacity: 0; transform: translateY(10px);
-        transition: opacity 0.2s ease, transform 0.2s ease;
-    }
-    .attach-menu.open { display: flex; opacity: 1; transform: translateY(0); }
-    .menu-item {
-        display: flex; align-items: center; gap: 8px; padding: 8px 10px;
-        color: #374151; font-size: 13px; border-radius: 6px; cursor: pointer;
-        transition: background-color 0.2s; text-decoration: none; font-weight: 500;
-    }
-    .menu-item:hover { background-color: #F3F4F6; }
-    .menu-item .material-symbols-rounded { font-size: 18px; color: #4B5563; }
-
-    /* 모달 (이름 변경) */
-    .modal-overlay {
-        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-        background-color: rgba(0,0,0,0.5); z-index: 3000;
-        display: none; justify-content: center; align-items: center;
-        opacity: 0; transition: opacity 0.2s;
-    }
-    .modal-overlay.open { display: flex; opacity: 1; }
-    
-    .modal-window {
-        background-color: #fff; width: 320px; border-radius: 12px;
-        padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-        transform: scale(0.95); transition: transform 0.2s;
-    }
-    .modal-overlay.open .modal-window { transform: scale(1); }
-    
-    .modal-title { font-size: 16px; font-weight: 600; margin-bottom: 12px; }
-    .modal-input {
-        width: 100%; padding: 10px; border: 1px solid #E5E7EB; border-radius: 8px;
-        font-size: 14px; box-sizing: border-box; outline: none; margin-bottom: 16px;
-    }
-    .modal-input:focus { border-color: var(--primary-color); }
-    
-    .modal-actions { display: flex; justify-content: flex-end; gap: 8px; }
-    .modal-btn {
-        padding: 8px 14px; border-radius: 6px; font-size: 13px; cursor: pointer; border: none; font-weight: 500;
-    }
-    .btn-cancel { background-color: #F3F4F6; color: #374151; }
-    .btn-confirm { background-color: var(--primary-color); color: #fff; }
-
-    /* [NEW] 사고 과정 / 상세 정보 패널 */
-    .details-panel {
-        position: fixed; z-index: 2500; background-color: #fff;
-        box-shadow: -2px 0 10px rgba(0,0,0,0.1);
-        display: flex; flex-direction: column;
-        transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1);
-    }
-    
-    /* Desktop: 오른쪽 슬라이드 */
-    @media (min-width: 769px) {
-        .details-panel {
-            top: 0; right: 0; width: 400px; height: 100%;
-            transform: translateX(100%);
-            border-left: 1px solid #E5E7EB;
-        }
-        .details-panel.open { transform: translateX(0); }
-    }
-    
-    /* Mobile: 아래쪽 슬라이드 모달 */
-    @media (max-width: 768px) {
-        .details-panel {
-            bottom: 0; left: 0; width: 100%; height: 80vh;
-            transform: translateY(100%);
-            border-radius: 20px 20px 0 0;
-        }
-        .details-panel.open { transform: translateY(0); }
-    }
-
-    .details-header {
-        padding: 16px; border-bottom: 1px solid #E5E7EB;
-        display: flex; justify-content: space-between; align-items: center;
-        font-weight: 600; font-size: 16px;
-    }
-    .details-close { cursor: pointer; color: #6B7280; padding: 4px; border-radius: 50%; }
-    .details-close:hover { background-color: #F3F4F6; }
-
-    .details-tabs {
-        display: flex; padding: 10px 16px; gap: 10px; border-bottom: 1px solid #E5E7EB;
-    }
-    .details-tab-btn {
-        padding: 6px 12px; border-radius: 20px; border: 1px solid #E5E7EB;
-        background: transparent; font-size: 13px; cursor: pointer;
-        color: #6B7280; font-weight: 500; transition: all 0.2s;
-    }
-    .details-tab-btn.active {
-        background-color: #EEF2FF; color: var(--primary-color); border-color: var(--primary-color);
-    }
-    .details-tab-btn:hover:not(.active) { background-color: #F9FAFB; }
-
-    .details-content-area {
-        flex: 1; overflow-y: auto; padding: 20px;
-    }
-
-    /* 사고 과정 텍스트 스타일 */
-    .thought-content {
-        font-size: 14px; line-height: 1.6; color: #6B7280; white-space: pre-wrap;
-    }
-
-    /* 인용 카드 그리드 */
-    .citation-grid {
-        display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
-    }
-    .citation-card {
-        border: 1px solid #E5E7EB; border-radius: 8px; padding: 12px;
-        cursor: pointer; transition: border-color 0.2s, box-shadow 0.2s;
-        display: flex; flex-direction: column; gap: 6px; background-color: #fff;
-    }
-    .citation-card:hover {
-        border-color: var(--primary-color); box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-    }
-    .citation-title {
-        font-size: 13px; font-weight: 600; color: #1F2937;
-        overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
-    }
-    .citation-snippet {
-        font-size: 11px; color: #9CA3AF; line-height: 1.4;
-        overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;
-    }
-
-
-    /* ==========================================================================
-       [PC 레이아웃 (769px 이상)]
-       ========================================================================== */
-    @media (min-width: 769px) {
-        .sidebar { box-shadow: none; border-right: 1px solid #E5E7EB; }
-        .mobile-menu-icon { display: none !important; }
-
-        /* [열림 상태] */
-        body.pc-sidebar-open .sidebar { transform: translateX(0); }
-        body.pc-sidebar-open .top-bar { left: var(--sidebar-width); width: calc(100% - var(--sidebar-width)); }
-        body.pc-sidebar-open .bottom-fixed-wrapper { left: var(--sidebar-width); width: calc(100% - var(--sidebar-width)); }
-        
-        body.pc-sidebar-open .chat-container { 
-            margin-left: calc(var(--sidebar-width) + (100% - var(--sidebar-width) - var(--content-max-width)) / 2);
-            margin-right: 0; 
-            width: var(--content-max-width);
-            max-width: none;
-        }
-        
-        @media (max-width: 1000px) {
-            body.pc-sidebar-open .chat-container {
-                margin-left: var(--sidebar-width);
-                width: calc(100% - var(--sidebar-width));
-                max-width: none;
-                padding-left: 20px; padding-right: 20px;
-            }
+            --window-radius: 20px;
+            --btn-radius: 12px;
+            --input-radius: 26px;
         }
 
-        /* [닫힘 상태] */
-        body:not(.pc-sidebar-open) .sidebar { transform: translateX(-100%); }
-        body:not(.pc-sidebar-open) .top-bar { left: 0; width: 100%; }
-        body:not(.pc-sidebar-open) .bottom-fixed-wrapper { left: 0; width: 100%; }
+        [data-theme="dark"] {
+            --bg-color: #121212;
+            --text-color: #ececf1;
+            --sub-text-color: #9ca3af;
+            
+            --sidebar-bg: #181818; 
+            --sidebar-hover: #2a2a2a;
+            
+            --input-bg: #2f2f2f;
+            --icon-color: #8e8e8e;
+            --btn-disabled-bg: #333333;
+            --btn-disabled-text: #555555;
+            
+            --user-bubble-bg: #2f2f2f;
+            --user-bubble-text: #ececf1;
+            --bot-bubble-text: #ececf1;
+
+            --modal-bg: #1e1e1e;
+            --modal-text: #ececf1;
+            --modal-sidebar-bg: #161616;
+            --modal-hover: #2c2c2c;
+            
+            --border-color: #333333;
+            --shadow-color: rgba(0, 0, 0, 0.6);
+            --stopped-text-color: #6b7280;
+            --danger-color: #ef4444;
+            --active-search-bg: rgba(14, 165, 233, 0.2);
+            --active-search-text: #38bdf8;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+        html, body, div, textarea { scrollbar-width: none; -ms-overflow-style: none; }
+        ::-webkit-scrollbar { display: none; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            height: 100dvh;
+            overflow: hidden;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        /* --- UI Components --- */
+        #toggle-btn-wrapper { position: fixed; top: 10px; left: 10px; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 8px; cursor: pointer; background: transparent; z-index: 2000; }
+        #toggle-btn-wrapper:hover { background-color: var(--sidebar-hover); }
+        .sidebar-icon { width: 24px; height: 24px; color: var(--text-color); }
+
+        #sidebar-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1400; opacity: 0; visibility: hidden; transition: opacity 0.3s ease; backdrop-filter: blur(2px); }
+        #sidebar-overlay.visible { opacity: 1; visibility: visible; }
+
+        .sidebar { width: 260px; display: flex; flex-direction: column; background-color: var(--sidebar-bg); transition: width 0.3s ease, transform 0.3s ease, background-color 0.3s; overflow: hidden; padding-top: 60px; flex-shrink: 0; border-right: 1px solid var(--border-color); position: relative; z-index: 1500; }
+        .sidebar.collapsed { width: 0; padding: 60px 0 0 0; border-right: none; }
+        .sidebar-content { display: flex; flex-direction: column; height: 100%; padding: 0 10px 20px 10px; width: 260px; opacity: 1; transition: opacity 0.2s; }
+        .sidebar.collapsed .sidebar-content { opacity: 0; pointer-events: none; }
+
+        .new-chat-btn, .menu-item { display: flex; align-items: center; gap: 10px; width: 100%; padding: 12px 14px; border-radius: var(--btn-radius); font-size: 14px; color: var(--text-color); cursor: pointer; border: none; background: transparent; text-align: left; white-space: nowrap; transition: background 0.2s; flex-shrink: 0; }
+        .new-chat-btn { margin-bottom: 20px; }
+        .new-chat-btn.active, .new-chat-btn:hover, .menu-item:hover { background-color: var(--sidebar-hover); }
+
+        .history-label { font-size: 12px; font-weight: 600; color: var(--icon-color); padding: 0 14px; margin-bottom: 8px; margin-top: 10px; }
+        .chat-history { flex: 1; overflow-y: auto; margin-bottom: 10px; padding-bottom: 10px; }
         
-        body:not(.pc-sidebar-open) .chat-container { 
-            margin-left: calc((100% - var(--content-max-width)) / 2);
-            margin-right: 0; 
-            max-width: var(--content-max-width); 
-            width: var(--content-max-width); 
+        .history-item { 
+            display: flex; align-items: center; justify-content: space-between;
+            width: 100%; padding: 10px 14px; border-radius: var(--btn-radius); 
+            font-size: 14px; color: var(--text-color); cursor: pointer; 
+            transition: background 0.2s; margin-bottom: 2px; position: relative;
+            height: 40px;
+        }
+        .history-item:hover, .history-item.active { background-color: var(--sidebar-hover); }
+        .history-title { 
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis; 
+            flex: 1; padding-right: 10px; pointer-events: none; 
+        }
+        .history-actions {
+            display: flex; gap: 4px; opacity: 0; transition: opacity 0.2s;
+            position: absolute; right: 5px; top: 50%; transform: translateY(-50%);
+            background: linear-gradient(to right, transparent, var(--sidebar-hover) 20%);
+            padding-left: 10px;
+        }
+        .history-item:hover .history-actions { opacity: 1; background-color: var(--sidebar-hover); }
+        .history-action-btn {
+            width: 24px; height: 24px; display: flex; align-items: center; justify-content: center;
+            border-radius: 4px; color: var(--icon-color); cursor: pointer;
+        }
+        .history-action-btn:hover { color: var(--text-color); background-color: rgba(0,0,0,0.05); }
+        .history-action-btn.delete:hover { color: var(--danger-color); }
+
+        /* Main Area */
+        .main { flex: 1; position: relative; display: flex; flex-direction: column; background-color: var(--bg-color); width: 100%; height: 100%; transition: background-color 0.3s; z-index: 1; }
+        
+        #welcome-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10; transition: opacity 0.4s ease, visibility 0.4s; }
+        #welcome-screen.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+        .center-logo-img { width: 80px; height: auto; border-radius: 50%; margin-bottom: 40px; }
+        .center-input-wrapper { width: 100%; max-width: 760px; padding: 0 20px; position: relative; }
+
+        #chat-content { flex: 1; width: 100%; max-width: 800px; margin: 0 auto; padding: 80px 20px 150px 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 24px; opacity: 0; visibility: hidden; transition: opacity 0.3s; -webkit-overflow-scrolling: touch; }
+        #chat-content.visible { opacity: 1; visibility: visible; }
+
+        .message-row { display: flex; width: 100%; opacity: 0; animation: fadeIn 0.4s ease-out forwards; flex-direction: column; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        
+        .message-row.user { align-items: flex-end; }
+        .message-row.bot { align-items: flex-start; }
+        
+        /* Attachment Bubbles (in chat) */
+        .bubble-attachments { display: flex; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; justify-content: flex-end; }
+        .message-row.bot .bubble-attachments { justify-content: flex-start; }
+        
+        .bubble-image-card {
+            width: 100px; height: 100px; border-radius: 12px; overflow: hidden; cursor: pointer;
+            border: 1px solid var(--border-color); background-color: var(--input-bg);
+            background-size: cover; background-position: center;
+        }
+        .bubble-file-card {
+            display: flex; align-items: center; gap: 8px; padding: 10px;
+            background-color: var(--input-bg); border-radius: 12px;
+            border: 1px solid var(--border-color); font-size: 13px;
+        }
+
+        .bot-bubble-wrapper { display: flex; flex-direction: column; align-items: flex-start; width: 100%; }
+        .message-bubble { max-width: 100%; line-height: 1.6; word-break: break-word; border-radius: 20px; }
+        .message-bubble.user-content { background-color: var(--user-bubble-bg); color: var(--user-bubble-text); font-size: 15px; padding: 10px 14px; border-top-right-radius: 4px; }
+        .message-bubble.bot-content { background-color: transparent; color: var(--bot-bubble-text); font-size: 16px; padding: 12px 16px; padding-left: 0; }
+        
+        /* Markdown Style for Bot Message */
+        .message-bubble.bot-content p { margin-bottom: 10px; }
+        .message-bubble.bot-content p:last-child { margin-bottom: 0; }
+        .message-bubble.bot-content pre { background: var(--input-bg); padding: 10px; border-radius: 8px; overflow-x: auto; margin-bottom: 10px; }
+        .message-bubble.bot-content code { background: var(--input-bg); padding: 2px 4px; border-radius: 4px; font-family: monospace; font-size: 0.9em; }
+        .message-bubble.bot-content pre code { background: transparent; padding: 0; }
+        .message-bubble.bot-content ul, .message-bubble.bot-content ol { margin-left: 20px; margin-bottom: 10px; }
+        .message-bubble.bot-content h1, .message-bubble.bot-content h2, .message-bubble.bot-content h3 { margin-top: 10px; margin-bottom: 8px; font-weight: 600; }
+        .message-bubble.bot-content a { color: var(--active-search-text); text-decoration: none; }
+        .message-bubble.bot-content a:hover { text-decoration: underline; }
+
+        .stopped-text { color: var(--stopped-text-color); font-size: 14px; margin-left: 6px; }
+
+        /* Thinking & Actions */
+        .thinking-dot { width: 10px; height: 10px; background-color: var(--text-color); border-radius: 50%; margin-left: 4px; animation: breathe 1.2s infinite ease-in-out; }
+        @keyframes breathe { 0%, 100% { transform: scale(0.9); opacity: 0.7; } 50% { transform: scale(1.1); opacity: 1; } }
+        .thinking-text { font-size: 14px; font-weight: 500; background: linear-gradient(to left, #999 0%, #999 40%, #111 50%, #999 60%, #999 100%); background-size: 200% auto; -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; color: transparent; animation: shimmer 1s linear infinite; cursor: default; margin-left: 2px; }
+        [data-theme="dark"] .thinking-text { background: linear-gradient(to left, #666 0%, #666 40%, #fff 50%, #666 60%, #666 100%); background-size: 200% auto; -webkit-background-clip: text; background-clip: text; }
+        @keyframes shimmer { from { background-position: 100% center; } to { background-position: -100% center; } }
+
+        .message-actions { display: flex; gap: 4px; margin-top: 6px; opacity: 0; transition: opacity 0.3s; margin-left: -6px; }
+        .message-actions.visible { opacity: 1; }
+        .action-btn { width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; border-radius: 8px; color: var(--icon-color); cursor: pointer; transition: background-color 0.2s, color 0.2s; }
+        .action-btn:hover { background-color: var(--sidebar-hover); color: var(--text-color); }
+        .action-icon { width: 18px; height: 18px; stroke-width: 2.2; }
+
+        /* Bottom Interface */
+        #bottom-interface { position: absolute; bottom: 0; left: 0; width: 100%; display: flex; flex-direction: column; align-items: center; padding: 0 20px 0 20px; opacity: 0; transform: translateY(50px); transition: opacity 0.5s ease, transform 0.5s cubic-bezier(0.25, 1, 0.5, 1); z-index: 5; pointer-events: none; background: linear-gradient(to top, var(--bg-color) 40%, transparent); }
+        #bottom-interface.visible { opacity: 1; transform: translateY(0); pointer-events: auto; }
+        
+        .bottom-input-wrapper { width: 100%; max-width: 760px; position: relative; }
+        
+        .input-container { display: flex; flex-direction: column; background-color: var(--input-bg); border-radius: var(--input-radius); padding: 10px 10px; box-shadow: 0 0 10px rgba(0,0,0,0.02); transition: background-color 0.3s; position: relative; }
+        
+        /* Attachment Preview Area inside Input */
+        .attachment-preview-area { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 0; margin-bottom: 0; transition: margin 0.2s; }
+        .attachment-preview-area.has-items { margin-bottom: 12px; padding-top: 8px; }
+        .attach-card { 
+            position: relative; width: 60px; height: 60px; flex-shrink: 0; border-radius: 10px; 
+            background-color: #ddd; background-size: cover; background-position: center; border: 1px solid var(--border-color); 
+            display: flex; align-items: center; justify-content: center; cursor: pointer;
+        }
+        .attach-card.file-type { background-color: var(--bg-color); font-size: 10px; color: var(--text-color); flex-direction: column; text-align: center; padding: 2px; }
+        .attach-card-remove { 
+            position: absolute; top: -6px; right: -6px; width: 18px; height: 18px; background: var(--text-color); 
+            color: var(--bg-color); border-radius: 50%; display: flex; align-items: center; justify-content: center; 
+            cursor: pointer; z-index: 2; border: 1px solid var(--bg-color);
         }
         
-        body:not(.pc-sidebar-open) .pc-sidebar-open-btn { display: inline-block; }
-    }
-</style>
+        .input-top-row { width: 100%; margin-bottom: 4px; }
+        .input-field { width: 100%; border: none; background: transparent; font-size: 16px; outline: none; color: var(--text-color); resize: none; font-family: inherit; overflow-y: auto; height: 24px; line-height: 24px; display: block; max-height: 200px; padding: 4px 0; padding-left: 6px; }
+        .input-field::placeholder { color: var(--icon-color); }
+        .input-bottom-row { display: flex; justify-content: space-between; align-items: center; height: 36px; }
+        
+        .left-actions, .right-actions { display: flex; align-items: center; gap: 8px; position: relative; }
+        .icon-btn { display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 50%; color: var(--icon-color); cursor: pointer; transition: 0.2s; position: relative; }
+        .icon-btn:hover { background-color: rgba(0,0,0,0.05); color: var(--text-color); }
+        
+        /* Search Toggle Button */
+        .search-btn {
+            display: flex; align-items: center; justify-content: center; 
+            height: 34px; border-radius: 17px; padding: 0; width: 34px; 
+            background-color: transparent; color: var(--icon-color); 
+            cursor: pointer; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            overflow: hidden; gap: 0;
+        }
+        .search-btn:hover { background-color: rgba(0,0,0,0.05); color: var(--text-color); }
+        .search-btn.active { background-color: var(--active-search-bg); color: var(--active-search-text); width: auto; padding: 0 12px 0 8px; }
+        .search-label { font-size: 13px; font-weight: 600; white-space: nowrap; opacity: 0; width: 0; overflow: hidden; transition: all 0.3s ease; margin-left: 0; }
+        .search-btn.active .search-label { opacity: 1; width: auto; margin-left: 6px; }
+
+        /* Plus Menu (Attachment) */
+        .attach-menu {
+            position: absolute; bottom: 50px; left: 0; background-color: var(--modal-bg);
+            border: 1px solid var(--border-color); border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 160px;
+            display: flex; flex-direction: column; overflow: hidden;
+            opacity: 0; visibility: hidden; transform: translateY(10px); transition: all 0.2s ease; z-index: 20;
+        }
+        .attach-menu.open { opacity: 1; visibility: visible; transform: translateY(0); }
+        .attach-item {
+            padding: 10px 14px; display: flex; align-items: center; gap: 10px;
+            font-size: 14px; color: var(--text-color); cursor: pointer; transition: background 0.2s;
+        }
+        .attach-item:hover { background-color: var(--sidebar-hover); }
+
+        .send-btn { display: flex; flex-shrink: 0; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 50%; background-color: var(--btn-disabled-bg); color: var(--btn-disabled-text); cursor: default; pointer-events: none; transition: 0.2s; }
+        .send-btn.active, .send-btn.stop-active { background-color: #000000; color: #fff; cursor: pointer; pointer-events: auto; }
+        [data-theme="dark"] .send-btn.active, [data-theme="dark"] .send-btn.stop-active { background-color: #ffffff; color: #000; }
+        .model-selector { display: flex; align-items: center; justify-content: center; gap: 4px; background-color: var(--bg-color); padding: 0 12px; height: 32px; border-radius: 16px; font-size: 13px; color: var(--text-color); cursor: pointer; transition: background-color 0.3s; }
+        .model-selector:hover { background-color: var(--sidebar-hover); }
+
+        /* Disclaimer Footer */
+        .bottom-disclaimer {
+            text-align: center; font-size: 11px; color: #9ca3af; margin-top: 8px; margin-bottom: 20px;
+            width: 100%; max-width: 760px;
+        }
+
+        /* --- Global Modal (Settings & Dialogs) --- */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.4); backdrop-filter: blur(5px); display: flex; align-items: center; justify-content: center; z-index: 9999; opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s; }
+        .modal-overlay.open { opacity: 1; visibility: visible; }
+        
+        /* Image Lightbox */
+        .image-lightbox {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.8); backdrop-filter: blur(10px);
+            z-index: 10000; display: flex; align-items: center; justify-content: center;
+            opacity: 0; visibility: hidden; transition: opacity 0.3s;
+        }
+        .image-lightbox.open { opacity: 1; visibility: visible; }
+        .lightbox-img { max-width: 90%; max-height: 90%; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); transform: scale(0.9); transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+        .image-lightbox.open .lightbox-img { transform: scale(1); }
+        .lightbox-close { position: absolute; top: 20px; right: 20px; color: white; cursor: pointer; background: rgba(255,255,255,0.2); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+
+        /* Settings Window */
+        .settings-window { background-color: var(--modal-bg); width: 750px; height: 500px; border-radius: var(--window-radius); display: flex; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.2); color: var(--modal-text); transform: scale(0.95); transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.3s; }
+        .modal-overlay.open .settings-window { transform: scale(1); }
+        .settings-sidebar { width: 220px; background-color: var(--modal-sidebar-bg); padding: 20px 10px; display: flex; flex-direction: column; gap: 4px; border-right: 1px solid var(--border-color); }
+        .settings-nav-item { padding: 12px 16px; border-radius: var(--btn-radius); font-size: 14px; color: var(--text-color); opacity: 0.7; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: background 0.2s, opacity 0.2s; white-space: nowrap; }
+        .settings-nav-item:hover { background-color: var(--modal-hover); opacity: 1; }
+        .settings-nav-item.active { background-color: var(--modal-hover); opacity: 1; font-weight: 600; }
+        .set-icon { width: 18px; height: 18px; flex-shrink: 0; }
+        .settings-content { flex: 1; padding: 40px; background-color: var(--modal-bg); position: relative; overflow-y: auto; }
+        .settings-header { font-size: 18px; font-weight: 600; margin-bottom: 24px; padding-bottom: 12px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
+        .close-modal-btn { cursor: pointer; color: var(--icon-color); width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 50%; transition: background 0.2s; }
+        .close-modal-btn:hover { background-color: var(--modal-hover); }
+        
+        .tab-section { display: none; flex-direction: column; height: 100%; }
+        .tab-section.active-tab { display: flex; }
+
+        /* 수정됨: Info 탭 전용 스타일 (중앙 정렬, 스크롤 금지) */
+        #tab-info {
+            overflow: hidden;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .setting-row { display: flex; justify-content: space-between; align-items: flex-start; padding: 16px 0; border-bottom: 1px solid var(--border-color); }
+        .setting-info { display: flex; flex-direction: column; gap: 4px; }
+        .setting-label { font-size: 14px; color: var(--text-color); font-weight: 500; }
+        .setting-desc { font-size: 12px; color: var(--sub-text-color); }
+        
+        .custom-select-container { position: relative; width: 160px; }
+        .custom-select-trigger { display: flex; align-items: center; justify-content: flex-end; gap: 8px; font-size: 14px; color: var(--text-color); cursor: pointer; padding: 8px 12px; border-radius: var(--btn-radius); transition: background-color 0.2s; }
+        .custom-select-trigger:hover { background-color: var(--modal-hover); }
+        .trigger-arrow { width: 12px; height: 12px; transition: transform 0.2s; }
+        .custom-select-container.open .trigger-arrow { transform: rotate(180deg); }
+        .custom-options { position: absolute; top: 100%; right: 0; background-color: var(--modal-bg); border: 1px solid var(--border-color); border-radius: 12px; box-shadow: 0 4px 12px var(--shadow-color); width: 100%; margin-top: 4px; opacity: 0; visibility: hidden; transform: translateY(-10px); transition: all 0.2s ease; overflow: hidden; z-index: 10; max-height: 200px; overflow-y: auto; }
+        .custom-select-container.open .custom-options { opacity: 1; visibility: visible; transform: translateY(0); }
+        .custom-option { padding: 10px 12px; font-size: 14px; color: var(--text-color); cursor: pointer; transition: background-color 0.1s; text-align: left; }
+        .custom-option:hover { background-color: var(--modal-hover); }
+        .custom-option.selected { font-weight: 600; background-color: var(--sidebar-hover); }
+        
+        .danger-btn { color: var(--danger-color); font-size: 14px; padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border-color); background: transparent; cursor: pointer; transition: background 0.2s; }
+        .danger-btn:hover { background-color: rgba(239, 68, 68, 0.1); }
+
+        /* Custom Dialog (Alert/Confirm/Prompt) */
+        .dialog-window {
+            background-color: var(--modal-bg); width: 400px; padding: 24px; border-radius: var(--window-radius); 
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3); display: flex; flex-direction: column; gap: 20px;
+            transform: scale(0.9); transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .modal-overlay.open .dialog-window { transform: scale(1); }
+        .dialog-title { font-size: 18px; font-weight: 600; color: var(--text-color); }
+        .dialog-input { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--input-bg); color: var(--text-color); font-size: 14px; outline: none; }
+        .dialog-input:focus { border-color: var(--icon-color); }
+        .dialog-actions { display: flex; justify-content: flex-end; gap: 10px; }
+        .dialog-btn { padding: 8px 16px; border-radius: 8px; font-size: 14px; cursor: pointer; border: none; font-weight: 500; transition: opacity 0.2s; }
+        .dialog-btn.cancel { background: transparent; color: var(--text-color); }
+        .dialog-btn.confirm { background: var(--text-color); color: var(--bg-color); }
+        .dialog-btn.delete-confirm { background: var(--danger-color); color: #fff; }
+        .dialog-btn:hover { opacity: 0.8; }
+
+        @media (max-width: 768px) {
+            .sidebar { position: fixed; left: 0; top: 0; bottom: 0; height: 100%; width: 220px !important; z-index: 1500; transform: translateX(0); transition: transform 0.3s ease; border-top-right-radius: 20px; border-bottom-right-radius: 20px; box-shadow: 4px 0 15px rgba(0,0,0,0.1); }
+            .sidebar.collapsed { width: 220px !important; transform: translateX(-100%); border-right: none; }
+            .sidebar-content { opacity: 1 !important; width: 220px !important; }
+            .message-bubble { max-width: 100%; }
+            #bottom-interface { padding-bottom: 20px; }
+            .settings-window { width: 100%; height: 100%; border-radius: 0; flex-direction: column; transform: scale(1) !important; }
+            .settings-sidebar { width: 100%; height: auto; flex-direction: row; overflow-x: auto; border-right: none; border-bottom: 1px solid var(--border-color); padding: 10px; gap: 8px; }
+            .settings-nav-item { flex: 0 0 auto; padding: 8px 12px; font-size: 13px; border-radius: 20px; background-color: transparent; }
+            .settings-nav-item.active { background-color: var(--text-color); color: var(--bg-color); }
+            .settings-content { padding: 20px; }
+            .center-logo-img { width: 60px; margin-bottom: 20px; }
+            .dialog-window { width: 90%; }
+        }
+    </style>
 </head>
-<body class="pc-sidebar-open"> 
+<body>
+    <div id="sidebar-overlay" onclick="toggleSidebar()"></div>
+    <div id="image-lightbox" class="image-lightbox" onclick="closeImageLightbox()">
+        <div class="lightbox-close" onclick="closeImageLightbox()"><svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></div>
+        <img id="lightbox-img" class="lightbox-img" src="" alt="Full view">
+    </div>
 
-    <div id="sidebarOverlay" class="sidebar-overlay"></div>
+    <div id="toggle-btn-wrapper" onclick="toggleSidebar()">
+        <svg class="sidebar-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2" stroke-width="2"></rect>
+            <line x1="9" y1="3" x2="9" y2="21" stroke-width="2"></line>
+        </svg>
+    </div>
 
-    <aside id="sidebar" class="sidebar">
-        <div class="sidebar-header">
-            <div class="sidebar-logo">
-                <img src="https://i.postimg.cc/LJV3sj3F/logop.png" alt="Logo">
-                MinsuGPT
-            </div>
-            <div id="sidebarCloseBtn" class="sidebar-close-btn" title="사이드바 닫기">
-                <span class="material-symbols-rounded">dock_to_right</span>
-            </div>
-        </div>
-        
+    <div class="sidebar" id="sidebar">
         <div class="sidebar-content">
-            <button class="sidebar-menu-btn" id="newChatBtn">
-                <span class="material-symbols-rounded">edit_square</span> 새 채팅
+            <button class="new-chat-btn active" id="newChatBtn" onclick="startNewChat()">
+                <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                <span data-i18n="newChat">New Chat</span>
             </button>
-            <button class="sidebar-menu-btn" id="sidebarSearchBtn">
-                <span class="material-symbols-rounded">search</span> 채팅 검색
-            </button>
-            
-            <div id="sidebarSearchContainer">
-                <div class="search-input-wrapper">
-                    <span class="material-symbols-rounded search-icon-inside">search</span>
-                    <input type="text" id="sidebarSearchInput" placeholder="채팅 제목 검색...">
+            <div class="history-label" data-i18n="history">History</div>
+            <div class="chat-history" id="chatHistoryList">
+                </div>
+            <div class="menu-item" onclick="openSettings()">
+                <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                <span data-i18n="settings">Settings</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="main">
+        <div id="welcome-screen">
+            <div class="center-logo">
+                <img src="https://6967a657d214301950ed7b2b.imgix.net/logo.png" alt="Logo" class="center-logo-img">
+            </div>
+            <div class="center-input-wrapper">
+                <div class="input-container">
+                    <div id="center-preview" class="attachment-preview-area"></div>
+                    <div class="input-top-row">
+                        <textarea id="centerInput" class="input-field" placeholder="Send a message" rows="1" data-i18n-placeholder="placeholder"></textarea>
+                    </div>
+                    <div class="input-bottom-row">
+                        <div class="left-actions">
+                            <div class="icon-btn" onclick="toggleAttachMenu('center')">
+                                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                            </div>
+                            <div class="search-btn" id="centerSearchBtn" onclick="toggleSearchMode('center')">
+                                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"></path></svg>
+                                <span class="search-label">검색 활성화</span>
+                            </div>
+                            <div class="attach-menu" id="centerAttachMenu">
+                                <div class="attach-item" onclick="handleFileUpload('image', 'center')">
+                                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg> 이미지
+                                </div>
+                                <div class="attach-item" onclick="handleFileUpload('file', 'center')">
+                                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg> 문서
+                                </div>
+                                <div class="attach-item" onclick="handleFileUpload('file', 'center')">
+                                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg> 파일
+                                </div>
+                            </div>
+                        </div>
+                        <div class="right-actions">
+                            <div class="model-selector">minsu-3<svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></div>
+                            <div class="send-btn" id="centerSendBtn" onclick="handleSendClick('center')">
+                                <svg class="icon-send" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path></svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bottom-disclaimer">
+                    MinsuGPT는 실수를 할 수 있습니다. 중요한 정보는 재차 확인하세요.
                 </div>
             </div>
-
-            <button class="sidebar-menu-btn">
-                <span class="material-symbols-rounded">image</span> 이미지
-            </button>
-            
-            <div class="sidebar-section-title">내 채팅</div>
-            <div id="savedChatList"></div>
         </div>
 
-        <div id="profileMenu" class="profile-menu">
-            <div class="menu-action-item"><span class="material-symbols-rounded">update</span> 패치노트</div>
-            <div class="menu-action-item"><span class="material-symbols-rounded">settings_applications</span> 채팅 설정</div>
-            <div class="menu-action-item"><span class="material-symbols-rounded">settings</span> 전체 설정</div>
-        </div>
+        <div id="chat-content"></div>
 
-        <div class="sidebar-footer">
-            <div class="user-avatar">
-                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS7iy-t1yxu4sxSnbqwbSb_8LBpN1ocQKzk8w&s" alt="User">
-            </div>
-            <div class="user-info">
-                <span class="user-name">게스트</span>
-                <span class="user-plan">Free</span>
-            </div>
-        </div>
-    </aside>
-
-
-    <header class="top-bar">
-        <div class="top-left" id="headerTitleArea">
-            <span id="pcSidebarOpenBtn" class="pc-sidebar-open-btn" title="사이드바 열기">
-                <span class="material-symbols-rounded">dock_to_right</span>
-            </span>
-            <span id="mobileMenuBtn" class="material-symbols-rounded mobile-menu-icon" style="margin-right: 8px;">menu</span>
-            MinsuGPT 
-            <span class="material-symbols-rounded" style="font-size:20px; color:#9CA3AF;">expand_more</span>
-        </div>
-        <div class="top-right">
-            <div class="offer-pill">
-                <span class="material-symbols-rounded" style="font-size:16px;">redeem</span>
-                무료 오퍼
-                <span class="offer-close">&times;</span>
-            </div>
-            <button class="share-btn"><span class="material-symbols-rounded">ios_share</span> 공유하기</button>
-            <button class="dots-btn" id="topDotsBtn"><span class="material-symbols-rounded">more_horiz</span></button>
-            
-            <div id="topMoreMenu" class="top-more-menu">
-                <div class="menu-action-item" id="topRenameBtn"><span class="material-symbols-rounded">edit</span> 이름 변경</div>
-                <div class="menu-action-item delete" id="topDeleteBtn"><span class="material-symbols-rounded">delete</span> 삭제</div>
-            </div>
-        </div>
-    </header>
-
-    <div id="chatContainer" class="chat-container">
-        <div id="emptyState" class="empty-state">무엇을 도와드릴까요?</div>
-    </div>
-
-    <div class="bottom-fixed-wrapper">
-        <div class="chat-input-container">
-            <div id="scrollToBottomBtn" class="scroll-to-bottom-btn" title="맨 아래로 이동">
-                <span class="material-symbols-rounded">arrow_downward</span>
-            </div>
-
-            <div id="attachMenu" class="attach-menu">
-                <div class="menu-item"><span class="material-symbols-rounded">image</span> <span>이미지</span></div>
-                <div class="menu-item"><span class="material-symbols-rounded">description</span> <span>문서</span></div>
-                <div class="menu-item"><span class="material-symbols-rounded">folder</span> <span>파일</span></div>
-            </div>
-            <textarea id="chatInput" class="chat-textarea" placeholder="메시지를 입력해주세요." rows="1"></textarea>
-            <div class="input-toolbar">
-                <div class="left-tools">
-                    <button id="attachBtn" class="icon-btn" title="첨부하기"><span class="material-symbols-rounded">attach_file</span></button>
-                    <button id="searchBtn" class="icon-btn" title="검색 모드"><span class="material-symbols-rounded">language</span></button>
+        <div id="bottom-interface">
+            <div class="bottom-input-wrapper">
+                <div class="input-container">
+                    <div id="bottom-preview" class="attachment-preview-area"></div>
+                    <div class="input-top-row">
+                        <textarea id="bottomInput" class="input-field" placeholder="Send a message" rows="1" data-i18n-placeholder="placeholder"></textarea>
+                    </div>
+                    <div class="input-bottom-row">
+                        <div class="left-actions">
+                            <div class="icon-btn" onclick="toggleAttachMenu('bottom')">
+                                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                            </div>
+                            <div class="search-btn" id="bottomSearchBtn" onclick="toggleSearchMode('bottom')">
+                                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"></path></svg>
+                                <span class="search-label">검색 활성화</span>
+                            </div>
+                            <div class="attach-menu" id="bottomAttachMenu">
+                                <div class="attach-item" onclick="handleFileUpload('image', 'bottom')">
+                                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg> 이미지
+                                </div>
+                                <div class="attach-item" onclick="handleFileUpload('file', 'bottom')">
+                                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg> 문서
+                                </div>
+                                <div class="attach-item" onclick="handleFileUpload('file', 'bottom')">
+                                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg> 파일
+                                </div>
+                            </div>
+                        </div>
+                        <div class="right-actions">
+                            <div class="model-selector">minsu-3<svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></div>
+                            <div class="send-btn" id="bottomSendBtn" onclick="handleSendClick('bottom')">
+                                <svg class="icon-send" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path></svg>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <button id="sendBtn" class="send-btn" disabled><span class="material-symbols-rounded">arrow_upward</span></button>
-            </div>
-        </div>
-        <div class="disclaimer-text">MinsuGPT는 실수할 수 있습니다. 중요한 정보는 한번더 확인하세요.</div>
-    </div>
-
-    <div id="renameModalOverlay" class="modal-overlay">
-        <div class="modal-window">
-            <div class="modal-title">채팅 이름 변경</div>
-            <input type="text" id="renameInput" class="modal-input" placeholder="새 이름을 입력하세요">
-            <div class="modal-actions">
-                <button class="modal-btn btn-cancel" id="renameCancelBtn">취소</button>
-                <button class="modal-btn btn-confirm" id="renameConfirmBtn">저장</button>
+                <div class="bottom-disclaimer">
+                    MinsuGPT는 실수를 할 수 있습니다. 중요한 정보는 재차 확인하세요.
+                </div>
             </div>
         </div>
     </div>
 
-    <div id="detailsPanel" class="details-panel">
-        <div class="details-header">
-            <span>상세 정보</span>
-            <div class="details-close" id="detailsCloseBtn"><span class="material-symbols-rounded">close</span></div>
+    <input type="file" id="hiddenFileInput" style="display:none;" multiple>
+
+    <div id="settings-modal" class="modal-overlay">
+        <div class="settings-window">
+            <div class="settings-sidebar">
+                <div class="settings-nav-item active" onclick="switchSettingsTab('general', this)"><svg class="set-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg> <span data-i18n="general">General</span></div>
+                <div class="settings-nav-item" onclick="switchSettingsTab('personalization', this)"><svg class="set-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path></svg> <span data-i18n="personalization">Personalization</span></div>
+                <div class="settings-nav-item" onclick="switchSettingsTab('dataControls', this)"><svg class="set-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"></path></svg> <span data-i18n="dataControls">Data Controls</span></div>
+                <div class="settings-nav-item" onclick="switchSettingsTab('info', this)"><svg class="set-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg> <span data-i18n="info">Info</span></div>
+            </div>
+            <div class="settings-content">
+                <div class="settings-header">
+                    <span id="settings-header-title" data-i18n="general">General</span>
+                    <div class="close-modal-btn" onclick="closeSettings()"><svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></div>
+                </div>
+                
+                <div id="tab-general" class="tab-section active-tab">
+                    <div class="setting-row">
+                        <div class="setting-info">
+                            <div class="setting-label" data-i18n="theme">Theme</div>
+                            <div class="setting-desc" data-i18n="themeDesc">인터페이스의 밝기 모드를 설정합니다.</div>
+                        </div>
+                        <div class="custom-select-container" id="themeSelect">
+                            <div class="custom-select-trigger" onclick="toggleDropdown('themeSelect')">
+                                <span id="currentThemeLabel" data-i18n="system">System</span>
+                                <svg class="trigger-arrow" width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                            </div>
+                            <div class="custom-options">
+                                <div class="custom-option selected" onclick="setTheme('system', this)" data-i18n="system">System</div>
+                                <div class="custom-option" onclick="setTheme('dark', this)" data-i18n="dark">Dark</div>
+                                <div class="custom-option" onclick="setTheme('light', this)" data-i18n="light">Light</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="setting-row">
+                        <div class="setting-info">
+                            <div class="setting-label" data-i18n="language">Language</div>
+                            <div class="setting-desc" data-i18n="langDesc">UI 언어를 변경합니다.</div>
+                        </div>
+                        <div class="custom-select-container" id="langSelect">
+                            <div class="custom-select-trigger" onclick="toggleDropdown('langSelect')">
+                                <span id="currentLangLabel">한국어</span>
+                                <svg class="trigger-arrow" width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                            </div>
+                            <div class="custom-options">
+                                <div class="custom-option selected" onclick="setLanguage('ko', '한국어', this)">한국어</div>
+                                <div class="custom-option" onclick="setLanguage('en', 'English', this)">English</div>
+                                <div class="custom-option" onclick="setLanguage('ja', '日本語', this)">日本語</div>
+                                <div class="custom-option" onclick="setLanguage('zh', '简体中文', this)">简体中文</div>
+                                <div class="custom-option" onclick="setLanguage('es', 'Español', this)">Español</div>
+                                <div class="custom-option" onclick="setLanguage('fr', 'Français', this)">Français</div>
+                                <div class="custom-option" onclick="setLanguage('de', 'Deutsch', this)">Deutsch</div>
+                                <div class="custom-option" onclick="setLanguage('ru', 'Русский', this)">Русский</div>
+                                <div class="custom-option" onclick="setLanguage('it', 'Italiano', this)">Italiano</div>
+                                <div class="custom-option" onclick="setLanguage('pt', 'Português', this)">Português</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="setting-row">
+                        <div class="setting-info">
+                            <div class="setting-label" data-i18n="deleteAllChats">Delete all chats</div>
+                            <div class="setting-desc" data-i18n="deleteAllDesc">모든 대화 기록을 로컬에서 영구 삭제합니다.</div>
+                        </div>
+                        <button class="danger-btn" onclick="confirmDeleteAllChats()" data-i18n="deleteAll">Delete All</button>
+                    </div>
+                </div>
+
+                <div id="tab-personalization" class="tab-section"></div>
+                <div id="tab-dataControls" class="tab-section"></div>
+
+                <div id="tab-info" class="tab-section">
+                    <img src="https://6967a657d214301950ed7b2b.imgix.net/logo.png" alt="MinsuGPT Logo" style="width: 80px; height: 80px; border-radius: 50%; margin-bottom: 20px;">
+                    <h2 style="font-size: 24px; font-weight: 700; margin-bottom: 16px;">MinsuGPT</h2>
+                    <div style="font-size: 14px; color: var(--sub-text-color); margin-bottom: 8px;">App Version: 2026211-200B2012</div>
+                    <div style="font-size: 12px; color: var(--sub-text-color);">Copyright 2026 MinsuGPT & Shin Jaewon. All Rights Reserved.</div>
+                </div>
+            </div>
         </div>
-        <div class="details-tabs" id="detailsTabs">
+    </div>
+
+    <div id="dialog-modal" class="modal-overlay">
+        <div class="dialog-window">
+            <div class="dialog-title" id="dialog-title">Title</div>
+            <input type="text" id="dialog-input" class="dialog-input" style="display:none;">
+            <div class="dialog-actions">
+                <button class="dialog-btn cancel" onclick="closeDialog()" data-i18n="cancel">Cancel</button>
+                <button id="dialog-confirm-btn" class="dialog-btn confirm">Confirm</button>
             </div>
-        <div class="details-content-area" id="detailsContent">
-            </div>
+        </div>
     </div>
 
     <script>
-        // [수정] 스크롤 보정값 설정 변수 (강력한 스크롤)
-        const SCROLL_CORRECTION_VALUE = 999999999999; 
+        // 수정됨: 다국어(10개 언어) 및 설명문구 번역 추가
+        const translations = {
+            ko: { newChat: "새 채팅", history: "기록", settings: "설정", placeholder: "메시지 보내기", general: "일반", personalization: "개인 맞춤 설정", dataControls: "데이터 제어", info: "정보", theme: "테마", system: "시스템", dark: "다크", light: "라이트", language: "언어", deleteAllChats: "모든 채팅 삭제", deleteAll: "모두 삭제", cancel: "취소", delete: "삭제", editTitle: "이름 수정", deleteConfirmTitle: "채팅 삭제", deleteConfirmMsg: "이 채팅을 영구적으로 삭제하시겠습니까?", deleteAllConfirmMsg: "모든 채팅 기록을 영구적으로 삭제하시겠습니까?", themeDesc: "인터페이스의 밝기 모드를 설정합니다.", langDesc: "UI 언어를 변경합니다.", deleteAllDesc: "모든 대화 기록을 로컬에서 영구 삭제합니다." },
+            en: { newChat: "New Chat", history: "History", settings: "Settings", placeholder: "Send a message", general: "General", personalization: "Personalization", dataControls: "Data Controls", info: "Info", theme: "Theme", system: "System", dark: "Dark", light: "Light", language: "Language", deleteAllChats: "Delete all chats", deleteAll: "Delete All", cancel: "Cancel", delete: "Delete", editTitle: "Edit Title", deleteConfirmTitle: "Delete Chat", deleteConfirmMsg: "Delete this chat permanently?", deleteAllConfirmMsg: "Permanently delete all chat history?", themeDesc: "Set the brightness mode of the interface.", langDesc: "Change the UI language.", deleteAllDesc: "Permanently delete all chat history from local storage." },
+            ja: { newChat: "新しいチャット", history: "履歴", settings: "設定", placeholder: "メッセージを送信", general: "一般", personalization: "パーソナライズ", dataControls: "データ制御", info: "情報", theme: "テーマ", system: "システム", dark: "ダーク", light: "ライト", language: "言語", deleteAllChats: "すべてのチャットを削除", deleteAll: "すべて削除", cancel: "キャンセル", delete: "削除", editTitle: "タイトル編集", deleteConfirmTitle: "チャット削除", deleteConfirmMsg: "このチャットを完全に削除しますか？", deleteAllConfirmMsg: "すべてのチャット履歴を完全に削除しますか？", themeDesc: "インターフェースの明るさモードを設定します。", langDesc: "UI言語を変更します。", deleteAllDesc: "ローカルストレージからすべてのチャット履歴を完全に削除します。" },
+            zh: { newChat: "新聊天", history: "历史记录", settings: "设置", placeholder: "发送消息", general: "常规", personalization: "个性化", dataControls: "数据控制", info: "信息", theme: "主题", system: "系统", dark: "深色", light: "浅色", language: "语言", deleteAllChats: "删除所有聊天", deleteAll: "全部删除", cancel: "取消", delete: "删除", editTitle: "编辑标题", deleteConfirmTitle: "删除聊天", deleteConfirmMsg: "确定要永久删除此聊天吗？", deleteAllConfirmMsg: "确定要永久删除所有聊天记录吗？", themeDesc: "设置界面的亮度模式。", langDesc: "更改界面语言。", deleteAllDesc: "从本地存储中永久删除所有聊天记录。" },
+            es: { newChat: "Nuevo Chat", history: "Historial", settings: "Ajustes", placeholder: "Enviar mensaje", general: "General", personalization: "Personalización", dataControls: "Datos", info: "Info", theme: "Tema", system: "Sistema", dark: "Oscuro", light: "Claro", language: "Idioma", deleteAllChats: "Borrar todos los chats", deleteAll: "Borrar todo", cancel: "Cancelar", delete: "Eliminar", editTitle: "Editar título", deleteConfirmTitle: "Eliminar chat", deleteConfirmMsg: "¿Eliminar este chat permanentemente?", deleteAllConfirmMsg: "¿Eliminar permanentemente todo el historial?", themeDesc: "Establece el modo de brillo de la interfaz.", langDesc: "Cambiar el idioma de la interfaz.", deleteAllDesc: "Eliminar permanentemente todo el historial del almacenamiento local." },
+            fr: { newChat: "Nouveau Chat", history: "Historique", settings: "Paramètres", placeholder: "Envoyer un message", general: "Général", personalization: "Personnalisation", dataControls: "Données", info: "Info", theme: "Thème", system: "Système", dark: "Sombre", light: "Clair", language: "Langue", deleteAllChats: "Supprimer tout", deleteAll: "Tout supprimer", cancel: "Annuler", delete: "Supprimer", editTitle: "Modifier le titre", deleteConfirmTitle: "Supprimer le chat", deleteConfirmMsg: "Supprimer ce chat définitivement ?", deleteAllConfirmMsg: "Supprimer définitivement tout l'historique ?", themeDesc: "Régler la luminosité de l'interface.", langDesc: "Changer la langue de l'interface.", deleteAllDesc: "Supprimer définitivement tout l'historique du stockage local." },
+            de: { newChat: "Neuer Chat", history: "Verlauf", settings: "Einstellungen", placeholder: "Nachricht senden", general: "Allgemein", personalization: "Personalisierung", dataControls: "Daten", info: "Info", theme: "Design", system: "System", dark: "Dunkel", light: "Hell", language: "Sprache", deleteAllChats: "Alle Chats löschen", deleteAll: "Alle löschen", cancel: "Abbrechen", delete: "Löschen", editTitle: "Titel bearbeiten", deleteConfirmTitle: "Chat löschen", deleteConfirmMsg: "Diesen Chat dauerhaft löschen?", deleteAllConfirmMsg: "Gesamten Chatverlauf dauerhaft löschen?", themeDesc: "Helligkeitsmodus der Oberfläche festlegen.", langDesc: "UI-Sprache ändern.", deleteAllDesc: "Gesamten Chatverlauf dauerhaft vom lokalen Speicher löschen." },
+            ru: { newChat: "Новый чат", history: "История", settings: "Настройки", placeholder: "Отправить сообщение", general: "Общие", personalization: "Персонализация", dataControls: "Данные", info: "Инфо", theme: "Тема", system: "Системная", dark: "Темная", light: "Светлая", language: "Язык", deleteAllChats: "Удалить все чаты", deleteAll: "Удалить все", cancel: "Отмена", delete: "Удалить", editTitle: "Изменить название", deleteConfirmTitle: "Удалить чат", deleteConfirmMsg: "Удалить этот чат навсегда?", deleteAllConfirmMsg: "Удалить всю историю чатов навсегда?", themeDesc: "Установить режим яркости интерфейса.", langDesc: "Изменить язык интерфейса.", deleteAllDesc: "Навсегда удалить всю историю чатов из локального хранилища." },
+            it: { newChat: "Nuova Chat", history: "Cronologia", settings: "Impostazioni", placeholder: "Invia un messaggio", general: "Generale", personalization: "Personalizzazione", dataControls: "Dati", info: "Info", theme: "Tema", system: "Sistema", dark: "Scuro", light: "Chiaro", language: "Lingua", deleteAllChats: "Elimina tutte le chat", deleteAll: "Elimina tutto", cancel: "Annulla", delete: "Elimina", editTitle: "Modifica titolo", deleteConfirmTitle: "Elimina chat", deleteConfirmMsg: "Eliminare definitivamente questa chat?", deleteAllConfirmMsg: "Eliminare definitivamente tutta la cronologia?", themeDesc: "Imposta la modalità di luminosità dell'interfaccia.", langDesc: "Cambia la lingua dell'interfaccia.", deleteAllDesc: "Elimina definitivamente tutta la cronologia dalla memoria locale." },
+            pt: { newChat: "Novo Chat", history: "Histórico", settings: "Configurações", placeholder: "Enviar mensagem", general: "Geral", personalization: "Personalização", dataControls: "Dados", info: "Info", theme: "Tema", system: "Sistema", dark: "Escuro", light: "Claro", language: "Idioma", deleteAllChats: "Apagar todas as conversas", deleteAll: "Apagar tudo", cancel: "Cancelar", delete: "Apagar", editTitle: "Editar título", deleteConfirmTitle: "Apagar conversa", deleteConfirmMsg: "Apagar esta conversa permanentemente?", deleteAllConfirmMsg: "Apagar permanentemente todo o histórico?", themeDesc: "Definir o modo de brilho da interface.", langDesc: "Alterar o idioma da interface.", deleteAllDesc: "Apagar permanentemente todo o histórico do armazenamento local." }
+        };
 
-        const chatContainer = document.getElementById('chatContainer');
-        const chatInput = document.getElementById('chatInput');
-        const sendBtn = document.getElementById('sendBtn');
-        const attachBtn = document.getElementById('attachBtn');
-        const attachMenu = document.getElementById('attachMenu');
-        const searchBtn = document.getElementById('searchBtn');
-        const scrollToBottomBtn = document.getElementById('scrollToBottomBtn');
-        const newChatBtn = document.getElementById('newChatBtn');
-        const savedChatList = document.getElementById('savedChatList');
+        let currentLang = 'ko';
+        let isGenerating = false;
+        let isSearchActive = false; // Search Mode Toggle
+        let typingTimeout = null;
+        let thinkingTimeout = null;
+        let currentBubbleElement = null;
+        let currentBotRowElement = null; 
+        
+        // Reader for stream
+        let streamReader = null;
+
+        // Data Management Variables
+        let currentChatId = null;
+        let currentMessages = [];
+        let currentAttachments = []; // Stores current attachments for the input
+        const STORAGE_KEY = 'chat_history_v1';
 
         const sidebar = document.getElementById('sidebar');
-        const sidebarOverlay = document.getElementById('sidebarOverlay');
-        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
-        const sidebarCloseBtn = document.getElementById('sidebarCloseBtn');
-        const pcSidebarOpenBtn = document.getElementById('pcSidebarOpenBtn');
+        const sidebarOverlay = document.getElementById('sidebar-overlay');
+        const newChatBtn = document.getElementById('newChatBtn');
+        const welcomeScreen = document.getElementById('welcome-screen');
+        const chatContent = document.getElementById('chat-content');
+        const bottomInterface = document.getElementById('bottom-interface');
+        const centerInput = document.getElementById('centerInput');
+        const centerSendBtn = document.getElementById('centerSendBtn');
+        const bottomInput = document.getElementById('bottomInput');
+        const bottomSendBtn = document.getElementById('bottomSendBtn');
+        const settingsModal = document.getElementById('settings-modal');
+        const dialogModal = document.getElementById('dialog-modal');
+        const chatHistoryList = document.getElementById('chatHistoryList');
+        const hiddenFileInput = document.getElementById('hiddenFileInput');
+        const imageLightbox = document.getElementById('image-lightbox');
+        const lightboxImg = document.getElementById('lightbox-img');
 
-        // 검색 관련
-        const sidebarSearchBtn = document.getElementById('sidebarSearchBtn');
-        const sidebarSearchContainer = document.getElementById('sidebarSearchContainer');
-        const sidebarSearchInput = document.getElementById('sidebarSearchInput');
+        const icons = {
+            send: '<svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path></svg>',
+            stop: '<svg width="12" height="12" fill="currentColor" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>',
+            copy: '<svg class="action-icon" style="transform: scaleX(-1);" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>',
+            check: '<svg class="action-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>',
+            regenerate: '<svg class="action-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>',
+            edit: '<svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>',
+            trash: '<svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>'
+        };
 
-        // 모달 관련 요소
-        const renameModalOverlay = document.getElementById('renameModalOverlay');
-        const renameInput = document.getElementById('renameInput');
-        const renameCancelBtn = document.getElementById('renameCancelBtn');
-        const renameConfirmBtn = document.getElementById('renameConfirmBtn');
-
-        // 상세 정보 패널 관련
-        const detailsPanel = document.getElementById('detailsPanel');
-        const detailsCloseBtn = document.getElementById('detailsCloseBtn');
-        const detailsTabs = document.getElementById('detailsTabs');
-        const detailsContent = document.getElementById('detailsContent');
-
-        // [NEW] 상단 더보기 및 프로필 메뉴 관련
-        const topDotsBtn = document.getElementById('topDotsBtn');
-        const topMoreMenu = document.getElementById('topMoreMenu');
-        const topRenameBtn = document.getElementById('topRenameBtn');
-        const topDeleteBtn = document.getElementById('topDeleteBtn');
-        
-        const sidebarFooter = document.querySelector('.sidebar-footer');
-        const profileMenu = document.getElementById('profileMenu');
-        
-        const emptyState = document.getElementById('emptyState');
-
-        let conversationHistory = [];
-        let abortController = null;
-        let isGenerating = false;
-        let isFirstMessage = true; 
-        let currentChatId = null;
-        let renameTargetId = null;
-        
-        // 메시지별 메타데이터 저장 (사고과정, 인용 등)
-        let messageMetadata = {}; 
-
-        marked.setOptions({ breaks: true, sanitize: false });
-
-        // --- 유틸리티 함수: UUID 생성 ---
-        function generateUUID() {
-            if (typeof crypto !== 'undefined' && crypto.randomUUID) {
-                return crypto.randomUUID();
-            }
-            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-                var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
-                return v.toString(16);
-            });
-        }
-
-        // --- 로컬 스토리지 관리 ---
-        function getSavedChats() {
-            const stored = localStorage.getItem('minsuGptChats');
-            return stored ? JSON.parse(stored) : {};
-        }
-
-        function saveChatsToStorage(chats) {
-            localStorage.setItem('minsuGptChats', JSON.stringify(chats));
-            renderSidebar();
-        }
-
-        function saveCurrentChat() {
-            if (!currentChatId) return;
-            const chats = getSavedChats();
+        // --- Initialization ---
+        function init() {
+            if (window.innerWidth <= 768) sidebar.classList.add('collapsed');
+            updateUIText('ko');
+            loadHistoryFromStorage();
             
-            let title = "새로운 채팅";
-            if (conversationHistory.length > 0) {
-                const firstUserMsg = conversationHistory.find(m => m.role === 'user');
-                if (firstUserMsg) {
-                    title = firstUserMsg.content.substring(0, 30);
-                }
+            const urlParams = new URLSearchParams(window.location.search);
+            const chatIdFromUrl = urlParams.get('chat');
+            
+            if (chatIdFromUrl) {
+                loadChat(chatIdFromUrl);
+            } else {
+                startNewChat(false);
             }
-            if (chats[currentChatId] && chats[currentChatId].title) {
-                title = chats[currentChatId].title;
-            }
-
-            chats[currentChatId] = {
-                id: currentChatId,
-                title: title,
-                history: conversationHistory,
-                metadata: messageMetadata, 
-                lastUpdated: Date.now()
-            };
-            saveChatsToStorage(chats);
         }
 
-        function loadChatFromStorage(id) {
-            const chats = getSavedChats();
-            if (chats[id]) {
-                currentChatId = id;
-                conversationHistory = chats[id].history || [];
-                messageMetadata = chats[id].metadata || {};
-                
-                chatContainer.innerHTML = '';
-                
-                // [NEW] 기록이 있으면 empty state 숨김
-                if (conversationHistory.length > 0) {
-                    emptyState.classList.remove('show');
+        // --- Search Mode Logic ---
+        function toggleSearchMode(origin) {
+            isSearchActive = !isSearchActive;
+            const btnCenter = document.getElementById('centerSearchBtn');
+            const btnBottom = document.getElementById('bottomSearchBtn');
+            
+            if (isSearchActive) {
+                btnCenter.classList.add('active');
+                btnBottom.classList.add('active');
+            } else {
+                btnCenter.classList.remove('active');
+                btnBottom.classList.remove('active');
+            }
+        }
+
+        // --- File Attachment Logic ---
+        function toggleAttachMenu(origin) {
+            const menu = document.getElementById(origin + 'AttachMenu');
+            const isOpen = menu.classList.contains('open');
+            // close all first
+            document.querySelectorAll('.attach-menu').forEach(el => el.classList.remove('open'));
+            if (!isOpen) menu.classList.add('open');
+        }
+
+        // Close menu when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.attach-menu') && !e.target.closest('.icon-btn')) {
+                document.querySelectorAll('.attach-menu').forEach(el => el.classList.remove('open'));
+            }
+        });
+
+        function handleFileUpload(type, origin) {
+            // Close menus
+            document.querySelectorAll('.attach-menu').forEach(el => el.classList.remove('open'));
+            
+            // Trigger hidden input
+            hiddenFileInput.setAttribute('accept', type === 'image' ? 'image/*' : '*/*');
+            hiddenFileInput.onchange = (e) => processFiles(e.target.files, origin);
+            hiddenFileInput.click();
+        }
+
+        async function processFiles(files, origin) {
+            if (!files || files.length === 0) return;
+
+            for (let file of files) {
+                // 수정됨: 백엔드 전송을 위해 원본 파일 객체(fileObject)도 저장
+                if (file.type.startsWith('image/')) {
+                    const compressedDataUrl = await compressImage(file);
+                    currentAttachments.push({ type: 'image', data: compressedDataUrl, name: file.name, fileObject: file });
                 } else {
-                    emptyState.classList.add('show');
+                    currentAttachments.push({ type: 'file', name: file.name, size: file.size, fileObject: file });
                 }
-                
-                conversationHistory.forEach((msg, index) => {
-                    const row = addMessage(msg.content, msg.role, false);
-                    if (msg.role === 'assistant') {
-                         // [수정] 메타데이터 인덱스를 1-based로 관리중이므로, 현재 loop index(0-based)를 보정
-                         // conversationHistory index: 0(user), 1(bot), 2(user), 3(bot)...
-                         // save 시점에서 metadata[conversationHistory.length]로 저장했으므로,
-                         // bot message의 index는 (msgIndex + 1)과 매칭되어야 함.
-                         // 하지만 단순하게 생각해서 저장 로직을 다시 보면:
-                         // sendMessage -> push user -> push bot. 
-                         // Metadata key is `conversationHistory.length + 1` (bot push 직전).
-                         // 예: User(idx 0) -> Bot(idx 1). Metadata key = 2.
-                         // 복원 시: forEach index 1 (bot). metadata key should be 2.
-                         // 따라서 key = index + 1
-                         const key = index + 1;
-                         if (messageMetadata[key]) {
-                             addBotButtons(row, msg.content, messageMetadata[key]);
-                         } else {
-                             addBotButtons(row, msg.content, null);
-                         }
-                    }
-                });
-                
-                isFirstMessage = false;
-                document.body.style.overflowY = 'auto';
-                
-                // URL 업데이트 (/chat/UUID)
-                history.pushState({ chatId: id }, '', `/chat/${id}`);
-                
-                window.scrollTo({ top: document.body.scrollHeight, behavior: 'auto' });
-                
-                // 스크롤 버튼 숨김 처리
-                scrollToBottomBtn.classList.remove('show');
-                
-                renderSidebar();
             }
+            renderAttachments();
+            hiddenFileInput.value = ''; // reset
         }
 
-        function deleteChat(id) {
-            const chats = getSavedChats();
-            delete chats[id];
-            saveChatsToStorage(chats);
-            if (currentChatId === id) {
-                startNewChat();
-            }
-        }
-
-        function openRenameModal(id) {
-            const chats = getSavedChats();
-            if (chats[id]) {
-                renameTargetId = id;
-                renameInput.value = chats[id].title;
-                renameModalOverlay.classList.add('open');
-                renameInput.focus();
-            }
-        }
-
-        function closeRenameModal() {
-            renameModalOverlay.classList.remove('open');
-            renameTargetId = null;
-        }
-
-        renameCancelBtn.addEventListener('click', closeRenameModal);
-        renameConfirmBtn.addEventListener('click', () => {
-            if (renameTargetId) {
-                const newTitle = renameInput.value.trim();
-                if (newTitle) {
-                    const chats = getSavedChats();
-                    if (chats[renameTargetId]) {
-                        chats[renameTargetId].title = newTitle;
-                        saveChatsToStorage(chats);
-                    }
-                }
-                closeRenameModal();
-            }
-        });
-
-        // --- 사이드바 렌더링 및 검색 ---
-        function renderSidebar(filterText = '') {
-            const chats = getSavedChats();
-            const sortedChats = Object.values(chats).sort((a, b) => b.lastUpdated - a.lastUpdated);
-            
-            savedChatList.innerHTML = '';
-            sortedChats.forEach(chat => {
-                if (filterText && !chat.title.toLowerCase().includes(filterText.toLowerCase())) {
-                    return;
-                }
-
-                const itemDiv = document.createElement('div');
-                itemDiv.className = `chat-history-item ${chat.id === currentChatId ? 'active' : ''}`;
-                itemDiv.innerHTML = `
-                    <div class="chat-title">${chat.title}</div>
-                    <div class="chat-item-options" data-id="${chat.id}">
-                        <span class="material-symbols-rounded" style="font-size:16px;">more_vert</span>
-                    </div>
-                `;
-                
-                itemDiv.addEventListener('click', (e) => {
-                    if (e.target.closest('.chat-item-options') || e.target.closest('.history-menu-dropdown')) return;
-                    loadChatFromStorage(chat.id);
-                });
-
-                const optionBtn = itemDiv.querySelector('.chat-item-options');
-                optionBtn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    document.querySelectorAll('.history-menu-dropdown').forEach(el => el.remove());
-                    
-                    const dropdown = document.createElement('div');
-                    dropdown.className = 'history-menu-dropdown show';
-                    dropdown.innerHTML = `
-                        <div class="history-menu-item" id="menuRename"><span class="material-symbols-rounded">edit</span> 이름 변경</div>
-                        <div class="history-menu-item delete" id="menuDelete"><span class="material-symbols-rounded">delete</span> 삭제</div>
-                    `;
-                    itemDiv.appendChild(dropdown);
-
-                    dropdown.querySelector('#menuRename').addEventListener('click', (ev) => {
-                        ev.stopPropagation();
-                        openRenameModal(chat.id);
-                        dropdown.remove();
-                    });
-                    
-                    dropdown.querySelector('#menuDelete').addEventListener('click', (ev) => {
-                        ev.stopPropagation();
-                        deleteChat(chat.id);
-                    });
-                });
-
-                savedChatList.appendChild(itemDiv);
+        function compressImage(file) {
+            return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = (event) => {
+                    const img = new Image();
+                    img.src = event.target.result;
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        const ctx = canvas.getContext('2d');
+                        // Resize constraint (max 800px)
+                        const MAX_SIZE = 800;
+                        let width = img.width;
+                        let height = img.height;
+                        
+                        if (width > height) {
+                            if (width > MAX_SIZE) { height *= MAX_SIZE / width; width = MAX_SIZE; }
+                        } else {
+                            if (height > MAX_SIZE) { width *= MAX_SIZE / height; height = MAX_SIZE; }
+                        }
+                        
+                        canvas.width = width;
+                        canvas.height = height;
+                        ctx.drawImage(img, 0, 0, width, height);
+                        // Backend compatible compression (JPEG 0.7)
+                        resolve(canvas.toDataURL('image/jpeg', 0.7));
+                    };
+                };
             });
         }
-        
-        // 검색 버튼 토글 (버튼 클릭 시 입력창 노출)
-        sidebarSearchBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            sidebarSearchBtn.style.display = 'none';
-            sidebarSearchContainer.style.display = 'block';
-            sidebarSearchInput.focus();
-        });
-        
-        // 검색 입력 이벤트
-        sidebarSearchInput.addEventListener('input', (e) => {
-            renderSidebar(e.target.value);
-        });
 
-        // [NEW] 상단 더보기 메뉴 토글
-        topDotsBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            if (topMoreMenu.classList.contains('show')) {
-                topMoreMenu.classList.remove('show');
-            } else {
-                topMoreMenu.classList.add('show');
-            }
-        });
-
-        // [NEW] 상단 메뉴 동작 (현재 채팅 대상)
-        topRenameBtn.addEventListener('click', () => {
-            if (currentChatId) openRenameModal(currentChatId);
-            topMoreMenu.classList.remove('show');
-        });
-        topDeleteBtn.addEventListener('click', () => {
-            if (currentChatId) deleteChat(currentChatId);
-            topMoreMenu.classList.remove('show');
-        });
-
-        // [NEW] 프로필 메뉴 토글
-        sidebarFooter.addEventListener('click', (e) => {
-            e.stopPropagation();
-            if (profileMenu.classList.contains('show')) {
-                profileMenu.classList.remove('show');
-            } else {
-                profileMenu.classList.add('show');
-            }
-        });
-
-        // 전역 클릭 이벤트 (검색창 외부 클릭 감지 등)
-        document.addEventListener('click', (e) => {
-            // 채팅 옵션 메뉴 닫기
-            if (!e.target.closest('.chat-history-item')) {
-                document.querySelectorAll('.history-menu-dropdown').forEach(el => el.remove());
-            }
-
-            // [NEW] 상단 더보기 메뉴 닫기
-            if (!topMoreMenu.contains(e.target) && e.target !== topDotsBtn) {
-                topMoreMenu.classList.remove('show');
-            }
-
-            // [NEW] 프로필 메뉴 닫기
-            if (!profileMenu.contains(e.target) && !sidebarFooter.contains(e.target)) {
-                profileMenu.classList.remove('show');
-            }
-
-            // 검색창 외부 클릭 시 되돌리기
-            if (sidebarSearchContainer.style.display === 'block') {
-                if (!sidebarSearchContainer.contains(e.target) && e.target !== sidebarSearchBtn) {
-                    sidebarSearchContainer.style.display = 'none';
-                    sidebarSearchBtn.style.display = 'flex'; // 원래 display 속성(flex)으로 복구
-                    sidebarSearchInput.value = ''; // 검색어 초기화
-                    renderSidebar(); // 목록 초기화
-                }
-            }
-        });
-
-        function startNewChat() {
-            if (isGenerating && abortController) abortController.abort();
-            currentChatId = null;
-            conversationHistory = [];
-            messageMetadata = {}; 
-            isFirstMessage = true;
-            chatContainer.innerHTML = '';
-            chatInput.value = '';
-            sendBtn.disabled = true;
-            adjustHeight();
-            scrollToBottomBtn.classList.remove('show'); 
+        function renderAttachments() {
+            const centerPreview = document.getElementById('center-preview');
+            const bottomPreview = document.getElementById('bottom-preview');
             
-            // [NEW] 새 채팅 시작 시 empty state 보이기
-            emptyState.classList.add('show');
+            [centerPreview, bottomPreview].forEach(container => {
+                container.innerHTML = '';
+                if (currentAttachments.length > 0) container.classList.add('has-items');
+                else container.classList.remove('has-items');
 
-            history.pushState({}, '', '/');
-            renderSidebar();
-        }
-
-        newChatBtn.addEventListener('click', startNewChat);
-
-        // --- 초기 로드 및 URL 처리 ---
-        window.addEventListener('load', () => {
-            // 초기 empty state 표시
-            if (!window.location.search && !window.location.pathname.includes('/chat/')) {
-                emptyState.classList.add('show');
-            }
-            
-            renderSidebar();
-            
-            const path = window.location.pathname;
-            const match = path.match(/\/chat\/([a-zA-Z0-9-]+)/);
-            if (match && match[1]) {
-                loadChatFromStorage(match[1]);
-            }
-        });
-
-        window.addEventListener('popstate', (event) => {
-            if (event.state && event.state.chatId) {
-                loadChatFromStorage(event.state.chatId);
-            } else {
-                startNewChat();
-            }
-        });
-
-
-        // --- 기능 유지 ---
-        function adjustHeight() {
-            chatInput.style.height = 'auto'; 
-            let scrollHeight = chatInput.scrollHeight;
-            if (scrollHeight > 150) { 
-                chatInput.style.height = '150px';
-                chatInput.style.overflowY = 'scroll'; 
-            } else {
-                chatInput.style.height = scrollHeight + 'px';
-                chatInput.style.overflowY = 'hidden'; 
-            }
-            if (!isGenerating) sendBtn.disabled = chatInput.value.trim().length === 0;
-        }
-
-        function toggleSidebar() {
-            if (window.innerWidth > 768) {
-                document.body.classList.toggle('pc-sidebar-open');
-            } else {
-                const isOpen = sidebar.classList.contains('open');
-                if (isOpen) {
-                    sidebar.classList.remove('open');
-                    sidebarOverlay.classList.remove('open');
-                } else {
-                    sidebar.classList.add('open');
-                    sidebarOverlay.classList.add('open');
-                }
-            }
-        }
-
-        mobileMenuBtn.addEventListener('click', toggleSidebar);
-        sidebarCloseBtn.addEventListener('click', toggleSidebar);
-        pcSidebarOpenBtn.addEventListener('click', toggleSidebar);
-        sidebarOverlay.addEventListener('click', toggleSidebar);
-
-        function checkScrollPosition() {
-            const scrollBottom = window.scrollY + window.innerHeight;
-            const docHeight = document.documentElement.scrollHeight;
-            
-            if (docHeight - scrollBottom > 100) {
-                scrollToBottomBtn.classList.add('show');
-            } else {
-                scrollToBottomBtn.classList.remove('show');
-            }
-        }
-        window.addEventListener('scroll', checkScrollPosition);
-
-        scrollToBottomBtn.addEventListener('click', () => {
-            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-        });
-
-        function applyMessagePadding(element) {
-            const headerHeight = 50; 
-            const topGap = 20;       
-            const targetVisualTop = headerHeight + topGap; 
-
-            const windowHeight = window.innerHeight;
-            const elementHeight = element.offsetHeight;
-            
-            let requiredPadding = windowHeight - (targetVisualTop + elementHeight);
-            if (requiredPadding < 160) requiredPadding = 160;
-            
-            chatContainer.style.paddingBottom = requiredPadding + 'px';
-        }
-
-        async function regenerateResponse() {
-            if (conversationHistory.length === 0) return;
-            const lastMsg = conversationHistory[conversationHistory.length - 1];
-            if (lastMsg.role === 'assistant') {
-                conversationHistory.pop();
-                const botRows = document.querySelectorAll('.message-row.bot');
-                if (botRows.length > 0) {
-                    botRows[botRows.length - 1].remove();
-                }
-            }
-            const lastUserMsg = conversationHistory[conversationHistory.length - 1];
-            if (!lastUserMsg || lastUserMsg.role !== 'user') return;
-            sendMessage(lastUserMsg.content, true);
-        }
-
-        // --- 상세 정보 패널 제어 ---
-        detailsCloseBtn.addEventListener('click', () => {
-            detailsPanel.classList.remove('open');
-        });
-
-        function openDetailsPanel(data, defaultTab = 'thought') {
-            detailsTabs.innerHTML = '';
-            detailsContent.innerHTML = '';
-            
-            let hasThought = data.thought && data.thought.trim().length > 0;
-            let hasCitations = data.citations && data.citations.length > 0;
-
-            // 탭 버튼 생성
-            if (hasThought) {
-                const tBtn = document.createElement('button');
-                tBtn.className = `details-tab-btn ${defaultTab === 'thought' ? 'active' : ''}`;
-                tBtn.innerText = '사고 과정';
-                tBtn.onclick = () => showTabContent('thought', data);
-                detailsTabs.appendChild(tBtn);
-            }
-            if (hasCitations) {
-                const cBtn = document.createElement('button');
-                cBtn.className = `details-tab-btn ${(!hasThought || defaultTab === 'citations') ? 'active' : ''}`;
-                cBtn.innerText = '인용';
-                cBtn.onclick = () => showTabContent('citations', data);
-                detailsTabs.appendChild(cBtn);
-            }
-
-            // 초기 컨텐츠 표시
-            if (defaultTab === 'thought' && hasThought) showTabContent('thought', data);
-            else if (hasCitations) showTabContent('citations', data);
-
-            detailsPanel.classList.add('open');
-        }
-
-        function showTabContent(type, data) {
-            // 탭 활성화 상태 업데이트
-            Array.from(detailsTabs.children).forEach(btn => {
-                if (btn.innerText === (type === 'thought' ? '사고 과정' : '인용')) btn.classList.add('active');
-                else btn.classList.remove('active');
-            });
-
-            detailsContent.innerHTML = '';
-            
-            if (type === 'thought') {
-                const div = document.createElement('div');
-                div.className = 'thought-content';
-                div.innerText = data.thought;
-                detailsContent.appendChild(div);
-            } else if (type === 'citations') {
-                const grid = document.createElement('div');
-                grid.className = 'citation-grid';
-                data.citations.forEach(cit => {
+                currentAttachments.forEach((att, index) => {
                     const card = document.createElement('div');
-                    card.className = 'citation-card';
-                    card.onclick = () => window.open(cit.url, '_blank');
+                    card.className = `attach-card ${att.type === 'file' ? 'file-type' : ''}`;
                     
-                    const t = document.createElement('div');
-                    t.className = 'citation-title';
-                    t.innerText = cit.title;
-                    
-                    const c = document.createElement('div');
-                    c.className = 'citation-snippet';
-                    // [수정] 긴 내용 잘라서 표시
-                    c.innerText = cit.content.length > 100 ? cit.content.substring(0, 100) + '...' : cit.content;
-                    
-                    card.appendChild(t);
-                    card.appendChild(c);
-                    grid.appendChild(card);
+                    if (att.type === 'image') {
+                        card.style.backgroundImage = `url(${att.data})`;
+                        card.onclick = () => openImageLightbox(att.data);
+                    } else {
+                        card.innerText = "📄\n" + att.name.substring(0, 10) + "...";
+                    }
+
+                    const removeBtn = document.createElement('div');
+                    removeBtn.className = 'attach-card-remove';
+                    removeBtn.innerHTML = '&times;';
+                    removeBtn.onclick = (e) => {
+                        e.stopPropagation(); // prevent lightbox
+                        removeAttachment(index);
+                    };
+
+                    card.appendChild(removeBtn);
+                    container.appendChild(card);
                 });
-                detailsContent.appendChild(grid);
-            }
+            });
+            
+            // Update send button state
+            toggleBtnState(centerInput.value, centerSendBtn);
+            toggleBtnState(bottomInput.value, bottomSendBtn);
         }
 
+        function removeAttachment(index) {
+            currentAttachments.splice(index, 1);
+            renderAttachments();
+        }
 
-        // --- 메시지 전송 및 파싱 로직 ---
-        async function sendMessage(textOverride = null, isRegen = false) {
-            if (isGenerating) {
-                if (abortController) abortController.abort();
+        // --- Lightbox Logic ---
+        function openImageLightbox(src) {
+            lightboxImg.src = src;
+            imageLightbox.classList.add('open');
+        }
+        function closeImageLightbox() {
+            imageLightbox.classList.remove('open');
+            setTimeout(() => { lightboxImg.src = ''; }, 300);
+        }
+
+        // --- Data & Storage Logic ---
+        function generateId(length = 12) {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+            let result = '';
+            for (let i = 0; i < length; i++) result += chars.charAt(Math.floor(Math.random() * chars.length));
+            return result;
+        }
+
+        function getStoredChats() {
+            try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); } 
+            catch { return []; }
+        }
+
+        function saveChatToStorage(chatObj) {
+            let chats = getStoredChats();
+            const existingIndex = chats.findIndex(c => c.id === chatObj.id);
+            
+            if (existingIndex > -1) {
+                chats[existingIndex] = chatObj;
+            } else {
+                chats.unshift(chatObj); 
+            }
+            
+            chatObj.updatedAt = Date.now();
+            chats.sort((a, b) => b.updatedAt - a.updatedAt); 
+
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(chats));
+            } catch (e) {
+                if (e.name === 'QuotaExceededError') {
+                    while (chats.length > 0) {
+                        chats.pop(); 
+                        try {
+                            localStorage.setItem(STORAGE_KEY, JSON.stringify(chats));
+                            break; 
+                        } catch (e2) {
+                            if (chats.length === 0) break; 
+                        }
+                    }
+                }
+            }
+            renderHistoryList();
+        }
+
+        function deleteChatFromStorage(id) {
+            let chats = getStoredChats();
+            chats = chats.filter(c => c.id !== id);
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(chats));
+            renderHistoryList();
+        }
+
+        function startNewChat(updateUrl = true) {
+            if (isGenerating) stopGeneration();
+            currentChatId = generateId();
+            currentMessages = [];
+            currentAttachments = [];
+            renderAttachments();
+
+            chatContent.innerHTML = '';
+            welcomeScreen.classList.remove('hidden');
+            chatContent.classList.remove('visible');
+            bottomInterface.classList.remove('visible');
+            newChatBtn.classList.add('active');
+            
+            centerInput.value = '';
+            bottomInput.value = '';
+            // New chat - reset height
+            centerInput.style.height = '24px';
+            bottomInput.style.height = '24px';
+            toggleBtnState('', centerSendBtn);
+            
+            document.querySelectorAll('.history-item').forEach(el => el.classList.remove('active'));
+            
+            if (updateUrl) {
+                const url = new URL(window.location);
+                url.searchParams.set('chat', currentChatId);
+                window.history.pushState({}, '', url);
+            }
+            if (window.innerWidth <= 768) { sidebar.classList.add('collapsed'); sidebarOverlay.classList.remove('visible'); }
+        }
+
+        function loadChat(id) {
+            const chats = getStoredChats();
+            const chat = chats.find(c => c.id === id);
+            
+            if (!chat) {
+                startNewChat();
                 return;
             }
 
-            // [NEW] 메시지 전송 시 empty state 숨김
-            emptyState.classList.remove('show');
+            if (isGenerating) stopGeneration();
+            currentChatId = chat.id;
+            currentMessages = chat.messages || [];
+            currentAttachments = []; // reset input attachments
+            renderAttachments();
 
-            let allocatedPadding = 160;
+            welcomeScreen.classList.add('hidden');
+            chatContent.classList.add('visible');
+            bottomInterface.classList.add('visible');
+            newChatBtn.classList.remove('active');
+            chatContent.innerHTML = '';
 
-            const text = textOverride || chatInput.value.trim();
-            if (text.length === 0) return;
-
-            if (isFirstMessage) {
-                document.body.style.overflowY = 'auto';
-                isFirstMessage = false;
-            }
-
-            if (!currentChatId) {
-                currentChatId = generateUUID();
-                history.pushState({ chatId: currentChatId }, '', `/chat/${currentChatId}`);
-            }
-
-            let userMsgElement;
-            if (!isRegen) {
-                userMsgElement = addMessage(text, 'user');
-                conversationHistory.push({ role: "user", content: text });
-                chatInput.value = '';
-                adjustHeight();
-                
-                // [수정] 무조건 즉시 스크롤
-                setTimeout(() => {
-                    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-                }, 10);
-            } else {
-                const userRows = document.querySelectorAll('.message-row.user');
-                userMsgElement = userRows[userRows.length - 1];
-            }
-            
-            saveCurrentChat();
-
-            isGenerating = true;
-            sendBtn.innerHTML = '<div class="stop-icon-square"></div>'; 
-            sendBtn.disabled = false;
-            
-            // [수정] 스크롤 로직: 이전 메세지 높이 + 보정값
-            if (userMsgElement && conversationHistory.length > 1) { 
-                requestAnimationFrame(() => {
-                    applyMessagePadding(userMsgElement); 
-                    
-                    setTimeout(() => {
-                        const messages = document.querySelectorAll('.message-row');
-                        if (messages.length >= 2) {
-                            const prevMsg = messages[messages.length - 2];
-                            const height = prevMsg.offsetHeight;
-                            window.scrollBy({ top: height + SCROLL_CORRECTION_VALUE, behavior: 'smooth' });
-                        } else {
-                            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-                        }
-                    }, 50);
-                });
-            } else {
-                setTimeout(() => {
-                    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-                }, 10);
-            }
-
-            const isSearchMode = searchBtn.classList.contains('active');
-            const loadingId = 'loading-' + Date.now();
-            const timers = addLoadingMessage(loadingId, isSearchMode);
-
-            abortController = new AbortController();
-            let botContent = null; 
-            
-            let rawFullText = ""; 
-            let cleanTextDisplay = "";
-            let currentMetadata = { thought: "", citations: [] };
-
-            try {
-                const response = await fetch(isSearchMode ? "https://jaewondev.pythonanywhere.com/ask" : "https://jaewondev.pythonanywhere.com/askfast", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ message: text, history: conversationHistory }),
-                    signal: abortController.signal
-                });
-
-                if (!response.ok) throw new Error("Server error");
-
-                const loadingElem = document.getElementById(loadingId);
-                if (loadingElem) loadingElem.remove();
-                if (timers) timers.forEach(t => clearTimeout(t));
-
-                const botRow = document.createElement('div');
-                botRow.classList.add('message-row', 'bot');
-                botContent = document.createElement('div');
-                botContent.classList.add('bot-text');
-                botContent.classList.add('animate-in'); 
-
-                botRow.appendChild(botContent);
-                chatContainer.appendChild(botRow);
-
-                const reader = response.body.getReader();
-                const decoder = new TextDecoder();
-                
-                const parseStream = (fullText) => {
-                    let extractedThoughts = "";
-                    let citations = [];
-                    
-                    let tempText = fullText.replace(/\[THOUGHT\]([\s\S]*?)\[\/THOUGHT\]/g, (match, p1) => {
-                        // [수정] 줄바꿈을 포함한 Title, URL, Content, Score 파싱을 위한 정규식
-                        // p1은 [THOUGHT] 내부의 전체 텍스트
-                        
-                        // 인용구조인지 확인 (단순 포함 여부보다 정규식으로 추출 시도)
-                        const citationRegex = /Title:\s*(.+?)\n\s*URL:\s*(.+?)\n\s*Content:\s*([\s\S]*?)\n\s*Score:/;
-                        const citMatch = p1.match(citationRegex);
-
-                        if (citMatch) {
-                            citations.push({
-                                title: citMatch[1].trim(),
-                                url: citMatch[2].trim(),
-                                content: citMatch[3].trim()
-                            });
-                            // 인용 카드 정보로 추출했으므로, 텍스트에서는 제거 (빈 문자열 반환)
-                            return "";
-                        } else {
-                            // 일반 사고 과정
-                            extractedThoughts += p1 + "\n\n";
-                            return ""; // 사고 과정도 본문에서 숨김
-                        }
-                    });
-
-                    const openTagIndex = tempText.indexOf("[THOUGHT]");
-                    if (openTagIndex !== -1) {
-                        tempText = tempText.substring(0, openTagIndex);
+            currentMessages.forEach(msg => {
+                if (msg.role === 'user') {
+                    appendMessageUI('user', msg.content, false, msg.attachments);
+                } else if (msg.role === 'bot') {
+                    // Load chat: render markdown for existing messages
+                    appendMessageUI('bot', msg.content, false); 
+                    const rows = chatContent.querySelectorAll('.message-row.bot');
+                    const lastRow = rows[rows.length-1];
+                    if(lastRow) {
+                       const bubble = lastRow.querySelector('.message-bubble');
+                       addActionButtons(lastRow.querySelector('.bot-bubble-wrapper'), bubble.innerText);
                     }
+                }
+            });
 
-                    return {
-                        cleanText: tempText,
-                        thoughts: extractedThoughts.trim(),
-                        citations: citations
-                    };
+            const url = new URL(window.location);
+            url.searchParams.set('chat', currentChatId);
+            window.history.pushState({}, '', url);
+
+            renderHistoryList();
+            if (window.innerWidth <= 768) { sidebar.classList.add('collapsed'); sidebarOverlay.classList.remove('visible'); }
+            scrollToBottom();
+        }
+
+        function renderHistoryList() {
+            const chats = getStoredChats();
+            chatHistoryList.innerHTML = '';
+            
+            chats.forEach(chat => {
+                const div = document.createElement('div');
+                div.className = `history-item ${chat.id === currentChatId ? 'active' : ''}`;
+                div.onclick = (e) => {
+                    if (e.target.closest('.history-action-btn')) return;
+                    loadChat(chat.id);
                 };
 
+                const titleSpan = document.createElement('span');
+                titleSpan.className = 'history-title';
+                titleSpan.innerText = chat.title || 'New Conversation';
+                
+                const actionsDiv = document.createElement('div');
+                actionsDiv.className = 'history-actions';
+                
+                const editBtn = document.createElement('div');
+                editBtn.className = 'history-action-btn';
+                editBtn.innerHTML = icons.edit;
+                editBtn.onclick = () => openRenameModal(chat.id, chat.title);
+                
+                const delBtn = document.createElement('div');
+                delBtn.className = 'history-action-btn delete';
+                delBtn.innerHTML = icons.trash;
+                delBtn.onclick = () => confirmDeleteChat(chat.id);
+                
+                actionsDiv.appendChild(editBtn);
+                actionsDiv.appendChild(delBtn);
+                
+                div.appendChild(titleSpan);
+                div.appendChild(actionsDiv);
+                chatHistoryList.appendChild(div);
+            });
+        }
+
+        function openDialog(title, inputMode, confirmCallback) {
+            document.getElementById('dialog-title').innerText = title;
+            const input = document.getElementById('dialog-input');
+            const confirmBtn = document.getElementById('dialog-confirm-btn');
+            
+            if (inputMode) {
+                input.style.display = 'block';
+                input.value = inputMode; 
+                input.focus();
+                confirmBtn.className = 'dialog-btn confirm';
+                confirmBtn.innerText = translations[currentLang].newChat === "New Chat" ? "Save" : "저장";
+            } else {
+                input.style.display = 'none';
+                confirmBtn.className = 'dialog-btn delete-confirm';
+                confirmBtn.innerText = translations[currentLang].delete;
+            }
+
+            confirmBtn.onclick = () => {
+                const val = input.value.trim();
+                if (inputMode && !val) return;
+                confirmCallback(val);
+                closeDialog();
+            };
+
+            dialogModal.classList.add('open');
+        }
+
+        function closeDialog() {
+            dialogModal.classList.remove('open');
+        }
+        dialogModal.addEventListener('click', (e) => { if (e.target === dialogModal) closeDialog(); });
+
+        function openRenameModal(id, currentTitle) {
+            openDialog(translations[currentLang].editTitle, currentTitle || 'New Conversation', (newTitle) => {
+                let chats = getStoredChats();
+                const chat = chats.find(c => c.id === id);
+                if (chat) {
+                    chat.title = newTitle;
+                    saveChatToStorage(chat);
+                }
+            });
+        }
+
+        function confirmDeleteChat(id) {
+            openDialog(translations[currentLang].deleteConfirmMsg, null, () => {
+                deleteChatFromStorage(id);
+                if (currentChatId === id) {
+                    startNewChat();
+                }
+            });
+        }
+
+        function confirmDeleteAllChats() {
+            openDialog(translations[currentLang].deleteAllConfirmMsg, null, () => {
+                localStorage.removeItem(STORAGE_KEY);
+                startNewChat();
+                renderHistoryList();
+                closeSettings();
+            });
+        }
+
+        // --- Chat UI Logic ---
+        function toggleSidebar() { 
+            const isCollapsed = sidebar.classList.toggle('collapsed');
+            if (window.innerWidth <= 768) {
+                if (!isCollapsed) { sidebarOverlay.classList.add('visible'); } else { sidebarOverlay.classList.remove('visible'); }
+            }
+        }
+
+        function triggerHaptic() { if (navigator.vibrate) { navigator.vibrate(2); } }
+        
+        // 수정됨: autoResize 기능 복구 (입력 시 창 늘어남)
+        function autoResize(el) {
+            el.style.height = '24px';
+            el.style.height = Math.min(el.scrollHeight, 200) + 'px';
+        }
+        
+        function scrollToBottom() { chatContent.scrollTop = chatContent.scrollHeight; }
+
+        function toggleBtnState(val, btn) { 
+            if (isGenerating) {
+                btn.classList.add('stop-active');
+            } else {
+                // Attachments or text enables button
+                (val.trim().length > 0 || currentAttachments.length > 0) ? btn.classList.add('active') : btn.classList.remove('active'); 
+                btn.classList.remove('stop-active');
+            }
+        }
+        
+        function handleKeydown(e, type) { 
+            if (e.isComposing) return; 
+            if (e.key === 'Enter' && !e.shiftKey) { 
+                e.preventDefault(); 
+                handleSendClick(type); 
+            } 
+        }
+
+        // 수정됨: 입력 시 autoResize 호출
+        centerInput.addEventListener('input', function() { autoResize(this); toggleBtnState(this.value, centerSendBtn); });
+        centerInput.addEventListener('keydown', (e) => handleKeydown(e, 'center'));
+        bottomInput.addEventListener('input', function() { autoResize(this); toggleBtnState(this.value, bottomSendBtn); });
+        bottomInput.addEventListener('keydown', (e) => handleKeydown(e, 'bottom'));
+
+        // 수정됨: 백엔드와 연동된 실제 전송 로직
+        async function handleSendClick(origin) {
+            if (isGenerating) {
+                stopGeneration();
+                return;
+            }
+
+            const input = origin === 'center' ? centerInput : bottomInput;
+            const text = input.value.trim();
+            if (!text && currentAttachments.length === 0) return;
+
+            // --- Backend Routing Logic ---
+            // 백엔드 엔드포인트 설정 (https 사용)
+            const endpoint = isSearchActive 
+                ? 'https://jaewondev6.pythonanywhere.com/ask' 
+                : 'https://jaewondev6.pythonanywhere.com/askfast';
+            
+            if (origin === 'center') {
+                newChatBtn.classList.remove('active'); 
+                welcomeScreen.classList.add('hidden'); 
+                chatContent.classList.add('visible'); 
+                bottomInterface.classList.add('visible');
+            }
+
+            // FormData 생성 (백엔드 app (19).py 규격에 맞춤)
+            const formData = new FormData();
+            formData.append('content', text); // 혹은 'query' - 백엔드 코드 확인 필요하지만 content가 일반적
+            
+            // 파일 첨부 처리
+            currentAttachments.forEach(att => {
+                if (att.fileObject) {
+                    formData.append('files', att.fileObject);
+                }
+            });
+
+            const attachmentsToSend = [...currentAttachments]; // Copy for UI
+            currentAttachments = []; // Clear input attachments
+            renderAttachments(); // Update UI
+
+            input.value = ''; 
+            input.style.height = '24px';
+            toggleBtnState('', origin === 'center' ? centerSendBtn : bottomSendBtn);
+
+            // Render User Message
+            appendMessageUI('user', text, false, attachmentsToSend);
+            
+            // Save to Storage
+            currentMessages.push({ role: 'user', content: text, attachments: attachmentsToSend });
+            
+            let chats = getStoredChats();
+            let currentChat = chats.find(c => c.id === currentChatId);
+            let title = currentChat ? currentChat.title : (text.substring(0, 30) || "Conversation");
+            
+            saveChatToStorage({
+                id: currentChatId,
+                title: title,
+                messages: currentMessages
+            });
+
+            scrollToBottom();
+            
+            // 실제 백엔드 스트리밍 요청 호출
+            await streamResponse(endpoint, formData);
+        }
+
+        // 수정됨: 실제 백엔드 스트리밍 및 마크다운 처리
+        async function streamResponse(endpoint, formData) {
+            startGenerationState();
+            
+            // 봇 버블 생성 (비어있는 상태)
+            const row = document.createElement('div'); row.className = 'message-row bot';
+            const wrapper = document.createElement('div'); wrapper.className = 'bot-bubble-wrapper';
+            const bubble = document.createElement('div'); bubble.className = 'message-bubble bot-content';
+            
+            // 초기 로딩 애니메이션 (Thinking Dot)
+            const dot = document.createElement('div'); dot.className = 'thinking-dot';
+            bubble.appendChild(dot);
+            
+            wrapper.appendChild(bubble);
+            row.appendChild(wrapper);
+            chatContent.appendChild(row);
+            scrollToBottom();
+            
+            currentBotRowElement = wrapper;
+            currentBubbleElement = bubble;
+            let fullText = "";
+
+            try {
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.body) throw new Error('ReadableStream not supported');
+
+                streamReader = response.body.getReader();
+                const decoder = new TextDecoder();
+                
+                // 첫 데이터가 오면 로딩 닷 제거
+                let firstChunk = true;
+
                 while (true) {
-                    const { done, value } = await reader.read();
+                    const { done, value } = await streamReader.read();
                     if (done) break;
                     
                     const chunk = decoder.decode(value, { stream: true });
-                    const cleanChunk = chunk.replace(/\[DONE\]/g, "");
-                    rawFullText += cleanChunk;
-
-                    const parsed = parseStream(rawFullText);
-                    cleanTextDisplay = parsed.cleanText;
-                    currentMetadata.thought = parsed.thoughts;
-                    // [수정] 기존 citations에 새로 파싱된 것 추가 (중복 방지 로직 필요시 추가)
-                    // 여기서는 매번 전체 텍스트를 파싱하므로 덮어쓰기 방식이 적합
-                    currentMetadata.citations = parsed.citations;
-
-
-                    if (cleanTextDisplay.length > 0) {
-                        botContent.innerHTML = marked.parse(cleanTextDisplay);
-                        
-                        // [수정] 봇 답변 생성 시 패딩 덮어쓰기 로직 (줄이지 않음, 그냥 둠)
-                        // 사용자가 "여백을 줄이지말고 봇의 답변을 그냥 그 위에 덮게 해줘" 라고 했으므로,
-                        // paddingBottom 값을 줄이는 로직을 제거합니다. 
-                        // 초기 설정된 paddingBottom이 유지되고, 내용이 길어지면 자연스럽게 스크롤 영역이 늘어남.
+                    if (firstChunk) {
+                        bubble.innerHTML = ""; // 로딩 닷 제거
+                        firstChunk = false;
                     }
+                    
+                    fullText += chunk;
+                    
+                    // 실시간 마크다운 렌더링
+                    bubble.innerHTML = marked.parse(fullText);
+                    scrollToBottom();
                 }
-                
-                const finalParsed = parseStream(rawFullText);
-                cleanTextDisplay = finalParsed.cleanText;
-                currentMetadata.thought = finalParsed.thoughts;
-                currentMetadata.citations = finalParsed.citations;
-
-                botContent.innerHTML = marked.parse(cleanTextDisplay);
-
-                // [수정] 메타데이터 저장 (현재 히스토리 길이 + 1 = 봇 메시지 인덱스)
-                const msgIndex = conversationHistory.length + 1; 
-                messageMetadata[msgIndex] = currentMetadata;
-
-                conversationHistory.push({ role: "assistant", content: cleanTextDisplay }); 
-                
-                addBotButtons(botRow, cleanTextDisplay, currentMetadata);
-
-                saveCurrentChat();
-                checkScrollPosition();
 
             } catch (error) {
-                const loadingElem = document.getElementById(loadingId);
-                if (loadingElem) loadingElem.remove();
-                if (timers) timers.forEach(t => clearTimeout(t));
-
-                if (error.name === 'AbortError') {
-                    if (botContent) {
-                        const stopMsg = document.createElement('div');
-                        stopMsg.style.color = '#9CA3AF'; 
-                        stopMsg.innerText = "[답변중단됨]";
-                        botContent.appendChild(stopMsg);
-                    }
-                } else {
-                    console.error(error);
-                    simulateBotError("죄송합니다. 오류가 발생했습니다.");
+                console.error('Stream error:', error);
+                if (currentBubbleElement) {
+                    currentBubbleElement.innerHTML += `<br><span class="stopped-text">[Error: ${error.message}]</span>`;
                 }
             } finally {
-                isGenerating = false;
-                abortController = null;
-                sendBtn.innerHTML = '<span class="material-symbols-rounded">arrow_upward</span>';
-                sendBtn.disabled = true; 
-                adjustHeight(); 
-                checkScrollPosition();
+                finishGeneration(fullText);
+                streamReader = null;
             }
         }
 
-        // --- 봇 버튼 추가 함수 ---
-        function addBotButtons(rowElement, textContent, metadata) {
-            if (rowElement.querySelector('.bot-action-bar')) return;
-
-            const actionBar = document.createElement('div');
-            actionBar.className = 'bot-action-bar';
+        function appendMessageUI(role, text, isTyping = false, attachments = []) {
+            const row = document.createElement('div'); row.className = `message-row ${role}`;
             
-            // 복사 버튼
-            const copyBtn = document.createElement('button');
+            // Render Attachments (Bubbles)
+            if (attachments && attachments.length > 0) {
+                const attachDiv = document.createElement('div');
+                attachDiv.className = 'bubble-attachments';
+                
+                attachments.forEach(att => {
+                    const card = document.createElement('div');
+                    if (att.type === 'image') {
+                        card.className = 'bubble-image-card';
+                        card.style.backgroundImage = `url(${att.data})`;
+                        card.onclick = () => openImageLightbox(att.data);
+                    } else {
+                        card.className = 'bubble-file-card';
+                        card.innerText = "📄 " + att.name;
+                    }
+                    attachDiv.appendChild(card);
+                });
+                row.appendChild(attachDiv);
+            }
+
+            if (role === 'bot') {
+                const wrapper = document.createElement('div'); wrapper.className = 'bot-bubble-wrapper';
+                const bubble = document.createElement('div'); bubble.className = `message-bubble ${role}-content`;
+                wrapper.appendChild(bubble);
+                row.appendChild(wrapper);
+                chatContent.appendChild(row);
+                
+                currentBotRowElement = wrapper;
+                // Render Markdown for existing messages
+                bubble.innerHTML = marked.parse(text);
+                
+                // Add copy/regen buttons
+                const lastRow = chatContent.querySelectorAll('.message-row.bot');
+                if(lastRow.length > 0) {
+                    addActionButtons(wrapper, text);
+                }
+            } else {
+                if (text) {
+                    const bubble = document.createElement('div'); bubble.className = `message-bubble ${role}-content`;
+                    bubble.innerText = text;
+                    row.appendChild(bubble);
+                }
+                chatContent.appendChild(row);
+            }
+            
+            scrollToBottom();
+            return row;
+        }
+
+        function startGenerationState() {
+            isGenerating = true;
+            centerSendBtn.innerHTML = icons.stop;
+            bottomSendBtn.innerHTML = icons.stop;
+            centerSendBtn.classList.add('stop-active');
+            bottomSendBtn.classList.add('stop-active');
+        }
+
+        function addActionButtons(wrapperElement, bubbleText) {
+            if (!wrapperElement) return;
+            if (wrapperElement.querySelector('.message-actions')) return; 
+
+            const actionsDiv = document.createElement('div');
+            actionsDiv.className = 'message-actions';
+            
+            const copyBtn = document.createElement('div');
             copyBtn.className = 'action-btn';
-            copyBtn.title = '복사';
-            copyBtn.innerHTML = '<span class="material-symbols-rounded">content_copy</span>';
-            copyBtn.addEventListener('click', () => {
-                navigator.clipboard.writeText(textContent).then(() => {
-                    const originalHTML = copyBtn.innerHTML;
-                    copyBtn.innerHTML = '<span class="material-symbols-rounded">check</span>';
-                    setTimeout(() => copyBtn.innerHTML = originalHTML, 2000);
+            copyBtn.innerHTML = icons.copy;
+            copyBtn.onclick = function() {
+                // Copy raw text, not html
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = bubbleText;
+                const textToCopy = tempDiv.innerText || bubbleText;
+                
+                navigator.clipboard.writeText(textToCopy.replace('[답변 중지됨]', '')).then(() => {
+                    copyBtn.innerHTML = icons.check; 
+                    setTimeout(() => { copyBtn.innerHTML = icons.copy; }, 2000);
                 });
-            });
+            };
 
-            // 재생성 버튼
-            const regenBtn = document.createElement('button');
+            const regenBtn = document.createElement('div');
             regenBtn.className = 'action-btn';
-            regenBtn.title = '재생성';
-            regenBtn.innerHTML = '<span class="material-symbols-rounded">refresh</span>';
-            regenBtn.addEventListener('click', regenerateResponse);
+            regenBtn.innerHTML = icons.regenerate;
+            regenBtn.onclick = function() {
+                // 재생성 로직: 마지막 봇 메시지 삭제 후 마지막 유저 메시지로 다시 요청
+                const rowToRemove = wrapperElement.closest('.message-row');
+                if (rowToRemove) rowToRemove.remove();
+                
+                if (currentMessages.length > 0 && currentMessages[currentMessages.length-1].role === 'bot') {
+                    currentMessages.pop();
+                }
+                
+                // 마지막 유저 메시지 찾기
+                const lastUserMsg = currentMessages.slice().reverse().find(m => m.role === 'user');
+                if(lastUserMsg) {
+                    // Re-trigger send (backend call)
+                    const endpoint = isSearchActive 
+                        ? 'https://jaewondev6.pythonanywhere.com/ask' 
+                        : 'https://jaewondev6.pythonanywhere.com/askfast';
+                        
+                    const formData = new FormData();
+                    formData.append('content', lastUserMsg.content);
+                    // 첨부파일은 재전송이 까다로우므로 텍스트만 재요청하거나, 로직 추가 필요.
+                    // 여기서는 간단히 텍스트 재요청으로 처리
+                    
+                    streamResponse(endpoint, formData);
+                }
+            };
 
-            actionBar.appendChild(copyBtn);
-            actionBar.appendChild(regenBtn);
-            
-            // [수정] 사고 과정 버튼 (텍스트)
-            if (metadata && metadata.thought && metadata.thought.trim().length > 0) {
-                const thoughtBtn = document.createElement('button');
-                thoughtBtn.className = 'action-btn';
-                thoughtBtn.innerHTML = '사고 과정'; 
-                thoughtBtn.addEventListener('click', () => {
-                    openDetailsPanel(metadata, 'thought');
-                });
-                actionBar.appendChild(thoughtBtn);
-            }
-
-            // [수정] 인용 버튼 (텍스트)
-            if (metadata && metadata.citations && metadata.citations.length > 0) {
-                const citationBtn = document.createElement('button');
-                citationBtn.className = 'action-btn';
-                citationBtn.innerHTML = '인용'; 
-                citationBtn.addEventListener('click', () => {
-                    openDetailsPanel(metadata, 'citations');
-                });
-                actionBar.appendChild(citationBtn);
-            }
-            
-            rowElement.appendChild(actionBar);
+            actionsDiv.appendChild(copyBtn);
+            actionsDiv.appendChild(regenBtn);
+            wrapperElement.appendChild(actionsDiv);
 
             requestAnimationFrame(() => {
-                actionBar.classList.add('visible');
+                actionsDiv.classList.add('visible');
+                scrollToBottom();
             });
         }
 
-
-        function createAnimatedChunk(container, text) {
-            const span = document.createElement('span');
-            span.className = 'reveal-chunk';
-            span.innerText = text; 
-            span.addEventListener('animationend', () => span.classList.add('done'));
-            container.appendChild(span);
-        }
-
-        function simulateBotError(msg) {
-            const botRow = document.createElement('div');
-            botRow.classList.add('message-row', 'bot');
-            const botContent = document.createElement('div');
-            botContent.classList.add('bot-text');
-            botRow.appendChild(botContent);
-            chatContainer.appendChild(botRow);
-            createAnimatedChunk(botContent, msg);
-        }
-
-        function addLoadingMessage(id, isSearchMode) {
-            const rowDiv = document.createElement('div');
-            rowDiv.classList.add('message-row', 'bot');
-            rowDiv.id = id; 
-            const contentDiv = document.createElement('div');
-            contentDiv.classList.add('analyzing-text'); 
+        function finishGeneration(finalText) {
+            isGenerating = false;
             
-            let timers = [];
-            if (isSearchMode) {
-                contentDiv.innerText = "검색을 진행하는 중...";
-                timers.push(setTimeout(() => { const el = document.getElementById(id); if(el) el.querySelector('.analyzing-text').innerText = "검색은 시간이 소요될 수 있습니다."; }, 3000));
-                timers.push(setTimeout(() => { const el = document.getElementById(id); if(el) el.querySelector('.analyzing-text').innerText = "질문을 분석하는중..."; }, 6000));
-            } else {
-                contentDiv.innerText = "질문을 분석하는중...";
+            if (currentBotRowElement && currentBubbleElement) {
+                addActionButtons(currentBotRowElement, finalText);
             }
-            rowDiv.appendChild(contentDiv);
-            chatContainer.appendChild(rowDiv);
-            return timers; 
-        }
 
-        function addMessage(text, sender, withAnimation = true) {
-            const rowDiv = document.createElement('div');
-            rowDiv.classList.add('message-row', sender); 
+            if (finalText) {
+                currentMessages.push({ role: 'bot', content: finalText });
+                let chats = getStoredChats();
+                const chat = chats.find(c => c.id === currentChatId);
+                if (chat) {
+                    chat.messages = currentMessages;
+                    saveChatToStorage(chat);
+                }
+            }
+
+            currentBubbleElement = null;
+            currentBotRowElement = null;
             
-            if (sender === 'user') {
-                const container = document.createElement('div');
-                container.className = 'user-bubble-container';
-
-                const copyBtn = document.createElement('button');
-                copyBtn.className = 'user-copy-btn';
-                copyBtn.title = '복사';
-                copyBtn.innerHTML = '<span class="material-symbols-rounded" style="font-size:16px;">content_copy</span>';
-                
-                // [수정] 복사 버튼 클릭 시 체크표시 이펙트 추가
-                copyBtn.addEventListener('click', () => {
-                    navigator.clipboard.writeText(text).then(() => {
-                        const originalHTML = copyBtn.innerHTML;
-                        copyBtn.innerHTML = '<span class="material-symbols-rounded" style="font-size:16px;">check</span>';
-                        setTimeout(() => copyBtn.innerHTML = originalHTML, 2000);
-                    });
-                });
-
-                const contentDiv = document.createElement('div');
-                contentDiv.classList.add('user-bubble');
-                contentDiv.innerHTML = text.replace(/\n/g, '<br>');
-                
-                container.appendChild(contentDiv);
-                container.appendChild(copyBtn);
-                rowDiv.appendChild(container);
-            } else {
-                const contentDiv = document.createElement('div');
-                contentDiv.classList.add('bot-text'); 
-                contentDiv.innerHTML = marked.parse(text);
-                rowDiv.appendChild(contentDiv);
-            }
-            chatContainer.appendChild(rowDiv);
-            return rowDiv; 
+            centerSendBtn.innerHTML = icons.send;
+            bottomSendBtn.innerHTML = icons.send;
+            centerSendBtn.classList.remove('stop-active');
+            bottomSendBtn.classList.remove('stop-active');
+            
+            toggleBtnState(centerInput.value, centerSendBtn);
+            toggleBtnState(bottomInput.value, bottomSendBtn);
         }
 
-        chatInput.addEventListener('input', adjustHeight);
-        chatInput.addEventListener('keydown', function(event) {
-            if (event.key === 'Enter' && !event.shiftKey && window.innerWidth > 768) {
-                event.preventDefault(); 
-                if (!sendBtn.disabled && !isGenerating) sendMessage();
+        // 수정됨: 스트림 중지 로직
+        function stopGeneration() {
+            if (streamReader) {
+                streamReader.cancel();
             }
-        });
-        sendBtn.addEventListener('click', () => sendMessage());
-        
-        attachBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            if (attachMenu.classList.contains('open')) {
-                attachMenu.classList.remove('open');
-                setTimeout(() => attachMenu.style.display='none', 200);
-            } else {
-                attachMenu.style.display='flex';
-                setTimeout(() => attachMenu.classList.add('open'), 10);
-            }
-        });
-        searchBtn.addEventListener('click', function() { this.classList.toggle('active'); });
-        document.addEventListener('click', (e) => {
-            if (attachMenu.classList.contains('open') && !attachMenu.contains(e.target)) {
-                attachMenu.classList.remove('open');
-                setTimeout(() => attachMenu.style.display='none', 200);
-            }
-        });
-        document.querySelector('.offer-close').addEventListener('click', (e) => {
-            e.stopPropagation();
-            document.querySelector('.offer-pill').style.display = 'none';
-        });
 
-        window.addEventListener('resize', () => {
-        });
+            let finalText = "";
+            if (currentBubbleElement) {
+                const stopSpan = document.createElement('span');
+                stopSpan.className = 'stopped-text';
+                stopSpan.innerText = " [답변 중지됨]";
+                currentBubbleElement.appendChild(stopSpan);
+                // HTML to Text conversion might be needed depending on saving strategy
+                finalText = currentBubbleElement.innerHTML; 
+            }
+
+            finishGeneration(finalText);
+        }
+
+        // --- Settings & Utils ---
+        function loadHistoryFromStorage() { renderHistoryList(); }
+        function openSettings() { settingsModal.classList.add('open'); if(window.innerWidth <= 768) { sidebar.classList.add('collapsed'); sidebarOverlay.classList.remove('visible'); } }
+        function closeSettings() { settingsModal.classList.remove('open'); document.querySelectorAll('.custom-select-container').forEach(el => el.classList.remove('open')); }
+        settingsModal.addEventListener('click', (e) => { if (e.target === settingsModal) closeSettings(); });
+        function toggleDropdown(id) { const el = document.getElementById(id); document.querySelectorAll('.custom-select-container').forEach(item => { if (item.id !== id) item.classList.remove('open'); }); el.classList.toggle('open'); }
+        function setTheme(mode, optionEl) { const container = document.getElementById('themeSelect'); container.querySelectorAll('.custom-option').forEach(opt => opt.classList.remove('selected')); optionEl.classList.add('selected'); const key = optionEl.getAttribute('data-i18n'); document.getElementById('currentThemeLabel').innerText = translations[currentLang][key]; container.classList.remove('open'); if (mode === 'system') { const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches; document.body.setAttribute('data-theme', isDark ? 'dark' : 'light'); } else { document.body.setAttribute('data-theme', mode); } }
+        function setLanguage(langCode, label, optionEl) { const container = document.getElementById('langSelect'); container.querySelectorAll('.custom-option').forEach(opt => opt.classList.remove('selected')); optionEl.classList.add('selected'); document.getElementById('currentLangLabel').innerText = label; container.classList.remove('open'); currentLang = langCode; updateUIText(langCode); renderHistoryList(); }
+        function updateUIText(lang) { const t = translations[lang]; if (!t) return; document.querySelectorAll('[data-i18n]').forEach(el => { const key = el.getAttribute('data-i18n'); if (t[key]) el.innerText = t[key]; }); document.querySelectorAll('[data-i18n-placeholder]').forEach(el => { const key = el.getAttribute('data-i18n-placeholder'); if (t[key]) el.placeholder = t[key]; }); const currentThemeKey = document.querySelector('#themeSelect .custom-option.selected').getAttribute('data-i18n'); if (currentThemeKey && t[currentThemeKey]) document.getElementById('currentThemeLabel').innerText = t[currentThemeKey]; }
+        document.addEventListener('click', function(e) { if (!e.target.closest('.custom-select-container')) { document.querySelectorAll('.custom-select-container').forEach(el => el.classList.remove('open')); } });
+
+        function switchSettingsTab(tabName, navItem) {
+            // 네비게이션 활성화
+            document.querySelectorAll('.settings-nav-item').forEach(el => el.classList.remove('active'));
+            if(navItem) navItem.classList.add('active');
+
+            // 탭 콘텐츠 전환
+            document.querySelectorAll('.tab-section').forEach(el => el.classList.remove('active-tab'));
+            const target = document.getElementById('tab-' + tabName);
+            if(target) target.classList.add('active-tab');
+
+            // 헤더 타이틀 변경
+            const key = navItem ? navItem.querySelector('span').getAttribute('data-i18n') : 'general';
+            document.getElementById('settings-header-title').innerText = translations[currentLang][key] || key;
+        }
+
+        init();
     </script>
 </body>
 </html>
