@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, interactive-widget=resizes-content">
     <title>MinsuGPT</title>
     <link rel="icon" href="https://6967a657d214301950ed7b2b.imgix.net/logo.png" type="image/png">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
@@ -38,6 +38,10 @@
             --active-search-bg: rgba(56, 189, 248, 0.15);
             --active-search-text: #0ea5e9;
 
+            /* [수정됨] 생각하기 모드 색상: 노란색과 주황색 사이 (Amber) */
+            --active-think-bg: rgba(255, 193, 7, 0.25); 
+            --active-think-text: #d97706; /* 진한 호박색 */
+
             --window-radius: 20px;
             --btn-radius: 12px;
             --input-radius: 26px;
@@ -71,6 +75,10 @@
             --danger-color: #ef4444;
             --active-search-bg: rgba(14, 165, 233, 0.2);
             --active-search-text: #38bdf8;
+            
+            /* [수정됨] 다크모드 생각하기 색상 */
+            --active-think-bg: rgba(251, 191, 36, 0.3);
+            --active-think-text: #fbbf24; 
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -136,11 +144,10 @@
         .center-logo-img { width: 80px; height: auto; border-radius: 50%; margin-bottom: 40px; }
         .center-input-wrapper { width: 100%; max-width: 760px; padding: 0 20px; position: relative; }
 
-        /* 채팅창 하단 여백 추가 (입력창과 겹침 방지) */
         #chat-content { flex: 1; width: 100%; max-width: 800px; margin: 0 auto; padding: 80px 20px 200px 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 24px; opacity: 0; visibility: hidden; transition: opacity 0.3s; -webkit-overflow-scrolling: touch; }
         #chat-content.visible { opacity: 1; visibility: visible; }
 
-        .message-row { display: flex; width: 100%; opacity: 0; animation: fadeIn 0.4s ease-out forwards; flex-direction: column; }
+        .message-row { display: flex; width: 100%; opacity: 0; animation: fadeIn 0.4s ease-out forwards; flex-direction: column; position: relative; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         
         .message-row.user { align-items: flex-end; }
@@ -154,8 +161,17 @@
 
         .bot-bubble-wrapper { display: flex; flex-direction: column; align-items: flex-start; width: 100%; }
         
-        .message-bubble { max-width: 100%; line-height: 1.6; word-break: break-word; border-radius: 20px; }
+        .message-bubble { max-width: 100%; line-height: 1.6; word-break: break-word; border-radius: 20px; position: relative; }
+        
         .message-bubble.user-content { background-color: var(--user-bubble-bg); color: var(--user-bubble-text); font-size: 15px; padding: 10px 14px; border-radius: 20px !important; }
+        .message-row.user:hover .user-actions { opacity: 1; visibility: visible; }
+        
+        .user-actions {
+            position: absolute; right: 100%; top: 50%; transform: translateY(-50%);
+            display: flex; gap: 4px; margin-right: 8px;
+            opacity: 0; visibility: hidden; transition: opacity 0.2s;
+        }
+        
         .message-bubble.bot-content { background-color: transparent; color: var(--bot-bubble-text); font-size: 16px; padding: 12px 16px; padding-left: 0; }
         
         .message-bubble.bot-content p { margin-bottom: 10px; }
@@ -176,11 +192,18 @@
         [data-theme="dark"] .thinking-text { background: linear-gradient(to left, #666 0%, #666 40%, #fff 50%, #666 60%, #666 100%); background-size: 200% auto; -webkit-background-clip: text; background-clip: text; }
         @keyframes shimmer { from { background-position: 100% center; } to { background-position: -100% center; } }
 
-        .message-actions { display: flex; gap: 4px; margin-top: 6px; opacity: 0; transition: opacity 0.3s; margin-left: -6px; }
+        .message-actions { display: flex; gap: 4px; margin-top: 6px; opacity: 0; transition: opacity 0.3s; margin-left: -6px; align-items: center; }
         .message-actions.visible { opacity: 1; }
         .action-btn { width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; border-radius: 8px; color: var(--icon-color); cursor: pointer; transition: background-color 0.2s, color 0.2s; }
         .action-btn:hover { background-color: var(--sidebar-hover); color: var(--text-color); }
         .action-icon { width: 18px; height: 18px; stroke-width: 2.2; }
+        
+        .edit-container { display: flex; flex-direction: column; width: 100%; gap: 8px; align-items: flex-end; }
+        .edit-textarea { width: 100%; background: var(--input-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 10px; color: var(--text-color); font-size: 15px; resize: none; outline: none; }
+        .edit-buttons { display: flex; gap: 8px; }
+        .edit-btn { padding: 6px 12px; border-radius: 16px; font-size: 13px; cursor: pointer; border: none; font-weight: 500; }
+        .edit-btn.save { background-color: var(--text-color); color: var(--bg-color); }
+        .edit-btn.cancel { background-color: var(--sidebar-hover); color: var(--text-color); }
 
         /* Bottom Interface */
         #bottom-interface { 
@@ -205,7 +228,7 @@
         .attach-card-remove { position: absolute; top: -6px; right: -6px; width: 18px; height: 18px; background: var(--text-color); color: var(--bg-color); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 2; border: 1px solid var(--bg-color); }
         
         .input-top-row { width: 100%; margin-bottom: 4px; }
-        .input-field { width: 100%; border: none; background: transparent; font-size: 16px; outline: none; color: var(--text-color); resize: none; font-family: inherit; overflow-y: auto; height: 24px; line-height: 24px; display: block; max-height: 200px; padding: 4px 0; padding-left: 6px; }
+        .input-field { width: 100%; border: none; background: transparent; font-size: 16px; outline: none; color: var(--text-color); resize: none; font-family: inherit; overflow-y: auto; height: 28px; line-height: 24px; display: block; max-height: 200px; padding: 2px 0 2px 6px; }
         .input-field::placeholder { color: var(--icon-color); }
         .input-bottom-row { display: flex; justify-content: space-between; align-items: center; height: 36px; }
         
@@ -213,11 +236,26 @@
         .icon-btn { display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 50%; color: var(--icon-color); cursor: pointer; transition: 0.2s; position: relative; }
         .icon-btn:hover { background-color: rgba(0,0,0,0.05); color: var(--text-color); }
         
-        .search-btn { display: flex; align-items: center; justify-content: center; height: 34px; border-radius: 17px; padding: 0; width: 34px; background-color: transparent; color: var(--icon-color); cursor: pointer; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); overflow: hidden; gap: 0; }
-        .search-btn:hover { background-color: rgba(0,0,0,0.05); color: var(--text-color); }
+        .search-btn, .think-btn {
+            display: flex; align-items: center; justify-content: center; 
+            height: 34px; border-radius: 17px; padding: 0; width: 34px; 
+            background-color: transparent; color: var(--icon-color); 
+            cursor: pointer; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            overflow: hidden; gap: 0;
+        }
+        .search-btn:hover, .think-btn:hover { background-color: rgba(0,0,0,0.05); color: var(--text-color); }
+        
         .search-btn.active { background-color: var(--active-search-bg); color: var(--active-search-text); width: auto; padding: 0 12px 0 8px; }
-        .search-label { font-size: 13px; font-weight: 600; white-space: nowrap; opacity: 0; width: 0; overflow: hidden; transition: all 0.3s ease; margin-left: 0; }
-        .search-btn.active .search-label { opacity: 1; width: auto; margin-left: 6px; }
+        /* [수정됨] 생각하기 버튼 활성화 CSS 확실하게 적용 */
+        .think-btn.active { 
+            background-color: var(--active-think-bg) !important; 
+            color: var(--active-think-text) !important; 
+            width: auto; 
+            padding: 0 12px 0 8px; 
+        }
+        
+        .search-label, .think-label { font-size: 13px; font-weight: 600; white-space: nowrap; opacity: 0; width: 0; overflow: hidden; transition: all 0.3s ease; margin-left: 0; }
+        .search-btn.active .search-label, .think-btn.active .think-label { opacity: 1; width: auto; margin-left: 6px; }
 
         .attach-menu { position: absolute; bottom: 50px; left: 0; background-color: var(--modal-bg); border: 1px solid var(--border-color); border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 160px; display: flex; flex-direction: column; overflow: hidden; opacity: 0; visibility: hidden; transform: translateY(10px); transition: all 0.2s ease; z-index: 20; }
         .attach-menu.open { opacity: 1; visibility: visible; transform: translateY(0); }
@@ -310,14 +348,25 @@
             .sidebar { position: fixed; left: 0; top: 0; bottom: 0; height: 100%; width: 220px !important; z-index: 1500; transform: translateX(0); transition: transform 0.3s ease; border-top-right-radius: 20px; border-bottom-right-radius: 20px; box-shadow: 4px 0 15px rgba(0,0,0,0.1); }
             .sidebar.collapsed { width: 220px !important; transform: translateX(-100%); border-right: none; }
             .sidebar-content { opacity: 1 !important; width: 220px !important; }
-            .message-bubble { max-width: 100%; }
+            
             /* [수정됨] 패딩을 16px로 줄여 좌우 여백 확보 */
             #chat-content { padding: 80px 16px 200px 16px; } 
             
             /* [수정됨] 모바일에서 텍스트 및 패딩 더 작게 */
             .message-bubble.user-content { font-size: 13px; padding: 8px 12px; }
+            /* [수정됨] 봇 버블 패딩 왼쪽 0으로 유지하되 스타일 확인 */
             .message-bubble.bot-content { font-size: 13px; padding: 8px 0; }
             
+            /* Thinking button no text on mobile and active color fix */
+            .search-btn.active .search-label, .think-btn.active .think-label { display: none; width: 0; opacity: 0; }
+            .search-btn.active, .think-btn.active { width: 34px; padding: 0; }
+            
+            /* [수정됨] 모바일에서 생각하기 버튼 활성화 시 배경색과 아이콘색 강제 적용 */
+            .think-btn.active { 
+                background-color: var(--active-think-bg) !important;
+                color: var(--active-think-text) !important;
+            }
+
             #bottom-interface { padding-bottom: 5px; } 
             .center-logo-img { width: 60px; margin-bottom: 20px; }
             .dialog-window { width: 90%; }
@@ -387,6 +436,10 @@
                                 <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"></path></svg>
                                 <span class="search-label">검색 활성화</span>
                             </div>
+                            <div class="think-btn" id="centerThinkBtn" onclick="toggleThinkingMode('center')">
+                                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path></svg>
+                                <span class="think-label">생각 활성화</span>
+                            </div>
                             <div class="attach-menu" id="centerAttachMenu">
                                 <div class="attach-item" onclick="handleFileUpload('image', 'center')"><svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg> 이미지</div>
                                 <div class="attach-item" onclick="handleFileUpload('file', 'center')"><svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg> 문서</div>
@@ -422,6 +475,10 @@
                             <div class="search-btn" id="bottomSearchBtn" onclick="toggleSearchMode('bottom')">
                                 <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"></path></svg>
                                 <span class="search-label">검색 활성화</span>
+                            </div>
+                            <div class="think-btn" id="bottomThinkBtn" onclick="toggleThinkingMode('bottom')">
+                                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path></svg>
+                                <span class="think-label">생각 활성화</span>
                             </div>
                             <div class="attach-menu" id="bottomAttachMenu">
                                 <div class="attach-item" onclick="handleFileUpload('image', 'bottom')"><svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg> 이미지</div>
@@ -629,6 +686,8 @@
         let currentLang = 'ko';
         let isGenerating = false;
         let isSearchActive = false;
+        let isThinkingActive = false;
+        let isManuallyStopped = false; // Flag to handle immediate stop
         let typingTimeout = null;
         let thinkingTimeout = null;
         let currentBubbleElement = null;
@@ -644,7 +703,8 @@
         let botTone = localStorage.getItem('botTone') || 'friendly';
         let isHistoryEnabled = localStorage.getItem('isHistoryEnabled') !== 'false';
         
-        let hapticStrength = parseInt(localStorage.getItem('hapticStrength')) || 1; // Default 1
+        // [수정됨] 기본 햅틱 세기 1로 변경
+        let hapticStrength = parseInt(localStorage.getItem('hapticStrength')) || 1; 
 
         const sidebar = document.getElementById('sidebar');
         const sidebarOverlay = document.getElementById('sidebar-overlay');
@@ -709,6 +769,21 @@
             const btnBottom = document.getElementById('bottomSearchBtn');
             
             if (isSearchActive) {
+                btnCenter.classList.add('active');
+                btnBottom.classList.add('active');
+            } else {
+                btnCenter.classList.remove('active');
+                btnBottom.classList.remove('active');
+            }
+            triggerHaptic();
+        }
+
+        function toggleThinkingMode(origin) {
+            isThinkingActive = !isThinkingActive;
+            const btnCenter = document.getElementById('centerThinkBtn');
+            const btnBottom = document.getElementById('bottomThinkBtn');
+            
+            if (isThinkingActive) {
                 btnCenter.classList.add('active');
                 btnBottom.classList.add('active');
             } else {
@@ -852,7 +927,7 @@
             bottomInterface.classList.remove('visible');
             newChatBtn.classList.add('active');
             centerInput.value = ''; bottomInput.value = '';
-            centerInput.style.height = '24px'; bottomInput.style.height = '24px';
+            centerInput.style.height = '28px'; bottomInput.style.height = '28px';
             toggleBtnState('', centerSendBtn);
             document.querySelectorAll('.history-item').forEach(el => el.classList.remove('active'));
             if (updateUrl) { const url = new URL(window.location); url.searchParams.set('chat', currentChatId); window.history.pushState({}, '', url); }
@@ -931,7 +1006,7 @@
             if (navigator.vibrate && hapticStrength > 0) navigator.vibrate(hapticStrength); 
         }
         
-        function autoResize(el) { el.style.height = '24px'; el.style.height = Math.min(el.scrollHeight, 200) + 'px'; }
+        function autoResize(el) { el.style.height = '28px'; el.style.height = Math.min(el.scrollHeight, 200) + 'px'; }
         function scrollToBottom() { chatContent.scrollTop = chatContent.scrollHeight; }
         function toggleBtnState(val, btn) { if (isGenerating) { btn.classList.add('stop-active'); } else { (val.trim().length > 0 || currentAttachments.length > 0) ? btn.classList.add('active') : btn.classList.remove('active'); btn.classList.remove('stop-active'); } }
         function handleKeydown(e, type) { if (e.isComposing) return; if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSendClick(type); } }
@@ -943,7 +1018,7 @@
 
         // --- System Config Logic (Background) ---
         async function sendSystemConfig() {
-            const endpoint = isSearchActive 
+            const endpoint = isSearchActive || isThinkingActive
                 ? 'https://jaewondev6.pythonanywhere.com/ask' 
                 : 'https://jaewondev6.pythonanywhere.com/askfast';
             
@@ -971,7 +1046,7 @@
             const text = input.value.trim();
             if (!text && currentAttachments.length === 0) return;
 
-            const endpoint = isSearchActive 
+            const endpoint = isSearchActive || isThinkingActive
                 ? 'https://jaewondev6.pythonanywhere.com/ask' 
                 : 'https://jaewondev6.pythonanywhere.com/askfast';
             
@@ -1010,7 +1085,7 @@
             currentAttachments = [];
             renderAttachments(); 
 
-            input.value = ''; input.style.height = '24px';
+            input.value = ''; input.style.height = '28px';
             toggleBtnState('', origin === 'center' ? centerSendBtn : bottomSendBtn);
 
             appendMessageUI('user', text, false, attachmentsToSend);
@@ -1030,6 +1105,7 @@
 
         async function streamResponse(endpoint, headers, body) {
             startGenerationState();
+            isManuallyStopped = false; 
             
             const row = document.createElement('div'); row.className = 'message-row bot';
             const wrapper = document.createElement('div'); wrapper.className = 'bot-bubble-wrapper';
@@ -1047,6 +1123,11 @@
             let firstChunk = true;
 
             const typeWriter = setInterval(() => {
+                if (isManuallyStopped) {
+                    clearInterval(typeWriter);
+                    return;
+                }
+
                 if (displayedText.length < fullText.length) {
                     if (firstChunk) { bubble.innerHTML = ""; firstChunk = false; triggerHaptic(); }
                     const charsToAdd = fullText.slice(displayedText.length, displayedText.length + 3);
@@ -1066,6 +1147,7 @@
                 const decoder = new TextDecoder();
 
                 while (true) {
+                    if (isManuallyStopped) break;
                     const { done, value } = await streamReader.read();
                     if (done) break;
                     const chunk = decoder.decode(value, { stream: true });
@@ -1074,14 +1156,19 @@
                 }
             } catch (error) {
                 console.error('Stream error:', error);
-                if (currentBubbleElement) currentBubbleElement.innerHTML += `<br><span class="stopped-text">[Error: ${error.message}]</span>`;
+                if (currentBubbleElement) {
+                     if (firstChunk) bubble.innerHTML = ""; 
+                     currentBubbleElement.innerHTML += `<br><span class="stopped-text">[Error: ${error.message}]</span>`;
+                }
             } finally {
-                const checkDone = setInterval(() => {
-                    if (displayedText.length >= fullText.length) {
-                        clearInterval(checkDone); clearInterval(typeWriter);
-                        finishGeneration(fullText);
-                    }
-                }, 100);
+                if (!isManuallyStopped) {
+                    const checkDone = setInterval(() => {
+                        if (displayedText.length >= fullText.length) {
+                            clearInterval(checkDone); clearInterval(typeWriter);
+                            finishGeneration(fullText);
+                        }
+                    }, 100);
+                }
                 streamReader = null;
             }
         }
@@ -1106,6 +1193,16 @@
                 bubble.innerHTML = marked.parse(text);
             } else {
                 if (text) { const bubble = document.createElement('div'); bubble.className = `message-bubble ${role}-content`; bubble.innerText = text; row.appendChild(bubble); }
+                
+                const userActions = document.createElement('div'); userActions.className = 'user-actions';
+                const copyBtn = document.createElement('div'); copyBtn.className = 'action-btn'; copyBtn.innerHTML = icons.copy;
+                copyBtn.onclick = () => { navigator.clipboard.writeText(text); copyBtn.innerHTML = icons.check; setTimeout(() => copyBtn.innerHTML = icons.copy, 2000); };
+                const editBtn = document.createElement('div'); editBtn.className = 'action-btn'; editBtn.innerHTML = icons.edit;
+                const thisMsgIndex = currentMessages.length;
+                editBtn.onclick = () => handleEditClick(bubble, thisMsgIndex);
+                userActions.appendChild(copyBtn); userActions.appendChild(editBtn);
+                row.appendChild(userActions);
+
                 chatContent.appendChild(row);
             }
             scrollToBottom();
@@ -1142,7 +1239,7 @@
                     if (currentMessages.length > 0 && currentMessages[currentMessages.length-1].role === 'bot') currentMessages.pop();
                     const lastUserMsg = currentMessages.slice().reverse().find(m => m.role === 'user');
                     if(lastUserMsg) {
-                        const endpoint = isSearchActive ? 'https://jaewondev6.pythonanywhere.com/ask' : 'https://jaewondev6.pythonanywhere.com/askfast';
+                        const endpoint = isSearchActive || isThinkingActive ? 'https://jaewondev6.pythonanywhere.com/ask' : 'https://jaewondev6.pythonanywhere.com/askfast';
                         
                         let regenImages = [];
                         if (lastUserMsg.attachments) {
@@ -1152,8 +1249,6 @@
                         let hiddenInst = "";
                         if (systemPrompt) hiddenInst += `[System: ${systemPrompt}] `;
                         hiddenInst += `[Tone: ${botTone}] `;
-                        if (['friendly', 'soft', 'stiff'].includes(botTone)) hiddenInst += "[Use honorifics] ";
-                        else if (botTone === 'friend') hiddenInst += "[Use banmal] ";
                         
                         const regenBody = JSON.stringify({
                             message: `${hiddenInst}\n${lastUserMsg.content}`,
@@ -1194,15 +1289,68 @@
         }
 
         function stopGeneration() {
+            isManuallyStopped = true; 
             if (streamReader) streamReader.cancel();
+            
             let finalText = "";
             if (currentBubbleElement) {
+                if (currentBubbleElement.innerHTML.includes('thinking-dot')) {
+                    currentBubbleElement.innerHTML = "";
+                }
                 const stopSpan = document.createElement('span'); stopSpan.className = 'stopped-text'; stopSpan.innerText = " [답변 중지됨]";
                 currentBubbleElement.appendChild(stopSpan);
                 finalText = currentBubbleElement.innerHTML; 
             }
             isGenerating = false;
             finishGeneration(finalText);
+        }
+
+        function handleEditClick(bubble, messageIndex) {
+            const originalText = currentMessages[messageIndex].content;
+            const editContainer = document.createElement('div'); editContainer.className = 'edit-container';
+            const textarea = document.createElement('textarea'); textarea.className = 'edit-textarea'; textarea.value = originalText;
+            const btnRow = document.createElement('div'); btnRow.className = 'edit-buttons';
+            const saveBtn = document.createElement('button'); saveBtn.className = 'edit-btn save'; saveBtn.innerText = 'Save & Submit';
+            saveBtn.onclick = () => submitEdit(messageIndex, textarea.value);
+            const cancelBtn = document.createElement('button'); cancelBtn.className = 'edit-btn cancel'; cancelBtn.innerText = 'Cancel';
+            cancelBtn.onclick = () => cancelEdit(bubble, originalText);
+            btnRow.appendChild(cancelBtn); btnRow.appendChild(saveBtn);
+            editContainer.appendChild(textarea); editContainer.appendChild(btnRow);
+            bubble.innerHTML = ''; bubble.appendChild(editContainer); textarea.focus();
+        }
+
+        function cancelEdit(bubble, originalText) { bubble.innerHTML = originalText; }
+
+        async function submitEdit(messageIndex, newText) {
+            if (!newText.trim()) return;
+            currentMessages = currentMessages.slice(0, messageIndex);
+            
+            chatContent.innerHTML = '';
+            currentMessages.forEach((msg, idx) => {
+                if (msg.role === 'user') appendMessageUI('user', msg.content, false, msg.attachments);
+                else if (msg.role === 'bot') {
+                    appendMessageUI('bot', msg.content, false);
+                    const rows = chatContent.querySelectorAll('.message-row.bot');
+                    const lastRow = rows[rows.length-1];
+                    if(lastRow) addActionButtons(lastRow.querySelector('.bot-bubble-wrapper'), msg.content, false);
+                }
+            });
+
+            appendMessageUI('user', newText, false, []); 
+            currentMessages.push({ role: 'user', content: newText, attachments: [] }); 
+            
+            scrollToBottom();
+            
+            const endpoint = isSearchActive || isThinkingActive ? 'https://jaewondev6.pythonanywhere.com/ask' : 'https://jaewondev6.pythonanywhere.com/askfast';
+            let hiddenInst = "";
+            if (systemPrompt) hiddenInst += `[System: ${systemPrompt}] `;
+            hiddenInst += `[Tone: ${botTone}] `;
+            const messageToSend = `${hiddenInst}\n${newText}`;
+            let historyPayload = [];
+            if (isHistoryEnabled) { historyPayload = currentMessages.map(m => ({ role: m.role === 'bot' ? 'model' : 'user', content: m.content })); }
+            
+            const requestBody = JSON.stringify({ message: messageToSend, history: historyPayload, image_base64: [] });
+            await streamResponse(endpoint, {'Content-Type': 'application/json'}, requestBody);
         }
 
         function loadHistoryFromStorage() { renderHistoryList(); }
