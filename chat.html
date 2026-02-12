@@ -39,8 +39,8 @@
             --active-search-text: #0ea5e9;
 
             /* [수정됨] 생각하기 모드 색상: 노란색과 주황색 사이 (Amber) */
-            --active-think-bg: rgba(255, 193, 7, 0.25); 
-            --active-think-text: #d97706; /* 진한 호박색 */
+            --active-think-bg: rgba(255, 179, 0, 0.25); 
+            --active-think-text: #f59e0b; /* Amber-500 */
 
             --window-radius: 20px;
             --btn-radius: 12px;
@@ -77,7 +77,7 @@
             --active-search-text: #38bdf8;
             
             /* [수정됨] 다크모드 생각하기 색상 */
-            --active-think-bg: rgba(251, 191, 36, 0.3);
+            --active-think-bg: rgba(251, 191, 36, 0.25);
             --active-think-text: #fbbf24; 
         }
 
@@ -163,15 +163,17 @@
         
         .message-bubble { max-width: 100%; line-height: 1.6; word-break: break-word; border-radius: 20px; position: relative; }
         
+        /* [수정됨] 사용자 버블 네 모서리 모두 둥글게 */
         .message-bubble.user-content { background-color: var(--user-bubble-bg); color: var(--user-bubble-text); font-size: 15px; padding: 10px 14px; border-radius: 20px !important; }
-        .message-row.user:hover .user-actions { opacity: 1; visibility: visible; }
         
+        /* [수정됨] 사용자 메시지 호버 시 왼쪽에 버튼 표시 */
+        .message-row.user:hover .user-actions { opacity: 1; visibility: visible; }
         .user-actions {
             position: absolute; right: 100%; top: 50%; transform: translateY(-50%);
             display: flex; gap: 4px; margin-right: 8px;
             opacity: 0; visibility: hidden; transition: opacity 0.2s;
         }
-        
+
         .message-bubble.bot-content { background-color: transparent; color: var(--bot-bubble-text); font-size: 16px; padding: 12px 16px; padding-left: 0; }
         
         .message-bubble.bot-content p { margin-bottom: 10px; }
@@ -198,14 +200,20 @@
         .action-btn:hover { background-color: var(--sidebar-hover); color: var(--text-color); }
         .action-icon { width: 18px; height: 18px; stroke-width: 2.2; }
         
-        .edit-container { display: flex; flex-direction: column; width: 100%; gap: 8px; align-items: flex-end; }
-        .edit-textarea { width: 100%; background: var(--input-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 10px; color: var(--text-color); font-size: 15px; resize: none; outline: none; }
+        /* [수정됨] 버전 네비게이션 (1/2 화살표) */
+        .version-nav { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text-color); margin-left: 6px; font-weight: 500; user-select: none; }
+        .nav-btn { cursor: pointer; color: var(--icon-color); display: flex; align-items: center; }
+        .nav-btn:hover { color: var(--text-color); }
+        .nav-btn.disabled { opacity: 0.3; cursor: default; pointer-events: none; }
+
+        /* [수정됨] 편집 모드 스타일 */
+        .edit-container { display: flex; flex-direction: column; width: 100%; gap: 8px; align-items: flex-end; min-width: 260px; }
+        .edit-textarea { width: 100%; background: var(--bg-color); border: 1px solid var(--active-search-text); border-radius: 12px; padding: 10px; color: var(--text-color); font-size: 15px; resize: none; outline: none; font-family: inherit; }
         .edit-buttons { display: flex; gap: 8px; }
-        .edit-btn { padding: 6px 12px; border-radius: 16px; font-size: 13px; cursor: pointer; border: none; font-weight: 500; }
-        .edit-btn.save { background-color: var(--text-color); color: var(--bg-color); }
+        .edit-btn { padding: 6px 14px; border-radius: 16px; font-size: 13px; cursor: pointer; border: none; font-weight: 500; transition: 0.2s; }
+        .edit-btn.save { background-color: #10a37f; color: #fff; }
         .edit-btn.cancel { background-color: var(--sidebar-hover); color: var(--text-color); }
 
-        /* Bottom Interface */
         #bottom-interface { 
             position: absolute; bottom: 0; left: 0; width: 100%; 
             display: flex; flex-direction: column; align-items: center; 
@@ -246,13 +254,7 @@
         .search-btn:hover, .think-btn:hover { background-color: rgba(0,0,0,0.05); color: var(--text-color); }
         
         .search-btn.active { background-color: var(--active-search-bg); color: var(--active-search-text); width: auto; padding: 0 12px 0 8px; }
-        /* [수정됨] 생각하기 버튼 활성화 CSS 확실하게 적용 */
-        .think-btn.active { 
-            background-color: var(--active-think-bg) !important; 
-            color: var(--active-think-text) !important; 
-            width: auto; 
-            padding: 0 12px 0 8px; 
-        }
+        .think-btn.active { background-color: var(--active-think-bg) !important; color: var(--active-think-text) !important; width: auto; padding: 0 12px 0 8px; }
         
         .search-label, .think-label { font-size: 13px; font-weight: 600; white-space: nowrap; opacity: 0; width: 0; overflow: hidden; transition: all 0.3s ease; margin-left: 0; }
         .search-btn.active .search-label, .think-btn.active .think-label { opacity: 1; width: auto; margin-left: 6px; }
@@ -279,7 +281,6 @@
         .image-lightbox.open .lightbox-img { transform: scale(1); }
         .lightbox-close { position: absolute; top: 20px; right: 20px; color: white; cursor: pointer; background: rgba(255,255,255,0.2); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
 
-        /* Settings Window */
         .settings-window { background-color: var(--modal-bg); width: 750px; height: 500px; border-radius: var(--window-radius); display: flex; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.2); color: var(--modal-text); transform: scale(0.95); transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.3s; }
         .modal-overlay.open .settings-window { transform: scale(1); }
         .settings-sidebar { width: 220px; background-color: var(--modal-sidebar-bg); padding: 20px 10px; display: flex; flex-direction: column; gap: 4px; border-right: 1px solid var(--border-color); }
@@ -349,23 +350,15 @@
             .sidebar.collapsed { width: 220px !important; transform: translateX(-100%); border-right: none; }
             .sidebar-content { opacity: 1 !important; width: 220px !important; }
             
-            /* [수정됨] 패딩을 16px로 줄여 좌우 여백 확보 */
             #chat-content { padding: 80px 16px 200px 16px; } 
             
-            /* [수정됨] 모바일에서 텍스트 및 패딩 더 작게 */
             .message-bubble.user-content { font-size: 13px; padding: 8px 12px; }
-            /* [수정됨] 봇 버블 패딩 왼쪽 0으로 유지하되 스타일 확인 */
             .message-bubble.bot-content { font-size: 13px; padding: 8px 0; }
             
-            /* Thinking button no text on mobile and active color fix */
             .search-btn.active .search-label, .think-btn.active .think-label { display: none; width: 0; opacity: 0; }
             .search-btn.active, .think-btn.active { width: 34px; padding: 0; }
             
-            /* [수정됨] 모바일에서 생각하기 버튼 활성화 시 배경색과 아이콘색 강제 적용 */
-            .think-btn.active { 
-                background-color: var(--active-think-bg) !important;
-                color: var(--active-think-text) !important;
-            }
+            .think-btn.active { background-color: var(--active-think-bg) !important; color: var(--active-think-text) !important; }
 
             #bottom-interface { padding-bottom: 5px; } 
             .center-logo-img { width: 60px; margin-bottom: 20px; }
@@ -380,10 +373,7 @@
             .settings-back-btn { display: block; }
             .setting-desc { font-size: 13px; margin-bottom: 4px;}
             
-            .settings-mobile-header {
-                display: flex; justify-content: space-between; align-items: center;
-                margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid var(--border-color);
-            }
+            .settings-mobile-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid var(--border-color); }
         }
     </style>
 </head>
@@ -703,7 +693,6 @@
         let botTone = localStorage.getItem('botTone') || 'friendly';
         let isHistoryEnabled = localStorage.getItem('isHistoryEnabled') !== 'false';
         
-        // [수정됨] 기본 햅틱 세기 1로 변경
         let hapticStrength = parseInt(localStorage.getItem('hapticStrength')) || 1; 
 
         const sidebar = document.getElementById('sidebar');
