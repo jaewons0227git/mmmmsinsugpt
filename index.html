@@ -99,6 +99,13 @@ function goToStep2(){
     document.getElementById('step-2').style.display='block';
 }
 
+// 방문 확인 및 리다이렉트 함수
+function checkRedirect() {
+    if(localStorage.getItem('minsugpt_visited') === 'true'){
+        window.location.replace("https://minsugpt.kro.kr/chat");
+    }
+}
+
 // '확인 및 시작' 클릭 시 저장
 const startBtn = document.getElementById('startBtn');
 startBtn.addEventListener('click', async function(){
@@ -110,21 +117,20 @@ startBtn.addEventListener('click', async function(){
     }
 });
 
-// 페이지 로드 시 값 불러오기
-window.addEventListener('DOMContentLoaded', async ()=>{
-    if(window.pywebview){ // 앱 환경
-        try{
-            const val = await window.pywebview.api.load_data('minsugpt_visited');
-            if(val==='true'){
-                localStorage.setItem('minsugpt_visited','true');
-                window.location.replace("https://minsugpt.kro.kr/chat");
-            }
-        }catch(err){ console.error('Python API load_data 실패',err); }
-    }else{ // 브라우저 환경
-        if(localStorage.getItem('minsugpt_visited')==='true'){
-            window.location.replace("https://minsugpt.kro.kr/chat");
+// 페이지 로드 시 확인 (브라우저 환경용)
+window.addEventListener('DOMContentLoaded', () => {
+    checkRedirect();
+});
+
+// 앱 환경(pywebview) 준비 완료 시 확인
+window.addEventListener('pywebviewready', async () => {
+    try {
+        const val = await window.pywebview.api.load_data('minsugpt_visited');
+        if(val === 'true'){
+            localStorage.setItem('minsugpt_visited', 'true');
+            checkRedirect();
         }
-    }
+    } catch(err) { console.error('Python API load_data 실패', err); }
 });
 </script>
 </body>
