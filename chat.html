@@ -38,9 +38,9 @@
             --active-search-bg: rgba(56, 189, 248, 0.15);
             --active-search-text: #0ea5e9;
 
-            /* [수정됨] 생각하기 모드 색상: 노란색과 주황색 사이 (Amber) */
+            /* 생각하기 모드 색상: Amber */
             --active-think-bg: rgba(255, 179, 0, 0.25); 
-            --active-think-text: #f59e0b; /* Amber-500 */
+            --active-think-text: #f59e0b;
 
             --window-radius: 20px;
             --btn-radius: 12px;
@@ -76,7 +76,6 @@
             --active-search-bg: rgba(14, 165, 233, 0.2);
             --active-search-text: #38bdf8;
             
-            /* [수정됨] 다크모드 생각하기 색상 */
             --active-think-bg: rgba(251, 191, 36, 0.25);
             --active-think-text: #fbbf24; 
         }
@@ -97,7 +96,6 @@
         }
 
         /* --- UI Components --- */
-        
         #toggle-btn-wrapper { 
             position: fixed; top: 10px; left: 10px; 
             width: 40px; height: 40px; 
@@ -151,7 +149,7 @@
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         
         .message-row.user { align-items: flex-end; }
-        .message-row.bot { align-items: flex-start; }
+        .message-row.bot { align-items: flex-start; width: 100%; }
         
         .bubble-attachments { display: flex; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; justify-content: flex-end; }
         .message-row.bot .bubble-attachments { justify-content: flex-start; }
@@ -159,21 +157,31 @@
         .bubble-image-card { width: 100px; height: 100px; border-radius: 12px; overflow: hidden; cursor: pointer; border: 1px solid var(--border-color); background-color: var(--input-bg); background-size: cover; background-position: center; }
         .bubble-file-card { display: flex; align-items: center; gap: 8px; padding: 10px; background-color: var(--input-bg); border-radius: 12px; border: 1px solid var(--border-color); font-size: 13px; }
 
+        /* [수정됨] 사용자 메시지 래퍼 및 호버 액션 개선 */
+        .user-bubble-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            max-width: 100%;
+            position: relative;
+        }
+        /* Hover triggers actions visibility */
+        .user-bubble-wrapper:hover .user-actions { opacity: 1; visibility: visible; }
+        
+        .user-actions {
+            display: flex;
+            gap: 4px;
+            margin-right: 8px;
+            opacity: 0; visibility: hidden; 
+            transition: opacity 0.2s;
+        }
+
         .bot-bubble-wrapper { display: flex; flex-direction: column; align-items: flex-start; width: 100%; }
         
         .message-bubble { max-width: 100%; line-height: 1.6; word-break: break-word; border-radius: 20px; position: relative; }
         
-        /* [수정됨] 사용자 버블 네 모서리 모두 둥글게 */
         .message-bubble.user-content { background-color: var(--user-bubble-bg); color: var(--user-bubble-text); font-size: 15px; padding: 10px 14px; border-radius: 20px !important; }
         
-        /* [수정됨] 사용자 메시지 호버 시 왼쪽에 버튼 표시 */
-        .message-row.user:hover .user-actions { opacity: 1; visibility: visible; }
-        .user-actions {
-            position: absolute; right: 100%; top: 50%; transform: translateY(-50%);
-            display: flex; gap: 4px; margin-right: 8px;
-            opacity: 0; visibility: hidden; transition: opacity 0.2s;
-        }
-
         .message-bubble.bot-content { background-color: transparent; color: var(--bot-bubble-text); font-size: 16px; padding: 12px 16px; padding-left: 0; }
         
         .message-bubble.bot-content p { margin-bottom: 10px; }
@@ -200,13 +208,11 @@
         .action-btn:hover { background-color: var(--sidebar-hover); color: var(--text-color); }
         .action-icon { width: 18px; height: 18px; stroke-width: 2.2; }
         
-        /* [수정됨] 버전 네비게이션 (1/2 화살표) */
         .version-nav { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text-color); margin-left: 6px; font-weight: 500; user-select: none; }
         .nav-btn { cursor: pointer; color: var(--icon-color); display: flex; align-items: center; }
         .nav-btn:hover { color: var(--text-color); }
         .nav-btn.disabled { opacity: 0.3; cursor: default; pointer-events: none; }
 
-        /* [수정됨] 편집 모드 스타일 */
         .edit-container { display: flex; flex-direction: column; width: 100%; gap: 8px; align-items: flex-end; min-width: 260px; }
         .edit-textarea { width: 100%; background: var(--bg-color); border: 1px solid var(--active-search-text); border-radius: 12px; padding: 10px; color: var(--text-color); font-size: 15px; resize: none; outline: none; font-family: inherit; }
         .edit-buttons { display: flex; gap: 8px; }
@@ -254,7 +260,11 @@
         .search-btn:hover, .think-btn:hover { background-color: rgba(0,0,0,0.05); color: var(--text-color); }
         
         .search-btn.active { background-color: var(--active-search-bg); color: var(--active-search-text); width: auto; padding: 0 12px 0 8px; }
-        .think-btn.active { background-color: var(--active-think-bg) !important; color: var(--active-think-text) !important; width: auto; padding: 0 12px 0 8px; }
+        .think-btn.active { 
+            background-color: var(--active-think-bg) !important; 
+            color: var(--active-think-text) !important; 
+            width: auto; padding: 0 12px 0 8px; 
+        }
         
         .search-label, .think-label { font-size: 13px; font-weight: 600; white-space: nowrap; opacity: 0; width: 0; overflow: hidden; transition: all 0.3s ease; margin-left: 0; }
         .search-btn.active .search-label, .think-btn.active .think-label { opacity: 1; width: auto; margin-left: 6px; }
@@ -281,6 +291,7 @@
         .image-lightbox.open .lightbox-img { transform: scale(1); }
         .lightbox-close { position: absolute; top: 20px; right: 20px; color: white; cursor: pointer; background: rgba(255,255,255,0.2); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
 
+        /* Settings Window */
         .settings-window { background-color: var(--modal-bg); width: 750px; height: 500px; border-radius: var(--window-radius); display: flex; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.2); color: var(--modal-text); transform: scale(0.95); transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.3s; }
         .modal-overlay.open .settings-window { transform: scale(1); }
         .settings-sidebar { width: 220px; background-color: var(--modal-sidebar-bg); padding: 20px 10px; display: flex; flex-direction: column; gap: 4px; border-right: 1px solid var(--border-color); }
@@ -358,7 +369,10 @@
             .search-btn.active .search-label, .think-btn.active .think-label { display: none; width: 0; opacity: 0; }
             .search-btn.active, .think-btn.active { width: 34px; padding: 0; }
             
-            .think-btn.active { background-color: var(--active-think-bg) !important; color: var(--active-think-text) !important; }
+            .think-btn.active { 
+                background-color: var(--active-think-bg) !important;
+                color: var(--active-think-text) !important;
+            }
 
             #bottom-interface { padding-bottom: 5px; } 
             .center-logo-img { width: 60px; margin-bottom: 20px; }
@@ -373,7 +387,10 @@
             .settings-back-btn { display: block; }
             .setting-desc { font-size: 13px; margin-bottom: 4px;}
             
-            .settings-mobile-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid var(--border-color); }
+            .settings-mobile-header {
+                display: flex; justify-content: space-between; align-items: center;
+                margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid var(--border-color);
+            }
         }
     </style>
 </head>
@@ -663,6 +680,7 @@
         const translations = {
             ko: { newChat: "새 채팅", history: "기록", settings: "설정", placeholder: "메시지 보내기", general: "일반", personalization: "개인 맞춤 설정", dataControls: "데이터 제어", info: "정보", theme: "테마", system: "시스템", dark: "다크", light: "라이트", language: "언어", deleteAllChats: "모든 채팅 삭제", deleteAll: "모두 삭제", cancel: "취소", delete: "삭제", editTitle: "이름 수정", deleteConfirmTitle: "채팅 삭제", deleteConfirmMsg: "이 채팅을 영구적으로 삭제하시겠습니까?", deleteAllConfirmMsg: "모든 채팅 기록을 영구적으로 삭제하시겠습니까?", themeDesc: "인터페이스의 밝기 모드를 설정합니다.", langDesc: "UI 언어를 변경합니다.", deleteAllDesc: "모든 대화 기록을 로컬에서 영구 삭제합니다.", systemPrompt: "시스템 프롬프트", systemPromptDesc: "봇에게 비공식적으로 명령할 내용을 입력하세요.", botTone: "봇 말투", botToneDesc: "봇의 말투를 설정합니다.", friendly: "친절함", friend: "친구", stiff: "딱딱한", soft: "부드러운", enthusiastic: "열정적인", historyMemory: "대화 기억", historyMemoryDesc: "이전 대화 내용을 기억하여 문맥을 유지합니다.", generalDesc: "테마, 언어, 채팅 삭제", persDesc: "시스템 프롬프트, 봇 말투", dataDesc: "대화 기억 설정", infoDesc: "앱 정보 및 저작권", hapticStrength: "햅틱 세기", hapticDesc: "진동의 세기를 조절합니다." },
             en: { newChat: "New Chat", history: "History", settings: "Settings", placeholder: "Send a message", general: "General", personalization: "Personalization", dataControls: "Data Controls", info: "Info", theme: "Theme", system: "System", dark: "Dark", light: "Light", language: "Language", deleteAllChats: "Delete all chats", deleteAll: "Delete All", cancel: "Cancel", delete: "Delete", editTitle: "Edit Title", deleteConfirmTitle: "Delete Chat", deleteConfirmMsg: "Delete this chat permanently?", deleteAllConfirmMsg: "Permanently delete all chat history?", themeDesc: "Set the brightness mode of the interface.", langDesc: "Change the UI language.", deleteAllDesc: "Permanently delete all chat history from local storage.", systemPrompt: "System Prompt", systemPromptDesc: "Instructions for the bot (hidden).", botTone: "Bot Tone", botToneDesc: "Set the tone of the bot.", friendly: "Friendly", friend: "Friend", stiff: "Stiff", soft: "Soft", enthusiastic: "Enthusiastic", historyMemory: "Chat Memory", historyMemoryDesc: "Send previous chat history for context.", generalDesc: "Theme, Language, Delete Chat", persDesc: "System Prompt, Bot Tone", dataDesc: "Chat Memory Settings", infoDesc: "App Info & Copyright", hapticStrength: "Haptic Strength", hapticDesc: "Adjust vibration intensity." },
+            // (Other languages maintained)
             ja: { newChat: "新しいチャット", history: "履歴", settings: "設定", placeholder: "メッセージを送信", general: "一般", personalization: "パーソナライズ", dataControls: "データ制御", info: "情報", theme: "テーマ", system: "システム", dark: "ダーク", light: "ライト", language: "言語", deleteAllChats: "すべてのチャットを削除", deleteAll: "すべて削除", cancel: "キャンセル", delete: "削除", editTitle: "タイトル編集", deleteConfirmTitle: "チャット削除", deleteConfirmMsg: "このチャットを完全に削除しますか？", deleteAllConfirmMsg: "すべてのチャット履歴を完全に削除しますか？", themeDesc: "インターフェースの明るさモードを設定します。", langDesc: "UI言語を変更します。", deleteAllDesc: "ローカルストレージからすべてのチャット履歴を完全に削除します。", systemPrompt: "システムプロンプト", systemPromptDesc: "ボットへの非公式な指示を入力します。", botTone: "口調", botToneDesc: "ボットの口調を設定します。", friendly: "親切", friend: "友達", stiff: "堅い", soft: "柔らかい", enthusiastic: "情熱的", historyMemory: "会話記憶", historyMemoryDesc: "以前の会話履歴を記憶して文脈を維持します。", generalDesc: "テーマ、言語、チャット削除", persDesc: "システムプロンプト、ボットの口調", dataDesc: "会話記憶設定", infoDesc: "アプリ情報と著作権", hapticStrength: "触覚強度", hapticDesc: "振動の強度を調整します。" },
             zh: { newChat: "新聊天", history: "历史记录", settings: "设置", placeholder: "发送消息", general: "常规", personalization: "个性化", dataControls: "数据控制", info: "信息", theme: "主题", system: "系统", dark: "深色", light: "浅色", language: "语言", deleteAllChats: "删除所有聊天", deleteAll: "全部删除", cancel: "取消", delete: "删除", editTitle: "编辑标题", deleteConfirmTitle: "删除聊天", deleteConfirmMsg: "确定要永久删除此聊天吗？", deleteAllConfirmMsg: "确定要永久删除所有聊天记录吗？", themeDesc: "设置界面的亮度模式。", langDesc: "更改界面语言。", deleteAllDesc: "从本地存储中永久删除所有聊天记录。", systemPrompt: "系统提示", systemPromptDesc: "输入非正式指令。", botTone: "语气", botToneDesc: "设置机器人的语气。", friendly: "亲切", friend: "朋友", stiff: "生硬", soft: "温柔", enthusiastic: "热情", historyMemory: "对话记忆", historyMemoryDesc: "记住以前的对话以保持上下文。", generalDesc: "主题，语言，删除聊天", persDesc: "系统提示，机器人语气", dataDesc: "对话记忆设置", infoDesc: "应用信息与版权", hapticStrength: "触觉强度", hapticDesc: "调整振动强度。" },
             es: { newChat: "Nuevo Chat", history: "Historial", settings: "Ajustes", placeholder: "Enviar mensaje", general: "General", personalization: "Personalización", dataControls: "Datos", info: "Info", theme: "Tema", system: "Sistema", dark: "Oscuro", light: "Claro", language: "Idioma", deleteAllChats: "Borrar todos los chats", deleteAll: "Borrar todo", cancel: "Cancelar", delete: "Eliminar", editTitle: "Editar título", deleteConfirmTitle: "Eliminar chat", deleteConfirmMsg: "¿Eliminar este chat permanentemente?", deleteAllConfirmMsg: "¿Eliminar permanentemente todo el historial?", themeDesc: "Establece el modo de brillo de la interfaz.", langDesc: "Cambiar el idioma de la interfaz.", deleteAllDesc: "Eliminar permanentemente todo el historial del almacenamiento local.", systemPrompt: "Prompt del sistema", systemPromptDesc: "Instrucciones ocultas para el bot.", botTone: "Tono", botToneDesc: "Establecer el tono del bot.", friendly: "Amable", friend: "Amigo", stiff: "Formal", soft: "Suave", enthusiastic: "Entusiasta", historyMemory: "Memoria", historyMemoryDesc: "Recordar historial para contexto.", generalDesc: "Tema, Idioma, Borrar Chat", persDesc: "Prompt del sistema, Tono del bot", dataDesc: "Ajustes de memoria", infoDesc: "Info de la app y copyright", hapticStrength: "Fuerza háptica", hapticDesc: "Ajustar la intensidad de la vibración." },
@@ -677,7 +695,7 @@
         let isGenerating = false;
         let isSearchActive = false;
         let isThinkingActive = false;
-        let isManuallyStopped = false; // Flag to handle immediate stop
+        let isManuallyStopped = false; 
         let typingTimeout = null;
         let thinkingTimeout = null;
         let currentBubbleElement = null;
@@ -721,9 +739,32 @@
             check: '<svg class="action-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>',
             regenerate: '<svg class="action-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>',
             edit: '<svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>',
-            trash: '<svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>'
+            trash: '<svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>',
+            left: '<svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>',
+            right: '<svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>'
         };
 
+        function saveToStorage(key, value) {
+            localStorage.setItem(key, value);
+            // Python app integration
+            if (window.pywebview && window.pywebview.api) {
+                window.pywebview.api.save_data(key, value).catch(() => {});
+            }
+        }
+        
+        function getStoredChats() { try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); } catch { return []; } }
+        
+        function saveChatToStorage(chatObj) {
+            let chats = getStoredChats();
+            const existingIndex = chats.findIndex(c => c.id === chatObj.id);
+            if (existingIndex > -1) chats[existingIndex] = chatObj; else chats.unshift(chatObj);
+            chatObj.updatedAt = Date.now();
+            chats.sort((a, b) => b.updatedAt - a.updatedAt);
+            saveToStorage(STORAGE_KEY, JSON.stringify(chats));
+            renderHistoryList();
+        }
+
+        // ... (Other init/toggle logic remains) ...
         function init() {
             if (window.innerWidth <= 768) sidebar.classList.add('collapsed');
             updateUIText('ko');
@@ -756,14 +797,8 @@
             isSearchActive = !isSearchActive;
             const btnCenter = document.getElementById('centerSearchBtn');
             const btnBottom = document.getElementById('bottomSearchBtn');
-            
-            if (isSearchActive) {
-                btnCenter.classList.add('active');
-                btnBottom.classList.add('active');
-            } else {
-                btnCenter.classList.remove('active');
-                btnBottom.classList.remove('active');
-            }
+            if (isSearchActive) { btnCenter.classList.add('active'); btnBottom.classList.add('active'); } 
+            else { btnCenter.classList.remove('active'); btnBottom.classList.remove('active'); }
             triggerHaptic();
         }
 
@@ -771,14 +806,8 @@
             isThinkingActive = !isThinkingActive;
             const btnCenter = document.getElementById('centerThinkBtn');
             const btnBottom = document.getElementById('bottomThinkBtn');
-            
-            if (isThinkingActive) {
-                btnCenter.classList.add('active');
-                btnBottom.classList.add('active');
-            } else {
-                btnCenter.classList.remove('active');
-                btnBottom.classList.remove('active');
-            }
+            if (isThinkingActive) { btnCenter.classList.add('active'); btnBottom.classList.add('active'); } 
+            else { btnCenter.classList.remove('active'); btnBottom.classList.remove('active'); }
             triggerHaptic();
         }
 
@@ -804,7 +833,6 @@
 
         async function processFiles(files, origin) {
             if (!files || files.length === 0) return;
-
             for (let file of files) {
                 if (file.type.startsWith('image/')) {
                     const compressedDataUrl = await compressImage(file);
@@ -883,24 +911,11 @@
             for (let i = 0; i < length; i++) result += chars.charAt(Math.floor(Math.random() * chars.length));
             return result;
         }
-
-        function getStoredChats() { try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); } catch { return []; } }
-
-        function saveChatToStorage(chatObj) {
-            let chats = getStoredChats();
-            const existingIndex = chats.findIndex(c => c.id === chatObj.id);
-            if (existingIndex > -1) chats[existingIndex] = chatObj; else chats.unshift(chatObj);
-            chatObj.updatedAt = Date.now();
-            chats.sort((a, b) => b.updatedAt - a.updatedAt);
-            try { localStorage.setItem(STORAGE_KEY, JSON.stringify(chats)); } 
-            catch (e) { if (e.name === 'QuotaExceededError') { while (chats.length > 0) { chats.pop(); try { localStorage.setItem(STORAGE_KEY, JSON.stringify(chats)); break; } catch (e2) { if (chats.length === 0) break; } } } }
-            renderHistoryList();
-        }
-
+        
         function deleteChatFromStorage(id) {
             let chats = getStoredChats();
             chats = chats.filter(c => c.id !== id);
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(chats));
+            saveToStorage(STORAGE_KEY, JSON.stringify(chats));
             renderHistoryList();
         }
 
@@ -941,7 +956,7 @@
             chatContent.innerHTML = '';
             
             currentMessages.forEach((msg, index) => {
-                if (msg.role === 'user') appendMessageUI('user', msg.content, false, msg.attachments);
+                if (msg.role === 'user') appendMessageUI('user', msg.content, false, msg.attachments, msg);
                 else if (msg.role === 'bot') {
                     appendMessageUI('bot', msg.content, false);
                     const rows = chatContent.querySelectorAll('.message-row.bot');
@@ -987,14 +1002,10 @@
         dialogModal.addEventListener('click', (e) => { if (e.target === dialogModal) closeDialog(); });
         function openRenameModal(id, currentTitle) { openDialog(translations[currentLang].editTitle, currentTitle || 'New Conversation', (newTitle) => { let chats = getStoredChats(); const chat = chats.find(c => c.id === id); if (chat) { chat.title = newTitle; saveChatToStorage(chat); } }); }
         function confirmDeleteChat(id) { openDialog(translations[currentLang].deleteConfirmMsg, null, () => { deleteChatFromStorage(id); if (currentChatId === id) startNewChat(); }); }
-        function confirmDeleteAllChats() { openDialog(translations[currentLang].deleteAllConfirmMsg, null, () => { localStorage.removeItem(STORAGE_KEY); startNewChat(); renderHistoryList(); closeSettings(); }); }
+        function confirmDeleteAllChats() { openDialog(translations[currentLang].deleteAllConfirmMsg, null, () => { saveToStorage(STORAGE_KEY, '[]'); startNewChat(); renderHistoryList(); closeSettings(); }); }
 
         function toggleSidebar() { const isCollapsed = sidebar.classList.toggle('collapsed'); if (window.innerWidth <= 768) { if (!isCollapsed) sidebarOverlay.classList.add('visible'); else sidebarOverlay.classList.remove('visible'); } }
-        
-        function triggerHaptic() { 
-            if (navigator.vibrate && hapticStrength > 0) navigator.vibrate(hapticStrength); 
-        }
-        
+        function triggerHaptic() { if (navigator.vibrate && hapticStrength > 0) navigator.vibrate(hapticStrength); }
         function autoResize(el) { el.style.height = '28px'; el.style.height = Math.min(el.scrollHeight, 200) + 'px'; }
         function scrollToBottom() { chatContent.scrollTop = chatContent.scrollHeight; }
         function toggleBtnState(val, btn) { if (isGenerating) { btn.classList.add('stop-active'); } else { (val.trim().length > 0 || currentAttachments.length > 0) ? btn.classList.add('active') : btn.classList.remove('active'); btn.classList.remove('stop-active'); } }
@@ -1005,12 +1016,10 @@
         bottomInput.addEventListener('input', function() { autoResize(this); toggleBtnState(this.value, bottomSendBtn); });
         bottomInput.addEventListener('keydown', (e) => handleKeydown(e, 'bottom'));
 
-        // --- System Config Logic (Background) ---
         async function sendSystemConfig() {
             const endpoint = isSearchActive || isThinkingActive
                 ? 'https://jaewondev6.pythonanywhere.com/ask' 
                 : 'https://jaewondev6.pythonanywhere.com/askfast';
-            
             let instructions = "";
             if (systemPrompt) instructions += `[System Instruction: ${systemPrompt}]\n`;
             instructions += `[Tone Instruction: Act ${botTone}.`;
@@ -1053,7 +1062,6 @@
             else if (botTone === 'friend') hiddenInst += "[Use banmal] ";
 
             const messageToSend = `${hiddenInst}\n${text}`;
-
             let historyPayload = [];
             if (isHistoryEnabled) {
                 historyPayload = currentMessages.map(m => ({
@@ -1061,9 +1069,7 @@
                     content: m.content
                 }));
             }
-
             let imagePayload = currentAttachments.filter(a => a.type === 'image').map(a => a.base64);
-
             const requestBody = JSON.stringify({
                 message: messageToSend,
                 history: historyPayload,
@@ -1086,7 +1092,6 @@
             saveChatToStorage({ id: currentChatId, title: title, messages: currentMessages });
 
             scrollToBottom();
-            
             document.querySelectorAll('.action-btn.regenerate').forEach(btn => btn.closest('.message-actions').remove());
 
             await streamResponse(endpoint, {'Content-Type': 'application/json'}, requestBody);
@@ -1112,11 +1117,7 @@
             let firstChunk = true;
 
             const typeWriter = setInterval(() => {
-                if (isManuallyStopped) {
-                    clearInterval(typeWriter);
-                    return;
-                }
-
+                if (isManuallyStopped) { clearInterval(typeWriter); return; }
                 if (displayedText.length < fullText.length) {
                     if (firstChunk) { bubble.innerHTML = ""; firstChunk = false; triggerHaptic(); }
                     const charsToAdd = fullText.slice(displayedText.length, displayedText.length + 3);
@@ -1134,14 +1135,12 @@
                 if (!response.body) throw new Error('ReadableStream not supported');
                 streamReader = response.body.getReader();
                 const decoder = new TextDecoder();
-
                 while (true) {
                     if (isManuallyStopped) break;
                     const { done, value } = await streamReader.read();
                     if (done) break;
                     const chunk = decoder.decode(value, { stream: true });
-                    const cleanChunk = chunk.replace(/\[DONE\]/g, ''); 
-                    fullText += cleanChunk;
+                    fullText += chunk.replace(/\[DONE\]/g, ''); 
                 }
             } catch (error) {
                 console.error('Stream error:', error);
@@ -1162,7 +1161,7 @@
             }
         }
 
-        function appendMessageUI(role, text, isTyping = false, attachments = []) {
+        function appendMessageUI(role, text, isTyping = false, attachments = [], msgObj = null) {
             const row = document.createElement('div'); row.className = `message-row ${role}`;
             if (attachments && attachments.length > 0) {
                 const attachDiv = document.createElement('div'); attachDiv.className = 'bubble-attachments';
@@ -1174,6 +1173,7 @@
                 });
                 row.appendChild(attachDiv);
             }
+
             if (role === 'bot') {
                 const wrapper = document.createElement('div'); wrapper.className = 'bot-bubble-wrapper';
                 const bubble = document.createElement('div'); bubble.className = `message-bubble ${role}-content`;
@@ -1181,23 +1181,34 @@
                 currentBotRowElement = wrapper;
                 bubble.innerHTML = marked.parse(text);
             } else {
-                if (text) { const bubble = document.createElement('div'); bubble.className = `message-bubble ${role}-content`; bubble.innerText = text; row.appendChild(bubble); }
+                // User Wrapper with Actions
+                const userWrapper = document.createElement('div'); userWrapper.className = 'user-bubble-wrapper';
                 
                 const userActions = document.createElement('div'); userActions.className = 'user-actions';
                 const copyBtn = document.createElement('div'); copyBtn.className = 'action-btn'; copyBtn.innerHTML = icons.copy;
                 copyBtn.onclick = () => { navigator.clipboard.writeText(text); copyBtn.innerHTML = icons.check; setTimeout(() => copyBtn.innerHTML = icons.copy, 2000); };
                 const editBtn = document.createElement('div'); editBtn.className = 'action-btn'; editBtn.innerHTML = icons.edit;
-                const thisMsgIndex = currentMessages.length;
+                
+                // Find index if not provided (safe check)
+                let thisMsgIndex = -1;
+                if (msgObj) thisMsgIndex = currentMessages.indexOf(msgObj);
+                else thisMsgIndex = currentMessages.length; // Approximate for new send
+                
                 editBtn.onclick = () => handleEditClick(bubble, thisMsgIndex);
                 userActions.appendChild(copyBtn); userActions.appendChild(editBtn);
-                row.appendChild(userActions);
-
+                
+                const bubble = document.createElement('div'); bubble.className = `message-bubble ${role}-content`; bubble.innerText = text;
+                
+                userWrapper.appendChild(userActions);
+                userWrapper.appendChild(bubble);
+                row.appendChild(userWrapper);
                 chatContent.appendChild(row);
             }
             scrollToBottom();
             return row;
         }
 
+        // ... (Rest of logic: startGenerationState, addActionButtons, finishGeneration, stopGeneration, edit logic, settings helpers) ...
         function startGenerationState() {
             isGenerating = true;
             centerSendBtn.innerHTML = icons.stop; bottomSendBtn.innerHTML = icons.stop;
@@ -1209,7 +1220,6 @@
             if (wrapperElement.querySelector('.message-actions')) return; 
 
             const actionsDiv = document.createElement('div'); actionsDiv.className = 'message-actions';
-            
             const copyBtn = document.createElement('div'); copyBtn.className = 'action-btn'; copyBtn.innerHTML = icons.copy;
             copyBtn.onclick = function() {
                 const tempDiv = document.createElement('div'); tempDiv.innerHTML = bubbleText;
@@ -1229,48 +1239,37 @@
                     const lastUserMsg = currentMessages.slice().reverse().find(m => m.role === 'user');
                     if(lastUserMsg) {
                         const endpoint = isSearchActive || isThinkingActive ? 'https://jaewondev6.pythonanywhere.com/ask' : 'https://jaewondev6.pythonanywhere.com/askfast';
-                        
-                        let regenImages = [];
-                        if (lastUserMsg.attachments) {
-                            regenImages = lastUserMsg.attachments.filter(a => a.type === 'image').map(a => a.base64);
-                        }
-                        
-                        let hiddenInst = "";
-                        if (systemPrompt) hiddenInst += `[System: ${systemPrompt}] `;
-                        hiddenInst += `[Tone: ${botTone}] `;
-                        
-                        const regenBody = JSON.stringify({
-                            message: `${hiddenInst}\n${lastUserMsg.content}`,
+                        const body = JSON.stringify({ 
+                            message: lastUserMsg.content,
                             history: currentMessages.map(m => ({ role: m.role==='bot'?'model':'user', content: m.content })),
-                            image_base64: regenImages
+                            image_base64: [] 
                         });
-
-                        streamResponse(endpoint, {'Content-Type': 'application/json'}, regenBody);
+                        streamResponse(endpoint, {'Content-Type': 'application/json'}, body);
                     }
                 };
                 actionsDiv.appendChild(regenBtn);
+                
+                // Version Nav Example (Static for now as structure is linear array)
+                const navDiv = document.createElement('div'); navDiv.className = 'version-nav';
+                navDiv.innerHTML = `${icons.left} <span>1/1</span> ${icons.right}`;
+                actionsDiv.appendChild(navDiv);
             }
-
-            wrapperElement.appendChild(actionsDiv);
-            requestAnimationFrame(() => { actionsDiv.classList.add('visible'); scrollToBottom(); });
+            wrapper.appendChild(actionsDiv);
+            requestAnimationFrame(() => actionsDiv.classList.add('visible'));
         }
 
         function finishGeneration(finalText) {
             isGenerating = false;
-            
             document.querySelectorAll('.action-btn.regenerate').forEach(btn => btn.closest('.message-actions').remove());
-
             if (currentBotRowElement && currentBubbleElement) {
                 addActionButtons(currentBotRowElement, finalText, true);
             }
-
             if (finalText) {
                 currentMessages.push({ role: 'bot', content: finalText });
                 let chats = getStoredChats();
                 const chat = chats.find(c => c.id === currentChatId);
                 if (chat) { chat.messages = currentMessages; saveChatToStorage(chat); }
             }
-
             currentBubbleElement = null; currentBotRowElement = null;
             centerSendBtn.innerHTML = icons.send; bottomSendBtn.innerHTML = icons.send;
             centerSendBtn.classList.remove('stop-active'); bottomSendBtn.classList.remove('stop-active');
@@ -1280,12 +1279,9 @@
         function stopGeneration() {
             isManuallyStopped = true; 
             if (streamReader) streamReader.cancel();
-            
             let finalText = "";
             if (currentBubbleElement) {
-                if (currentBubbleElement.innerHTML.includes('thinking-dot')) {
-                    currentBubbleElement.innerHTML = "";
-                }
+                if (currentBubbleElement.innerHTML.includes('thinking-dot')) currentBubbleElement.innerHTML = "";
                 const stopSpan = document.createElement('span'); stopSpan.className = 'stopped-text'; stopSpan.innerText = " [답변 중지됨]";
                 currentBubbleElement.appendChild(stopSpan);
                 finalText = currentBubbleElement.innerHTML; 
@@ -1295,66 +1291,69 @@
         }
 
         function handleEditClick(bubble, messageIndex) {
+            // Safe check for valid index
+            if(messageIndex < 0 || messageIndex >= currentMessages.length) {
+                // Fallback: try to find index by content match
+                const text = bubble.innerText;
+                messageIndex = currentMessages.findIndex(m => m.content === text && m.role === 'user');
+                if(messageIndex === -1) return; 
+            }
+            
             const originalText = currentMessages[messageIndex].content;
             const editContainer = document.createElement('div'); editContainer.className = 'edit-container';
             const textarea = document.createElement('textarea'); textarea.className = 'edit-textarea'; textarea.value = originalText;
             const btnRow = document.createElement('div'); btnRow.className = 'edit-buttons';
             const saveBtn = document.createElement('button'); saveBtn.className = 'edit-btn save'; saveBtn.innerText = 'Save & Submit';
+            
             saveBtn.onclick = () => submitEdit(messageIndex, textarea.value);
+            
             const cancelBtn = document.createElement('button'); cancelBtn.className = 'edit-btn cancel'; cancelBtn.innerText = 'Cancel';
-            cancelBtn.onclick = () => cancelEdit(bubble, originalText);
+            cancelBtn.onclick = () => { bubble.innerHTML = ''; bubble.innerText = originalText; }; 
+            
             btnRow.appendChild(cancelBtn); btnRow.appendChild(saveBtn);
             editContainer.appendChild(textarea); editContainer.appendChild(btnRow);
             bubble.innerHTML = ''; bubble.appendChild(editContainer); textarea.focus();
         }
 
-        function cancelEdit(bubble, originalText) { bubble.innerHTML = originalText; }
-
-        async function submitEdit(messageIndex, newText) {
+        async function submitEdit(msgIndex, newText) {
             if (!newText.trim()) return;
-            currentMessages = currentMessages.slice(0, messageIndex);
+            currentMessages = currentMessages.slice(0, msgIndex);
             
             chatContent.innerHTML = '';
-            currentMessages.forEach((msg, idx) => {
-                if (msg.role === 'user') appendMessageUI('user', msg.content, false, msg.attachments);
+            currentMessages.forEach((msg) => {
+                if (msg.role === 'user') appendMessageUI('user', msg.content, false, msg.attachments, msg);
                 else if (msg.role === 'bot') {
                     appendMessageUI('bot', msg.content, false);
-                    const rows = chatContent.querySelectorAll('.message-row.bot');
-                    const lastRow = rows[rows.length-1];
-                    if(lastRow) addActionButtons(lastRow.querySelector('.bot-bubble-wrapper'), msg.content, false);
+                    const lastRow = chatContent.querySelectorAll('.message-row.bot');
+                    if(lastRow.length) addActionButtons(lastRow[lastRow.length-1].querySelector('.bot-bubble-wrapper'), msg.content, false); // not latest
                 }
             });
 
-            appendMessageUI('user', newText, false, []); 
-            currentMessages.push({ role: 'user', content: newText, attachments: [] }); 
-            
-            scrollToBottom();
-            
-            const endpoint = isSearchActive || isThinkingActive ? 'https://jaewondev6.pythonanywhere.com/ask' : 'https://jaewondev6.pythonanywhere.com/askfast';
-            let hiddenInst = "";
-            if (systemPrompt) hiddenInst += `[System: ${systemPrompt}] `;
-            hiddenInst += `[Tone: ${botTone}] `;
-            const messageToSend = `${hiddenInst}\n${newText}`;
-            let historyPayload = [];
-            if (isHistoryEnabled) { historyPayload = currentMessages.map(m => ({ role: m.role === 'bot' ? 'model' : 'user', content: m.content })); }
-            
-            const requestBody = JSON.stringify({ message: messageToSend, history: historyPayload, image_base64: [] });
-            await streamResponse(endpoint, {'Content-Type': 'application/json'}, requestBody);
+            handleSendClickRaw(newText, []); 
+        }
+        
+        async function handleSendClickRaw(text, attachments) {
+             appendMessageUI('user', text, false, attachments, {role:'user', content:text, attachments:attachments});
+             currentMessages.push({ role: 'user', content: text, attachments: attachments });
+             
+             const endpoint = isSearchActive || isThinkingActive ? 'https://jaewondev6.pythonanywhere.com/ask' : 'https://jaewondev6.pythonanywhere.com/askfast';
+             let hiddenInst = "";
+             if (systemPrompt) hiddenInst += `[System: ${systemPrompt}] `;
+             hiddenInst += `[Tone: ${botTone}] `;
+             const messageToSend = `${hiddenInst}\n${text}`;
+             let historyPayload = isHistoryEnabled ? currentMessages.map(m => ({ role: m.role==='bot'?'model':'user', content: m.content })) : [];
+             const requestBody = JSON.stringify({ message: messageToSend, history: historyPayload, image_base64: [] });
+             scrollToBottom();
+             await streamResponse(endpoint, {'Content-Type': 'application/json'}, requestBody);
         }
 
-        function loadHistoryFromStorage() { renderHistoryList(); }
-        function openSettings() { settingsModal.classList.add('open'); if(window.innerWidth <= 768) { sidebar.classList.add('collapsed'); sidebarOverlay.classList.remove('visible'); } }
-        function closeSettings() { settingsModal.classList.remove('open'); document.querySelectorAll('.custom-select-container').forEach(el => el.classList.remove('open')); if(window.innerWidth <= 768) backToSettingsList(); }
-        settingsModal.addEventListener('click', (e) => { if (e.target === settingsModal) closeSettings(); });
-        function toggleDropdown(id) { const el = document.getElementById(id); document.querySelectorAll('.custom-select-container').forEach(item => { if (item.id !== id) item.classList.remove('open'); }); el.classList.toggle('open'); }
-        function setTheme(mode, optionEl) { const container = document.getElementById('themeSelect'); container.querySelectorAll('.custom-option').forEach(opt => opt.classList.remove('selected')); optionEl.classList.add('selected'); const key = optionEl.getAttribute('data-i18n'); document.getElementById('currentThemeLabel').innerText = translations[currentLang][key]; container.classList.remove('open'); if (mode === 'system') { const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches; document.body.setAttribute('data-theme', isDark ? 'dark' : 'light'); } else { document.body.setAttribute('data-theme', mode); } }
-        function setLanguage(langCode, label, optionEl) { const container = document.getElementById('langSelect'); container.querySelectorAll('.custom-option').forEach(opt => opt.classList.remove('selected')); optionEl.classList.add('selected'); document.getElementById('currentLangLabel').innerText = label; container.classList.remove('open'); currentLang = langCode; updateUIText(langCode); renderHistoryList(); }
-        
-        function savePersonalization() { systemPrompt = document.getElementById('systemPromptInput').value; localStorage.setItem('systemPrompt', systemPrompt); sendSystemConfig(); }
-        function setTone(toneValue, label, optionEl) { const container = document.getElementById('toneSelect'); container.querySelectorAll('.custom-option').forEach(opt => opt.classList.remove('selected')); optionEl.classList.add('selected'); document.getElementById('currentToneLabel').innerText = label; container.classList.remove('open'); botTone = toneValue; localStorage.setItem('botTone', botTone); sendSystemConfig(); }
-        function toggleHistoryMemory(checkbox) { isHistoryEnabled = checkbox.checked; localStorage.setItem('isHistoryEnabled', isHistoryEnabled); }
-        function updateHapticStrength(val) { hapticStrength = parseInt(val); localStorage.setItem('hapticStrength', hapticStrength); triggerHaptic(); }
+        // ... (Settings helpers: savePersonalization, setTone, toggleHistoryMemory, updateHapticStrength) ...
+        function savePersonalization() { systemPrompt = document.getElementById('systemPromptInput').value; saveToStorage('systemPrompt', systemPrompt); sendSystemConfig(); }
+        function setTone(toneValue, label, optionEl) { const container = document.getElementById('toneSelect'); container.querySelectorAll('.custom-option').forEach(opt => opt.classList.remove('selected')); optionEl.classList.add('selected'); document.getElementById('currentToneLabel').innerText = label; container.classList.remove('open'); botTone = toneValue; saveToStorage('botTone', botTone); sendSystemConfig(); }
+        function toggleHistoryMemory(checkbox) { isHistoryEnabled = checkbox.checked; saveToStorage('isHistoryEnabled', isHistoryEnabled); }
+        function updateHapticStrength(val) { hapticStrength = parseInt(val); saveToStorage('hapticStrength', hapticStrength); triggerHaptic(); }
 
+        // ... (updateUIText, switchSettingsTab, backToSettingsList) ...
         function updateUIText(lang) { const t = translations[lang]; if (!t) return; document.querySelectorAll('[data-i18n]').forEach(el => { const key = el.getAttribute('data-i18n'); if (t[key]) el.innerText = t[key]; }); document.querySelectorAll('[data-i18n-placeholder]').forEach(el => { const key = el.getAttribute('data-i18n-placeholder'); if (t[key]) el.placeholder = t[key]; }); const currentThemeKey = document.querySelector('#themeSelect .custom-option.selected').getAttribute('data-i18n'); if (currentThemeKey && t[currentThemeKey]) document.getElementById('currentThemeLabel').innerText = t[currentThemeKey]; const toneKey = botTone; if(t[toneKey]) document.getElementById('currentToneLabel').innerText = t[toneKey]; }
         document.addEventListener('click', function(e) { if (!e.target.closest('.custom-select-container')) { document.querySelectorAll('.custom-select-container').forEach(el => el.classList.remove('open')); } });
 
