@@ -10,7 +10,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Elms+Sans:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
 
     <script>
-        // 페이지 로드 시 즉시 실행: 방문 기록 체크 (브라우저용)
+        // 페이지 로드 시 즉시 실행: 방문 기록 체크
         (function() {
             var hasVisited = localStorage.getItem('minsugpt_visited');
             if (hasVisited === 'true') {
@@ -22,9 +22,13 @@
     <style>
         /* 기존 스타일 그대로 유지 */
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: "Elms Sans", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", "Malgun Gothic", sans-serif; background-color: #ffffff; display: flex; justify-content: center; align-items: center; min-height: 100vh; color: #333; line-height: 1.6; opacity: 0; animation: fadeIn 0.5s forwards; animation-delay: 0.1s; }
+        body { font-family: "Elms Sans", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", "Malgun Gothic", sans-serif;
+               background-color: #ffffff; display: flex; justify-content: center; align-items: center;
+               min-height: 100vh; color: #333; line-height: 1.6; opacity: 0; animation: fadeIn 0.5s forwards; animation-delay: 0.1s;}
         @keyframes fadeIn { to { opacity: 1; } }
-        .card { background-color: #ffffff; width: 100%; max-width: 720px; min-height: 400px; padding: 40px; border-radius: 24px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12); border: 1px solid rgba(0,0,0,0.05); margin: 20px; display: flex; flex-direction: column; justify-content: center; position: relative; }
+        .card { background-color: #ffffff; width: 100%; max-width: 720px; min-height: 400px; padding: 40px;
+                border-radius: 24px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12); border: 1px solid rgba(0,0,0,0.05);
+                margin: 20px; display: flex; flex-direction: column; justify-content: center; position: relative;}
         #step-1 { text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; }
         #step-1 h1 { font-size: 32px; font-weight: 700; margin-bottom: 16px; color: #202123; }
         #step-1 p { font-size: 16px; color: #6e6e80; margin-bottom: 32px; }
@@ -38,9 +42,7 @@
         .grid-container { display: flex; gap: 24px; margin-bottom: 32px; }
         .grid-item { flex: 1; display: flex; flex-direction: column; align-items: flex-start; }
         .icon-box { width: 24px; height: 24px; margin-bottom: 12px; }
-        .text-green { color: #10a37f; }
-        .text-purple { color: #a962ff; }
-        .text-orange { color: #ff8b3d; }
+        .text-green { color: #10a37f; } .text-purple { color: #a962ff; } .text-orange { color: #ff8b3d; }
         .grid-item h3 { font-size: 16px; font-weight: 700; margin-bottom: 8px; color: #202123; }
         .grid-item p { font-size: 14px; color: #555; word-break: keep-all; line-height: 1.5; }
         .link-text { color: #555; text-decoration: underline; cursor: pointer; }
@@ -52,93 +54,91 @@
 </head>
 <body>
 
-<div class="card">
-    <div id="step-1">
-        <h1>안녕하세요</h1>
-        <p>시작하려면 다음을 누르세요</p>
-        <button class="btn-next" onclick="goToStep2()">다음</button>
-    </div>
-
-    <div id="step-2">
-        <div class="header">
-            <h1>MinsuGPT</h1>
-            <p>시작 팁</p>
+    <div class="card">
+        <div id="step-1">
+            <h1>안녕하세요</h1>
+            <p>시작하려면 다음을 누르세요</p>
+            <button class="btn-next" onclick="goToStep2()">다음</button>
         </div>
 
-        <div class="grid-container">
-            <div class="grid-item">
-                <div class="icon-box text-green">
-                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
-                    </svg>
-                </div>
-                <h3>무엇이든 물어보세요</h3>
-                <p>MinsuGPT는 질문에 답변하고, 학습을 도와드리고, 코드를 작성하고, 함께 브레인스토밍하는 등 다양한 작업을 수행할 수 있습니다.</p>
+        <div id="step-2">
+            <div class="header">
+                <h1>MinsuGPT</h1>
+                <p>시작 팁</p>
             </div>
-
-            <div class="grid-item">
-                <div class="icon-box text-purple">
-                    <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M12 2L20.66 7V17L12 22L3.34 17V7L12 2Z" />
-                    </svg>
+            <div class="grid-container">
+                <div class="grid-item">
+                    <div class="icon-box text-green">
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
+                        </svg>
+                    </div>
+                    <h3>무엇이든 물어보세요</h3>
+                    <p>MinsuGPT는 질문에 답변하고, 학습을 도와드리고, 코드를 작성하고, 함께 브레인스토밍하는 등 다양한 작업을 수행할 수 있습니다.</p>
                 </div>
-                <h3>민감한 정보를 공유하지 마세요</h3>
-                <p>서비스 개선을 위해 채팅 기록을 검토하거나 사용할 수 있습니다. <span class="link-text">도움말 센터</span>에서 사용자님의 선택 사항에 대해 자세히 알아보세요.</p>
-            </div>
-
-            <div class="grid-item">
-                <div class="icon-box text-orange">
-                    <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M12 2L1 21H23L12 2ZM12 6L19.53 19H4.47L12 6ZM11 10V14H13V10H11ZM11 16V18H13V16H11Z" />
-                    </svg>
+                <div class="grid-item">
+                    <div class="icon-box text-purple">
+                        <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 2L20.66 7V17L12 22L3.34 17V7L12 2Z" />
+                        </svg>
+                    </div>
+                    <h3>민감한 정보를 공유하지 마세요</h3>
+                    <p>서비스 개선을 위해 채팅 기록을 검토하거나 사용할 수 있습니다. <span class="link-text">도움말 센터</span>에서 사용자님의 선택 사항에 대해 자세히 알아보세요.</p>
                 </div>
-                <h3>사실 여부를 확인해 보세요</h3>
-                <p>당사에는 보호 조치가 있지만, MinsuGPT는 부정확한 정보를 제공할 수 있습니다. MinsuGPT는 조언을 드리려는 것이 아닙니다.</p>
+                <div class="grid-item">
+                    <div class="icon-box text-orange">
+                        <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 2L1 21H23L12 2ZM12 6L19.53 19H4.47L12 6ZM11 10V14H13V10H11ZM11 16V18H13V16H11Z" />
+                        </svg>
+                    </div>
+                    <h3>사실 여부를 확인해 보세요</h3>
+                    <p>당사에는 보호 조치가 있지만, MinsuGPT는 부정확한 정보를 제공할 수 있습니다. MinsuGPT는 조언을 드리려는 것이 아닙니다.</p>
+                </div>
             </div>
-        </div>
-
-        <div class="footer">
-            <button id="startBtn" class="btn-start">확인 및 시작</button>
+            <div class="footer">
+                <a href="https://minsugpt.kro.kr/chat" id="startBtn" class="btn-start">확인 및 시작</a>
+            </div>
         </div>
     </div>
-</div>
 
-<script>
-    // 1단계 -> 2단계
-    function goToStep2() {
-        document.getElementById('step-1').style.display = 'none';
-        document.getElementById('step-2').style.display = 'block';
-    }
-
-    // 🔹 PyWebView + 브라우저 모두 지원
-    async function setVisited() {
-        localStorage.setItem('minsugpt_visited', 'true');
-        // PyWebView API 호출 시도
-        if (window.pywebview && window.pywebview.api && window.pywebview.api.save_data) {
-            try { await window.pywebview.api.save_data('minsugpt_visited', 'true'); } catch(e) {}
+    <script>
+        // 1단계 -> 2단계 전환
+        function goToStep2() {
+            var step1 = document.getElementById('step-1');
+            var step2 = document.getElementById('step-2');
+            step1.style.display = 'none';
+            step2.style.display = 'block';
         }
-    }
 
-    // 버튼 클릭 시 동기화
-    document.getElementById('startBtn').addEventListener('click', function() {
-        setVisited();
-        // 브라우저는 페이지 이동
-        if(!window.pywebview) window.location.href = "https://minsugpt.kro.kr/chat";
-    });
+        // '확인 및 시작' 클릭 시 로컬스토리지 저장 + Python 브리지 호출
+        const startBtn = document.getElementById('startBtn');
+        startBtn.addEventListener('click', async function(e) {
+            localStorage.setItem('minsugpt_visited', 'true');
 
-    // 페이지 로드 시 Python JSON 파일로부터 동기화
-    async function restoreVisited() {
-        if (window.pywebview && window.pywebview.api && window.pywebview.api.load_data) {
-            try {
-                let visited = await window.pywebview.api.load_data('minsugpt_visited');
-                if (visited === 'true') {
-                    localStorage.setItem('minsugpt_visited', 'true');
-                    window.location.href = "https://minsugpt.kro.kr/chat";
+            // PyWebView 브리지: api.save_data 호출
+            if (window.pywebview) {
+                try {
+                    await window.pywebview.api.save_data('minsugpt_visited', 'true');
+                } catch (err) {
+                    console.error('Python API 호출 실패:', err);
                 }
-            } catch(e) {}
-        }
-    }
-    restoreVisited();
-</script>
+            }
+        });
+
+        // 페이지 로드 시 Python 브리지에서 값 불러오기
+        window.addEventListener('DOMContentLoaded', async () => {
+            if (window.pywebview) {
+                try {
+                    const val = await window.pywebview.api.load_data('minsugpt_visited');
+                    if (val === 'true') {
+                        localStorage.setItem('minsugpt_visited', 'true');
+                        window.location.replace("https://minsugpt.kro.kr/chat");
+                    }
+                } catch (err) {
+                    console.error('Python API load_data 실패:', err);
+                }
+            }
+        });
+    </script>
 </body>
 </html>
