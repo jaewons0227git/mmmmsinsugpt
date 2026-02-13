@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MinsuGPT 다운로드</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Elms+Sans:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+
+    <style>
+        /* CSS Variables */
+        :root {
+            --primary-color: #000000;
+            --secondary-color: #333333;
+            --bg-color: #ffffff;
+            --surface-color: #f9f9f9;
+            --border-color: #e5e5e5;
+            --text-main: #111111;
+            --text-sub: #666666;
+            --white: #ffffff;
+        }
+
+        /* 스무스 스크롤 적용 */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Elms Sans", -apple-system, BlinkMacSystemFont, "Malgun Gothic", "Apple SD Gothic Neo", sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.6;
+            word-break: keep-all;
+        }
+
+        .container {
+            max-width: 1000px; /* 전체 너비를 살짝 줄여 컴팩트하게 */
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        /* --- Header (Compact) --- */
+        header {
+            background-color: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-color);
+            padding: 12px 0; /* 높이 축소 */
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-family: "Elms Sans", sans-serif;
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: var(--primary-color);
+            text-decoration: none;
+            letter-spacing: -0.5px;
+        }
+
+        /* 웹에서 이용하기 버튼 스타일 */
+        .nav-btn {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-main);
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 100px; /* 완전 둥글게 */
+            border: 1px solid var(--border-color);
+            transition: all 0.2s ease;
+        }
+
+        .nav-btn:hover {
+            background-color: var(--surface-color);
+            border-color: var(--text-main);
+        }
+
+        /* --- Hero Section --- */
+        .hero {
+            text-align: center;
+            padding: 100px 20px 80px;
+            background-color: var(--bg-color);
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            font-weight: 800;
+            line-height: 1.2;
+            margin-bottom: 20px;
+            letter-spacing: -1px;
+        }
+
+        .hero p {
+            font-size: 1.1rem;
+            color: var(--text-sub);
+            margin-bottom: 40px;
+        }
+
+        /* --- Download Section --- */
+        .download-section {
+            padding: 60px 0 100px;
+            background-color: var(--surface-color);
+            border-top: 1px solid var(--border-color);
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+        
+        .section-header h2 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .section-header p {
+            color: var(--text-sub);
+            font-size: 0.9rem;
+        }
+
+        /* Grid */
+        .os-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+        }
+
+        /* Cards - 곡률 증가 */
+        .download-card {
+            background: var(--white);
+            border: 1px solid var(--border-color);
+            border-radius: 24px; /* 카드 모서리 둥글게 */
+            padding: 36px 24px;
+            text-align: center;
+            transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.3s;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: 100%;
+        }
+
+        .download-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            border-color: var(--text-main);
+        }
+
+        .os-icon {
+            font-size: 1.8rem;
+            margin-bottom: 16px;
+        }
+
+        .os-title {
+            font-family: "Elms Sans", sans-serif;
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .version-info {
+            font-size: 0.9rem;
+            color: var(--text-sub);
+            margin-bottom: 24px;
+        }
+
+        /* Buttons - 캡슐형 */
+        .btn {
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            padding: 14px 0;
+            border-radius: 100px; /* 완전 둥글게 (Pill shape) */
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: var(--white);
+            border: 1px solid var(--primary-color);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--secondary-color);
+            transform: scale(1.02);
+        }
+
+        .btn-disabled {
+            background-color: #f2f2f2;
+            color: #a0a0a0;
+            border: 1px solid #eeeeee;
+            cursor: not-allowed;
+        }
+
+        /* --- Footer (Compact & White) --- */
+        footer {
+            background-color: var(--white); /* 배경 흰색 */
+            border-top: 1px solid var(--border-color);
+            text-align: center;
+            padding: 30px 0; /* 높이 축소 */
+            color: var(--text-sub);
+            font-size: 0.8rem;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="container nav-content">
+            <a href="#" class="logo">MinsuGPT</a>
+            <a href="https://minsugpt.kro.kr/chat" class="nav-btn">웹에서 이용하기</a>
+        </div>
+    </header>
+
+    <section class="hero">
+        <div class="container">
+            <h1>당신의 AI 파트너,<br>MinsuGPT</h1>
+            <p>더 빠르고 스마트한 업무 환경을 경험하세요.<br>PC와 모바일, 어디서든 함께합니다.</p>
+            <a href="#download" class="btn btn-primary" style="width: auto; padding: 14px 40px;">다운로드하기</a>
+        </div>
+    </section>
+
+    <section id="download" class="download-section">
+        <div class="container">
+            <div class="section-header">
+                <h2>다운로드</h2>
+                <p>최신 버전: v1.0.4 | 2026년 2월 업데이트</p>
+            </div>
+
+            <div class="os-grid">
+                <div class="download-card">
+                    <div>
+                        <div class="os-icon">⊞</div>
+                        <h3 class="os-title">Windows</h3>
+                        <p class="version-info">Windows 10/11 (64-bit)</p>
+                    </div>
+                    <a href="https://www.dropbox.com/scl/fi/svwyq98xkut3lb3xlhr6u/MinsuGPT_Setup.exe?rlkey=v21hmcq0r9m7kzlhnwzt7pbbq&st=fj1ifj19&dl=1" class="btn btn-primary">다운로드</a>
+                </div>
+
+                <div class="download-card">
+                    <div>
+                        <div class="os-icon">⌘</div>
+                        <h3 class="os-title">macOS</h3>
+                        <p class="version-info">Intel & Apple Silicon</p>
+                    </div>
+                    <div class="btn btn-disabled">현재 준비 중</div>
+                </div>
+
+                <div class="download-card">
+                    <div>
+                        <div class="os-icon">🤖</div>
+                        <h3 class="os-title">Android</h3>
+                        <p class="version-info">Android 10 이상</p>
+                    </div>
+                    <a href="#" class="btn btn-primary">APK 다운로드</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2026 MinsuGPT. All rights reserved.</p>
+        </div>
+    </footer>
+
+</body>
+</html>
