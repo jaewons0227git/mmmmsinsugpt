@@ -424,80 +424,61 @@
 
 /* ===== 코드블럭 ===== */
 
-.message-bubble pre {
-  background: var(--code-bg);
-  border-radius: 15px;
+.message-bubble pre{
+  background: var(--code-bg, #f6f8fa);
+  border: 1px solid var(--code-border, #d0d7de);
+  border-radius: 14px;
   overflow: hidden;
-  margin: 14px 0;
-  border: 1px solid var(--code-border);
+  margin: 12px 0;
 }
 
 /* 헤더 */
-.code-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+.code-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
 
-  background: var(--code-header-bg);
-  color: var(--code-sub);
+  height:26px;
+  padding:0 10px;
+  font-size:12px;
+  line-height:1;
 
-  padding: 4px 12px;
-  font-size: 12px;
-  line-height: 1;
-
-  border-bottom: 1px solid var(--code-border);
-
-  border-top-left-radius: 14px;
-  border-top-right-radius: 14px;
-  border-bottom-right-radius: 14px;
-  border-bottom-left-radius: 14px;
+  background: var(--code-header-bg, #f6f8fa);
+  border-bottom:1px solid var(--code-border, #d0d7de);
 }
 
-/* 언어 텍스트 */
-.code-lang {
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--code-sub);
+/* 왼쪽 언어 */
+.code-lang{
+  white-space:nowrap;
+  color:#666;
+}
+
+/* 오른쪽 버튼 묶음 */
+.code-actions{
+  display:flex;
+  gap:6px;
 }
 
 /* 버튼 */
-.code-header button {
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 4px;
-  border-radius: 6px;
-  color: var(--code-sub);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background .15s ease, color .15s ease;
+.code-header button{
+  width:24px;
+  height:22px;
+  border:none;
+  background:none;
+  cursor:pointer;
+  border-radius:6px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
 }
 
-.code-header button:hover {
-  background: var(--code-btn-hover);
-  color: var(--code-text);
-}
-
-.code-header svg {
-  width: 15px;
-  height: 15px;
-}
-
-/* 코드 영역 */
-.message-bubble pre code {
-  display: block;
-  padding: 14px;
-  overflow-x: auto;
-  font-size: 13px;
-  line-height: 1.55;
-  color: var(--code-text);
-  background: var(--code-bg);
+.code-header button:hover{
+  background:#eaeef2;
 }
 
 /* 접기 */
-pre.collapsed code {
-  display: none;
+pre.collapsed code{
+  display:none;
 }
 
 
