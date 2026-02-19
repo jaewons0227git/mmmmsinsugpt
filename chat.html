@@ -443,6 +443,61 @@
     padding: 16px;
     display: block;
 }
+
+
+        /* ===== ChatGPT Style Code Block ===== */
+pre{
+  position:relative;
+  margin:16px 0;
+  border-radius:20px; /* 👉 더 둥글게 */
+  overflow:hidden;
+  border:1px solid var(--code-border);
+  background:var(--code-bg);
+}
+
+pre code{
+  display:block;
+  padding:18px;
+  font-size:13px;
+  line-height:1.6;
+  font-family:"JetBrains Mono","Fira Code",monospace;
+  color:var(--code-text);
+  background:transparent;
+  max-height:400px;
+  overflow:auto;
+}
+
+.code-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:6px 10px;
+  font-size:11px;
+  border-bottom:1px solid var(--code-border);
+  background:rgba(0,0,0,0.05);
+}
+
+.copy-btn,.fold-btn{
+  border:none;
+  padding:3px 8px;
+  border-radius:8px;
+  cursor:pointer;
+  font-size:11px;
+  margin-left:6px;
+}
+
+:root{
+  --code-bg:#f7f8fa;
+  --code-text:#1f2328;
+  --code-border:#e5e7eb;
+}
+
+[data-theme="dark"]{
+  --code-bg:#1e1e1e;
+  --code-text:#d4d4d4;
+  --code-border:#333;
+}
+
     </style>
 </head>
 <body>
@@ -1248,6 +1303,8 @@
                 wrapper.appendChild(bubble); row.appendChild(wrapper); chatContent.appendChild(row);
                 currentBotRowElement = wrapper;
                 bubble.innerHTML = marked.parse(text);
+                enhanceCodeBlocks();
+
             } else {
                 if (text) { const bubble = document.createElement('div'); bubble.className = `message-bubble ${role}-content`; bubble.innerText = text; row.appendChild(bubble); }
                 
@@ -1441,6 +1498,57 @@
             document.getElementById('settingsSidebar').classList.remove('hidden');
             document.getElementById('settingsContent').classList.remove('active');
         }
+
+        function enhanceCodeBlocks(){
+
+  document.querySelectorAll('pre code').forEach(code=>{
+    const pre = code.parentElement;
+    if(pre.querySelector('.code-header')) return;
+
+    const lang = code.className.replace('language-','') || 'code';
+
+    const header = document.createElement('div');
+    header.className='code-header';
+
+    const left=document.createElement('span');
+    left.innerText=lang;
+
+    const right=document.createElement('div');
+
+    // 복사 버튼
+    const copy=document.createElement('button');
+    copy.className='copy-btn';
+    copy.innerText='Copy';
+    copy.onclick=()=>{
+      navigator.clipboard.writeText(code.innerText);
+      copy.innerText='✓';
+      setTimeout(()=>copy.innerText='Copy',1500);
+    };
+
+    // 접기 버튼
+    const fold=document.createElement('button');
+    fold.className='fold-btn';
+    fold.innerText='Fold';
+    fold.onclick=()=>{
+      if(code.style.display==='none'){
+        code.style.display='block';
+        fold.innerText='Fold';
+      }else{
+        code.style.display='none';
+        fold.innerText='Open';
+      }
+    };
+
+    right.appendChild(copy);
+    right.appendChild(fold);
+
+    header.appendChild(left);
+    header.appendChild(right);
+
+    pre.prepend(header);
+  });
+}
+
 
         init();
     </script>
