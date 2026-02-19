@@ -396,67 +396,54 @@
     box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 
-/* ===== ChatGPT Style Code Block ===== */
-
-.message-bubble pre {
-    position: relative;
-    border-radius: 18px;
-    padding: 0;
-    margin: 14px 0;
-    overflow: hidden;
-    background: var(--code-bg, #0d1117);
-    border: 1px solid rgba(255,255,255,0.08);
+/* ===== ChatGPT 스타일 코드블럭 ===== */
+/* 코드블럭 전체 */
+pre {
+  background: #0d1117;
+  border-radius: 12px;
+  padding: 0;
+  overflow: hidden;
+  margin: 12px 0;
+  position: relative;
 }
 
 /* 헤더 */
-.code-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 6px 10px;
-    font-size: 12px;
-    background: rgba(255,255,255,0.05);
-    border-bottom: 1px solid rgba(255,255,255,0.08);
+.code-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  background:#161b22;
+  padding:6px 12px;
+  font-size:13px;
+  color:#9da7b3;
+  border-bottom:1px solid #30363d;
 }
 
-.code-lang {
-    opacity: 0.7;
+/* 버튼 */
+.code-header button{
+  background:none;
+  border:none;
+  cursor:pointer;
+  color:#9da7b3;
+  padding:4px;
+}
+.code-header button:hover{
+  color:white;
 }
 
-.code-actions button {
-    border: none;
-    background: transparent;
-    cursor: pointer;
-    font-size: 12px;
-    padding: 4px 6px;
-    border-radius: 6px;
-}
-
-.code-actions button:hover {
-    background: rgba(255,255,255,0.15);
-}
-
-/* 코드 영역 */
-.message-bubble pre code {
-    display: block;
-    padding: 14px;
-    font-size: 13px;
-    line-height: 1.6;
-    overflow-x: auto;
-}
-
-/* 다크모드 자동 */
-[data-theme="light"] .message-bubble pre {
-    --code-bg: #f5f5f5;
-}
-[data-theme="dark"] .message-bubble pre {
-    --code-bg: #0d1117;
+/* 코드 */
+pre code{
+  display:block;
+  padding:14px;
+  overflow:auto;
+  font-size:14px;
 }
 
 /* 접기 */
-.code-collapsed code {
-    display: none;
+pre.collapsed code{
+  display:none;
 }
+
 
     </style>
 </head>
@@ -806,6 +793,9 @@
             edit: '<svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>',
             trash: '<svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>'
         };
+
+        
+
 
         function init() {
             if (window.innerWidth <= 768) sidebar.classList.add('collapsed');
@@ -1464,53 +1454,65 @@
 
 
 
-        function enhanceCodeBlocks() {
-    document.querySelectorAll('.message-bubble pre').forEach(pre => {
-        if (pre.dataset.done) return;
-        pre.dataset.done = true;
+const copyIcon = `
+<svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<rect x="9" y="9" width="13" height="13" rx="2"/>
+<path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+</svg>
+`;
+
+const collapseIcon = `
+<svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M6 9l6 6 6-6"/>
+</svg>
+`;
+
+function copyCode(btn){
+    const code = btn.closest('pre').querySelector('code').innerText;
+    navigator.clipboard.writeText(code);
+    btn.style.color = "#4ade80";
+    setTimeout(()=>btn.style.color="",1000);
+}
+
+function toggleCode(btn){
+    const pre = btn.closest('pre');
+    pre.classList.toggle('collapsed');
+}
+
+function enhanceCodeBlocks() {
+    document.querySelectorAll('.message-bubble pre').forEach(pre=>{
+        if(pre.dataset.done) return;
+        pre.dataset.done=true;
 
         const code = pre.querySelector('code');
-        if (!code) return;
+        if(!code) return;
+
+        // highlight 적용
+        hljs.highlightElement(code);
 
         // 언어 감지
-        let lang = '';
-        code.className.split(' ').forEach(cls => {
-            if (cls.startsWith('language-'))
-                lang = cls.replace('language-', '');
+        let lang="code";
+        code.className.split(' ').forEach(cls=>{
+            if(cls.startsWith('language-'))
+                lang=cls.replace('language-','');
         });
 
         // 헤더 만들기
-        const header = document.createElement('div');
-        header.className = 'code-header';
-
-        header.innerHTML = `
-            <span class="code-lang">${lang || 'code'}</span>
-            <div class="code-actions">
-                <button onclick="copyCode(this)">📋</button>
-                <button onclick="toggleCode(this)">▾</button>
+        const header=document.createElement('div');
+        header.className="code-header";
+        header.innerHTML=`
+            <span>${lang}</span>
+            <div>
+                <button onclick="copyCode(this)">${copyIcon}</button>
+                <button onclick="toggleCode(this)">${collapseIcon}</button>
             </div>
         `;
 
-        pre.insertBefore(header, pre.firstChild);
+        pre.insertBefore(header,code);
     });
-     /* ⭐ 여기 넣기 */
-    document.querySelectorAll('pre code').forEach(el => {
-        hljs.highlightElement(el);
-    });       
 }
 
-function copyCode(btn) {
-    const code = btn.closest('pre').querySelector('code').innerText;
-    navigator.clipboard.writeText(code);
-    btn.innerText = "✔";
-    setTimeout(() => btn.innerText = "📋", 1200);
-}
 
-function toggleCode(btn) {
-    const pre = btn.closest('pre');
-    pre.classList.toggle('code-collapsed');
-    btn.innerText = pre.classList.contains('code-collapsed') ? "▸" : "▾";
-}
 
         init();
     </script>
