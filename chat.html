@@ -389,7 +389,7 @@
 .code-block-container {
     background-color: #ffffff;
     border: 1px solid #e1e4e8;
-    border-radius: 8px;
+    border-radius: 15px;
     margin: 10px 0;
     overflow: hidden;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
@@ -399,14 +399,37 @@
 /* ===== ChatGPT 스타일 코드블럭 ===== */
 /* ===== ChatGPT 스타일 코드블럭 ===== */
 
-/* 전체 블럭 */
+/* ===== 테마 변수 ===== */
+
+/* 라이트 모드 */
+:root {
+  --code-bg: #f6f8fa;
+  --code-border: #d0d7de;
+  --code-header-bg: #f6f8fa;
+  --code-text: #24292f;
+  --code-sub: #57606a;
+  --code-btn-hover: #eaeef2;
+}
+
+/* 다크 모드 */
+[data-theme="dark"] {
+  --code-bg: #0d1117;
+  --code-border: #30363d;
+  --code-header-bg: #0d1117;
+  --code-text: #e6edf3;
+  --code-sub: #8b949e;
+  --code-btn-hover: #161b22;
+}
+
+
+/* ===== 코드블럭 ===== */
+
 .message-bubble pre {
-  background: #0d1117;
-  border-radius: 14px;
+  background: var(--code-bg);
+  border-radius: 15px;
   overflow: hidden;
   margin: 14px 0;
-  position: relative;
-  border: 1px solid #30363d;
+  border: 1px solid var(--code-border);
 }
 
 /* 헤더 */
@@ -415,46 +438,47 @@
   align-items: center;
   justify-content: space-between;
 
-  background: #0d1117;
-  color: #8b949e;
+  background: var(--code-header-bg);
+  color: var(--code-sub);
 
-  padding: 4px 12px;      /* 얇은 한 줄 느낌 */
+  padding: 4px 12px;
   font-size: 12px;
   line-height: 1;
 
-  border-bottom: 1px solid #30363d;
+  border-bottom: 1px solid var(--code-border);
 
   border-top-left-radius: 14px;
   border-top-right-radius: 14px;
+  border-bottom-right-radius: 14px;
+  border-bottom-left-radius: 14px;
 }
 
 /* 언어 텍스트 */
 .code-lang {
   font-size: 12px;
-  color: #8b949e;
   font-weight: 500;
+  color: var(--code-sub);
 }
 
-/* 복사 버튼 */
+/* 버튼 */
 .code-header button {
   background: none;
   border: none;
   cursor: pointer;
   padding: 4px;
-  color: #8b949e;
+  border-radius: 6px;
+  color: var(--code-sub);
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 6px;
-  transition: background 0.15s ease, color 0.15s ease;
+  transition: background .15s ease, color .15s ease;
 }
 
 .code-header button:hover {
-  background: #161b22;
-  color: #ffffff;
+  background: var(--code-btn-hover);
+  color: var(--code-text);
 }
 
-/* 아이콘 크기 */
 .code-header svg {
   width: 15px;
   height: 15px;
@@ -467,13 +491,15 @@
   overflow-x: auto;
   font-size: 13px;
   line-height: 1.55;
-  background: #0d1117;
+  color: var(--code-text);
+  background: var(--code-bg);
 }
 
-/* 접기 기능 */
+/* 접기 */
 pre.collapsed code {
   display: none;
 }
+
 
 
     </style>
