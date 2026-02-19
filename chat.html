@@ -6,6 +6,11 @@
     <title>MinsuGPT</title>
     <link rel="icon" href="https://6967a657d214301950ed7b2b.imgix.net/logo.png" type="image/png">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link rel="stylesheet"
+ href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
@@ -391,111 +396,66 @@
     box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 
-/* 상단 헤더 (언어 이름 + 복사 버튼) */
-.code-block-header {
+/* ===== ChatGPT Style Code Block ===== */
+
+.message-bubble pre {
+    position: relative;
+    border-radius: 18px;
+    padding: 0;
+    margin: 14px 0;
+    overflow: hidden;
+    background: var(--code-bg, #0d1117);
+    border: 1px solid rgba(255,255,255,0.08);
+}
+
+/* 헤더 */
+.code-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background-color: #f6f8fa;
-    padding: 8px 16px;
-    border-bottom: 1px solid #e1e4e8;
+    padding: 6px 10px;
     font-size: 12px;
-    color: #6e7781;
-    font-weight: 600;
+    background: rgba(255,255,255,0.05);
+    border-bottom: 1px solid rgba(255,255,255,0.08);
 }
 
-.lang-name {
-    text-transform: uppercase; /* 언어 이름 대문자로 */
+.code-lang {
+    opacity: 0.7;
 }
 
-/* 복사 버튼 */
-.copy-btn {
-    background: none;
+.code-actions button {
     border: none;
+    background: transparent;
     cursor: pointer;
-    color: #6e7781;
-    display: flex;
-    align-items: center;
-    gap: 6px;
     font-size: 12px;
-    transition: color 0.2s;
+    padding: 4px 6px;
+    border-radius: 6px;
 }
 
-.copy-btn:hover {
-    color: #0969da;
+.code-actions button:hover {
+    background: rgba(255,255,255,0.15);
 }
 
-/* 실제 코드 내용 */
-.code-block-body {
-    padding: 0;
-    background-color: #ffffff;
+/* 코드 영역 */
+.message-bubble pre code {
+    display: block;
+    padding: 14px;
+    font-size: 13px;
+    line-height: 1.6;
     overflow-x: auto;
 }
 
-.code-block-body pre {
-    margin: 0;
+/* 다크모드 자동 */
+[data-theme="light"] .message-bubble pre {
+    --code-bg: #f5f5f5;
+}
+[data-theme="dark"] .message-bubble pre {
+    --code-bg: #0d1117;
 }
 
-.code-block-body code {
-    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
-    font-size: 14px;
-    line-height: 1.5;
-    padding: 16px;
-    display: block;
-}
-
-
-        /* ===== ChatGPT Style Code Block ===== */
-pre{
-  position:relative;
-  margin:16px 0;
-  border-radius:20px; /* 👉 더 둥글게 */
-  overflow:hidden;
-  border:1px solid var(--code-border);
-  background:var(--code-bg);
-}
-
-pre code{
-  display:block;
-  padding:18px;
-  font-size:13px;
-  line-height:1.6;
-  font-family:"JetBrains Mono","Fira Code",monospace;
-  color:var(--code-text);
-  background:transparent;
-  max-height:400px;
-  overflow:auto;
-}
-
-.code-header{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  padding:6px 10px;
-  font-size:11px;
-  border-bottom:1px solid var(--code-border);
-  background:rgba(0,0,0,0.05);
-}
-
-.copy-btn,.fold-btn{
-  border:none;
-  padding:3px 8px;
-  border-radius:8px;
-  cursor:pointer;
-  font-size:11px;
-  margin-left:6px;
-}
-
-:root{
-  --code-bg:#f7f8fa;
-  --code-text:#1f2328;
-  --code-border:#e5e7eb;
-}
-
-[data-theme="dark"]{
-  --code-bg:#1e1e1e;
-  --code-text:#d4d4d4;
-  --code-border:#333;
+/* 접기 */
+.code-collapsed code {
+    display: none;
 }
 
     </style>
@@ -1304,7 +1264,6 @@ pre code{
                 currentBotRowElement = wrapper;
                 bubble.innerHTML = marked.parse(text);
                 enhanceCodeBlocks();
-
             } else {
                 if (text) { const bubble = document.createElement('div'); bubble.className = `message-bubble ${role}-content`; bubble.innerText = text; row.appendChild(bubble); }
                 
@@ -1499,56 +1458,59 @@ pre code{
             document.getElementById('settingsContent').classList.remove('active');
         }
 
-        function enhanceCodeBlocks(){
 
-  document.querySelectorAll('pre code').forEach(code=>{
-    const pre = code.parentElement;
-    if(pre.querySelector('.code-header')) return;
 
-    const lang = code.className.replace('language-','') || 'code';
 
-    const header = document.createElement('div');
-    header.className='code-header';
 
-    const left=document.createElement('span');
-    left.innerText=lang;
 
-    const right=document.createElement('div');
 
-    // 복사 버튼
-    const copy=document.createElement('button');
-    copy.className='copy-btn';
-    copy.innerText='Copy';
-    copy.onclick=()=>{
-      navigator.clipboard.writeText(code.innerText);
-      copy.innerText='✓';
-      setTimeout(()=>copy.innerText='Copy',1500);
-    };
+        function enhanceCodeBlocks() {
+    document.querySelectorAll('.message-bubble pre').forEach(pre => {
+        if (pre.dataset.done) return;
+        pre.dataset.done = true;
 
-    // 접기 버튼
-    const fold=document.createElement('button');
-    fold.className='fold-btn';
-    fold.innerText='Fold';
-    fold.onclick=()=>{
-      if(code.style.display==='none'){
-        code.style.display='block';
-        fold.innerText='Fold';
-      }else{
-        code.style.display='none';
-        fold.innerText='Open';
-      }
-    };
+        const code = pre.querySelector('code');
+        if (!code) return;
 
-    right.appendChild(copy);
-    right.appendChild(fold);
+        // 언어 감지
+        let lang = '';
+        code.className.split(' ').forEach(cls => {
+            if (cls.startsWith('language-'))
+                lang = cls.replace('language-', '');
+        });
 
-    header.appendChild(left);
-    header.appendChild(right);
+        // 헤더 만들기
+        const header = document.createElement('div');
+        header.className = 'code-header';
 
-    pre.prepend(header);
-  });
+        header.innerHTML = `
+            <span class="code-lang">${lang || 'code'}</span>
+            <div class="code-actions">
+                <button onclick="copyCode(this)">📋</button>
+                <button onclick="toggleCode(this)">▾</button>
+            </div>
+        `;
+
+        pre.insertBefore(header, pre.firstChild);
+    });
+     /* ⭐ 여기 넣기 */
+    document.querySelectorAll('pre code').forEach(el => {
+        hljs.highlightElement(el);
+    });       
 }
 
+function copyCode(btn) {
+    const code = btn.closest('pre').querySelector('code').innerText;
+    navigator.clipboard.writeText(code);
+    btn.innerText = "✔";
+    setTimeout(() => btn.innerText = "📋", 1200);
+}
+
+function toggleCode(btn) {
+    const pre = btn.closest('pre');
+    pre.classList.toggle('code-collapsed');
+    btn.innerText = pre.classList.contains('code-collapsed') ? "▸" : "▾";
+}
 
         init();
     </script>
