@@ -397,51 +397,82 @@
 }
 
 /* ===== ChatGPT 스타일 코드블럭 ===== */
-/* 코드블럭 전체 */
-pre {
+/* ===== ChatGPT 스타일 코드블럭 ===== */
+
+/* 전체 블럭 */
+.message-bubble pre {
   background: #0d1117;
-  border-radius: 12px;
-  padding: 0;
+  border-radius: 14px;
   overflow: hidden;
-  margin: 12px 0;
+  margin: 14px 0;
   position: relative;
+  border: 1px solid #30363d;
 }
 
 /* 헤더 */
-.code-header{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  background:#161b22;
-  padding:6px 12px;
-  font-size:13px;
-  color:#9da7b3;
-  border-bottom:1px solid #30363d;
+.code-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  background: #0d1117;
+  color: #8b949e;
+
+  padding: 4px 12px;      /* 얇은 한 줄 느낌 */
+  font-size: 12px;
+  line-height: 1;
+
+  border-bottom: 1px solid #30363d;
+
+  border-top-left-radius: 14px;
+  border-top-right-radius: 14px;
 }
 
-/* 버튼 */
-.code-header button{
-  background:none;
-  border:none;
-  cursor:pointer;
-  color:#9da7b3;
-  padding:4px;
-}
-.code-header button:hover{
-  color:white;
+/* 언어 텍스트 */
+.code-lang {
+  font-size: 12px;
+  color: #8b949e;
+  font-weight: 500;
 }
 
-/* 코드 */
-pre code{
-  display:block;
-  padding:14px;
-  overflow:auto;
-  font-size:14px;
+/* 복사 버튼 */
+.code-header button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  color: #8b949e;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  transition: background 0.15s ease, color 0.15s ease;
 }
 
-/* 접기 */
-pre.collapsed code{
-  display:none;
+.code-header button:hover {
+  background: #161b22;
+  color: #ffffff;
+}
+
+/* 아이콘 크기 */
+.code-header svg {
+  width: 15px;
+  height: 15px;
+}
+
+/* 코드 영역 */
+.message-bubble pre code {
+  display: block;
+  padding: 14px;
+  overflow-x: auto;
+  font-size: 13px;
+  line-height: 1.55;
+  background: #0d1117;
+}
+
+/* 접기 기능 */
+pre.collapsed code {
+  display: none;
 }
 
 
