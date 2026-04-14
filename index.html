@@ -2,18 +2,1893 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>Redirecting...</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, interactive-widget=resizes-content">
+    <title>MinsuGPT</title>
+    <link rel="icon" href="https://raw.githubusercontent.com/jaewondev27/image/refs/heads/main/image-removebg-preview%20(1).png" type="image/png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:ital,opsz,wght@0,17..18,400..700;1,17..18,400..700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    
+    <style>
+        :root {
+            /* UI Colors */
+            --bg-color: #ffffff;
+            --text-color: #374151;
+            --sub-text-color: #6b7280;
+            
+            --sidebar-bg: #f9fafb; 
+            --sidebar-hover: #eceef1;
+            
+            --input-bg: #f4f4f4;
+            --icon-color: #9ca3af;
+            --btn-disabled-bg: #e5e7eb;
+            --btn-disabled-text: #9ca3af;
 
-    <!-- 즉시 리디렉션 -->
-    <meta http-equiv="refresh" content="0; url=https://drive.google.com/file/d/1GnIEbfb_Bw3Za4hcjWqzmaaAYt-uU9-H/view?usp=sharing">
+            --user-bubble-bg: #f3f4f6;
+            --user-bubble-text: #1f2937;
+            --bot-bubble-text: #111827;
 
-    <script>
-        // 자바스크립트 리디렉션 (보조용)
-        window.location.href = "https://drive.google.com/file/d/1GnIEbfb_Bw3Za4hcjWqzmaaAYt-uU9-H/view?usp=sharing";
-    </script>
+            --modal-bg: #ffffff;
+            --modal-text: #374151;
+            --modal-sidebar-bg: #f9fafb;
+            --modal-hover: #eceef1;
+            
+            --border-color: #e5e7eb; 
+            --shadow-color: rgba(0, 0, 0, 0.1);
+            --stopped-text-color: #9ca3af;
+            --danger-color: #ef4444;
+            --active-search-bg: rgba(56, 189, 248, 0.15);
+            --active-search-text: #0ea5e9;
+
+            /* [수정됨] 생각하기 모드 색상: 노란색과 주황색 사이 (Amber) */
+            --active-think-bg: rgba(255, 179, 0, 0.25); 
+            --active-think-text: #f59e0b; /* Amber-500 */
+
+            --window-radius: 20px;
+            --btn-radius: 12px;
+            --input-radius: 26px;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #121212;
+            --text-color: #ececf1;
+            --sub-text-color: #9ca3af;
+            
+            --sidebar-bg: #181818; 
+            --sidebar-hover: #2a2a2a;
+            
+            --input-bg: #2f2f2f;
+            --icon-color: #8e8e8e;
+            --btn-disabled-bg: #333333;
+            --btn-disabled-text: #555555;
+            
+            --user-bubble-bg: #2f2f2f;
+            --user-bubble-text: #ececf1;
+            --bot-bubble-text: #ececf1;
+
+            --modal-bg: #1e1e1e;
+            --modal-text: #ececf1;
+            --modal-sidebar-bg: #161616;
+            --modal-hover: #2c2c2c;
+            
+            --border-color: #333333;
+            --shadow-color: rgba(0, 0, 0, 0.6);
+            --stopped-text-color: #6b7280;
+            --danger-color: #ef4444;
+            --active-search-bg: rgba(14, 165, 233, 0.2);
+            --active-search-text: #38bdf8;
+            
+            /* [수정됨] 다크모드 생각하기 색상 */
+            --active-think-bg: rgba(251, 191, 36, 0.25);
+            --active-think-text: #fbbf24; 
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+        html, body, div, textarea { scrollbar-width: none; -ms-overflow-style: none; }
+        ::-webkit-scrollbar { display: none; }
+
+        body {
+            font-family: 'Google Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            height: 100dvh;
+            overflow: hidden;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        /* --- UI Components --- */
+        
+        #toggle-btn-wrapper { 
+            position: fixed; top: 10px; left: 10px; 
+            width: 40px; height: 40px; 
+            display: flex; align-items: center; justify-content: center; 
+            border-radius: 8px; cursor: pointer; 
+            background-color: var(--bg-color); 
+            box-shadow: 0 2px 5px var(--shadow-color);
+            border: 1px solid var(--border-color);
+            z-index: 2000; 
+            transition: background-color 0.3s;
+        }
+        #toggle-btn-wrapper:hover { background-color: var(--sidebar-hover); }
+        .sidebar-icon { width: 24px; height: 24px; color: var(--text-color); }
+
+        #sidebar-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1400; opacity: 0; visibility: hidden; transition: opacity 0.3s ease; backdrop-filter: blur(2px); }
+        #sidebar-overlay.visible { opacity: 1; visibility: visible; }
+
+        .sidebar { width: 260px; display: flex; flex-direction: column; background-color: var(--sidebar-bg); transition: width 0.3s ease, transform 0.3s ease, background-color 0.3s; overflow: hidden; padding-top: 60px; flex-shrink: 0; border-right: 1px solid var(--border-color); position: relative; z-index: 1500; }
+        .sidebar.collapsed { width: 0; padding: 60px 0 0 0; border-right: none; }
+        .sidebar-content { display: flex; flex-direction: column; height: 100%; padding: 0 10px 20px 10px; width: 260px; opacity: 1; transition: opacity 0.2s; }
+        .sidebar.collapsed .sidebar-content { opacity: 0; pointer-events: none; }
+
+        .new-chat-btn, .menu-item { display: flex; align-items: center; gap: 10px; width: 100%; padding: 12px 14px; border-radius: var(--btn-radius); font-size: 14px; color: var(--text-color); cursor: pointer; border: none; background: transparent; text-align: left; white-space: nowrap; transition: background 0.2s; flex-shrink: 0; }
+        .new-chat-btn { margin-bottom: 20px; }
+        .new-chat-btn.active, .new-chat-btn:hover, .menu-item:hover { background-color: var(--sidebar-hover); }
+
+        .history-label { font-size: 12px; font-weight: 600; color: var(--icon-color); padding: 0 14px; margin-bottom: 8px; margin-top: 10px; }
+        .chat-history { flex: 1; overflow-y: auto; margin-bottom: 10px; padding-bottom: 10px; }
+        
+        .history-item { display: flex; align-items: center; justify-content: space-between; width: 100%; padding: 10px 14px; border-radius: var(--btn-radius); font-size: 14px; color: var(--text-color); cursor: pointer; transition: background 0.2s; margin-bottom: 2px; position: relative; height: 40px; }
+        .history-item:hover, .history-item.active { background-color: var(--sidebar-hover); }
+        .history-title { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; padding-right: 10px; pointer-events: none; }
+        .history-actions { display: flex; gap: 4px; opacity: 0; transition: opacity 0.2s; position: absolute; right: 5px; top: 50%; transform: translateY(-50%); background: linear-gradient(to right, transparent, var(--sidebar-hover) 20%); padding-left: 10px; }
+        .history-item:hover .history-actions { opacity: 1; background-color: var(--sidebar-hover); }
+        .history-action-btn { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; border-radius: 4px; color: var(--icon-color); cursor: pointer; }
+        .history-action-btn:hover { color: var(--text-color); background-color: rgba(0,0,0,0.05); }
+        .history-action-btn.delete:hover { color: var(--danger-color); }
+
+        /* Main Area */
+        .main { flex: 1; position: relative; display: flex; flex-direction: column; background-color: var(--bg-color); width: 100%; height: 100%; transition: background-color 0.3s; z-index: 1; }
+        
+        #welcome-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10; transition: opacity 0.4s ease, visibility 0.4s; }
+        #welcome-screen.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+        .center-logo-img { width: 80px; height: auto; border-radius: 50%; margin-bottom: 40px; }
+        .center-input-wrapper { width: 100%; max-width: 760px; padding: 0 20px; position: relative; }
+
+        #chat-content { flex: 1; width: 100%; max-width: 800px; margin: 0 auto; padding: 80px 20px 200px 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 24px; opacity: 0; visibility: hidden; transition: opacity 0.3s; -webkit-overflow-scrolling: touch; }
+        #chat-content.visible { opacity: 1; visibility: visible; }
+
+        .message-row { display: flex; width: 100%; opacity: 0; animation: fadeIn 0.4s ease-out forwards; flex-direction: column; position: relative; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        
+        .message-row.user { align-items: flex-end; }
+        .message-row.bot { align-items: flex-start; }
+        
+        .bubble-attachments { display: flex; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; justify-content: flex-end; }
+        .message-row.bot .bubble-attachments { justify-content: flex-start; }
+        
+        .bubble-image-card { width: 100px; height: 100px; border-radius: 12px; overflow: hidden; cursor: pointer; border: 1px solid var(--border-color); background-color: var(--input-bg); background-size: cover; background-position: center; }
+        .bubble-file-card { display: flex; align-items: center; gap: 8px; padding: 10px; background-color: var(--input-bg); border-radius: 12px; border: 1px solid var(--border-color); font-size: 13px; }
+
+        .bot-bubble-wrapper { display: flex; flex-direction: column; align-items: flex-start; width: 100%; }
+        
+        .message-bubble { max-width: 100%; line-height: 1.6; word-break: break-word; border-radius: 20px; position: relative; }
+        
+        /* [수정됨] 사용자 버블 네 모서리 모두 둥글게 */
+        .message-bubble.user-content { background-color: var(--user-bubble-bg); color: var(--user-bubble-text); font-size: 15px; padding: 10px 14px; border-radius: 20px !important; }
+        
+        /* [수정됨] 사용자 메시지 호버 시 왼쪽에 버튼 표시 */
+        .message-row.user:hover .user-actions { opacity: 1; visibility: visible; }
+        .user-actions {
+            position: absolute; right: 100%; top: 50%; transform: translateY(-50%);
+            display: flex; gap: 4px; margin-right: 8px;
+            opacity: 0; visibility: hidden; transition: opacity 0.2s;
+        }
+
+        .message-bubble.bot-content { background-color: transparent; color: var(--bot-bubble-text); font-size: 16px; padding: 12px 16px; padding-left: 0; }
+        
+        .message-bubble.bot-content p { margin-bottom: 10px; }
+        .message-bubble.bot-content p:last-child { margin-bottom: 0; }
+        .message-bubble.bot-content pre { background: var(--input-bg); padding: 10px; border-radius: 8px; overflow-x: auto; margin-bottom: 10px; }
+        .message-bubble.bot-content code { background: var(--input-bg); padding: 2px 4px; border-radius: 4px; font-family: monospace; font-size: 0.9em; }
+        .message-bubble.bot-content pre code { background: transparent; padding: 0; }
+        .message-bubble.bot-content ul, .message-bubble.bot-content ol { margin-left: 20px; margin-bottom: 10px; }
+        .message-bubble.bot-content h1, .message-bubble.bot-content h2, .message-bubble.bot-content h3 { margin-top: 10px; margin-bottom: 8px; font-weight: 600; }
+        .message-bubble.bot-content a { color: var(--active-search-text); text-decoration: none; }
+        .message-bubble.bot-content a:hover { text-decoration: underline; }
+
+        .stopped-text { color: var(--stopped-text-color); font-size: 14px; margin-left: 6px; }
+
+        .thinking-dot { width: 10px; height: 10px; background-color: var(--text-color); border-radius: 50%; margin-left: 4px; animation: breathe 1.2s infinite ease-in-out; }
+        @keyframes breathe { 0%, 100% { transform: scale(0.9); opacity: 0.7; } 50% { transform: scale(1.1); opacity: 1; } }
+        .thinking-text { font-size: 14px; font-weight: 500; background: linear-gradient(to left, #999 0%, #999 40%, #111 50%, #999 60%, #999 100%); background-size: 200% auto; -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; color: transparent; animation: shimmer 1s linear infinite; cursor: default; margin-left: 2px; }
+        [data-theme="dark"] .thinking-text { background: linear-gradient(to left, #666 0%, #666 40%, #fff 50%, #666 60%, #666 100%); background-size: 200% auto; -webkit-background-clip: text; background-clip: text; }
+        @keyframes shimmer { from { background-position: 100% center; } to { background-position: -100% center; } }
+
+        .message-actions { display: flex; gap: 4px; margin-top: 6px; opacity: 0; transition: opacity 0.3s; margin-left: -6px; align-items: center; }
+        .message-actions.visible { opacity: 1; }
+        .action-btn { width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; border-radius: 8px; color: var(--icon-color); cursor: pointer; transition: background-color 0.2s, color 0.2s; }
+        .action-btn:hover { background-color: var(--sidebar-hover); color: var(--text-color); }
+        .action-icon { width: 18px; height: 18px; stroke-width: 2.2; }
+        
+        /* [수정됨] 버전 네비게이션 (1/2 화살표) */
+        .version-nav { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text-color); margin-left: 6px; font-weight: 500; user-select: none; }
+        .nav-btn { cursor: pointer; color: var(--icon-color); display: flex; align-items: center; }
+        .nav-btn:hover { color: var(--text-color); }
+        .nav-btn.disabled { opacity: 0.3; cursor: default; pointer-events: none; }
+
+        /* [수정됨] 편집 모드 스타일 */
+        .edit-container { display: flex; flex-direction: column; width: 100%; gap: 8px; align-items: flex-end; min-width: 260px; }
+        .edit-textarea { width: 100%; background: var(--bg-color); border: 1px solid var(--active-search-text); border-radius: 12px; padding: 10px; color: var(--text-color); font-size: 15px; resize: none; outline: none; font-family: inherit; }
+        .edit-buttons { display: flex; gap: 8px; }
+        .edit-btn { padding: 6px 14px; border-radius: 16px; font-size: 13px; cursor: pointer; border: none; font-weight: 500; transition: 0.2s; }
+        .edit-btn.save { background-color: #10a37f; color: #fff; }
+        .edit-btn.cancel { background-color: var(--sidebar-hover); color: var(--text-color); }
+
+        #bottom-interface { 
+            position: absolute; bottom: 0; left: 0; width: 100%; 
+            display: flex; flex-direction: column; align-items: center; 
+            padding: 0 20px 5px 20px; 
+            opacity: 0; transform: translateY(50px); 
+            transition: opacity 0.5s ease, transform 0.5s cubic-bezier(0.25, 1, 0.5, 1); 
+            z-index: 5; pointer-events: none; 
+            background: linear-gradient(to top, var(--bg-color) 40%, transparent); 
+        }
+        #bottom-interface.visible { opacity: 1; transform: translateY(0); pointer-events: auto; }
+        
+        .bottom-input-wrapper { width: 100%; max-width: 760px; position: relative; }
+        
+        .input-container { display: flex; flex-direction: column; background-color: var(--input-bg); border-radius: var(--input-radius); padding: 10px 10px; box-shadow: 0 0 10px rgba(0,0,0,0.02); transition: background-color 0.3s; position: relative; }
+        
+        .attachment-preview-area { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 0; margin-bottom: 0; transition: margin 0.2s; }
+        .attachment-preview-area.has-items { margin-bottom: 12px; padding-top: 8px; }
+        .attach-card { position: relative; width: 60px; height: 60px; flex-shrink: 0; border-radius: 10px; background-color: #ddd; background-size: cover; background-position: center; border: 1px solid var(--border-color); display: flex; align-items: center; justify-content: center; cursor: pointer; }
+        .attach-card.file-type { background-color: var(--bg-color); font-size: 10px; color: var(--text-color); flex-direction: column; text-align: center; padding: 2px; }
+        .attach-card-remove { position: absolute; top: -6px; right: -6px; width: 18px; height: 18px; background: var(--text-color); color: var(--bg-color); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 2; border: 1px solid var(--bg-color); }
+        
+        .input-top-row { width: 100%; margin-bottom: 4px; }
+        .input-field { width: 100%; border: none; background: transparent; font-size: 16px; outline: none; color: var(--text-color); resize: none; font-family: inherit; overflow-y: auto; height: 28px; line-height: 24px; display: block; max-height: 200px; padding: 2px 0 2px 6px; }
+        .input-field::placeholder { color: var(--icon-color); }
+        .input-bottom-row { display: flex; justify-content: space-between; align-items: center; height: 36px; }
+        
+        .left-actions, .right-actions { display: flex; align-items: center; gap: 8px; position: relative; }
+        .icon-btn { display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 50%; color: var(--icon-color); cursor: pointer; transition: 0.2s; position: relative; }
+        .icon-btn:hover { background-color: rgba(0,0,0,0.05); color: var(--text-color); }
+        
+        .search-btn, .think-btn {
+            display: flex; align-items: center; justify-content: center; 
+            height: 34px; border-radius: 17px; padding: 0; width: 34px; 
+            background-color: transparent; color: var(--icon-color); 
+            cursor: pointer; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            overflow: hidden; gap: 0;
+        }
+        .search-btn:hover, .think-btn:hover { background-color: rgba(0,0,0,0.05); color: var(--text-color); }
+        
+        .search-btn.active { background-color: var(--active-search-bg); color: var(--active-search-text); width: auto; padding: 0 12px 0 8px; }
+        .think-btn.active { background-color: var(--active-think-bg) !important; color: var(--active-think-text) !important; width: auto; padding: 0 12px 0 8px; }
+        
+        .search-label, .think-label { font-size: 13px; font-weight: 600; white-space: nowrap; opacity: 0; width: 0; overflow: hidden; transition: all 0.3s ease; margin-left: 0; }
+        .search-btn.active .search-label, .think-btn.active .think-label { opacity: 1; width: auto; margin-left: 6px; }
+
+        .attach-menu { position: absolute; bottom: 50px; left: 0; background-color: var(--modal-bg); border: 1px solid var(--border-color); border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 160px; display: flex; flex-direction: column; overflow: hidden; opacity: 0; visibility: hidden; transform: translateY(10px); transition: all 0.2s ease; z-index: 20; }
+        .attach-menu.open { opacity: 1; visibility: visible; transform: translateY(0); }
+        .attach-item { padding: 10px 14px; display: flex; align-items: center; gap: 10px; font-size: 14px; color: var(--text-color); cursor: pointer; transition: background 0.2s; }
+        .attach-item:hover { background-color: var(--sidebar-hover); }
+
+        .send-btn { display: flex; flex-shrink: 0; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 50%; background-color: var(--btn-disabled-bg); color: var(--btn-disabled-text); cursor: default; pointer-events: none; transition: 0.2s; }
+        .send-btn.active, .send-btn.stop-active { background-color: #000000; color: #fff; cursor: pointer; pointer-events: auto; }
+        [data-theme="dark"] .send-btn.active, [data-theme="dark"] .send-btn.stop-active { background-color: #ffffff; color: #000; }
+        .model-selector { display: flex; align-items: center; justify-content: center; gap: 4px; background-color: var(--bg-color); padding: 0 12px; height: 32px; border-radius: 16px; font-size: 13px; color: var(--text-color); cursor: pointer; transition: background-color 0.3s; }
+        .model-selector:hover { background-color: var(--sidebar-hover); }
+
+        .bottom-disclaimer { text-align: center; font-size: 11px; color: #9ca3af; margin-top: 8px; margin-bottom: 5px; width: 100%; max-width: 760px; }
+
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.4); backdrop-filter: blur(5px); display: flex; align-items: center; justify-content: center; z-index: 9999; opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s; }
+        .modal-overlay.open { opacity: 1; visibility: visible; }
+        
+        .image-lightbox { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.8); backdrop-filter: blur(10px); z-index: 10000; display: flex; align-items: center; justify-content: center; opacity: 0; visibility: hidden; transition: opacity 0.3s; }
+        .image-lightbox.open { opacity: 1; visibility: visible; }
+        .lightbox-img { max-width: 90%; max-height: 90%; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); transform: scale(0.9); transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+        .image-lightbox.open .lightbox-img { transform: scale(1); }
+        .lightbox-close { position: absolute; top: 20px; right: 20px; color: white; cursor: pointer; background: rgba(255,255,255,0.2); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+
+        .settings-window { background-color: var(--modal-bg); width: 750px; height: 500px; border-radius: var(--window-radius); display: flex; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.2); color: var(--modal-text); transform: scale(0.95); transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.3s; }
+        .modal-overlay.open .settings-window { transform: scale(1); }
+        .settings-sidebar { width: 220px; background-color: var(--modal-sidebar-bg); padding: 20px 10px; display: flex; flex-direction: column; gap: 4px; border-right: 1px solid var(--border-color); }
+        .settings-nav-item { padding: 12px 16px; border-radius: var(--btn-radius); font-size: 14px; color: var(--text-color); opacity: 0.7; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: background 0.2s, opacity 0.2s; white-space: nowrap; }
+        .settings-nav-item:hover { background-color: var(--modal-hover); opacity: 1; }
+        .settings-nav-item.active { background-color: var(--modal-hover); opacity: 1; font-weight: 600; }
+        .set-icon { width: 18px; height: 18px; flex-shrink: 0; }
+        .settings-content { flex: 1; padding: 40px; background-color: var(--modal-bg); position: relative; overflow-y: auto; }
+        
+        .settings-back-btn { display: none; cursor: pointer; margin-right: 10px; padding: 5px; }
+        
+        .settings-header { font-size: 18px; font-weight: 600; margin-bottom: 24px; padding-bottom: 12px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
+        .close-modal-btn { cursor: pointer; color: var(--icon-color); width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 50%; transition: background 0.2s; }
+        .close-modal-btn:hover { background-color: var(--modal-hover); }
+        
+        .tab-section { display: none; flex-direction: column; height: 100%; }
+        .tab-section.active-tab { display: flex; }
+
+        #tab-info { overflow: hidden; justify-content: flex-start; align-items: center; padding-top: 100px; }
+
+        .setting-row { display: flex; justify-content: space-between; align-items: flex-start; padding: 16px 0; border-bottom: 1px solid var(--border-color); }
+        .setting-info { display: flex; flex-direction: column; gap: 4px; }
+        .setting-label { font-size: 14px; color: var(--text-color); font-weight: 500; }
+        .setting-desc { font-size: 12px; color: var(--sub-text-color); }
+        
+        .setting-textarea { width: 100%; margin-top: 10px; padding: 10px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--input-bg); color: var(--text-color); font-size: 14px; resize: vertical; min-height: 80px; outline: none; }
+        .setting-textarea:focus { border-color: var(--icon-color); }
+
+        .custom-select-container { position: relative; width: 160px; }
+        .custom-select-trigger { display: flex; align-items: center; justify-content: flex-end; gap: 8px; font-size: 14px; color: var(--text-color); cursor: pointer; padding: 8px 12px; border-radius: var(--btn-radius); transition: background-color 0.2s; }
+        .custom-select-trigger:hover { background-color: var(--modal-hover); }
+        .trigger-arrow { width: 12px; height: 12px; transition: transform 0.2s; }
+        .custom-select-container.open .trigger-arrow { transform: rotate(180deg); }
+        .custom-options { position: absolute; top: 100%; right: 0; background-color: var(--modal-bg); border: 1px solid var(--border-color); border-radius: 12px; box-shadow: 0 4px 12px var(--shadow-color); width: 100%; margin-top: 4px; opacity: 0; visibility: hidden; transform: translateY(-10px); transition: all 0.2s ease; overflow: hidden; z-index: 10; max-height: 200px; overflow-y: auto; }
+        .custom-select-container.open .custom-options { opacity: 1; visibility: visible; transform: translateY(0); }
+        .custom-option { padding: 10px 12px; font-size: 14px; color: var(--text-color); cursor: pointer; transition: background-color 0.1s; text-align: left; }
+        .custom-option:hover { background-color: var(--modal-hover); }
+        .custom-option.selected { font-weight: 600; background-color: var(--sidebar-hover); }
+        
+        .danger-btn { color: var(--danger-color); font-size: 14px; padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border-color); background: transparent; cursor: pointer; transition: background 0.2s; }
+        .danger-btn:hover { background-color: rgba(239, 68, 68, 0.1); }
+
+        .toggle-switch { position: relative; width: 44px; height: 24px; cursor: pointer; }
+        .toggle-input { opacity: 0; width: 0; height: 0; }
+        .toggle-slider { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--btn-disabled-bg); transition: .4s; border-radius: 24px; }
+        .toggle-slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+        .toggle-input:checked + .toggle-slider { background-color: #10a37f; }
+        [data-theme="dark"] .toggle-input:checked + .toggle-slider { background-color: #fff; }
+        .toggle-input:checked + .toggle-slider:before { transform: translateX(20px); }
+
+        .dialog-window { background-color: var(--modal-bg); width: 400px; padding: 24px; border-radius: var(--window-radius); box-shadow: 0 20px 40px rgba(0,0,0,0.3); display: flex; flex-direction: column; gap: 20px; transform: scale(0.9); transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1); }
+        .modal-overlay.open .dialog-window { transform: scale(1); }
+        .dialog-title { font-size: 18px; font-weight: 600; color: var(--text-color); }
+        .dialog-input { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--input-bg); color: var(--text-color); font-size: 14px; outline: none; }
+        .dialog-input:focus { border-color: var(--icon-color); }
+        .dialog-actions { display: flex; justify-content: flex-end; gap: 10px; }
+        .dialog-btn { padding: 8px 16px; border-radius: 8px; font-size: 14px; cursor: pointer; border: none; font-weight: 500; transition: opacity 0.2s; }
+        .dialog-btn.cancel { background: transparent; color: var(--text-color); }
+        .dialog-btn.confirm { background: var(--text-color); color: var(--bg-color); }
+        .dialog-btn.delete-confirm { background: var(--danger-color); color: #fff; }
+        .dialog-btn:hover { opacity: 0.8; }
+
+        .settings-mobile-header { display: none; }
+
+        /* ===== Auth Pages (Login + Signup) ===== */
+        #auth-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #fff; z-index: 9999;
+            display: flex; flex-direction: column;
+            font-family: 'Google Sans', sans-serif;
+            transition: opacity 0.35s ease;
+        }
+        #auth-overlay.hidden { opacity: 0; pointer-events: none; }
+
+        /* Top bar */
+        .auth-topbar {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 18px 28px; flex-shrink: 0;
+        }
+        .auth-brand {
+            font-size: 20px; font-weight: 700; color: #111;
+            letter-spacing: -0.5px;
+        }
+        .auth-topbar-right {
+            display: flex; align-items: center; gap: 6px;
+            font-size: 13px; color: #333; cursor: pointer;
+            padding: 6px 10px; border-radius: 6px;
+            border: none; background: none;
+            transition: background 0.15s;
+        }
+        .auth-topbar-right:hover { background: #f0f0f0; }
+        .auth-topbar-right svg { width: 14px; height: 14px; }
+
+        /* Center form area */
+        .auth-center {
+            flex: 1; display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            padding: 0 20px 60px 20px;
+        }
+        .auth-card {
+            width: 100%; max-width: 340px;
+            display: flex; flex-direction: column; gap: 14px;
+        }
+        .auth-title {
+            font-size: 26px; font-weight: 700; color: #111;
+            text-align: center; margin-bottom: 6px; letter-spacing: -0.5px;
+        }
+        .auth-step-label {
+            font-size: 14px; color: #888; text-align: center;
+            margin-top: -8px; margin-bottom: 4px;
+        }
+
+        /* Google button */
+        .auth-google-btn {
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+            width: 100%; padding: 13px 16px; border-radius: 100px;
+            border: 1.5px solid #dadce0; background: #fff;
+            font-size: 15px; font-weight: 500; color: #333;
+            cursor: pointer; transition: background 0.15s;
+            font-family: 'Google Sans', sans-serif;
+        }
+        .auth-google-btn:hover { background: #f8f8f8; }
+        .auth-google-btn svg { flex-shrink: 0; }
+
+        /* Input fields */
+        .auth-input {
+            width: 100%; padding: 14px 18px;
+            border-radius: 100px; border: 1.5px solid #e0e0e0;
+            background: #fff; color: #111;
+            font-size: 15px; outline: none;
+            font-family: 'Google Sans', sans-serif;
+            transition: border-color 0.2s;
+            -webkit-appearance: none;
+        }
+        .auth-input:focus { border-color: #111; }
+        .auth-input::placeholder { color: #aaa; }
+
+        /* Primary button */
+        .auth-primary-btn {
+            width: 100%; padding: 15px 16px;
+            border-radius: 100px; border: none;
+            background: #1a1a1a; color: #fff;
+            font-size: 16px; font-weight: 600;
+            cursor: pointer; transition: background 0.15s;
+            font-family: 'Google Sans', sans-serif;
+        }
+        .auth-primary-btn:hover { background: #333; }
+        .auth-primary-btn:disabled { background: #ccc; cursor: not-allowed; }
+
+        /* Links */
+        .auth-link-row {
+            text-align: center; font-size: 14px; color: #555;
+        }
+        .auth-link {
+            color: #111; font-weight: 600; cursor: pointer;
+            text-decoration: none;
+        }
+        .auth-link:hover { text-decoration: underline; }
+
+        /* Error */
+        .auth-error {
+            font-size: 13px; color: #d93025;
+            text-align: center; min-height: 16px;
+            margin-top: -4px;
+        }
+
+        /* Password requirements */
+        .pw-req-list {
+            display: flex; flex-direction: column; gap: 6px;
+            padding: 2px 4px;
+        }
+        .pw-req-item {
+            display: flex; align-items: center; gap: 10px;
+            font-size: 14px; color: #888;
+            transition: color 0.2s;
+        }
+        .pw-req-item.met { color: #111; }
+        .pw-req-dot {
+            width: 16px; height: 16px; border-radius: 50%;
+            border: 1.5px solid #ccc; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.2s;
+        }
+        .pw-req-item.met .pw-req-dot {
+            border-color: #111; background: #111;
+        }
+        .pw-req-item.met .pw-req-dot::after {
+            content: ''; display: block;
+            width: 5px; height: 8px;
+            border-right: 2px solid #fff; border-bottom: 2px solid #fff;
+            transform: rotate(45deg) translate(-1px, -1px);
+        }
+
+        /* Bottom footer */
+        .auth-footer {
+            padding: 16px 28px; text-align: center;
+            font-size: 12px; color: #888; line-height: 1.6;
+            flex-shrink: 0;
+        }
+        .auth-footer a { color: #555; text-decoration: underline; }
+
+        /* Success modal */
+        .auth-modal-backdrop {
+            display: none; position: fixed; inset: 0;
+            background: rgba(0,0,0,0.45); z-index: 10000;
+            align-items: center; justify-content: center;
+        }
+        .auth-modal-backdrop.open { display: flex; }
+        .auth-modal {
+            background: #fff; border-radius: 20px;
+            padding: 36px 32px; max-width: 340px; width: 90%;
+            display: flex; flex-direction: column; gap: 14px;
+            text-align: center;
+            animation: modalIn 0.25s cubic-bezier(0.16,1,0.3,1);
+        }
+        @keyframes modalIn { from { transform: scale(0.92); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .auth-modal-title { font-size: 22px; font-weight: 700; color: #111; }
+        .auth-modal-body { font-size: 15px; color: #555; line-height: 1.6; }
+
+        /* Page transitions */
+        .auth-page { display: none; }
+        .auth-page.active { display: flex; flex-direction: column; gap: 14px; }
+
+        @media (max-width: 480px) {
+            .auth-topbar { padding: 14px 18px; }
+            .auth-title { font-size: 22px; }
+        }
+
+        /* ===== Thought Block ===== */
+        .thought-block {
+            border: 1px solid var(--border-color); border-radius: 12px;
+            margin-bottom: 10px; overflow: hidden; font-size: 14px;
+            background: var(--input-bg);
+        }
+        .thought-header {
+            display: flex; align-items: center; gap: 8px;
+            padding: 8px 14px; cursor: pointer; user-select: none;
+            color: var(--sub-text-color); font-weight: 500;
+        }
+        .thought-header:hover { background: var(--sidebar-hover); }
+        .thought-toggle-icon { transition: transform 0.2s; font-size: 10px; }
+        .thought-block.open .thought-toggle-icon { transform: rotate(90deg); }
+        .thought-body {
+            max-height: 0; overflow: hidden;
+            transition: max-height 0.3s ease, padding 0.3s ease;
+            padding: 0 14px; color: var(--sub-text-color); line-height: 1.6;
+            white-space: pre-wrap; word-break: break-word;
+        }
+        .thought-block.open .thought-body { max-height: 400px; padding: 10px 14px; overflow-y: auto; }
+
+        @media (max-width: 768px) {
+            .sidebar { position: fixed; left: 0; top: 0; bottom: 0; height: 100%; width: 220px !important; z-index: 1500; transform: translateX(0); transition: transform 0.3s ease; border-top-right-radius: 20px; border-bottom-right-radius: 20px; box-shadow: 4px 0 15px rgba(0,0,0,0.1); }
+            .sidebar.collapsed { width: 220px !important; transform: translateX(-100%); border-right: none; }
+            .sidebar-content { opacity: 1 !important; width: 220px !important; }
+            
+            #chat-content { padding: 80px 16px 200px 16px; } 
+            
+            .message-bubble.user-content { font-size: 13px; padding: 8px 12px; }
+            .message-bubble.bot-content { font-size: 13px; padding: 8px 0; }
+            
+            .search-btn.active .search-label, .think-btn.active .think-label { display: none; width: 0; opacity: 0; }
+            .search-btn.active, .think-btn.active { width: 34px; padding: 0; }
+            
+            .think-btn.active { background-color: var(--active-think-bg) !important; color: var(--active-think-text) !important; }
+
+            #bottom-interface { padding-bottom: 5px; } 
+            .center-logo-img { width: 60px; margin-bottom: 20px; }
+            .dialog-window { width: 90%; }
+
+            .settings-window { width: 100%; height: 100%; border-radius: 0; flex-direction: column; transform: scale(1) !important; }
+            .settings-sidebar { width: 100%; height: 100%; border-right: none; padding: 20px; display: flex; flex-direction: column; }
+            .settings-sidebar.hidden { display: none; }
+            .settings-nav-item { padding: 16px; border-radius: 12px; background-color: var(--input-bg); margin-bottom: 10px; font-size: 16px; display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
+            .settings-content { padding: 20px; display: none; flex-direction: column; height: 100%; }
+            .settings-content.active { display: flex; }
+            .settings-back-btn { display: block; }
+            .setting-desc { font-size: 13px; margin-bottom: 4px;}
+            
+            .settings-mobile-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid var(--border-color); }
+        }
+    </style>
 </head>
 <body>
-    <p>자동으로 이동 중입니다...<br>
-    이동되지 않으면 <a href="https://drive.google.com/file/d/1GnIEbfb_Bw3Za4hcjWqzmaaAYt-uU9-H/view?usp=sharing">여기 클릭</a></p>
+    <!-- ===== Auth Overlay (Login + Signup) ===== -->
+    <div id="auth-overlay">
+
+        <!-- Top bar -->
+        <div class="auth-topbar">
+            <div class="auth-brand">MinsuGPT</div>
+            <button class="auth-topbar-right" id="authTopbarLabel">
+                <span id="authTopbarText">MinsuGPT에 로그인 중입니다</span>
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
+            </button>
+        </div>
+
+        <!-- Center -->
+        <div class="auth-center">
+            <div class="auth-card">
+
+                <!-- ── LOGIN PAGE ── -->
+                <div class="auth-page active" id="page-login">
+                    <div class="auth-title">계정에 로그인하기</div>
+
+                    <button class="auth-google-btn" disabled>
+                        <svg width="20" height="20" viewBox="0 0 48 48">
+                            <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+                            <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+                            <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+                            <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+                        </svg>
+                        Google로 로그인
+                    </button>
+
+                    <input type="text" id="loginId" class="auth-input" placeholder="이메일 또는 아이디" autocomplete="username">
+                    <input type="password" id="loginPw" class="auth-input" placeholder="비밀번호" autocomplete="current-password">
+                    <div class="auth-error" id="loginError"></div>
+                    <button class="auth-primary-btn" onclick="doLogin()">계속하기</button>
+                    <div class="auth-link-row">계정이 없으신가요? <span class="auth-link" onclick="showSignup()">회원가입</span></div>
+                </div>
+
+                <!-- ── SIGNUP STEP 1: 이름 ── -->
+                <div class="auth-page" id="page-signup-1">
+                    <div class="auth-title">계정 만들기</div>
+                    <div class="auth-step-label">1 / 4 단계</div>
+                    <input type="text" id="signupName" class="auth-input" placeholder="이름을 입력하세요" autocomplete="name">
+                    <div class="auth-error" id="signupError1"></div>
+                    <button class="auth-primary-btn" onclick="signupNext(1)">다음</button>
+                    <div class="auth-link-row">이미 계정이 있으신가요? <span class="auth-link" onclick="showLogin()">로그인</span></div>
+                </div>
+
+                <!-- ── SIGNUP STEP 2: 이메일 ── -->
+                <div class="auth-page" id="page-signup-2">
+                    <div class="auth-title">계정 만들기</div>
+                    <div class="auth-step-label">2 / 4 단계</div>
+                    <input type="email" id="signupEmail" class="auth-input" placeholder="이메일 주소를 입력하세요" autocomplete="email">
+                    <div class="auth-error" id="signupError2"></div>
+                    <button class="auth-primary-btn" onclick="signupNext(2)">다음</button>
+                    <div class="auth-link-row"><span class="auth-link" onclick="signupBack(2)">이전 단계로</span></div>
+                    <div class="auth-link-row">이미 계정이 있으신가요? <span class="auth-link" onclick="showLogin()">로그인</span></div>
+                </div>
+
+                <!-- ── SIGNUP STEP 3: 생년월일 ── -->
+                <div class="auth-page" id="page-signup-3">
+                    <div class="auth-title">계정 만들기</div>
+                    <div class="auth-step-label">3 / 4 단계</div>
+                    <input type="date" id="signupBirth" class="auth-input" placeholder="연도-월-일">
+                    <div style="font-size:13px;color:#888;padding: 0 6px;">생년월일을 선택해주세요.</div>
+                    <div class="auth-error" id="signupError3"></div>
+                    <button class="auth-primary-btn" onclick="signupNext(3)">다음</button>
+                    <div class="auth-link-row"><span class="auth-link" onclick="signupBack(3)">이전 단계로</span></div>
+                    <div class="auth-link-row">이미 계정이 있으신가요? <span class="auth-link" onclick="showLogin()">로그인</span></div>
+                </div>
+
+                <!-- ── SIGNUP STEP 4: 비밀번호 ── -->
+                <div class="auth-page" id="page-signup-4">
+                    <div class="auth-title">계정 만들기</div>
+                    <div class="auth-step-label">4 / 4 단계</div>
+                    <input type="password" id="signupPw1" class="auth-input" placeholder="비밀번호를 입력하세요" oninput="checkPwReqs()">
+                    <div style="font-size:13px;color:#888;padding:2px 6px;">아래 조건 모두 만족:</div>
+                    <div class="pw-req-list">
+                        <div class="pw-req-item" id="req-len"><div class="pw-req-dot"></div>최소 8자 이상</div>
+                        <div class="pw-req-item" id="req-alpha"><div class="pw-req-dot"></div>문자 및 숫자 조합</div>
+                        <div class="pw-req-item" id="req-special"><div class="pw-req-dot"></div>특수문자 포함</div>
+                    </div>
+                    <input type="password" id="signupPw2" class="auth-input" placeholder="비밀번호를 한번 더 입력하세요">
+                    <div class="auth-error" id="signupError4"></div>
+                    <button class="auth-primary-btn" id="signupSubmitBtn" onclick="doSignup()">계정 생성하기</button>
+                    <div class="auth-link-row"><span class="auth-link" onclick="signupBack(4)">이전 단계로</span></div>
+                    <div class="auth-link-row">이미 계정이 있으신가요? <span class="auth-link" onclick="showLogin()">로그인</span></div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="auth-footer">
+            계속 진행함으로써 MinsuGPT의 <a href="#">서비스 이용약관</a> 및 <a href="#">개인정보 처리방침</a>에 동의합니다.
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div class="auth-modal-backdrop" id="signupSuccessModal">
+        <div class="auth-modal">
+            <div class="auth-modal-title">계정 생성 완료!</div>
+            <div class="auth-modal-body">계정이 성공적으로 생성되었습니다.<br>관리자의 승인 후 서비스를 이용할 수 있습니다.</div>
+            <button class="auth-primary-btn" onclick="showLogin(); document.getElementById('signupSuccessModal').classList.remove('open');">로그인하러 가기</button>
+        </div>
+    </div>
+    <div id="sidebar-overlay" onclick="toggleSidebar()"></div>
+    <div id="image-lightbox" class="image-lightbox" onclick="closeImageLightbox()">
+        <div class="lightbox-close" onclick="closeImageLightbox()"><svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></div>
+        <img id="lightbox-img" class="lightbox-img" src="" alt="Full view">
+    </div>
+
+    <div id="toggle-btn-wrapper" onclick="toggleSidebar()">
+        <svg class="sidebar-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2" stroke-width="2"></rect>
+            <line x1="9" y1="3" x2="9" y2="21" stroke-width="2"></line>
+        </svg>
+    </div>
+
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-content">
+            <button class="new-chat-btn active" id="newChatBtn" onclick="startNewChat()">
+                <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                <span data-i18n="newChat">New Chat</span>
+            </button>
+            <div class="history-label" data-i18n="history">History</div>
+            <div class="chat-history" id="chatHistoryList"></div>
+            <div class="menu-item" onclick="openSettings()">
+                <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                <span data-i18n="settings">Settings</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="main">
+        <div id="welcome-screen">
+            <div class="center-logo">
+                <img src="https://raw.githubusercontent.com/jaewondev27/image/refs/heads/main/image-removebg-preview%20(1).png" alt="Logo" class="center-logo-img">
+            </div>
+            <div class="center-input-wrapper">
+                <div class="input-container">
+                    <div id="center-preview" class="attachment-preview-area"></div>
+                    <div class="input-top-row">
+                        <textarea id="centerInput" class="input-field" placeholder="Send a message" rows="1" data-i18n-placeholder="placeholder"></textarea>
+                    </div>
+                    <div class="input-bottom-row">
+                        <div class="left-actions">
+                            <div class="icon-btn" onclick="toggleAttachMenu('center')">
+                                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                            </div>
+                            <div class="search-btn" id="centerSearchBtn" onclick="toggleSearchMode('center')">
+                                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"></path></svg>
+                                <span class="search-label">검색 활성화</span>
+                            </div>
+                            <div class="think-btn" id="centerThinkBtn" onclick="toggleThinkingMode('center')">
+                                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path></svg>
+                                <span class="think-label">생각 활성화</span>
+                            </div>
+                            <div class="attach-menu" id="centerAttachMenu">
+                                <div class="attach-item" onclick="handleFileUpload('image', 'center')"><svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg> 이미지</div>
+                                <div class="attach-item" onclick="handleFileUpload('file', 'center')"><svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg> 문서</div>
+                                <div class="attach-item" onclick="handleFileUpload('file', 'center')"><svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg> 파일</div>
+                            </div>
+                        </div>
+                        <div class="right-actions">
+                            <div class="model-selector">minsu-3<svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></div>
+                            <div class="send-btn" id="centerSendBtn" onclick="handleSendClick('center')">
+                                <svg class="icon-send" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path></svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bottom-disclaimer">MinsuGPT는 실수를 할 수 있습니다. 중요한 정보는 재차 확인하세요.</div>
+            </div>
+        </div>
+
+        <div id="chat-content"></div>
+
+        <div id="bottom-interface">
+            <div class="bottom-input-wrapper">
+                <div class="input-container">
+                    <div id="bottom-preview" class="attachment-preview-area"></div>
+                    <div class="input-top-row">
+                        <textarea id="bottomInput" class="input-field" placeholder="Send a message" rows="1" data-i18n-placeholder="placeholder"></textarea>
+                    </div>
+                    <div class="input-bottom-row">
+                        <div class="left-actions">
+                            <div class="icon-btn" onclick="toggleAttachMenu('bottom')">
+                                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                            </div>
+                            <div class="search-btn" id="bottomSearchBtn" onclick="toggleSearchMode('bottom')">
+                                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"></path></svg>
+                                <span class="search-label">검색 활성화</span>
+                            </div>
+                            <div class="think-btn" id="bottomThinkBtn" onclick="toggleThinkingMode('bottom')">
+                                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path></svg>
+                                <span class="think-label">생각 활성화</span>
+                            </div>
+                            <div class="attach-menu" id="bottomAttachMenu">
+                                <div class="attach-item" onclick="handleFileUpload('image', 'bottom')"><svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg> 이미지</div>
+                                <div class="attach-item" onclick="handleFileUpload('file', 'bottom')"><svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg> 문서</div>
+                                <div class="attach-item" onclick="handleFileUpload('file', 'bottom')"><svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg> 파일</div>
+                            </div>
+                        </div>
+                        <div class="right-actions">
+                            <div class="model-selector">minsu-3<svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></div>
+                            <div class="send-btn" id="bottomSendBtn" onclick="handleSendClick('bottom')">
+                                <svg class="icon-send" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path></svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bottom-disclaimer">MinsuGPT는 실수를 할 수 있습니다. 중요한 정보는 재차 확인하세요.</div>
+            </div>
+        </div>
+    </div>
+
+    <input type="file" id="hiddenFileInput" style="display:none;" multiple>
+
+    <div id="settings-modal" class="modal-overlay">
+        <div class="settings-window">
+            <div class="settings-sidebar" id="settingsSidebar">
+                <div class="settings-mobile-header">
+                    <span style="font-size: 18px; font-weight: 600;">설정</span>
+                    <div class="close-modal-btn" onclick="closeSettings()"><svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></div>
+                </div>
+
+                <div class="settings-nav-item active" onclick="switchSettingsTab('general', this)">
+                    <span style="display:flex; align-items:center; gap:10px;">
+                        <svg class="set-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg> 
+                        <span data-i18n="general">General</span>
+                    </span>
+                    <div class="setting-desc" style="display:none; margin-left:28px;" data-i18n="generalDesc">테마, 언어, 채팅 삭제</div>
+                </div>
+                <div class="settings-nav-item" onclick="switchSettingsTab('personalization', this)">
+                    <span style="display:flex; align-items:center; gap:10px;">
+                        <svg class="set-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path></svg> 
+                        <span data-i18n="personalization">Personalization</span>
+                    </span>
+                    <div class="setting-desc" style="display:none; margin-left:28px;" data-i18n="persDesc">시스템 프롬프트, 봇 말투</div>
+                </div>
+                <div class="settings-nav-item" onclick="switchSettingsTab('dataControls', this)">
+                    <span style="display:flex; align-items:center; gap:10px;">
+                        <svg class="set-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"></path></svg> 
+                        <span data-i18n="dataControls">Data Controls</span>
+                    </span>
+                    <div class="setting-desc" style="display:none; margin-left:28px;" data-i18n="dataDesc">대화 기억 설정</div>
+                </div>
+                <div class="settings-nav-item" onclick="switchSettingsTab('info', this)">
+                    <span style="display:flex; align-items:center; gap:10px;">
+                        <span style="font-size:18px; line-height:1; display:flex; align-items:center; width:18px; justify-content:center;">🛈</span> 
+                        <span data-i18n="info">Info</span>
+                    </span>
+                    <div class="setting-desc" style="display:none; margin-left:28px;" data-i18n="infoDesc">앱 정보 및 저작권</div>
+                </div>
+            </div>
+            <div class="settings-content" id="settingsContent">
+                <div class="settings-header">
+                    <div style="display:flex; align-items:center;">
+                        <span class="settings-back-btn" onclick="backToSettingsList()"><svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg></span>
+                        <span id="settings-header-title" data-i18n="general">General</span>
+                    </div>
+                    <div class="close-modal-btn" onclick="closeSettings()"><svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></div>
+                </div>
+                
+                <div id="tab-general" class="tab-section active-tab">
+                    <div class="setting-row">
+                        <div class="setting-info">
+                            <div class="setting-label" data-i18n="hapticStrength">Haptic Strength</div>
+                            <div class="setting-desc" data-i18n="hapticDesc">진동의 세기를 조절합니다.</div>
+                        </div>
+                        <input type="range" id="hapticRange" min="0" max="20" step="1" value="1" oninput="updateHapticStrength(this.value)">
+                    </div>
+                    
+                    <div class="setting-row">
+                        <div class="setting-info">
+                            <div class="setting-label" data-i18n="theme">Theme</div>
+                            <div class="setting-desc" data-i18n="themeDesc">인터페이스의 밝기 모드를 설정합니다.</div>
+                        </div>
+                        <div class="custom-select-container" id="themeSelect">
+                            <div class="custom-select-trigger" onclick="toggleDropdown('themeSelect')">
+                                <span id="currentThemeLabel" data-i18n="system">System</span>
+                                <svg class="trigger-arrow" width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                            </div>
+                            <div class="custom-options">
+                                <div class="custom-option selected" onclick="setTheme('system', this)" data-i18n="system">System</div>
+                                <div class="custom-option" onclick="setTheme('dark', this)" data-i18n="dark">Dark</div>
+                                <div class="custom-option" onclick="setTheme('light', this)" data-i18n="light">Light</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="setting-row">
+                        <div class="setting-info">
+                            <div class="setting-label" data-i18n="language">Language</div>
+                            <div class="setting-desc" data-i18n="langDesc">UI 언어를 변경합니다.</div>
+                        </div>
+                        <div class="custom-select-container" id="langSelect">
+                            <div class="custom-select-trigger" onclick="toggleDropdown('langSelect')">
+                                <span id="currentLangLabel">한국어</span>
+                                <svg class="trigger-arrow" width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                            </div>
+                            <div class="custom-options">
+                                <div class="custom-option selected" onclick="setLanguage('ko', '한국어', this)">한국어</div>
+                                <div class="custom-option" onclick="setLanguage('en', 'English', this)">English</div>
+                                <div class="custom-option" onclick="setLanguage('ja', '日本語', this)">日本語</div>
+                                <div class="custom-option" onclick="setLanguage('zh', '简体中文', this)">简体中文</div>
+                                <div class="custom-option" onclick="setLanguage('es', 'Español', this)">Español</div>
+                                <div class="custom-option" onclick="setLanguage('fr', 'Français', this)">Français</div>
+                                <div class="custom-option" onclick="setLanguage('de', 'Deutsch', this)">Deutsch</div>
+                                <div class="custom-option" onclick="setLanguage('ru', 'Русский', this)">Русский</div>
+                                <div class="custom-option" onclick="setLanguage('it', 'Italiano', this)">Italiano</div>
+                                <div class="custom-option" onclick="setLanguage('pt', 'Português', this)">Português</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="setting-row">
+                        <div class="setting-info">
+                            <div class="setting-label" data-i18n="deleteAllChats">Delete all chats</div>
+                            <div class="setting-desc" data-i18n="deleteAllDesc">모든 대화 기록을 로컬에서 영구 삭제합니다.</div>
+                        </div>
+                        <button class="danger-btn" onclick="confirmDeleteAllChats()" data-i18n="deleteAll">Delete All</button>
+                    </div>
+                </div>
+
+                <div id="tab-personalization" class="tab-section">
+                    <div class="setting-row" style="flex-direction: column; align-items: stretch; gap: 10px;">
+                        <div class="setting-info">
+                            <div class="setting-label" data-i18n="systemPrompt">System Prompt</div>
+                            <div class="setting-desc" data-i18n="systemPromptDesc">봇에게 비공식적으로 명령할 내용을 입력하세요.</div>
+                        </div>
+                        <textarea id="systemPromptInput" class="setting-textarea" placeholder="Ex: 너는 최고의 프로그래머야..." onchange="savePersonalization()"></textarea>
+                    </div>
+                    <div class="setting-row">
+                        <div class="setting-info">
+                            <div class="setting-label" data-i18n="botTone">Bot Tone</div>
+                            <div class="setting-desc" data-i18n="botToneDesc">봇의 말투를 설정합니다.</div>
+                        </div>
+                        <div class="custom-select-container" id="toneSelect">
+                            <div class="custom-select-trigger" onclick="toggleDropdown('toneSelect')">
+                                <span id="currentToneLabel" data-i18n="friendly">Friendly</span>
+                                <svg class="trigger-arrow" width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                            </div>
+                            <div class="custom-options">
+                                <div class="custom-option selected" onclick="setTone('friendly', '친절함', this)" data-i18n="friendly">친절함</div>
+                                <div class="custom-option" onclick="setTone('friend', '친구', this)" data-i18n="friend">친구</div>
+                                <div class="custom-option" onclick="setTone('stiff', '딱딱한', this)" data-i18n="stiff">딱딱한</div>
+                                <div class="custom-option" onclick="setTone('soft', '부드러운', this)" data-i18n="soft">부드러운</div>
+                                <div class="custom-option" onclick="setTone('enthusiastic', '열정적인', this)" data-i18n="enthusiastic">열정적인</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="tab-dataControls" class="tab-section">
+                    <div class="setting-row">
+                        <div class="setting-info">
+                            <div class="setting-label" data-i18n="historyMemory">History Memory</div>
+                            <div class="setting-desc" data-i18n="historyMemoryDesc">이전 대화 내용을 기억하여 문맥을 유지합니다.</div>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" class="toggle-input" id="historyToggle" onchange="toggleHistoryMemory(this)">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <div id="tab-info" class="tab-section">
+                    <img src="https://raw.githubusercontent.com/jaewondev27/image/refs/heads/main/image-removebg-preview%20(1).png" alt="MinsuGPT Logo" style="width: 80px; height: 80px; border-radius: 50%; margin-bottom: 20px;">
+                    <h2 style="font-size: 24px; font-weight: 700; margin-bottom: 16px;">MinsuGPT</h2>
+                    <div style="font-size: 14px; color: var(--sub-text-color); margin-bottom: 8px;">App Version: 2026211-200B2012</div>
+                    <div style="font-size: 12px; color: var(--sub-text-color);">Copyright 2026 MinsuGPT & Shin Jaewon. All Rights Reserved.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="dialog-modal" class="modal-overlay">
+        <div class="dialog-window">
+            <div class="dialog-title" id="dialog-title">Title</div>
+            <input type="text" id="dialog-input" class="dialog-input" style="display:none;">
+            <div class="dialog-actions">
+                <button class="dialog-btn cancel" onclick="closeDialog()" data-i18n="cancel">Cancel</button>
+                <button id="dialog-confirm-btn" class="dialog-btn confirm">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const translations = {
+            ko: { newChat: "새 채팅", history: "기록", settings: "설정", placeholder: "메시지 보내기", general: "일반", personalization: "개인 맞춤 설정", dataControls: "데이터 제어", info: "정보", theme: "테마", system: "시스템", dark: "다크", light: "라이트", language: "언어", deleteAllChats: "모든 채팅 삭제", deleteAll: "모두 삭제", cancel: "취소", delete: "삭제", editTitle: "이름 수정", deleteConfirmTitle: "채팅 삭제", deleteConfirmMsg: "이 채팅을 영구적으로 삭제하시겠습니까?", deleteAllConfirmMsg: "모든 채팅 기록을 영구적으로 삭제하시겠습니까?", themeDesc: "인터페이스의 밝기 모드를 설정합니다.", langDesc: "UI 언어를 변경합니다.", deleteAllDesc: "모든 대화 기록을 로컬에서 영구 삭제합니다.", systemPrompt: "시스템 프롬프트", systemPromptDesc: "봇에게 비공식적으로 명령할 내용을 입력하세요.", botTone: "봇 말투", botToneDesc: "봇의 말투를 설정합니다.", friendly: "친절함", friend: "친구", stiff: "딱딱한", soft: "부드러운", enthusiastic: "열정적인", historyMemory: "대화 기억", historyMemoryDesc: "이전 대화 내용을 기억하여 문맥을 유지합니다.", generalDesc: "테마, 언어, 채팅 삭제", persDesc: "시스템 프롬프트, 봇 말투", dataDesc: "대화 기억 설정", infoDesc: "앱 정보 및 저작권", hapticStrength: "햅틱 세기", hapticDesc: "진동의 세기를 조절합니다." },
+            en: { newChat: "New Chat", history: "History", settings: "Settings", placeholder: "Send a message", general: "General", personalization: "Personalization", dataControls: "Data Controls", info: "Info", theme: "Theme", system: "System", dark: "Dark", light: "Light", language: "Language", deleteAllChats: "Delete all chats", deleteAll: "Delete All", cancel: "Cancel", delete: "Delete", editTitle: "Edit Title", deleteConfirmTitle: "Delete Chat", deleteConfirmMsg: "Delete this chat permanently?", deleteAllConfirmMsg: "Permanently delete all chat history?", themeDesc: "Set the brightness mode of the interface.", langDesc: "Change the UI language.", deleteAllDesc: "Permanently delete all chat history from local storage.", systemPrompt: "System Prompt", systemPromptDesc: "Instructions for the bot (hidden).", botTone: "Bot Tone", botToneDesc: "Set the tone of the bot.", friendly: "Friendly", friend: "Friend", stiff: "Stiff", soft: "Soft", enthusiastic: "Enthusiastic", historyMemory: "Chat Memory", historyMemoryDesc: "Send previous chat history for context.", generalDesc: "Theme, Language, Delete Chat", persDesc: "System Prompt, Bot Tone", dataDesc: "Chat Memory Settings", infoDesc: "App Info & Copyright", hapticStrength: "Haptic Strength", hapticDesc: "Adjust vibration intensity." },
+            ja: { newChat: "新しいチャット", history: "履歴", settings: "設定", placeholder: "メッセージを送信", general: "一般", personalization: "パーソナライズ", dataControls: "データ制御", info: "情報", theme: "テーマ", system: "システム", dark: "ダーク", light: "ライト", language: "言語", deleteAllChats: "すべてのチャットを削除", deleteAll: "すべて削除", cancel: "キャンセル", delete: "削除", editTitle: "タイトル編集", deleteConfirmTitle: "チャット削除", deleteConfirmMsg: "このチャットを完全に削除しますか？", deleteAllConfirmMsg: "すべてのチャット履歴を完全に削除しますか？", themeDesc: "インターフェースの明るさモードを設定します。", langDesc: "UI言語を変更します。", deleteAllDesc: "ローカルストレージからすべてのチャット履歴を完全に削除します。", systemPrompt: "システムプロンプト", systemPromptDesc: "ボットへの非公式な指示を入力します。", botTone: "口調", botToneDesc: "ボットの口調を設定します。", friendly: "親切", friend: "友達", stiff: "堅い", soft: "柔らかい", enthusiastic: "情熱的", historyMemory: "会話記憶", historyMemoryDesc: "以前の会話履歴を記憶して文脈を維持します。", generalDesc: "テーマ、言語、チャット削除", persDesc: "システムプロンプト、ボットの口調", dataDesc: "会話記憶設定", infoDesc: "アプリ情報と著作権", hapticStrength: "触覚強度", hapticDesc: "振動の強度を調整します。" },
+            zh: { newChat: "新聊天", history: "历史记录", settings: "设置", placeholder: "发送消息", general: "常规", personalization: "个性化", dataControls: "数据控制", info: "信息", theme: "主题", system: "系统", dark: "深色", light: "浅色", language: "语言", deleteAllChats: "删除所有聊天", deleteAll: "全部删除", cancel: "取消", delete: "删除", editTitle: "编辑标题", deleteConfirmTitle: "删除聊天", deleteConfirmMsg: "确定要永久删除此聊天吗？", deleteAllConfirmMsg: "确定要永久删除所有聊天记录吗？", themeDesc: "设置界面的亮度模式。", langDesc: "更改界面语言。", deleteAllDesc: "从本地存储中永久删除所有聊天记录。", systemPrompt: "系统提示", systemPromptDesc: "输入非正式指令。", botTone: "语气", botToneDesc: "设置机器人的语气。", friendly: "亲切", friend: "朋友", stiff: "生硬", soft: "温柔", enthusiastic: "热情", historyMemory: "对话记忆", historyMemoryDesc: "记住以前的对话以保持上下文。", generalDesc: "主题，语言，删除聊天", persDesc: "系统提示，机器人语气", dataDesc: "对话记忆设置", infoDesc: "应用信息与版权", hapticStrength: "触觉强度", hapticDesc: "调整振动强度。" },
+            es: { newChat: "Nuevo Chat", history: "Historial", settings: "Ajustes", placeholder: "Enviar mensaje", general: "General", personalization: "Personalización", dataControls: "Datos", info: "Info", theme: "Tema", system: "Sistema", dark: "Oscuro", light: "Claro", language: "Idioma", deleteAllChats: "Borrar todos los chats", deleteAll: "Borrar todo", cancel: "Cancelar", delete: "Eliminar", editTitle: "Editar título", deleteConfirmTitle: "Eliminar chat", deleteConfirmMsg: "¿Eliminar este chat permanentemente?", deleteAllConfirmMsg: "¿Eliminar permanentemente todo el historial?", themeDesc: "Establece el modo de brillo de la interfaz.", langDesc: "Cambiar el idioma de la interfaz.", deleteAllDesc: "Eliminar permanentemente todo el historial del almacenamiento local.", systemPrompt: "Prompt del sistema", systemPromptDesc: "Instrucciones ocultas para el bot.", botTone: "Tono", botToneDesc: "Establecer el tono del bot.", friendly: "Amable", friend: "Amigo", stiff: "Formal", soft: "Suave", enthusiastic: "Entusiasta", historyMemory: "Memoria", historyMemoryDesc: "Recordar historial para contexto.", generalDesc: "Tema, Idioma, Borrar Chat", persDesc: "Prompt del sistema, Tono del bot", dataDesc: "Ajustes de memoria", infoDesc: "Info de la app y copyright", hapticStrength: "Fuerza háptica", hapticDesc: "Ajustar la intensidad de la vibración." },
+            fr: { newChat: "Nouveau Chat", history: "Historique", settings: "Paramètres", placeholder: "Envoyer un message", general: "Général", personalization: "Personnalisation", dataControls: "Données", info: "Info", theme: "Thème", system: "Système", dark: "Sombre", light: "Clair", language: "Langue", deleteAllChats: "Supprimer tout", deleteAll: "Tout supprimer", cancel: "Annuler", delete: "Supprimer", editTitle: "Modifier le titre", deleteConfirmTitle: "Supprimer le chat", deleteConfirmMsg: "Supprimer ce chat définitivement ?", deleteAllConfirmMsg: "Supprimer définitivement tout l'historique ?", themeDesc: "Régler la luminosité de l'interface.", langDesc: "Changer la langue de l'interface.", deleteAllDesc: "Supprimer définitivement tout l'historique du stockage local.", systemPrompt: "Prompt système", systemPromptDesc: "Instructions cachées pour le bot.", botTone: "Ton", botToneDesc: "Définir le ton du bot.", friendly: "Amical", friend: "Ami", stiff: "Rigide", soft: "Doux", enthusiastic: "Enthousiaste", historyMemory: "Mémoire", historyMemoryDesc: "Se souvenir de l'historique pour le contexte.", generalDesc: "Thème, Langue, Supprimer Chat", persDesc: "Prompt système, Ton du bot", dataDesc: "Paramètres de mémoire", infoDesc: "Infos app & copyright", hapticStrength: "Force haptique", hapticDesc: "Régler l'intensité des vibrations." },
+            de: { newChat: "Neuer Chat", history: "Verlauf", settings: "Einstellungen", placeholder: "Nachricht senden", general: "Allgemein", personalization: "Personalisierung", dataControls: "Daten", info: "Info", theme: "Design", system: "System", dark: "Dunkel", light: "Hell", language: "Sprache", deleteAllChats: "Alle Chats löschen", deleteAll: "Alle löschen", cancel: "Abbrechen", delete: "Löschen", editTitle: "Titel bearbeiten", deleteConfirmTitle: "Chat löschen", deleteConfirmMsg: "Diesen Chat dauerhaft löschen?", deleteAllConfirmMsg: "Gesamten Chatverlauf dauerhaft löschen?", themeDesc: "Helligkeitsmodus der Oberfläche festlegen.", langDesc: "UI-Sprache ändern.", deleteAllDesc: "Gesamten Chatverlauf dauerhaft vom lokalen Speicher löschen.", systemPrompt: "System Prompt", systemPromptDesc: "Versteckte Anweisungen für den Bot.", botTone: "Tonfall", botToneDesc: "Tonfall des Bots festlegen.", friendly: "Freundlich", friend: "Freund", stiff: "Steif", soft: "Sanft", enthusiastic: "Begeistert", historyMemory: "Gedächtnis", historyMemoryDesc: "Verlauf für Kontext speichern.", generalDesc: "Thema, Sprache, Chat löschen", persDesc: "System Prompt, Bot Tonfall", dataDesc: "Speichereinstellungen", infoDesc: "App Info & Copyright", hapticStrength: "Haptische Stärke", hapticDesc: "Vibrationsintensität einstellen." },
+            ru: { newChat: "Новый чат", history: "История", settings: "Настройки", placeholder: "Отправить сообщение", general: "Общие", personalization: "Персонализация", dataControls: "Данные", info: "Инфо", theme: "Тема", system: "Системная", dark: "Темная", light: "Светлая", language: "Язык", deleteAllChats: "Удалить все чаты", deleteAll: "Удалить все", cancel: "Отмена", delete: "Удалить", editTitle: "Изменить название", deleteConfirmTitle: "Удалить чат", deleteConfirmMsg: "Удалить этот чат навсегда?", deleteAllConfirmMsg: "Удалить всю историю чатов навсегда?", themeDesc: "Установить режим яркости интерфейса.", langDesc: "Изменить язык интерфейса.", deleteAllDesc: "Навсегда удалить всю историю чатов из локального хранилища.", systemPrompt: "Системный промпт", systemPromptDesc: "Скрытые инструкции для бота.", botTone: "Тон", botToneDesc: "Установить тон бота.", friendly: "Дружелюбный", friend: "Друг", stiff: "Строгий", soft: "Мягкий", enthusiastic: "Восторженный", historyMemory: "Память", historyMemoryDesc: "Помнить историю для контекста.", generalDesc: "Тема, Язык, Удалить чат", persDesc: "Системный промпт, Тон бота", dataDesc: "Настройки памяти", infoDesc: "Информация о приложении", hapticStrength: "Сила тактильного отклика", hapticDesc: "Настроить интенсивность вибрации." },
+            it: { newChat: "Nuova Chat", history: "Cronologia", settings: "Impostazioni", placeholder: "Invia un messaggio", general: "Generale", personalization: "Personalizzazione", dataControls: "Dati", info: "Info", theme: "Tema", system: "Sistema", dark: "Scuro", light: "Chiaro", language: "Lingua", deleteAllChats: "Elimina tutte le chat", deleteAll: "Elimina tutto", cancel: "Annulla", delete: "Elimina", editTitle: "Modifica titolo", deleteConfirmTitle: "Elimina chat", deleteConfirmMsg: "Eliminare definitivamente questa chat?", deleteAllConfirmMsg: "Eliminare definitivamente tutta la cronologia?", themeDesc: "Imposta la modalità di luminosità dell'interfaccia.", langDesc: "Cambia la lingua dell'interfaccia.", deleteAllDesc: "Elimina definitivamente tutta la cronologia dalla memoria locale.", systemPrompt: "Prompt di sistema", systemPromptDesc: "Istruzioni nascoste per il bot.", botTone: "Tono", botToneDesc: "Imposta il tono del bot.", friendly: "Amichevole", friend: "Amico", stiff: "Rigido", soft: "Dolce", enthusiastic: "Entusiasta", historyMemory: "Memoria", historyMemoryDesc: "Ricorda la cronologia per il contesto.", generalDesc: "Tema, Lingua, Elimina chat", persDesc: "Prompt di sistema, Tono", dataDesc: "Impostazioni memoria", infoDesc: "Info app & copyright", hapticStrength: "Intensità tattile", hapticDesc: "Regola l'intensità della vibrazione." },
+            pt: { newChat: "Novo Chat", history: "Histórico", settings: "Configurações", placeholder: "Enviar mensagem", general: "Geral", personalization: "Personalização", dataControls: "Dados", info: "Info", theme: "Tema", system: "Sistema", dark: "Escuro", light: "Claro", language: "Idioma", deleteAllChats: "Apagar todas as conversas", deleteAll: "Apagar tudo", cancel: "Cancelar", delete: "Apagar", editTitle: "Editar título", deleteConfirmTitle: "Apagar conversa", deleteConfirmMsg: "Apagar esta conversa permanentemente?", deleteAllConfirmMsg: "Apagar permanentemente todo o histórico?", themeDesc: "Definir o modo de brilho da interface.", langDesc: "Alterar o idioma da interface.", deleteAllDesc: "Apagar permanentemente todo o histórico do armazenamento local.", systemPrompt: "Prompt do sistema", systemPromptDesc: "Instruções ocultas para o bot.", botTone: "Tom", botToneDesc: "Definir o tom do bot.", friendly: "Amigável", friend: "Amigo", stiff: "Rígido", soft: "Suave", enthusiastic: "Entusiasmado", historyMemory: "Memória", historyMemoryDesc: "Lembrar histórico para contexto.", generalDesc: "Tema, Idioma, Apagar conversa", persDesc: "Prompt do sistema, Tom", dataDesc: "Configurações de memória", infoDesc: "Info do app e copyright", hapticStrength: "Força tátil", hapticDesc: "Ajustar a intensidade da vibração." }
+        };
+
+        let currentLang = 'ko';
+        let isGenerating = false;
+        let isSearchActive = false;
+        let isThinkingActive = false;
+        let isManuallyStopped = false; // Flag to handle immediate stop
+        let typingTimeout = null;
+        let thinkingTimeout = null;
+        let currentBubbleElement = null;
+        let currentBotRowElement = null; 
+        let streamReader = null;
+
+        let currentChatId = null;
+        let currentMessages = [];
+        let currentAttachments = []; 
+        const STORAGE_KEY = 'chat_history_v1';
+        
+        let systemPrompt = localStorage.getItem('systemPrompt') || '';
+        let botTone = localStorage.getItem('botTone') || 'friendly';
+        let isHistoryEnabled = localStorage.getItem('isHistoryEnabled') !== 'false';
+        
+        let hapticStrength = parseInt(localStorage.getItem('hapticStrength')) || 1;
+
+        // ===== Auth Token =====
+        let authToken = localStorage.getItem('auth_token') || null;
+
+        const API_BASE = '';  // 상대 경로 사용 (백엔드와 같은 도메인)
+
+        function getAuthHeaders() {
+            const headers = { 'Content-Type': 'application/json' };
+            if (authToken) headers['Authorization'] = `Bearer ${authToken}`;
+            return headers;
+        }
+
+        // ── Auth page navigation ──
+        function showAuthPage(id) {
+            document.querySelectorAll('.auth-page').forEach(p => p.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+        }
+        function showLogin() {
+            showAuthPage('page-login');
+            document.getElementById('authTopbarText').textContent = 'MinsuGPT에 로그인 중입니다';
+        }
+        function showSignup() {
+            showAuthPage('page-signup-1');
+            document.getElementById('authTopbarText').textContent = 'MinsuGPT에 계정 만들기';
+        }
+
+        // ── Signup step navigation ──
+        function signupNext(step) {
+            const errId = `signupError${step}`;
+            document.getElementById(errId).textContent = '';
+
+            if (step === 1) {
+                const name = document.getElementById('signupName').value.trim();
+                if (!name) { document.getElementById(errId).textContent = '이름을 입력해주세요.'; return; }
+                showAuthPage('page-signup-2');
+            } else if (step === 2) {
+                const email = document.getElementById('signupEmail').value.trim();
+                if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                    document.getElementById(errId).textContent = '올바른 이메일 주소를 입력해주세요.'; return;
+                }
+                showAuthPage('page-signup-3');
+            } else if (step === 3) {
+                const birth = document.getElementById('signupBirth').value;
+                if (!birth) { document.getElementById(errId).textContent = '생년월일을 선택해주세요.'; return; }
+                showAuthPage('page-signup-4');
+            }
+        }
+        function signupBack(step) {
+            if (step === 2) showAuthPage('page-signup-1');
+            else if (step === 3) showAuthPage('page-signup-2');
+            else if (step === 4) showAuthPage('page-signup-3');
+        }
+
+        // ── Password requirements check ──
+        function checkPwReqs() {
+            const pw = document.getElementById('signupPw1').value;
+            const setReq = (id, ok) => {
+                const el = document.getElementById(id);
+                ok ? el.classList.add('met') : el.classList.remove('met');
+            };
+            setReq('req-len', pw.length >= 8);
+            setReq('req-alpha', /[a-zA-Z]/.test(pw) && /[0-9]/.test(pw));
+            setReq('req-special', /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(pw));
+        }
+
+        // ── Sign up ──
+        async function doSignup() {
+            const btn = document.getElementById('signupSubmitBtn');
+            const errEl = document.getElementById('signupError4');
+            errEl.textContent = '';
+
+            const name = document.getElementById('signupName').value.trim();
+            const email = document.getElementById('signupEmail').value.trim();
+            const birthdate = document.getElementById('signupBirth').value;
+            const pw1 = document.getElementById('signupPw1').value;
+            const pw2 = document.getElementById('signupPw2').value;
+
+            if (pw1.length < 8 || !/[a-zA-Z]/.test(pw1) || !/[0-9]/.test(pw1) || !/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(pw1)) {
+                errEl.textContent = '비밀번호 조건을 모두 충족해주세요.'; return;
+            }
+            if (pw1 !== pw2) { errEl.textContent = '비밀번호가 일치하지 않습니다.'; return; }
+
+            btn.disabled = true; btn.textContent = '처리 중...';
+            try {
+                const res = await fetch(`${API_BASE}/signup`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: email, password: pw1, name, email, birthdate })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    document.getElementById('signupSuccessModal').classList.add('open');
+                } else {
+                    errEl.textContent = data.error === 'Username or Email already exists'
+                        ? '이미 사용 중인 이메일입니다.' : (data.error || '회원가입 실패');
+                }
+            } catch(e) {
+                errEl.textContent = '서버에 연결할 수 없습니다.';
+            } finally {
+                btn.disabled = false; btn.textContent = '계정 생성하기';
+            }
+        }
+
+        // ── Login ──
+        async function doLogin() {
+            const errEl = document.getElementById('loginError');
+            errEl.textContent = '';
+            const username = document.getElementById('loginId').value.trim();
+            const password = document.getElementById('loginPw').value;
+            if (!username || !password) { errEl.textContent = '아이디와 비밀번호를 입력하세요.'; return; }
+
+            try {
+                const res = await fetch(`${API_BASE}/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ username, password })
+                });
+                const data = await res.json();
+                if (res.ok && data.token) {
+                    authToken = data.token;
+                    localStorage.setItem('auth_token', authToken);
+                    const overlay = document.getElementById('auth-overlay');
+                    overlay.classList.add('hidden');
+                    setTimeout(() => overlay.style.display = 'none', 350);
+                    init();
+                } else {
+                    const msg = data.error === 'unapproved'
+                        ? '아직 승인되지 않은 계정입니다. 관리자 승인 후 이용 가능합니다.'
+                        : '아이디 또는 비밀번호가 올바르지 않습니다.';
+                    errEl.textContent = msg;
+                }
+            } catch(e) {
+                errEl.textContent = '서버에 연결할 수 없습니다.';
+            }
+        }
+
+        // Enter key bindings for login
+        document.addEventListener('DOMContentLoaded', () => {
+            ['loginId', 'loginPw'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+            });
+            ['signupName'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.addEventListener('keydown', e => { if (e.key === 'Enter') signupNext(1); });
+            });
+        });
+
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebar-overlay');
+        const newChatBtn = document.getElementById('newChatBtn');
+        const welcomeScreen = document.getElementById('welcome-screen');
+        const chatContent = document.getElementById('chat-content');
+        const bottomInterface = document.getElementById('bottom-interface');
+        const centerInput = document.getElementById('centerInput');
+        const centerSendBtn = document.getElementById('centerSendBtn');
+        const bottomInput = document.getElementById('bottomInput');
+        const bottomSendBtn = document.getElementById('bottomSendBtn');
+        const settingsModal = document.getElementById('settings-modal');
+        const dialogModal = document.getElementById('dialog-modal');
+        const chatHistoryList = document.getElementById('chatHistoryList');
+        const hiddenFileInput = document.getElementById('hiddenFileInput');
+        const imageLightbox = document.getElementById('image-lightbox');
+        const lightboxImg = document.getElementById('lightbox-img');
+        const settingsSidebar = document.getElementById('settingsSidebar');
+        const settingsContent = document.getElementById('settingsContent');
+
+        const icons = {
+            send: '<svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path></svg>',
+            stop: '<svg width="12" height="12" fill="currentColor" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>',
+            copy: '<svg class="action-icon" style="transform: scaleX(-1);" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>',
+            check: '<svg class="action-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>',
+            regenerate: '<svg class="action-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>',
+            edit: '<svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>',
+            trash: '<svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>'
+        };
+
+        function init() {
+            if (!authToken) {
+                // 토큰 없으면 로그인 화면 유지
+                return;
+            }
+            if (window.innerWidth <= 768) sidebar.classList.add('collapsed');
+            updateUIText('ko');
+            loadHistoryFromStorage();
+            
+            document.getElementById('systemPromptInput').value = systemPrompt;
+            document.getElementById('historyToggle').checked = isHistoryEnabled;
+            document.getElementById('hapticRange').value = hapticStrength; 
+            
+            const toneKey = botTone;
+            if(translations['ko'][toneKey]) {
+                document.getElementById('currentToneLabel').innerText = translations['ko'][toneKey];
+                document.querySelectorAll('#toneSelect .custom-option').forEach(opt => {
+                     if(opt.getAttribute('data-i18n') === toneKey) opt.classList.add('selected');
+                     else opt.classList.remove('selected');
+                });
+            }
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const chatIdFromUrl = urlParams.get('chat');
+            
+            // 로그인 오버레이 숨기기
+            const loginOverlay = document.getElementById('auth-overlay');
+            if (loginOverlay) { loginOverlay.classList.add('hidden'); setTimeout(() => loginOverlay.style.display = 'none', 400); }
+
+            if (chatIdFromUrl) {
+                loadChat(chatIdFromUrl);
+            } else {
+                startNewChat(false);
+            }
+        }
+
+        function toggleSearchMode(origin) {
+            isSearchActive = !isSearchActive;
+            const btnCenter = document.getElementById('centerSearchBtn');
+            const btnBottom = document.getElementById('bottomSearchBtn');
+            
+            if (isSearchActive) {
+                btnCenter.classList.add('active');
+                btnBottom.classList.add('active');
+            } else {
+                btnCenter.classList.remove('active');
+                btnBottom.classList.remove('active');
+            }
+            triggerHaptic();
+        }
+
+        function toggleThinkingMode(origin) {
+            isThinkingActive = !isThinkingActive;
+            const btnCenter = document.getElementById('centerThinkBtn');
+            const btnBottom = document.getElementById('bottomThinkBtn');
+            
+            if (isThinkingActive) {
+                btnCenter.classList.add('active');
+                btnBottom.classList.add('active');
+            } else {
+                btnCenter.classList.remove('active');
+                btnBottom.classList.remove('active');
+            }
+            triggerHaptic();
+        }
+
+        function toggleAttachMenu(origin) {
+            const menu = document.getElementById(origin + 'AttachMenu');
+            const isOpen = menu.classList.contains('open');
+            document.querySelectorAll('.attach-menu').forEach(el => el.classList.remove('open'));
+            if (!isOpen) menu.classList.add('open');
+        }
+
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.attach-menu') && !e.target.closest('.icon-btn')) {
+                document.querySelectorAll('.attach-menu').forEach(el => el.classList.remove('open'));
+            }
+        });
+
+        function handleFileUpload(type, origin) {
+            document.querySelectorAll('.attach-menu').forEach(el => el.classList.remove('open'));
+            hiddenFileInput.setAttribute('accept', type === 'image' ? 'image/*' : '*/*');
+            hiddenFileInput.onchange = (e) => processFiles(e.target.files, origin);
+            hiddenFileInput.click();
+        }
+
+        async function processFiles(files, origin) {
+            if (!files || files.length === 0) return;
+
+            for (let file of files) {
+                if (file.type.startsWith('image/')) {
+                    const compressedDataUrl = await compressImage(file);
+                    const base64String = compressedDataUrl.split(',')[1];
+                    currentAttachments.push({ type: 'image', data: compressedDataUrl, base64: base64String, name: file.name, fileObject: file });
+                } else {
+                    currentAttachments.push({ type: 'file', name: file.name, size: file.size, fileObject: file });
+                }
+            }
+            renderAttachments();
+            hiddenFileInput.value = '';
+        }
+
+        function compressImage(file) {
+            return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = (event) => {
+                    const img = new Image();
+                    img.src = event.target.result;
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        const ctx = canvas.getContext('2d');
+                        const MAX_SIZE = 800;
+                        let width = img.width;
+                        let height = img.height;
+                        if (width > height) { if (width > MAX_SIZE) { height *= MAX_SIZE / width; width = MAX_SIZE; } } 
+                        else { if (height > MAX_SIZE) { width *= MAX_SIZE / height; height = MAX_SIZE; } }
+                        canvas.width = width; canvas.height = height;
+                        ctx.drawImage(img, 0, 0, width, height);
+                        resolve(canvas.toDataURL('image/jpeg', 0.7));
+                    };
+                };
+            });
+        }
+
+        function renderAttachments() {
+            const centerPreview = document.getElementById('center-preview');
+            const bottomPreview = document.getElementById('bottom-preview');
+            [centerPreview, bottomPreview].forEach(container => {
+                container.innerHTML = '';
+                if (currentAttachments.length > 0) container.classList.add('has-items');
+                else container.classList.remove('has-items');
+                currentAttachments.forEach((att, index) => {
+                    const card = document.createElement('div');
+                    card.className = `attach-card ${att.type === 'file' ? 'file-type' : ''}`;
+                    if (att.type === 'image') {
+                        card.style.backgroundImage = `url(${att.data})`;
+                        card.onclick = () => openImageLightbox(att.data);
+                    } else {
+                        card.innerText = "📄\n" + att.name.substring(0, 10) + "...";
+                    }
+                    const removeBtn = document.createElement('div');
+                    removeBtn.className = 'attach-card-remove';
+                    removeBtn.innerHTML = '&times;';
+                    removeBtn.onclick = (e) => { e.stopPropagation(); removeAttachment(index); };
+                    card.appendChild(removeBtn);
+                    container.appendChild(card);
+                });
+            });
+            toggleBtnState(centerInput.value, centerSendBtn);
+            toggleBtnState(bottomInput.value, bottomSendBtn);
+        }
+
+        function removeAttachment(index) {
+            currentAttachments.splice(index, 1);
+            renderAttachments();
+        }
+
+        function openImageLightbox(src) { lightboxImg.src = src; imageLightbox.classList.add('open'); }
+        function closeImageLightbox() { imageLightbox.classList.remove('open'); setTimeout(() => { lightboxImg.src = ''; }, 300); }
+
+        function generateId(length = 12) {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+            let result = '';
+            for (let i = 0; i < length; i++) result += chars.charAt(Math.floor(Math.random() * chars.length));
+            return result;
+        }
+
+        function getStoredChats() { try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); } catch { return []; } }
+
+        function saveChatToStorage(chatObj) {
+            let chats = getStoredChats();
+            const existingIndex = chats.findIndex(c => c.id === chatObj.id);
+            if (existingIndex > -1) chats[existingIndex] = chatObj; else chats.unshift(chatObj);
+            chatObj.updatedAt = Date.now();
+            chats.sort((a, b) => b.updatedAt - a.updatedAt);
+            try { localStorage.setItem(STORAGE_KEY, JSON.stringify(chats)); } 
+            catch (e) { if (e.name === 'QuotaExceededError') { while (chats.length > 0) { chats.pop(); try { localStorage.setItem(STORAGE_KEY, JSON.stringify(chats)); break; } catch (e2) { if (chats.length === 0) break; } } } }
+            renderHistoryList();
+        }
+
+        function deleteChatFromStorage(id) {
+            let chats = getStoredChats();
+            chats = chats.filter(c => c.id !== id);
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(chats));
+            renderHistoryList();
+        }
+
+        function startNewChat(updateUrl = true) {
+            if (isGenerating) stopGeneration();
+            currentChatId = generateId();
+            currentMessages = [];
+            currentAttachments = [];
+            renderAttachments();
+            chatContent.innerHTML = '';
+            welcomeScreen.classList.remove('hidden');
+            chatContent.classList.remove('visible');
+            bottomInterface.classList.remove('visible');
+            newChatBtn.classList.add('active');
+            centerInput.value = ''; bottomInput.value = '';
+            centerInput.style.height = '28px'; bottomInput.style.height = '28px';
+            toggleBtnState('', centerSendBtn);
+            document.querySelectorAll('.history-item').forEach(el => el.classList.remove('active'));
+            if (updateUrl) { const url = new URL(window.location); url.searchParams.set('chat', currentChatId); window.history.pushState({}, '', url); }
+            if (window.innerWidth <= 768) { sidebar.classList.add('collapsed'); sidebarOverlay.classList.remove('visible'); }
+            
+            sendSystemConfig();
+        }
+
+        function loadChat(id) {
+            const chats = getStoredChats();
+            const chat = chats.find(c => c.id === id);
+            if (!chat) { startNewChat(); return; }
+            if (isGenerating) stopGeneration();
+            currentChatId = chat.id;
+            currentMessages = chat.messages || [];
+            currentAttachments = [];
+            renderAttachments();
+            welcomeScreen.classList.add('hidden');
+            chatContent.classList.add('visible');
+            bottomInterface.classList.add('visible');
+            newChatBtn.classList.remove('active');
+            chatContent.innerHTML = '';
+            
+            currentMessages.forEach((msg, index) => {
+                if (msg.role === 'user') appendMessageUI('user', msg.content, false, msg.attachments);
+                else if (msg.role === 'bot') {
+                    appendMessageUI('bot', msg.content, false);
+                    const rows = chatContent.querySelectorAll('.message-row.bot');
+                    const lastRow = rows[rows.length-1];
+                    const isLastMessage = (index === currentMessages.length - 1);
+                    if(lastRow) addActionButtons(lastRow.querySelector('.bot-bubble-wrapper'), msg.content, isLastMessage);
+                }
+            });
+            const url = new URL(window.location); url.searchParams.set('chat', currentChatId); window.history.pushState({}, '', url);
+            renderHistoryList();
+            if (window.innerWidth <= 768) { sidebar.classList.add('collapsed'); sidebarOverlay.classList.remove('visible'); }
+            scrollToBottom();
+            
+            sendSystemConfig();
+        }
+
+        function renderHistoryList() {
+            const chats = getStoredChats();
+            chatHistoryList.innerHTML = '';
+            chats.forEach(chat => {
+                const div = document.createElement('div');
+                div.className = `history-item ${chat.id === currentChatId ? 'active' : ''}`;
+                div.onclick = (e) => { if (e.target.closest('.history-action-btn')) return; loadChat(chat.id); };
+                const titleSpan = document.createElement('span'); titleSpan.className = 'history-title'; titleSpan.innerText = chat.title || 'New Conversation';
+                const actionsDiv = document.createElement('div'); actionsDiv.className = 'history-actions';
+                const editBtn = document.createElement('div'); editBtn.className = 'history-action-btn'; editBtn.innerHTML = icons.edit; editBtn.onclick = () => openRenameModal(chat.id, chat.title);
+                const delBtn = document.createElement('div'); delBtn.className = 'history-action-btn delete'; delBtn.innerHTML = icons.trash; delBtn.onclick = () => confirmDeleteChat(chat.id);
+                actionsDiv.appendChild(editBtn); actionsDiv.appendChild(delBtn);
+                div.appendChild(titleSpan); div.appendChild(actionsDiv); chatHistoryList.appendChild(div);
+            });
+        }
+
+        function openDialog(title, inputMode, confirmCallback) {
+            document.getElementById('dialog-title').innerText = title;
+            const input = document.getElementById('dialog-input');
+            const confirmBtn = document.getElementById('dialog-confirm-btn');
+            if (inputMode) { input.style.display = 'block'; input.value = inputMode; input.focus(); confirmBtn.className = 'dialog-btn confirm'; confirmBtn.innerText = translations[currentLang].newChat === "New Chat" ? "Save" : "저장"; } 
+            else { input.style.display = 'none'; confirmBtn.className = 'dialog-btn delete-confirm'; confirmBtn.innerText = translations[currentLang].delete; }
+            confirmBtn.onclick = () => { const val = input.value.trim(); if (inputMode && !val) return; confirmCallback(val); closeDialog(); };
+            dialogModal.classList.add('open');
+        }
+        function closeDialog() { dialogModal.classList.remove('open'); }
+        dialogModal.addEventListener('click', (e) => { if (e.target === dialogModal) closeDialog(); });
+        function openRenameModal(id, currentTitle) { openDialog(translations[currentLang].editTitle, currentTitle || 'New Conversation', (newTitle) => { let chats = getStoredChats(); const chat = chats.find(c => c.id === id); if (chat) { chat.title = newTitle; saveChatToStorage(chat); } }); }
+        function confirmDeleteChat(id) { openDialog(translations[currentLang].deleteConfirmMsg, null, () => { deleteChatFromStorage(id); if (currentChatId === id) startNewChat(); }); }
+        function confirmDeleteAllChats() { openDialog(translations[currentLang].deleteAllConfirmMsg, null, () => { localStorage.removeItem(STORAGE_KEY); startNewChat(); renderHistoryList(); closeSettings(); }); }
+
+        function toggleSidebar() { const isCollapsed = sidebar.classList.toggle('collapsed'); if (window.innerWidth <= 768) { if (!isCollapsed) sidebarOverlay.classList.add('visible'); else sidebarOverlay.classList.remove('visible'); } }
+        
+        function triggerHaptic() { 
+            if (navigator.vibrate && hapticStrength > 0) navigator.vibrate(hapticStrength); 
+        }
+        
+        function autoResize(el) { el.style.height = '28px'; el.style.height = Math.min(el.scrollHeight, 200) + 'px'; }
+        function scrollToBottom() { chatContent.scrollTop = chatContent.scrollHeight; }
+        function toggleBtnState(val, btn) { if (isGenerating) { btn.classList.add('stop-active'); } else { (val.trim().length > 0 || currentAttachments.length > 0) ? btn.classList.add('active') : btn.classList.remove('active'); btn.classList.remove('stop-active'); } }
+        function handleKeydown(e, type) { if (e.isComposing) return; if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSendClick(type); } }
+
+        centerInput.addEventListener('input', function() { autoResize(this); toggleBtnState(this.value, centerSendBtn); });
+        centerInput.addEventListener('keydown', (e) => handleKeydown(e, 'center'));
+        bottomInput.addEventListener('input', function() { autoResize(this); toggleBtnState(this.value, bottomSendBtn); });
+        bottomInput.addEventListener('keydown', (e) => handleKeydown(e, 'bottom'));
+
+        // --- System Config Logic (Background) ---
+        async function sendSystemConfig() {
+            const endpoint = isSearchActive || isThinkingActive
+                ? `${API_BASE}/ask` 
+                : `${API_BASE}/askfast`;
+            
+            let instructions = "";
+            if (systemPrompt) instructions += `[System Instruction: ${systemPrompt}]\n`;
+            instructions += `[Tone Instruction: Act ${botTone}.`;
+            if (['friendly', 'soft', 'stiff'].includes(botTone)) instructions += " Use polite honorifics (korean 'yo/nida').";
+            else if (botTone === 'friend') instructions += " Use casual language (Banmal).";
+            instructions += "]\n(This is a system setup message. Do NOT respond to this message. Just set your persona.)";
+
+            try {
+                fetch(endpoint, {
+                    method: 'POST',
+                    headers: getAuthHeaders(),
+                    credentials: 'include',
+                    body: JSON.stringify({ message: instructions, history: [], image_base64: [] })
+                }).catch(() => {}); 
+            } catch (e) {}
+        }
+
+        async function handleSendClick(origin) {
+            if (isGenerating) { stopGeneration(); return; }
+            triggerHaptic();
+
+            const input = origin === 'center' ? centerInput : bottomInput;
+            const text = input.value.trim();
+            if (!text && currentAttachments.length === 0) return;
+
+            const endpoint = isSearchActive || isThinkingActive
+                ? `${API_BASE}/ask` 
+                : `${API_BASE}/askfast`;
+            
+            if (origin === 'center') {
+                newChatBtn.classList.remove('active'); 
+                welcomeScreen.classList.add('hidden'); 
+                chatContent.classList.add('visible'); 
+                bottomInterface.classList.add('visible');
+            }
+
+            let hiddenInst = "";
+            if (systemPrompt) hiddenInst += `[System: ${systemPrompt}] `;
+            hiddenInst += `[Tone: ${botTone}] `;
+            if (['friendly', 'soft', 'stiff'].includes(botTone)) hiddenInst += "[Use honorifics] ";
+            else if (botTone === 'friend') hiddenInst += "[Use banmal] ";
+
+            const messageToSend = `${hiddenInst}\n${text}`;
+
+            let historyPayload = [];
+            if (isHistoryEnabled) {
+                historyPayload = currentMessages.map(m => ({
+                    role: m.role === 'bot' ? 'model' : 'user',
+                    content: m.content
+                }));
+            }
+
+            let imagePayload = currentAttachments.filter(a => a.type === 'image').map(a => a.base64);
+
+            const requestBody = JSON.stringify({
+                message: messageToSend,
+                history: historyPayload,
+                image_base64: imagePayload
+            });
+
+            const attachmentsToSend = [...currentAttachments];
+            currentAttachments = [];
+            renderAttachments(); 
+
+            input.value = ''; input.style.height = '28px';
+            toggleBtnState('', origin === 'center' ? centerSendBtn : bottomSendBtn);
+
+            appendMessageUI('user', text, false, attachmentsToSend);
+            currentMessages.push({ role: 'user', content: text, attachments: attachmentsToSend });
+            
+            let chats = getStoredChats();
+            let currentChat = chats.find(c => c.id === currentChatId);
+            let title = currentChat ? currentChat.title : (text.substring(0, 30) || "Conversation");
+            saveChatToStorage({ id: currentChatId, title: title, messages: currentMessages });
+
+            scrollToBottom();
+            
+            document.querySelectorAll('.action-btn.regenerate').forEach(btn => btn.closest('.message-actions').remove());
+
+            await streamResponse(endpoint, getAuthHeaders(), requestBody);
+        }
+
+        // ===== [THOUGHT] 블록 렌더러 =====
+        function renderThoughtBlock(thoughtText, wrapper) {
+            const block = document.createElement('div');
+            block.className = 'thought-block';
+            block.innerHTML = `
+                <div class="thought-header" onclick="this.parentElement.classList.toggle('open')">
+                    <span>💭</span>
+                    <span>생각 과정 보기</span>
+                    <span class="thought-toggle-icon">▶</span>
+                </div>
+                <div class="thought-body"></div>`;
+            block.querySelector('.thought-body').textContent = thoughtText;
+            wrapper.insertBefore(block, wrapper.querySelector('.message-bubble'));
+        }
+
+        async function streamResponse(endpoint, headers, body) {
+            startGenerationState();
+            isManuallyStopped = false;
+
+            const row = document.createElement('div'); row.className = 'message-row bot';
+            const wrapper = document.createElement('div'); wrapper.className = 'bot-bubble-wrapper';
+            const bubble = document.createElement('div'); bubble.className = 'message-bubble bot-content';
+            const dot = document.createElement('div'); dot.className = 'thinking-dot';
+            bubble.appendChild(dot);
+            wrapper.appendChild(bubble); row.appendChild(wrapper); chatContent.appendChild(row);
+            scrollToBottom();
+
+            currentBotRowElement = wrapper;
+            currentBubbleElement = bubble;
+
+            // rawBuffer: 서버에서 받은 전체 원시 텍스트
+            let rawBuffer = "";
+            // fullText: [THOUGHT] 제거 후 실제 표시할 텍스트
+            let fullText = "";
+            let displayedText = "";
+            let firstChunk = true;
+            let thoughtRendered = false;
+
+            // [THOUGHT]...[/THOUGHT] 파싱 후 thought / content 분리
+            function parseBuffer(raw) {
+                // thought 블록 추출 (여러 개 가능)
+                const thoughtRegex = /\[THOUGHT\]([\s\S]*?)\[\/THOUGHT\]/g;
+                let thoughts = [];
+                let match;
+                while ((match = thoughtRegex.exec(raw)) !== null) {
+                    thoughts.push(match[1]);
+                }
+                // thought 블록 제거 후 나머지가 본문
+                const content = raw.replace(/\[THOUGHT\][\s\S]*?\[\/THOUGHT\]/g, '')
+                                   .replace(/\[DONE\]/g, '')
+                                   .trim();
+                return { thoughts, content };
+            }
+
+            const typeWriter = setInterval(() => {
+                if (isManuallyStopped) { clearInterval(typeWriter); return; }
+                const parsed = parseBuffer(rawBuffer);
+                fullText = parsed.content;
+
+                // thought 블록이 새로 완성되면 한 번만 렌더
+                if (!thoughtRendered && parsed.thoughts.length > 0 && rawBuffer.includes('[/THOUGHT]')) {
+                    thoughtRendered = true;
+                    parsed.thoughts.forEach(t => renderThoughtBlock(t, wrapper));
+                }
+
+                if (displayedText.length < fullText.length) {
+                    if (firstChunk) { bubble.innerHTML = ""; firstChunk = false; triggerHaptic(); }
+                    const charsToAdd = fullText.slice(displayedText.length, displayedText.length + 3);
+                    displayedText += charsToAdd;
+                    bubble.innerHTML = marked.parse(displayedText);
+                    scrollToBottom();
+                    triggerHaptic();
+                } else if (!isGenerating && displayedText.length === fullText.length) {
+                    clearInterval(typeWriter);
+                }
+            }, 30);
+
+            try {
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: headers,
+                    credentials: 'include',
+                    body: body
+                });
+
+                // 인증 실패 → 로그인 화면으로
+                if (response.status === 401) {
+                    authToken = null;
+                    localStorage.removeItem('auth_token');
+                    clearInterval(typeWriter);
+                    bubble.innerHTML = '<span class="stopped-text">[세션이 만료되었습니다. 다시 로그인하세요.]</span>';
+                    const overlay = document.getElementById('auth-overlay');
+                    overlay.style.display = 'flex'; overlay.classList.remove('hidden');
+                    showLogin();
+                    finishGeneration('');
+                    return;
+                }
+
+                if (!response.body) throw new Error('ReadableStream not supported');
+                streamReader = response.body.getReader();
+                const decoder = new TextDecoder();
+
+                while (true) {
+                    if (isManuallyStopped) break;
+                    const { done, value } = await streamReader.read();
+                    if (done) break;
+                    rawBuffer += decoder.decode(value, { stream: true });
+                }
+            } catch (error) {
+                console.error('Stream error:', error);
+                if (currentBubbleElement) {
+                    if (firstChunk) bubble.innerHTML = "";
+                    currentBubbleElement.innerHTML += `<br><span class="stopped-text">[Error: ${error.message}]</span>`;
+                }
+            } finally {
+                if (!isManuallyStopped) {
+                    const checkDone = setInterval(() => {
+                        const parsed = parseBuffer(rawBuffer);
+                        fullText = parsed.content;
+                        if (displayedText.length >= fullText.length) {
+                            clearInterval(checkDone); clearInterval(typeWriter);
+                            finishGeneration(fullText);
+                        }
+                    }, 100);
+                }
+                streamReader = null;
+            }
+        }
+
+        function appendMessageUI(role, text, isTyping = false, attachments = []) {
+            const row = document.createElement('div'); row.className = `message-row ${role}`;
+            if (attachments && attachments.length > 0) {
+                const attachDiv = document.createElement('div'); attachDiv.className = 'bubble-attachments';
+                attachments.forEach(att => {
+                    const card = document.createElement('div');
+                    if (att.type === 'image') { card.className = 'bubble-image-card'; card.style.backgroundImage = `url(${att.data})`; card.onclick = () => openImageLightbox(att.data); } 
+                    else { card.className = 'bubble-file-card'; card.innerText = "📄 " + att.name; }
+                    attachDiv.appendChild(card);
+                });
+                row.appendChild(attachDiv);
+            }
+            if (role === 'bot') {
+                const wrapper = document.createElement('div'); wrapper.className = 'bot-bubble-wrapper';
+                const bubble = document.createElement('div'); bubble.className = `message-bubble ${role}-content`;
+                wrapper.appendChild(bubble); row.appendChild(wrapper); chatContent.appendChild(row);
+                currentBotRowElement = wrapper;
+                bubble.innerHTML = marked.parse(text);
+            } else {
+                if (text) { const bubble = document.createElement('div'); bubble.className = `message-bubble ${role}-content`; bubble.innerText = text; row.appendChild(bubble); }
+                
+                const userActions = document.createElement('div'); userActions.className = 'user-actions';
+                const copyBtn = document.createElement('div'); copyBtn.className = 'action-btn'; copyBtn.innerHTML = icons.copy;
+                copyBtn.onclick = () => { navigator.clipboard.writeText(text); copyBtn.innerHTML = icons.check; setTimeout(() => copyBtn.innerHTML = icons.copy, 2000); };
+                const editBtn = document.createElement('div'); editBtn.className = 'action-btn'; editBtn.innerHTML = icons.edit;
+                const thisMsgIndex = currentMessages.length;
+                editBtn.onclick = () => handleEditClick(bubble, thisMsgIndex);
+                userActions.appendChild(copyBtn); userActions.appendChild(editBtn);
+                row.appendChild(userActions);
+
+                chatContent.appendChild(row);
+            }
+            scrollToBottom();
+            return row;
+        }
+
+        function startGenerationState() {
+            isGenerating = true;
+            centerSendBtn.innerHTML = icons.stop; bottomSendBtn.innerHTML = icons.stop;
+            centerSendBtn.classList.add('stop-active'); bottomSendBtn.classList.add('stop-active');
+        }
+
+        function addActionButtons(wrapperElement, bubbleText, showRegen = false) {
+            if (!wrapperElement) return;
+            if (wrapperElement.querySelector('.message-actions')) return; 
+
+            const actionsDiv = document.createElement('div'); actionsDiv.className = 'message-actions';
+            
+            const copyBtn = document.createElement('div'); copyBtn.className = 'action-btn'; copyBtn.innerHTML = icons.copy;
+            copyBtn.onclick = function() {
+                const tempDiv = document.createElement('div'); tempDiv.innerHTML = bubbleText;
+                const textToCopy = tempDiv.innerText || bubbleText;
+                navigator.clipboard.writeText(textToCopy.replace('[답변 중지됨]', '')).then(() => {
+                    copyBtn.innerHTML = icons.check; setTimeout(() => { copyBtn.innerHTML = icons.copy; }, 2000);
+                });
+            };
+            actionsDiv.appendChild(copyBtn);
+
+            if (showRegen) {
+                const regenBtn = document.createElement('div'); regenBtn.className = 'action-btn regenerate'; regenBtn.innerHTML = icons.regenerate;
+                regenBtn.onclick = function() {
+                    const rowToRemove = wrapperElement.closest('.message-row');
+                    if (rowToRemove) rowToRemove.remove();
+                    if (currentMessages.length > 0 && currentMessages[currentMessages.length-1].role === 'bot') currentMessages.pop();
+                    const lastUserMsg = currentMessages.slice().reverse().find(m => m.role === 'user');
+                    if(lastUserMsg) {
+                        const endpoint = isSearchActive || isThinkingActive ? 'https://jaewondev6.pythonanywhere.com/ask' : 'https://jaewondev6.pythonanywhere.com/askfast';
+                        
+                        let regenImages = [];
+                        if (lastUserMsg.attachments) {
+                            regenImages = lastUserMsg.attachments.filter(a => a.type === 'image').map(a => a.base64);
+                        }
+                        
+                        let hiddenInst = "";
+                        if (systemPrompt) hiddenInst += `[System: ${systemPrompt}] `;
+                        hiddenInst += `[Tone: ${botTone}] `;
+                        
+                        const regenBody = JSON.stringify({
+                            message: `${hiddenInst}\n${lastUserMsg.content}`,
+                            history: currentMessages.map(m => ({ role: m.role==='bot'?'model':'user', content: m.content })),
+                            image_base64: regenImages
+                        });
+
+                        streamResponse(endpoint, {'Content-Type': 'application/json'}, regenBody);
+                    }
+                };
+                actionsDiv.appendChild(regenBtn);
+            }
+
+            wrapperElement.appendChild(actionsDiv);
+            requestAnimationFrame(() => { actionsDiv.classList.add('visible'); scrollToBottom(); });
+        }
+
+        function finishGeneration(finalText) {
+            isGenerating = false;
+            
+            document.querySelectorAll('.action-btn.regenerate').forEach(btn => btn.closest('.message-actions').remove());
+
+            if (currentBotRowElement && currentBubbleElement) {
+                addActionButtons(currentBotRowElement, finalText, true);
+            }
+
+            if (finalText) {
+                currentMessages.push({ role: 'bot', content: finalText });
+                let chats = getStoredChats();
+                const chat = chats.find(c => c.id === currentChatId);
+                if (chat) { chat.messages = currentMessages; saveChatToStorage(chat); }
+            }
+
+            currentBubbleElement = null; currentBotRowElement = null;
+            centerSendBtn.innerHTML = icons.send; bottomSendBtn.innerHTML = icons.send;
+            centerSendBtn.classList.remove('stop-active'); bottomSendBtn.classList.remove('stop-active');
+            toggleBtnState(centerInput.value, centerSendBtn); toggleBtnState(bottomInput.value, bottomSendBtn);
+        }
+
+        function stopGeneration() {
+            isManuallyStopped = true; 
+            if (streamReader) streamReader.cancel();
+            
+            let finalText = "";
+            if (currentBubbleElement) {
+                if (currentBubbleElement.innerHTML.includes('thinking-dot')) {
+                    currentBubbleElement.innerHTML = "";
+                }
+                const stopSpan = document.createElement('span'); stopSpan.className = 'stopped-text'; stopSpan.innerText = " [답변 중지됨]";
+                currentBubbleElement.appendChild(stopSpan);
+                finalText = currentBubbleElement.innerHTML; 
+            }
+            isGenerating = false;
+            finishGeneration(finalText);
+        }
+
+        function handleEditClick(bubble, messageIndex) {
+            const originalText = currentMessages[messageIndex].content;
+            const editContainer = document.createElement('div'); editContainer.className = 'edit-container';
+            const textarea = document.createElement('textarea'); textarea.className = 'edit-textarea'; textarea.value = originalText;
+            const btnRow = document.createElement('div'); btnRow.className = 'edit-buttons';
+            const saveBtn = document.createElement('button'); saveBtn.className = 'edit-btn save'; saveBtn.innerText = 'Save & Submit';
+            saveBtn.onclick = () => submitEdit(messageIndex, textarea.value);
+            const cancelBtn = document.createElement('button'); cancelBtn.className = 'edit-btn cancel'; cancelBtn.innerText = 'Cancel';
+            cancelBtn.onclick = () => cancelEdit(bubble, originalText);
+            btnRow.appendChild(cancelBtn); btnRow.appendChild(saveBtn);
+            editContainer.appendChild(textarea); editContainer.appendChild(btnRow);
+            bubble.innerHTML = ''; bubble.appendChild(editContainer); textarea.focus();
+        }
+
+        function cancelEdit(bubble, originalText) { bubble.innerHTML = originalText; }
+
+        async function submitEdit(messageIndex, newText) {
+            if (!newText.trim()) return;
+            currentMessages = currentMessages.slice(0, messageIndex);
+            
+            chatContent.innerHTML = '';
+            currentMessages.forEach((msg, idx) => {
+                if (msg.role === 'user') appendMessageUI('user', msg.content, false, msg.attachments);
+                else if (msg.role === 'bot') {
+                    appendMessageUI('bot', msg.content, false);
+                    const rows = chatContent.querySelectorAll('.message-row.bot');
+                    const lastRow = rows[rows.length-1];
+                    if(lastRow) addActionButtons(lastRow.querySelector('.bot-bubble-wrapper'), msg.content, false);
+                }
+            });
+
+            appendMessageUI('user', newText, false, []); 
+            currentMessages.push({ role: 'user', content: newText, attachments: [] }); 
+            
+            scrollToBottom();
+            
+            const endpoint = isSearchActive || isThinkingActive ? `${API_BASE}/ask` : `${API_BASE}/askfast`;
+            let hiddenInst = "";
+            if (systemPrompt) hiddenInst += `[System: ${systemPrompt}] `;
+            hiddenInst += `[Tone: ${botTone}] `;
+            const messageToSend = `${hiddenInst}\n${newText}`;
+            let historyPayload = [];
+            if (isHistoryEnabled) { historyPayload = currentMessages.map(m => ({ role: m.role === 'bot' ? 'model' : 'user', content: m.content })); }
+            
+            const requestBody = JSON.stringify({ message: messageToSend, history: historyPayload, image_base64: [] });
+            await streamResponse(endpoint, getAuthHeaders(), requestBody);
+        }
+
+        function loadHistoryFromStorage() { renderHistoryList(); }
+        function openSettings() { settingsModal.classList.add('open'); if(window.innerWidth <= 768) { sidebar.classList.add('collapsed'); sidebarOverlay.classList.remove('visible'); } }
+        function closeSettings() { settingsModal.classList.remove('open'); document.querySelectorAll('.custom-select-container').forEach(el => el.classList.remove('open')); if(window.innerWidth <= 768) backToSettingsList(); }
+        settingsModal.addEventListener('click', (e) => { if (e.target === settingsModal) closeSettings(); });
+        function toggleDropdown(id) { const el = document.getElementById(id); document.querySelectorAll('.custom-select-container').forEach(item => { if (item.id !== id) item.classList.remove('open'); }); el.classList.toggle('open'); }
+        function setTheme(mode, optionEl) { const container = document.getElementById('themeSelect'); container.querySelectorAll('.custom-option').forEach(opt => opt.classList.remove('selected')); optionEl.classList.add('selected'); const key = optionEl.getAttribute('data-i18n'); document.getElementById('currentThemeLabel').innerText = translations[currentLang][key]; container.classList.remove('open'); if (mode === 'system') { const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches; document.body.setAttribute('data-theme', isDark ? 'dark' : 'light'); } else { document.body.setAttribute('data-theme', mode); } }
+        function setLanguage(langCode, label, optionEl) { const container = document.getElementById('langSelect'); container.querySelectorAll('.custom-option').forEach(opt => opt.classList.remove('selected')); optionEl.classList.add('selected'); document.getElementById('currentLangLabel').innerText = label; container.classList.remove('open'); currentLang = langCode; updateUIText(langCode); renderHistoryList(); }
+        
+        function savePersonalization() { systemPrompt = document.getElementById('systemPromptInput').value; localStorage.setItem('systemPrompt', systemPrompt); sendSystemConfig(); }
+        function setTone(toneValue, label, optionEl) { const container = document.getElementById('toneSelect'); container.querySelectorAll('.custom-option').forEach(opt => opt.classList.remove('selected')); optionEl.classList.add('selected'); document.getElementById('currentToneLabel').innerText = label; container.classList.remove('open'); botTone = toneValue; localStorage.setItem('botTone', botTone); sendSystemConfig(); }
+        function toggleHistoryMemory(checkbox) { isHistoryEnabled = checkbox.checked; localStorage.setItem('isHistoryEnabled', isHistoryEnabled); }
+        function updateHapticStrength(val) { hapticStrength = parseInt(val); localStorage.setItem('hapticStrength', hapticStrength); triggerHaptic(); }
+
+        function updateUIText(lang) { const t = translations[lang]; if (!t) return; document.querySelectorAll('[data-i18n]').forEach(el => { const key = el.getAttribute('data-i18n'); if (t[key]) el.innerText = t[key]; }); document.querySelectorAll('[data-i18n-placeholder]').forEach(el => { const key = el.getAttribute('data-i18n-placeholder'); if (t[key]) el.placeholder = t[key]; }); const currentThemeKey = document.querySelector('#themeSelect .custom-option.selected').getAttribute('data-i18n'); if (currentThemeKey && t[currentThemeKey]) document.getElementById('currentThemeLabel').innerText = t[currentThemeKey]; const toneKey = botTone; if(t[toneKey]) document.getElementById('currentToneLabel').innerText = t[toneKey]; }
+        document.addEventListener('click', function(e) { if (!e.target.closest('.custom-select-container')) { document.querySelectorAll('.custom-select-container').forEach(el => el.classList.remove('open')); } });
+
+        function switchSettingsTab(tabName, navItem) {
+            document.querySelectorAll('.settings-nav-item').forEach(el => el.classList.remove('active'));
+            if(navItem) navItem.classList.add('active');
+            document.querySelectorAll('.tab-section').forEach(el => el.classList.remove('active-tab'));
+            const target = document.getElementById('tab-' + tabName);
+            if(target) target.classList.add('active-tab');
+            const key = navItem ? navItem.querySelector('span:not(.set-icon)').getAttribute('data-i18n') : 'general';
+            document.getElementById('settings-header-title').innerText = translations[currentLang][key] || key;
+            if (window.innerWidth <= 768) { document.getElementById('settingsSidebar').classList.add('hidden'); document.getElementById('settingsContent').classList.add('active'); }
+        }
+
+        function backToSettingsList() {
+            document.getElementById('settingsSidebar').classList.remove('hidden');
+            document.getElementById('settingsContent').classList.remove('active');
+        }
+
+        // ===== 페이지 시작: 토큰 있으면 바로 앱, 없으면 로그인 화면 =====
+        if (authToken) {
+            init();
+        }
+        // 토큰 없을 경우엔 auth-overlay가 기본 표시 상태로 유지됨
+    </script>
 </body>
-</html>
+                                                                                                           </html>
