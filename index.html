@@ -118,6 +118,41 @@
         #toggle-btn-wrapper:hover { background-color: var(--sidebar-hover); }
         .sidebar-icon { width: 24px; height: 24px; color: var(--text-color); }
 
+        /* TopBar brand */
+        #topbar-brand {
+            position: fixed; top: 10px; left: 60px;
+            font-family: 'Google Sans', sans-serif;
+            font-size: 16px; font-weight: 700;
+            color: var(--text-color); z-index: 2000;
+            pointer-events: none;
+            letter-spacing: -0.3px;
+            line-height: 40px;
+            white-space: nowrap;
+        }
+
+        /* Logout confirm modal */
+        #logout-modal {
+            position: fixed; inset: 0; z-index: 9998;
+            background: rgba(0,0,0,0.45);
+            display: none; align-items: center; justify-content: center;
+            backdrop-filter: blur(3px);
+        }
+        #logout-modal.open { display: flex; }
+        .logout-modal-box {
+            background: var(--modal-bg); border-radius: 18px;
+            padding: 28px 28px 22px 28px; max-width: 320px; width: 90%;
+            display: flex; flex-direction: column; gap: 12px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+            animation: modalIn 0.22s cubic-bezier(0.16,1,0.3,1);
+        }
+        .logout-modal-title { font-size: 17px; font-weight: 700; color: var(--text-color); }
+        .logout-modal-body { font-size: 14px; color: var(--sub-text-color); line-height: 1.55; }
+        .logout-modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 4px; }
+        .logout-modal-btn { padding: 9px 20px; border-radius: 10px; font-size: 14px; font-weight: 600; border: none; cursor: pointer; transition: opacity 0.15s; font-family: 'Google Sans', sans-serif; }
+        .logout-modal-btn.cancel { background: var(--sidebar-hover); color: var(--text-color); }
+        .logout-modal-btn.confirm { background: var(--danger-color); color: #fff; }
+        .logout-modal-btn:hover { opacity: 0.85; }
+
         #sidebar-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1400; opacity: 0; visibility: hidden; transition: opacity 0.3s ease; backdrop-filter: blur(2px); }
         #sidebar-overlay.visible { opacity: 1; visibility: visible; }
 
@@ -196,38 +231,122 @@
 
         .code-block-wrapper {
             border-radius: 10px; overflow: hidden; margin-bottom: 14px;
-            border: 1px solid #2d2d3a; background: #1e1e2e;
+            border: 1px solid var(--cb-border);
+            background: var(--cb-bg);
             font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
         }
+        /* Light theme code block vars */
+        :root {
+            --cb-bg: #ffffff;
+            --cb-header-bg: #f8f8f8;
+            --cb-border: #e0e0e0;
+            --cb-lang-color: #555;
+            --cb-btn-bg: transparent;
+            --cb-btn-color: #666;
+            --cb-btn-hover-bg: #ebebeb;
+            --cb-btn-hover-color: #222;
+            --cb-tab-active-bg: #ffffff;
+            --cb-tab-active-border: #222;
+            --cb-tab-inactive-color: #888;
+            --cb-code-bg: #ffffff;
+            --cb-frame-border: #e0e0e0;
+        }
+        [data-theme="dark"] {
+            --cb-bg: #1e1e2e;
+            --cb-header-bg: #16161e;
+            --cb-border: #2d2d3a;
+            --cb-lang-color: #a9b1d6;
+            --cb-btn-bg: transparent;
+            --cb-btn-color: #888;
+            --cb-btn-hover-bg: #2d2d3a;
+            --cb-btn-hover-color: #c0caf5;
+            --cb-tab-active-bg: #1e1e2e;
+            --cb-tab-active-border: #a9b1d6;
+            --cb-tab-inactive-color: #555;
+            --cb-code-bg: #1e1e2e;
+            --cb-frame-border: #2d2d3a;
+        }
+
         .code-block-header {
             display: flex; align-items: center; justify-content: space-between;
-            padding: 8px 14px; background: #16161e;
-            border-bottom: 1px solid #2d2d3a;
+            padding: 0 8px 0 14px;
+            background: var(--cb-header-bg);
+            border-bottom: 1px solid var(--cb-border);
+            min-height: 42px;
         }
-        .code-block-lang {
-            font-size: 12px; font-weight: 600; color: #a9b1d6;
-            font-family: 'Google Sans', sans-serif; text-transform: uppercase;
-            letter-spacing: 0.04em;
+        .code-block-tabs {
+            display: flex; align-items: center; gap: 0; height: 42px;
         }
-        .code-block-actions { display: flex; gap: 6px; }
+        .code-block-tab {
+            display: flex; align-items: center; gap: 6px;
+            padding: 0 12px; height: 100%; cursor: pointer;
+            font-size: 13px; font-family: 'Google Sans', sans-serif;
+            color: var(--cb-tab-inactive-color);
+            border-bottom: 2px solid transparent;
+            transition: color 0.15s, border-color 0.15s;
+            white-space: nowrap;
+            background: none; border-top: none; border-left: none; border-right: none;
+        }
+        .code-block-tab.active {
+            color: var(--cb-lang-color);
+            border-bottom-color: var(--cb-tab-active-border);
+            font-weight: 600;
+        }
+        .code-block-tab svg { width: 13px; height: 13px; flex-shrink: 0; }
+        .code-block-actions { display: flex; gap: 2px; align-items: center; }
         .code-block-btn {
-            display: flex; align-items: center; gap: 5px;
-            padding: 4px 10px; border-radius: 6px; border: none;
-            background: #2d2d3a; color: #a9b1d6; cursor: pointer;
-            font-size: 12px; font-family: 'Google Sans', sans-serif;
+            display: flex; align-items: center; justify-content: center;
+            width: 32px; height: 32px; border-radius: 6px; border: none;
+            background: var(--cb-btn-bg); color: var(--cb-btn-color); cursor: pointer;
             transition: background 0.15s, color 0.15s;
         }
-        .code-block-btn:hover { background: #3a3a4a; color: #c0caf5; }
-        .code-block-btn svg { width: 13px; height: 13px; flex-shrink: 0; }
-        .code-block-body { overflow-x: auto; }
-        .code-block-body pre { margin: 0 !important; border-radius: 0 !important; background: transparent !important; }
-        .code-block-body pre code { font-size: 13px !important; line-height: 1.6 !important; padding: 14px 16px !important; display: block; }
-        .hljs { background: transparent !important; }
+        .code-block-btn:hover { background: var(--cb-btn-hover-bg); color: var(--cb-btn-hover-color); }
+        .code-block-btn svg { width: 15px; height: 15px; flex-shrink: 0; }
+        .code-block-run-btn {
+            display: flex; align-items: center; justify-content: center;
+            width: 32px; height: 32px; border-radius: 6px; border: none;
+            background: var(--cb-btn-bg); color: var(--cb-btn-color); cursor: pointer;
+            transition: background 0.15s, color 0.15s;
+        }
+        .code-block-run-btn:hover { background: var(--cb-btn-hover-bg); color: var(--cb-btn-hover-color); }
+        .code-block-run-btn svg { width: 15px; height: 15px; }
+
+        .code-block-body { overflow-x: auto; display: block; background: var(--cb-code-bg); }
+        .code-block-body.hidden { display: none; }
+        .code-block-body pre { margin: 0 !important; border-radius: 0 !important; background: var(--cb-code-bg) !important; }
+        .code-block-body pre code.hljs { font-size: 13px !important; line-height: 1.6 !important; padding: 14px 16px !important; display: block; background: var(--cb-code-bg) !important; color: inherit; }
+
+        /* Light mode: override atom-one-dark to light palette */
+        :root .hljs { background: var(--cb-code-bg) !important; color: #383a42 !important; }
+        :root .hljs-comment, :root .hljs-quote { color: #a0a1a7; font-style: italic; }
+        :root .hljs-doctag, :root .hljs-keyword, :root .hljs-formula { color: #a626a4; }
+        :root .hljs-section, :root .hljs-name, :root .hljs-selector-tag, :root .hljs-deletion, :root .hljs-subst { color: #e45649; }
+        :root .hljs-literal { color: #0184bb; }
+        :root .hljs-string, :root .hljs-regexp, :root .hljs-addition, :root .hljs-attribute, :root .hljs-meta-string { color: #50a14f; }
+        :root .hljs-built_in, :root .hljs-class .hljs-title { color: #c18401; }
+        :root .hljs-attr, :root .hljs-variable, :root .hljs-template-variable, :root .hljs-type, :root .hljs-selector-class, :root .hljs-selector-attr, :root .hljs-selector-pseudo, :root .hljs-number { color: #986801; }
+        :root .hljs-symbol, :root .hljs-bullet, :root .hljs-link, :root .hljs-meta, :root .hljs-selector-id, :root .hljs-title { color: #4078f2; }
+        :root .hljs-emphasis { font-style: italic; }
+        :root .hljs-strong { font-weight: bold; }
+        :root .hljs-link { text-decoration: underline; }
+        /* Dark mode: keep dark colors */
+        [data-theme="dark"] .hljs { background: var(--cb-code-bg) !important; color: #abb2bf !important; }
+        [data-theme="dark"] .hljs-comment, [data-theme="dark"] .hljs-quote { color: #5c6370; font-style: italic; }
+        [data-theme="dark"] .hljs-doctag, [data-theme="dark"] .hljs-keyword, [data-theme="dark"] .hljs-formula { color: #c678dd; }
+        [data-theme="dark"] .hljs-section, [data-theme="dark"] .hljs-name, [data-theme="dark"] .hljs-selector-tag, [data-theme="dark"] .hljs-deletion, [data-theme="dark"] .hljs-subst { color: #e06c75; }
+        [data-theme="dark"] .hljs-literal { color: #56b6c2; }
+        [data-theme="dark"] .hljs-string, [data-theme="dark"] .hljs-regexp, [data-theme="dark"] .hljs-addition, [data-theme="dark"] .hljs-attribute, [data-theme="dark"] .hljs-meta-string { color: #98c379; }
+        [data-theme="dark"] .hljs-built_in, [data-theme="dark"] .hljs-class .hljs-title { color: #e6c07b; }
+        [data-theme="dark"] .hljs-attr, [data-theme="dark"] .hljs-variable, [data-theme="dark"] .hljs-template-variable, [data-theme="dark"] .hljs-type, [data-theme="dark"] .hljs-number { color: #d19a66; }
+        [data-theme="dark"] .hljs-symbol, [data-theme="dark"] .hljs-bullet, [data-theme="dark"] .hljs-link, [data-theme="dark"] .hljs-meta, [data-theme="dark"] .hljs-selector-id, [data-theme="dark"] .hljs-title { color: #61afef; }
+        [data-theme="dark"] .hljs-tag { color: #e06c75; }
+        [data-theme="dark"] .hljs-tag .hljs-name { color: #e06c75; }
+        [data-theme="dark"] .hljs-tag .hljs-attr { color: #d19a66; }
 
         /* HTML Run Iframe */
         .code-run-frame {
-            width: 100%; border: none; border-top: 1px solid #2d2d3a;
-            background: #fff; border-radius: 0 0 10px 10px;
+            width: 100%; border: none; border-top: 1px solid var(--cb-frame-border);
+            background: #fff;
             min-height: 120px; display: none;
         }
         .code-run-frame.visible { display: block; }
@@ -262,16 +381,26 @@
         /* ── Collapsed profile (PC only) ── */
         #collapsed-profile-btn {
             display: none;
-            position: fixed; left: 6px; bottom: 14px;
-            width: 40px; height: 40px;
+            position: fixed; left: 8px; bottom: 12px;
+            width: 32px; height: 32px;
             border-radius: 50%; border: none; cursor: pointer;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: #fff; font-size: 14px; font-weight: 700;
+            color: #fff; font-size: 12px; font-weight: 700;
             align-items: center; justify-content: center;
-            z-index: 1600; box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            z-index: 1600; box-shadow: 0 2px 6px rgba(0,0,0,0.25);
             transition: transform 0.15s;
         }
-        #collapsed-profile-btn:hover { transform: scale(1.08); }
+        #collapsed-profile-btn:hover { transform: scale(1.1); }
+
+        /* Sidebar logout button */
+        .sidebar-logout-btn {
+            display: flex; align-items: center; justify-content: center;
+            width: 32px; height: 32px; border-radius: 8px; border: none;
+            background: transparent; color: var(--icon-color); cursor: pointer;
+            transition: background 0.15s, color 0.15s; flex-shrink: 0;
+            margin-right: 4px;
+        }
+        .sidebar-logout-btn:hover { background: rgba(239,68,68,0.1); color: var(--danger-color); }
 
         /* Popover */
         #profile-popover {
@@ -789,6 +918,7 @@
             <line x1="9" y1="3" x2="9" y2="21" stroke-width="2"></line>
         </svg>
     </div>
+    <div id="topbar-brand">MinsuGPT</div>
 
     <div class="sidebar" id="sidebar">
         <div class="sidebar-content">
@@ -800,13 +930,30 @@
             <div class="chat-history" id="chatHistoryList"></div>
             <!-- Profile + Settings row -->
             <div class="sidebar-bottom">
-                <button class="sidebar-profile-row" onclick="openSettings()" id="sidebarProfileRow">
-                    <div class="sidebar-avatar" id="sidebarAvatar">?</div>
-                    <span class="sidebar-profile-name" id="sidebarProfileName">사용자</span>
-                    <span class="sidebar-settings-icon" title="설정">
-                        <i data-lucide="settings" style="width:16px;height:16px;"></i>
-                    </span>
-                </button>
+                <div style="display:flex; align-items:center; width:100%; gap:0;">
+                    <button class="sidebar-profile-row" onclick="openSettings()" id="sidebarProfileRow" style="flex:1;">
+                        <div class="sidebar-avatar" id="sidebarAvatar">?</div>
+                        <span class="sidebar-profile-name" id="sidebarProfileName">사용자</span>
+                        <span class="sidebar-settings-icon" title="설정">
+                            <i data-lucide="settings" style="width:16px;height:16px;"></i>
+                        </span>
+                    </button>
+                    <button class="sidebar-logout-btn" onclick="confirmLogout()" title="로그아웃">
+                        <i data-lucide="log-out" style="width:16px;height:16px;"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Logout confirm modal -->
+    <div id="logout-modal">
+        <div class="logout-modal-box">
+            <div class="logout-modal-title">로그아웃</div>
+            <div class="logout-modal-body">정말 로그아웃하시겠습니까?</div>
+            <div class="logout-modal-actions">
+                <button class="logout-modal-btn cancel" onclick="document.getElementById('logout-modal').classList.remove('open')">취소</button>
+                <button class="logout-modal-btn confirm" onclick="doLogout()">로그아웃</button>
             </div>
         </div>
     </div>
@@ -818,7 +965,7 @@
         <div class="popover-item" onclick="openSettings(); closeProfilePopover();">
             <i data-lucide="settings" style="width:16px;height:16px;"></i> 설정
         </div>
-        <div class="popover-item danger" onclick="doLogout()">
+        <div class="popover-item danger" onclick="confirmLogout(); closeProfilePopover();">
             <i data-lucide="log-out" style="width:16px;height:16px;"></i> 로그아웃
         </div>
     </div>
@@ -1222,6 +1369,9 @@
             const password = document.getElementById('loginPw').value;
             if (!username || !password) { errEl.textContent = '아이디와 비밀번호를 입력하세요.'; return; }
 
+            const btn = document.querySelector('#page-login .auth-primary-btn');
+            if (btn) { btn.disabled = true; btn.textContent = '로그인 중...'; }
+
             try {
                 const res = await fetch(`${API_BASE}/login`, {
                     method: 'POST',
@@ -1245,7 +1395,15 @@
                 }
             } catch(e) {
                 errEl.textContent = '서버에 연결할 수 없습니다.';
+            } finally {
+                if (btn) { btn.disabled = false; btn.textContent = '계속하기'; }
             }
+        }
+
+        // ── Logout confirm ──
+        function confirmLogout() {
+            closeProfilePopover();
+            document.getElementById('logout-modal').classList.add('open');
         }
 
         // Enter key bindings for login
@@ -1337,6 +1495,18 @@
                 loadChat(chatIdFromUrl);
             } else {
                 startNewChat(false);
+            }
+
+            // ?input= 자동 전송 처리 (/n → 줄바꿈)
+            const inputParam = urlParams.get('input');
+            if (inputParam) {
+                const autoMsg = inputParam.replace(/\/n/g, '\n');
+                setTimeout(() => {
+                    centerInput.value = autoMsg;
+                    autoResize(centerInput);
+                    toggleBtnState(autoMsg, centerSendBtn);
+                    handleSendClick('center');
+                }, 300);
             }
         }
 
@@ -1640,80 +1810,59 @@
         // ── Marked + syntax highlight setup ──
         const renderer = new marked.Renderer();
         renderer.code = function(code, lang) {
-            // marked v5 passes object or string
             if (typeof code === 'object') { lang = code.lang; code = code.text; }
             const language = (lang || 'plaintext').toLowerCase();
             const isHtml = language === 'html';
             const id = 'cb_' + Math.random().toString(36).slice(2, 8);
-
             let highlighted;
-            try {
-                highlighted = hljs.highlight(code, { language: hljs.getLanguage(language) ? language : 'plaintext' }).value;
-            } catch(e) {
-                highlighted = hljs.highlightAuto(code).value;
-            }
-
-            const runBtn = isHtml ? `<button class="code-block-btn" onclick="runHtml('${id}', this)">
-                <svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>실행
-            </button>` : '';
-
-            return `<div class="code-block-wrapper">
-                <div class="code-block-header">
-                    <span class="code-block-lang">${language}</span>
-                    <div class="code-block-actions">
-                        ${runBtn}
-                        <button class="code-block-btn" onclick="copyCode(this, '${id}')">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>복사
-                        </button>
-                    </div>
-                </div>
-                <div class="code-block-body">
-                    <pre><code id="${id}" class="hljs language-${language}">${highlighted}</code></pre>
-                </div>
-                ${isHtml ? `<iframe class="code-run-frame" id="frame_${id}" sandbox="allow-scripts"></iframe>` : ''}
-            </div>`;
+            try { highlighted = hljs.highlight(code, { language: hljs.getLanguage(language) ? language : 'plaintext' }).value; }
+            catch(e) { highlighted = hljs.highlightAuto(code).value; }
+            const langIcon = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>`;
+            const previewTab = isHtml ? `<button class="code-block-tab" id="tab_preview_${id}" onclick="switchCodeTab('${id}','preview')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>미리보기</button>` : '';
+            const runBtn = isHtml ? `<button class="code-block-btn" onclick="switchCodeTab('${id}','preview')" title="실행"><svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg></button>` : '';
+            return `<div class="code-block-wrapper" id="wrapper_${id}"><div class="code-block-header"><div class="code-block-tabs"><button class="code-block-tab active" id="tab_code_${id}" onclick="switchCodeTab('${id}','code')">${langIcon} ${language.toUpperCase()}</button>${previewTab}</div><div class="code-block-actions"><button class="code-block-btn" onclick="copyCode(this,'${id}')" title="복사"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button>${runBtn}</div></div><div class="code-block-body" id="body_code_${id}"><pre><code id="${id}" class="hljs language-${language}">${highlighted}</code></pre></div>${isHtml ? `<iframe class="code-run-frame" id="frame_${id}" sandbox="allow-scripts allow-same-origin" style="display:none;"></iframe>` : ''}</div>`;
         };
-
         marked.setOptions({ renderer, breaks: true, gfm: true });
 
-        // 스트리밍 중 사용할 단순 렌더러 (코드블록 깨짐 방지)
-        const plainRenderer = new marked.Renderer();
-        // code: 단순 pre/code 블록만
-        plainRenderer.code = function(code, lang) {
-            if (typeof code === 'object') { lang = code.lang; code = code.text; }
-            const escaped = code.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-            return `<pre style="background:var(--input-bg);padding:12px;border-radius:8px;overflow-x:auto;margin-bottom:10px;font-family:monospace;font-size:13px;"><code>${escaped}</code></pre>`;
-        };
+        function switchCodeTab(id, tab) {
+            const codeBody = document.getElementById(`body_code_${id}`);
+            const frame = document.getElementById(`frame_${id}`);
+            const tabCode = document.getElementById(`tab_code_${id}`);
+            const tabPreview = document.getElementById(`tab_preview_${id}`);
+            if (tab === 'preview' && frame) {
+                codeBody.style.display = 'none'; frame.style.display = 'block';
+                const codeEl = document.getElementById(id);
+                frame.srcdoc = codeEl ? codeEl.innerText : '';
+                frame.onload = () => { try { const h = frame.contentDocument?.body?.scrollHeight; if (h) frame.style.height = Math.min(Math.max(h+20,120),600)+'px'; } catch(e){} };
+                if (tabCode) tabCode.classList.remove('active');
+                if (tabPreview) tabPreview.classList.add('active');
+            } else {
+                codeBody.style.display = ''; if (frame) frame.style.display = 'none';
+                if (tabCode) tabCode.classList.add('active');
+                if (tabPreview) tabPreview.classList.remove('active');
+            }
+        }
 
         function copyCode(btn, id) {
             const code = document.getElementById(id)?.innerText || '';
             navigator.clipboard.writeText(code).then(() => {
                 const orig = btn.innerHTML;
-                btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7"/></svg>복사됨`;
+                btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7"/></svg>`;
                 setTimeout(() => btn.innerHTML = orig, 2000);
             });
         }
 
-        function runHtml(id, btn) {
-            const frame = document.getElementById('frame_' + id);
-            if (!frame) return;
-            if (frame.classList.contains('visible')) {
-                frame.classList.remove('visible');
-                btn.innerHTML = `<svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>실행`;
-            } else {
-                const code = document.getElementById(id)?.innerText || '';
-                frame.srcdoc = code;
-                frame.onload = () => {
-                    try {
-                        const h = frame.contentDocument?.body?.scrollHeight;
-                        if (h) frame.style.height = Math.min(Math.max(h + 20, 120), 600) + 'px';
-                    } catch(e) {}
-                };
-                frame.classList.add('visible');
-                btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>닫기`;
-            }
-        }
-        
+        const plainRenderer = new marked.Renderer();
+        plainRenderer.code = function(code, lang) {
+            if (typeof code === 'object') { lang = code.lang; code = code.text; }
+            const language = (lang || 'plaintext').toLowerCase();
+            let highlighted;
+            try { highlighted = hljs.highlight(code, { language: hljs.getLanguage(language) ? language : 'plaintext' }).value; }
+            catch(e) { highlighted = hljs.highlightAuto(code).value; }
+            const langIcon = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>`;
+            return `<div class="code-block-wrapper"><div class="code-block-header"><div class="code-block-tabs"><button class="code-block-tab active">${langIcon} ${language.toUpperCase()}</button></div></div><div class="code-block-body"><pre><code class="hljs language-${language}">${highlighted}</code></pre></div></div>`;
+        };
+
         function autoResize(el) { el.style.height = '28px'; el.style.height = Math.min(el.scrollHeight, 200) + 'px'; }
         function scrollToBottom() { chatContent.scrollTop = chatContent.scrollHeight; }
         function toggleBtnState(val, btn) { if (isGenerating) { btn.classList.add('stop-active'); } else { (val.trim().length > 0 || currentAttachments.length > 0) ? btn.classList.add('active') : btn.classList.remove('active'); btn.classList.remove('stop-active'); } }
