@@ -126,7 +126,7 @@
         #toggle-btn-wrapper:active { transform: scale(0.96); }
         .sidebar-icon { width: 22px; height: 22px; color: var(--text-color); flex-shrink: 0; transition: transform 0.25s ease; }
         #topbar-brand {
-            font-family: 'Google Sans', sans-serif;
+            font-family: 'Google Sans', 'Google Sans Display', sans-serif !important;
             font-size: 15px; font-weight: 700;
             color: var(--text-color);
             letter-spacing: -0.3px;
@@ -170,7 +170,7 @@
         .sidebar.collapsed .sidebar-content { opacity: 0; pointer-events: none; }
 
         .new-chat-btn, .menu-item { display: flex; align-items: center; gap: 10px; width: 100%; padding: 12px 14px; border-radius: var(--btn-radius); font-size: 14px; color: var(--text-color); cursor: pointer; border: none; background: transparent; text-align: left; white-space: nowrap; transition: background 0.2s; flex-shrink: 0; }
-        .new-chat-btn { margin-bottom: 20px; }
+        .new-chat-btn { margin-bottom: 4px; }
         .new-chat-btn.active, .new-chat-btn:hover, .menu-item:hover { background-color: var(--sidebar-hover); }
 
         .history-label { font-size: 12px; font-weight: 600; color: var(--icon-color); padding: 0 14px; margin-bottom: 8px; margin-top: 10px; }
@@ -1152,6 +1152,91 @@
             font-size: 15px; color: var(--sub-text-color);
             font-family: 'Google Sans', sans-serif; font-weight: 500;
         }
+
+        /* ── Modal close animations ── */
+        @keyframes modalOut {
+            from { transform: scale(1); opacity: 1; }
+            to { transform: scale(0.93); opacity: 0; }
+        }
+        @keyframes overlayOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+        @keyframes sheetOut {
+            from { transform: translateY(0); }
+            to { transform: translateY(100%); }
+        }
+        .modal-closing .settings-window,
+        .modal-closing .dialog-window,
+        .modal-closing .logout-modal-box,
+        .modal-closing .search-modal-box,
+        .modal-closing .auth-modal { animation: modalOut 0.2s ease forwards; }
+        .modal-closing.sheet-close .mob-profile-sheet { animation: sheetOut 0.25s ease forwards; }
+        .modal-closing { animation: overlayOut 0.22s ease forwards; pointer-events: none; }
+
+        /* ── Private mode CSS ── */
+        :root { --private-color: #8b5cf6; --private-bg: rgba(139,92,246,0.12); }
+        .private-badge {
+            display: none; align-items: center; gap: 4px;
+            position: fixed; top: 10px; right: 16px; z-index: 2001;
+            background: var(--private-bg); color: var(--private-color);
+            border: 1px solid rgba(139,92,246,0.3); border-radius: 20px;
+            padding: 4px 12px; font-size: 12px; font-weight: 600;
+            font-family: 'Google Sans', sans-serif;
+            backdrop-filter: blur(4px);
+            animation: fadeIn 0.3s ease;
+        }
+        .private-badge.visible { display: flex; }
+        .private-badge svg { width: 13px; height: 13px; }
+
+        /* Private toggle button in sidebar */
+        .private-toggle-btn {
+            display: flex; align-items: center; justify-content: center;
+            width: 28px; height: 28px; border-radius: 8px; border: none;
+            background: transparent; color: var(--icon-color); cursor: pointer;
+            flex-shrink: 0; transition: background 0.15s, color 0.15s, transform 0.12s;
+            margin-left: 2px;
+        }
+        .private-toggle-btn:hover { background: var(--sidebar-hover); color: var(--text-color); }
+        .private-toggle-btn:active { transform: scale(0.88); }
+        .private-toggle-btn.active { color: var(--private-color); background: var(--private-bg); }
+        .private-toggle-btn svg { width: 15px; height: 15px; }
+
+        /* Private mode main area indicator */
+        body.private-mode #chat-content { border-top: 2px solid rgba(139,92,246,0.3); }
+        body.private-mode .input-container { border: 1.5px solid rgba(139,92,246,0.25); }
+
+        /* Private mode loading overlay */
+        #private-loading {
+            position: fixed; inset: 0; z-index: 19990;
+            background: rgba(0,0,0,0); display: none;
+            align-items: center; justify-content: center; flex-direction: column; gap: 20px;
+            backdrop-filter: blur(12px);
+        }
+        #private-loading.open { display: flex; }
+        .private-loading-icon {
+            width: 56px; height: 56px; border-radius: 18px;
+            background: linear-gradient(135deg, #7c3aed, #a855f7);
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 8px 32px rgba(139,92,246,0.4);
+            animation: pop 0.3s cubic-bezier(0.16,1,0.3,1);
+        }
+        .private-loading-icon svg { width: 30px; height: 30px; color: white; }
+        .private-loading-title {
+            font-size: 20px; font-weight: 700; color: var(--text-color);
+            font-family: 'Google Sans', sans-serif;
+        }
+        .private-loading-sub {
+            font-size: 14px; color: var(--sub-text-color);
+            font-family: 'Google Sans', sans-serif; text-align: center; max-width: 260px;
+        }
+        .private-loading-bar {
+            width: 200px; height: 4px; background: var(--input-bg); border-radius: 2px; overflow: hidden;
+        }
+        .private-loading-fill {
+            height: 100%; width: 0%; background: linear-gradient(to right, #7c3aed, #a855f7);
+            border-radius: 2px; transition: width 0.1s linear;
+        }
     </style>
 </head>
 <body>
@@ -1277,11 +1362,16 @@
     <div class="sidebar" id="sidebar">
         <!-- ── Desktop sidebar content ── -->
         <div class="sidebar-content" id="desktopSidebarContent">
-            <button class="new-chat-btn active" id="newChatBtn" onclick="startNewChat()">
-                <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
-                <span data-i18n="newChat">새 채팅</span>
-            </button>
-            <button class="new-chat-btn" onclick="openSearchModal()" style="margin-bottom:6px;">
+            <div style="display:flex;align-items:center;gap:4px;margin-bottom:4px;">
+                <button class="new-chat-btn active" id="newChatBtn" onclick="startNewChat()" style="margin-bottom:0;flex:1;">
+                    <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                    <span data-i18n="newChat">새 채팅</span>
+                </button>
+                <button class="private-toggle-btn" id="privateToggleBtn" onclick="togglePrivateMode()" title="비공개 모드">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                </button>
+            </div>
+            <button class="new-chat-btn" onclick="openSearchModal()" style="margin-bottom:14px;">
                 <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
                 <span>검색</span>
             </button>
@@ -1351,7 +1441,7 @@
             <div class="logout-modal-title">로그아웃</div>
             <div class="logout-modal-body">정말 로그아웃하시겠습니까?</div>
             <div class="logout-modal-actions">
-                <button class="logout-modal-btn cancel" onclick="document.getElementById('logout-modal').classList.remove('open')">취소</button>
+                <button class="logout-modal-btn cancel" onclick="const lm=document.getElementById('logout-modal');lm.classList.add('modal-closing');setTimeout(()=>lm.classList.remove('open','modal-closing'),200)" >취소</button>
                 <button class="logout-modal-btn confirm" onclick="doLogout()">로그아웃</button>
             </div>
         </div>
@@ -1401,6 +1491,22 @@
             <circle cx="22" cy="22" r="18"/>
         </svg>
         <div class="logout-loading-text">로그아웃 중...</div>
+    </div>
+
+    <!-- Private mode badge -->
+    <div class="private-badge" id="privateBadge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        비공개 모드
+    </div>
+
+    <!-- Private mode loading -->
+    <div id="private-loading">
+        <div class="private-loading-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        </div>
+        <div class="private-loading-title">비공개 모드 전환 중</div>
+        <div class="private-loading-sub">대화 내용이 저장되지 않습니다</div>
+        <div class="private-loading-bar"><div class="private-loading-fill" id="privateProgressFill"></div></div>
     </div>
     <!-- Collapsed profile button (PC only) -->
     <button id="collapsed-profile-btn" onclick="toggleProfilePopover(event)" title="프로필">?</button>
@@ -1702,6 +1808,8 @@
         let isHistoryEnabled = localStorage.getItem('isHistoryEnabled') !== 'false';
         
         let hapticStrength = parseInt(localStorage.getItem('hapticStrength')) || 1;
+        let isPrivateMode = false;
+        let hapticInterval = null; // 연속 햅틱용
 
         // ===== Auth Token =====
         let authToken = localStorage.getItem('auth_token') || null;
@@ -1844,6 +1952,60 @@
             }
         }
 
+
+        // ══ Private Mode ══
+        function togglePrivateMode() {
+            if (isPrivateMode) {
+                // 비공개 모드 해제
+                isPrivateMode = false;
+                updatePrivateModeUI(false);
+                triggerHaptic();
+            } else {
+                // 비공개 모드 진입 — 로딩 애니메이션 10초
+                activatePrivateMode();
+            }
+        }
+
+        function activatePrivateMode() {
+            const overlay = document.getElementById('private-loading');
+            const fill = document.getElementById('privateProgressFill');
+            overlay.classList.add('open');
+            fill.style.width = '0%';
+
+            let progress = 0;
+            const totalMs = 10000;
+            const interval = 100;
+            const steps = totalMs / interval;
+            let current = 0;
+            const timer = setInterval(() => {
+                current++;
+                progress = (current / steps) * 100;
+                fill.style.width = progress + '%';
+                if (current >= steps) {
+                    clearInterval(timer);
+                    overlay.classList.remove('open');
+                    isPrivateMode = true;
+                    updatePrivateModeUI(true);
+                    startNewChat(false);
+                }
+            }, interval);
+        }
+
+        function updatePrivateModeUI(active) {
+            const badge = document.getElementById('privateBadge');
+            const btn = document.getElementById('privateToggleBtn');
+            badge?.classList.toggle('visible', active);
+            btn?.classList.toggle('active', active);
+            document.body.classList.toggle('private-mode', active);
+        }
+
+        // ?private URL 파라미터 처리
+        function checkPrivateParam() {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.has('private') && !isPrivateMode) {
+                activatePrivateMode();
+            }
+        }
         // ── Logout confirm ──
         function confirmLogout() {
             closeProfilePopover();
@@ -1952,6 +2114,9 @@
             } else {
                 startNewChat(false);
             }
+
+            // ?private 파라미터 처리
+            checkPrivateParam();
 
             // ?input= 자동 전송 처리 (/n → 줄바꿈)
             const inputParam = urlParams.get('input');
@@ -2101,6 +2266,7 @@
         function getStoredChats() { try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); } catch { return []; } }
 
         function saveChatToStorage(chatObj) {
+            if (isPrivateMode) return; // 비공개 모드에서는 저장 안함
             let chats = getStoredChats();
             const existingIndex = chats.findIndex(c => c.id === chatObj.id);
             if (existingIndex > -1) chats[existingIndex] = chatObj; else chats.unshift(chatObj);
@@ -2197,7 +2363,10 @@
             confirmBtn.onclick = () => { const val = input.value.trim(); if (inputMode && !val) return; confirmCallback(val); closeDialog(); };
             dialogModal.classList.add('open');
         }
-        function closeDialog() { dialogModal.classList.remove('open'); }
+        function closeDialog() {
+            dialogModal.classList.add('modal-closing');
+            setTimeout(() => dialogModal.classList.remove('open', 'modal-closing'), 200);
+        }
         dialogModal.addEventListener('click', (e) => { if (e.target === dialogModal) closeDialog(); });
         function openRenameModal(id, currentTitle) { openDialog(translations[currentLang].editTitle, currentTitle || 'New Conversation', (newTitle) => { let chats = getStoredChats(); const chat = chats.find(c => c.id === id); if (chat) { chat.title = newTitle; saveChatToStorage(chat); } }); }
         function confirmDeleteChat(id) { openDialog(translations[currentLang].deleteConfirmMsg, null, () => { deleteChatFromStorage(id); if (currentChatId === id) startNewChat(); }); }
@@ -2240,10 +2409,14 @@
         }
 
         function closeSearchModal() {
-            document.getElementById('search-modal').classList.remove('open');
-            document.getElementById('searchInput').value = '';
-            document.getElementById('searchResults').innerHTML = '<div class="search-empty">검색어를 입력하세요</div>';
-            document.getElementById('searchClearBtn').classList.remove('visible');
+            const modal = document.getElementById('search-modal');
+            modal.classList.add('modal-closing');
+            setTimeout(() => {
+                modal.classList.remove('open', 'modal-closing');
+                document.getElementById('searchInput').value = '';
+                document.getElementById('searchResults').innerHTML = '<div class="search-empty">검색어를 입력하세요</div>';
+                document.getElementById('searchClearBtn').classList.remove('visible');
+            }, 220);
         }
 
         function clearSearch() {
@@ -2327,7 +2500,9 @@
         }
 
         function closeMobProfileMenu() {
-            document.getElementById('mob-profile-menu').classList.remove('open');
+            const el = document.getElementById('mob-profile-menu');
+            el.classList.add('modal-closing', 'sheet-close');
+            setTimeout(() => el.classList.remove('open', 'modal-closing', 'sheet-close'), 250);
         }
 
         // 모바일 전용 히스토리 렌더러
@@ -2400,8 +2575,32 @@
             setTimeout(() => document.addEventListener('click', () => menu.remove(), { once: true }), 10);
         }
         
-        function triggerHaptic() { 
-            if (navigator.vibrate && hapticStrength > 0) navigator.vibrate(hapticStrength); 
+        function triggerHaptic() {
+            if (navigator.vibrate && hapticStrength > 0) {
+                // hapticStrength 1~20 → 진동 1~20ms
+                navigator.vibrate(hapticStrength);
+            }
+        }
+
+        function startContinuousHaptic() {
+            if (hapticStrength === 0 || !navigator.vibrate) return;
+            stopContinuousHaptic();
+            // 봇 타이핑 중 연속 미세진동: hapticStrength ms 진동, 간격 = 30ms
+            hapticInterval = setInterval(() => {
+                navigator.vibrate(hapticStrength);
+            }, 50);
+        }
+
+        function stopContinuousHaptic() {
+            if (hapticInterval) { clearInterval(hapticInterval); hapticInterval = null; }
+            if (navigator.vibrate) navigator.vibrate(0);
+        }
+
+        function updateHapticStrength(val) {
+            hapticStrength = parseInt(val);
+            localStorage.setItem('hapticStrength', hapticStrength);
+            // 미리보기 진동
+            if (hapticStrength > 0 && navigator.vibrate) navigator.vibrate([hapticStrength, 30, hapticStrength]);
         }
 
         // ── Profile popover ──
@@ -2711,7 +2910,7 @@
                 }
 
                 if (displayedText.length < fullText.length) {
-                    if (firstChunk) { bubble.innerHTML = ""; firstChunk = false; triggerHaptic(); switchToStopBtn(); }
+                    if (firstChunk) { bubble.innerHTML = ""; firstChunk = false; triggerHaptic(); switchToStopBtn(); startContinuousHaptic(); }
                     const charsToAdd = fullText.slice(displayedText.length, displayedText.length + 5);
                     displayedText += charsToAdd;
                     // 스트리밍 중 코드블록은 plain pre/code로만 렌더 (깨짐 방지)
@@ -2881,6 +3080,7 @@
 
         function finishGeneration(finalText) {
             isGenerating = false;
+            stopContinuousHaptic();
             
             document.querySelectorAll('.action-btn.regenerate').forEach(btn => btn.closest('.message-actions').remove());
 
@@ -2908,6 +3108,7 @@
 
         function stopGeneration() {
             isManuallyStopped = true;
+            stopContinuousHaptic();
             centerSendBtn.classList.remove('waiting'); bottomSendBtn.classList.remove('waiting');
             if (streamReader) streamReader.cancel();
             
@@ -2974,7 +3175,24 @@
 
         function loadHistoryFromStorage() { renderHistoryList(); }
         function openSettings() { settingsModal.classList.add('open'); if(window.innerWidth <= 768) { sidebar.classList.add('collapsed'); sidebarOverlay.classList.remove('visible'); } }
-        function closeSettings() { settingsModal.classList.remove('open'); document.querySelectorAll('.custom-select-container').forEach(el => el.classList.remove('open')); if(window.innerWidth <= 768) backToSettingsList(); }
+
+        // ── Animated modal close helper ──
+        function closeModalAnimated(overlayEl, duration = 220, isSheet = false) {
+            if (!overlayEl) return;
+            overlayEl.classList.add('modal-closing');
+            if (isSheet) overlayEl.classList.add('sheet-close');
+            setTimeout(() => {
+                overlayEl.classList.remove('open', 'modal-closing', 'sheet-close');
+            }, duration);
+        }
+        function closeSettings() {
+            settingsModal.classList.add('modal-closing');
+            setTimeout(() => {
+                settingsModal.classList.remove('open', 'modal-closing');
+                document.querySelectorAll('.custom-select-container').forEach(el => el.classList.remove('open'));
+                if(window.innerWidth <= 768) backToSettingsList();
+            }, 200);
+        }
         settingsModal.addEventListener('click', (e) => { if (e.target === settingsModal) closeSettings(); });
         function toggleDropdown(id) { const el = document.getElementById(id); document.querySelectorAll('.custom-select-container').forEach(item => { if (item.id !== id) item.classList.remove('open'); }); el.classList.toggle('open'); }
         function setTheme(mode, optionEl) { const container = document.getElementById('themeSelect'); container.querySelectorAll('.custom-option').forEach(opt => opt.classList.remove('selected')); optionEl.classList.add('selected'); const key = optionEl.getAttribute('data-i18n'); document.getElementById('currentThemeLabel').innerText = translations[currentLang][key]; container.classList.remove('open'); if (mode === 'system') { const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches; document.body.setAttribute('data-theme', isDark ? 'dark' : 'light'); } else { document.body.setAttribute('data-theme', mode); } }
@@ -2983,7 +3201,6 @@
         function savePersonalization() { systemPrompt = document.getElementById('systemPromptInput').value; localStorage.setItem('systemPrompt', systemPrompt); sendSystemConfig(); }
         function setTone(toneValue, label, optionEl) { const container = document.getElementById('toneSelect'); container.querySelectorAll('.custom-option').forEach(opt => opt.classList.remove('selected')); optionEl.classList.add('selected'); document.getElementById('currentToneLabel').innerText = label; container.classList.remove('open'); botTone = toneValue; localStorage.setItem('botTone', botTone); sendSystemConfig(); }
         function toggleHistoryMemory(checkbox) { isHistoryEnabled = checkbox.checked; localStorage.setItem('isHistoryEnabled', isHistoryEnabled); }
-        function updateHapticStrength(val) { hapticStrength = parseInt(val); localStorage.setItem('hapticStrength', hapticStrength); triggerHaptic(); }
 
         function updateUIText(lang) { const t = translations[lang]; if (!t) return; document.querySelectorAll('[data-i18n]').forEach(el => { const key = el.getAttribute('data-i18n'); if (t[key]) el.innerText = t[key]; }); document.querySelectorAll('[data-i18n-placeholder]').forEach(el => { const key = el.getAttribute('data-i18n-placeholder'); if (t[key]) el.placeholder = t[key]; }); const currentThemeKey = document.querySelector('#themeSelect .custom-option.selected').getAttribute('data-i18n'); if (currentThemeKey && t[currentThemeKey]) document.getElementById('currentThemeLabel').innerText = t[currentThemeKey]; const toneKey = botTone; if(t[toneKey]) document.getElementById('currentToneLabel').innerText = t[toneKey]; }
         document.addEventListener('click', function(e) { if (!e.target.closest('.custom-select-container')) { document.querySelectorAll('.custom-select-container').forEach(el => el.classList.remove('open')); } });
