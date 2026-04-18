@@ -102,32 +102,40 @@
             transition: background-color 0.3s, color 0.3s;
         }
 
+
+        /* ── Global font override ── */
+        input, textarea, button, select, a {
+            font-family: 'Google Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
         /* --- UI Components --- */
         
-        #toggle-btn-wrapper { 
-            position: fixed; top: 10px; left: 10px; 
-            width: 40px; height: 40px; 
-            display: flex; align-items: center; justify-content: center; 
-            border-radius: 8px; cursor: pointer; 
-            background-color: var(--bg-color); 
-            box-shadow: 0 2px 5px var(--shadow-color);
+        /* ── Toggle + Brand (desktop: separate, mobile: merged) ── */
+        #toggle-btn-wrapper {
+            position: fixed; top: 10px; left: 10px;
+            height: 40px; display: flex; align-items: center;
+            padding: 0 14px 0 10px;
+            border-radius: 12px; cursor: pointer;
+            background-color: var(--bg-color);
+            box-shadow: 0 2px 6px var(--shadow-color);
             border: 1px solid var(--border-color);
-            z-index: 2000; 
-            transition: background-color 0.3s;
+            z-index: 2000; gap: 8px;
+            transition: background-color 0.2s, box-shadow 0.2s, transform 0.15s;
+            user-select: none;
         }
-        #toggle-btn-wrapper:hover { background-color: var(--sidebar-hover); }
-        .sidebar-icon { width: 24px; height: 24px; color: var(--text-color); }
-
-        /* TopBar brand */
+        #toggle-btn-wrapper:hover { background-color: var(--sidebar-hover); box-shadow: 0 3px 10px var(--shadow-color); }
+        #toggle-btn-wrapper:active { transform: scale(0.96); }
+        .sidebar-icon { width: 22px; height: 22px; color: var(--text-color); flex-shrink: 0; transition: transform 0.25s ease; }
         #topbar-brand {
-            position: fixed; top: 10px; left: 60px;
             font-family: 'Google Sans', sans-serif;
-            font-size: 16px; font-weight: 700;
-            color: var(--text-color); z-index: 2000;
-            pointer-events: none;
+            font-size: 15px; font-weight: 700;
+            color: var(--text-color);
             letter-spacing: -0.3px;
-            line-height: 40px;
+            line-height: 1;
             white-space: nowrap;
+            transition: color 0.2s;
+        }
+        @media (max-width: 768px) {
+            #toggle-btn-wrapper { border-radius: 16px; }
         }
 
         /* Logout confirm modal */
@@ -153,8 +161,8 @@
         .logout-modal-btn.confirm { background: var(--danger-color); color: #fff; }
         .logout-modal-btn:hover { opacity: 0.85; }
 
-        #sidebar-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1400; opacity: 0; visibility: hidden; transition: opacity 0.3s ease; backdrop-filter: blur(2px); }
-        #sidebar-overlay.visible { opacity: 1; visibility: visible; }
+        #sidebar-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1400; opacity: 0; visibility: hidden; pointer-events: none; transition: opacity 0.35s ease, visibility 0.35s; backdrop-filter: blur(2px); }
+        #sidebar-overlay.visible { opacity: 1; visibility: visible; pointer-events: auto; }
 
         .sidebar { width: 260px; display: flex; flex-direction: column; background-color: var(--sidebar-bg); transition: width 0.3s ease, transform 0.3s ease, background-color 0.3s; overflow: hidden; padding-top: 60px; flex-shrink: 0; border-right: 1px solid var(--border-color); position: relative; z-index: 1500; }
         .sidebar.collapsed { width: 0; padding: 60px 0 0 0; border-right: none; }
@@ -311,7 +319,7 @@
         .code-block-run-btn:hover { background: var(--cb-btn-hover-bg); color: var(--cb-btn-hover-color); }
         .code-block-run-btn svg { width: 15px; height: 15px; }
 
-        .code-block-body { overflow-x: auto; display: block; background: var(--cb-code-bg); }
+        .code-block-body { overflow-x: auto; display: block; background: var(--cb-code-bg); width: 100%; }
         .code-block-body.hidden { display: none; }
         .code-block-body pre { margin: 0 !important; border-radius: 0 !important; background: var(--cb-code-bg) !important; }
         .code-block-body pre code.hljs { font-size: 13px !important; line-height: 1.6 !important; padding: 14px 16px !important; display: block; background: var(--cb-code-bg) !important; color: inherit; }
@@ -471,7 +479,7 @@
         .attach-card-remove { position: absolute; top: -6px; right: -6px; width: 18px; height: 18px; background: var(--text-color); color: var(--bg-color); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 2; border: 1px solid var(--bg-color); }
         
         .input-top-row { width: 100%; margin-bottom: 4px; }
-        .input-field { width: 100%; border: none; background: transparent; font-size: 16px; outline: none; color: var(--text-color); resize: none; font-family: inherit; overflow-y: auto; height: 28px; line-height: 24px; display: block; max-height: 200px; padding: 2px 0 2px 6px; }
+        .input-field { width: 100%; border: none; background: transparent; font-size: 16px; outline: none; color: var(--text-color); resize: none; font-family: 'Google Sans', -apple-system, sans-serif; overflow-y: auto; height: 28px; line-height: 24px; display: block; max-height: 200px; padding: 2px 0 2px 6px; }
         .input-field::placeholder { color: var(--icon-color); }
         .input-bottom-row { display: flex; justify-content: space-between; align-items: center; height: 36px; }
         
@@ -574,8 +582,8 @@
         .dialog-actions { display: flex; justify-content: flex-end; gap: 10px; }
         .dialog-btn { padding: 8px 16px; border-radius: 8px; font-size: 14px; cursor: pointer; border: none; font-weight: 500; transition: opacity 0.2s; }
         .dialog-btn.cancel { background: transparent; color: var(--text-color); }
-        .dialog-btn.confirm { background: var(--text-color); color: var(--bg-color); }
-        .dialog-btn.delete-confirm { background: var(--danger-color); color: #fff; }
+        .dialog-btn.confirm { background: #000000 !important; color: #ffffff !important; }
+        .dialog-btn.delete-confirm { background: #ef4444; color: #fff; }
         .dialog-btn:hover { opacity: 0.8; }
 
         .settings-mobile-header { display: none; }
@@ -597,7 +605,7 @@
         }
         .auth-brand {
             font-size: 20px; font-weight: 700; color: #111;
-            letter-spacing: -0.5px;
+            letter-spacing: -0.5px; font-family: 'Google Sans', sans-serif;
         }
         .auth-topbar-right {
             display: flex; align-items: center; gap: 6px;
@@ -605,6 +613,7 @@
             padding: 6px 10px; border-radius: 6px;
             border: none; background: none;
             transition: background 0.15s;
+            font-family: 'Google Sans', sans-serif;
         }
         .auth-topbar-right:hover { background: #f0f0f0; }
         .auth-topbar-right svg { width: 14px; height: 14px; }
@@ -713,7 +722,7 @@
         .auth-footer {
             padding: 16px 28px; text-align: center;
             font-size: 12px; color: #888; line-height: 1.6;
-            flex-shrink: 0;
+            flex-shrink: 0; font-family: 'Google Sans', sans-serif;
         }
         .auth-footer a { color: #555; text-decoration: underline; }
 
@@ -766,12 +775,174 @@
         }
         .thought-block.open .thought-body { max-height: 400px; padding: 10px 14px; overflow-y: auto; }
 
+
+        /* ── Micro Animations ── */
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @keyframes ripple { 0% { transform: scale(0); opacity: 0.4; } 100% { transform: scale(2.5); opacity: 0; } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes pop { 0% { transform: scale(0.94); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+
+        .message-row { animation: slideUp 0.3s cubic-bezier(0.16,1,0.3,1) forwards; }
+        .action-btn { transition: background 0.15s, color 0.15s, transform 0.12s; }
+        .action-btn:active { transform: scale(0.88); }
+        .send-btn { transition: background 0.18s, transform 0.14s, box-shadow 0.18s, opacity 0.15s; }
+        .send-btn.active:active { transform: scale(0.9); }
+        .new-chat-btn, .menu-item, .history-item { transition: background 0.15s, transform 0.12s; }
+        .new-chat-btn:active, .menu-item:active, .history-item:active { transform: scale(0.98); }
+        .icon-btn { transition: background 0.15s, color 0.15s, transform 0.12s; }
+        .icon-btn:active { transform: scale(0.88); }
+        .code-block-btn, .code-block-run-btn { transition: background 0.15s, color 0.15s, transform 0.1s; }
+        .code-block-btn:active, .code-block-run-btn:active { transform: scale(0.88); }
+        .sidebar-profile-row { transition: background 0.15s, transform 0.12s; }
+        .sidebar-profile-row:active { transform: scale(0.98); }
+        .sidebar-logout-btn { transition: background 0.15s, color 0.15s, transform 0.12s; }
+        .sidebar-logout-btn:active { transform: scale(0.88); }
+        .auth-primary-btn { transition: background 0.15s, opacity 0.15s, transform 0.12s; }
+        .auth-primary-btn:active:not(:disabled) { transform: scale(0.97); }
+        .dialog-btn { transition: opacity 0.15s, transform 0.12s, background 0.15s; }
+        .dialog-btn:active { transform: scale(0.94); }
+        .logout-modal-btn { transition: opacity 0.15s, transform 0.12s; }
+        .logout-modal-btn:active { transform: scale(0.94); }
+        .thought-block { transition: box-shadow 0.2s; }
+        .thought-block:hover { box-shadow: 0 2px 8px var(--shadow-color); }
+        .popover-item { transition: background 0.12s, transform 0.1s; }
+        .popover-item:active { transform: scale(0.97); }
+        #profile-popover { transition: opacity 0.18s cubic-bezier(0.16,1,0.3,1), transform 0.18s cubic-bezier(0.16,1,0.3,1), visibility 0.18s; }
+        #profile-popover.open { animation: pop 0.18s cubic-bezier(0.16,1,0.3,1); }
+
+        /* ── Google Spinner (SVG, rounded ends, no background) ── */
+        @keyframes spin-svg { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @keyframes dash { 0% { stroke-dashoffset: 56; } 50% { stroke-dashoffset: 14; } 100% { stroke-dashoffset: 56; } }
+        .g-spinner {
+            width: 20px; height: 20px; flex-shrink: 0;
+            animation: spin-svg 1.4s linear infinite;
+            display: inline-block;
+        }
+        .g-spinner circle {
+            stroke: #fff; stroke-width: 2.8; fill: none;
+            stroke-linecap: round;
+            stroke-dasharray: 56;
+            stroke-dashoffset: 42;
+            animation: dash 1.4s ease-in-out infinite;
+            transform-origin: center;
+        }
+        .g-spinner-dark {
+            width: 18px; height: 18px; flex-shrink: 0;
+            animation: spin-svg 1.4s linear infinite;
+            display: inline-block;
+        }
+        .g-spinner-dark circle {
+            stroke: #666; stroke-width: 2.5; fill: none;
+            stroke-linecap: round;
+            stroke-dasharray: 56;
+            stroke-dashoffset: 42;
+            animation: dash 1.4s ease-in-out infinite;
+            transform-origin: center;
+        }
+
+        /* ── Code block full width ── */
+        .message-bubble.bot-content { width: 100%; }
+        .code-block-wrapper { width: 100%; }
         @media (max-width: 768px) {
             #collapsed-profile-btn { display: none !important; }
             #profile-popover { display: none !important; }
-            .sidebar { position: fixed; left: 0; top: 0; bottom: 0; height: 100%; width: 220px !important; z-index: 1500; transform: translateX(0); transition: transform 0.3s ease; border-top-right-radius: 20px; border-bottom-right-radius: 20px; box-shadow: 4px 0 15px rgba(0,0,0,0.1); }
-            .sidebar.collapsed { width: 220px !important; transform: translateX(-100%); border-right: none; }
-            .sidebar-content { opacity: 1 !important; width: 220px !important; }
+            /* ─── Grok-style full-screen mobile sidebar ─── */
+            .sidebar {
+                position: fixed; inset: 0; width: 100% !important;
+                height: 100% !important; z-index: 3000;
+                background: var(--bg-color); border-radius: 0 !important;
+                box-shadow: none !important; border-right: none !important;
+                transform: translateX(0);
+                transition: transform 0.32s cubic-bezier(0.25,1,0.5,1), opacity 0.32s ease;
+                opacity: 1; overflow: hidden; padding-top: 0 !important;
+                display: flex; flex-direction: column;
+            }
+            .sidebar.collapsed {
+                width: 100% !important;
+                transform: translateX(-100%);
+                opacity: 0; box-shadow: none;
+            }
+            .sidebar-content { opacity: 1 !important; width: 100% !important; padding: 0 !important; }
+            /* Mobile sidebar header */
+            .mob-sidebar-header {
+                display: flex; align-items: center; padding: 20px 20px 12px 20px;
+                flex-shrink: 0;
+            }
+            .mob-sidebar-avatar {
+                width: 52px; height: 52px; border-radius: 50%;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                display: flex; align-items: center; justify-content: center;
+                color: #fff; font-size: 20px; font-weight: 700; flex-shrink: 0;
+            }
+            .mob-sidebar-name {
+                flex: 1; font-size: 18px; font-weight: 700; color: var(--text-color);
+                margin-left: 14px; font-family: 'Google Sans', sans-serif;
+            }
+            .mob-sidebar-close {
+                width: 42px; height: 42px; border-radius: 50%;
+                background: var(--input-bg); border: none; cursor: pointer;
+                display: flex; align-items: center; justify-content: center;
+                color: var(--text-color); transition: background 0.15s, transform 0.12s;
+            }
+            .mob-sidebar-close:active { transform: scale(0.88); }
+            /* Mobile history section */
+            .mob-history-section { flex: 1; overflow-y: auto; padding: 8px 0; }
+            .mob-history-label {
+                font-size: 13px; font-weight: 600; color: var(--icon-color);
+                padding: 4px 20px 8px 20px; display: flex; align-items: center;
+                justify-content: space-between;
+            }
+            .mob-history-item {
+                display: flex; align-items: center;
+                padding: 12px 20px; cursor: pointer;
+                transition: background 0.15s;
+            }
+            .mob-history-item:active { background: var(--sidebar-hover); }
+            .mob-history-item:hover { background: var(--sidebar-hover); }
+            .mob-history-item.active { background: var(--sidebar-hover); }
+            .mob-history-text { flex: 1; min-width: 0; }
+            .mob-history-title {
+                font-size: 15px; font-weight: 500; color: var(--text-color);
+                white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+                font-family: 'Google Sans', sans-serif;
+            }
+            .mob-history-date {
+                font-size: 13px; color: var(--sub-text-color); margin-top: 2px;
+                font-family: 'Google Sans', sans-serif;
+            }
+            .mob-history-more {
+                width: 36px; height: 36px; border-radius: 50%; border: none;
+                background: transparent; color: var(--icon-color); cursor: pointer;
+                display: flex; align-items: center; justify-content: center;
+                flex-shrink: 0; transition: background 0.15s;
+            }
+            .mob-history-more:hover { background: var(--sidebar-hover); }
+            /* Mobile bottom bar */
+            .mob-sidebar-bottom {
+                flex-shrink: 0; padding: 12px 16px 24px 16px;
+                display: flex; align-items: center; gap: 10px;
+                border-top: 1px solid var(--border-color);
+            }
+            .mob-search-bar {
+                flex: 1; display: flex; align-items: center; gap: 10px;
+                background: var(--input-bg); border-radius: 50px;
+                padding: 10px 16px; cursor: pointer;
+            }
+            .mob-search-bar svg { color: var(--sub-text-color); flex-shrink: 0; }
+            .mob-search-bar span { font-size: 15px; color: var(--sub-text-color); font-family: 'Google Sans', sans-serif; }
+            .mob-bottom-icon {
+                width: 46px; height: 46px; border-radius: 50%;
+                background: var(--input-bg); border: none; cursor: pointer;
+                display: flex; align-items: center; justify-content: center;
+                color: var(--text-color); flex-shrink: 0;
+                transition: background 0.15s, transform 0.12s;
+            }
+            .mob-bottom-icon:active { transform: scale(0.88); }
+            /* Hide desktop sidebar on mobile, show mobile version */
+            #desktopSidebarContent { display: none !important; }
+            #mobileSidebarContent { display: flex !important; }
+            /* On mobile, sidebar has no padding-top (it's 0 from JS) */
+            .sidebar { padding-top: 0 !important; }
             
             #chat-content { padding: 80px 16px 200px 16px; } 
             
@@ -834,7 +1005,7 @@
                     <input type="text" id="loginId" class="auth-input" placeholder="이메일 또는 아이디" autocomplete="username">
                     <input type="password" id="loginPw" class="auth-input" placeholder="비밀번호" autocomplete="current-password">
                     <div class="auth-error" id="loginError"></div>
-                    <button class="auth-primary-btn" onclick="doLogin()">계속하기</button>
+                    <button class="auth-primary-btn" id="loginSubmitBtn" onclick="doLogin()">계속하기</button>
                     <div class="auth-link-row">계정이 없으신가요? <span class="auth-link" onclick="showSignup()">회원가입</span></div>
                 </div>
 
@@ -906,7 +1077,7 @@
             <button class="auth-primary-btn" onclick="showLogin(); document.getElementById('signupSuccessModal').classList.remove('open');">로그인하러 가기</button>
         </div>
     </div>
-    <div id="sidebar-overlay" onclick="toggleSidebar()"></div>
+    <div id="sidebar-overlay" onclick="if(window.innerWidth>768)toggleSidebar()"></div>
     <div id="image-lightbox" class="image-lightbox" onclick="closeImageLightbox()">
         <div class="lightbox-close" onclick="closeImageLightbox()"><svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></div>
         <img id="lightbox-img" class="lightbox-img" src="" alt="Full view">
@@ -917,18 +1088,18 @@
             <rect x="3" y="3" width="18" height="18" rx="2" ry="2" stroke-width="2"></rect>
             <line x1="9" y1="3" x2="9" y2="21" stroke-width="2"></line>
         </svg>
+        <span id="topbar-brand">MinsuGPT</span>
     </div>
-    <div id="topbar-brand">MinsuGPT</div>
 
     <div class="sidebar" id="sidebar">
-        <div class="sidebar-content">
+        <!-- ── Desktop sidebar content ── -->
+        <div class="sidebar-content" id="desktopSidebarContent">
             <button class="new-chat-btn active" id="newChatBtn" onclick="startNewChat()">
                 <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                 <span data-i18n="newChat">새 채팅</span>
             </button>
             <div class="history-label" data-i18n="history">기록</div>
             <div class="chat-history" id="chatHistoryList"></div>
-            <!-- Profile + Settings row -->
             <div class="sidebar-bottom">
                 <div style="display:flex; align-items:center; width:100%; gap:0;">
                     <button class="sidebar-profile-row" onclick="openSettings()" id="sidebarProfileRow" style="flex:1;">
@@ -942,6 +1113,45 @@
                         <i data-lucide="log-out" style="width:16px;height:16px;"></i>
                     </button>
                 </div>
+            </div>
+        </div>
+
+        <!-- ── Mobile Grok-style sidebar content ── -->
+        <div id="mobileSidebarContent" style="display:none; flex-direction:column; height:100%; width:100%;">
+            <!-- Header: Avatar + Name + Close -->
+            <div class="mob-sidebar-header">
+                <div class="mob-sidebar-avatar" id="mobSidebarAvatar">?</div>
+                <div class="mob-sidebar-name" id="mobSidebarName">사용자</div>
+                <button class="mob-sidebar-close" onclick="toggleSidebar()">
+                    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+                        <path d="M13 5l7 7-7 7M5 5l7 7-7 7" opacity="0.5"/><path d="M13 5l7 7-7 7"/>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- History section -->
+            <div class="mob-history-section" id="mobHistoryList">
+                <!-- JS로 렌더링 -->
+            </div>
+
+            <!-- Bottom bar: Search + Settings + New Chat -->
+            <div class="mob-sidebar-bottom">
+                <div class="mob-search-bar" onclick="toggleSidebar()">
+                    <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+                    </svg>
+                    <span>검색</span>
+                </div>
+                <button class="mob-bottom-icon" onclick="openSettings(); toggleSidebar();" title="설정">
+                    <svg width="22" height="22" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                        <path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><circle cx="12" cy="12" r="3"/>
+                    </svg>
+                </button>
+                <button class="mob-bottom-icon" onclick="startNewChat(); toggleSidebar();" title="새 채팅">
+                    <svg width="22" height="22" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                        <path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                    </svg>
+                </button>
             </div>
         </div>
     </div>
@@ -1369,8 +1579,8 @@
             const password = document.getElementById('loginPw').value;
             if (!username || !password) { errEl.textContent = '아이디와 비밀번호를 입력하세요.'; return; }
 
-            const btn = document.querySelector('#page-login .auth-primary-btn');
-            if (btn) { btn.disabled = true; btn.textContent = '로그인 중...'; }
+            const btn = document.getElementById('loginSubmitBtn');
+            if (btn) { btn.disabled = true; btn.innerHTML = '<svg class="g-spinner" viewBox="0 0 24 24" style="margin-right:8px;"><circle cx="12" cy="12" r="9"/></svg>로그인 중...'; btn.style.display='flex'; btn.style.alignItems='center'; btn.style.justifyContent='center'; }
 
             try {
                 const res = await fetch(`${API_BASE}/login`, {
@@ -1396,7 +1606,7 @@
             } catch(e) {
                 errEl.textContent = '서버에 연결할 수 없습니다.';
             } finally {
-                if (btn) { btn.disabled = false; btn.textContent = '계속하기'; }
+                if (btn) { btn.disabled = false; btn.innerHTML = '계속하기'; btn.style.display=''; }
             }
         }
 
@@ -1448,11 +1658,22 @@
         };
 
         function init() {
-            if (!authToken) {
-                // 토큰 없으면 로그인 화면 유지
-                return;
+            if (!authToken) { return; }
+            const isMobile = window.innerWidth <= 768;
+            if (isMobile) {
+                sidebar.classList.add('collapsed');
+                // 모바일 기본값: 데스크탑 콘텐츠 숨김
+                const dc = document.getElementById('desktopSidebarContent');
+                const mc = document.getElementById('mobileSidebarContent');
+                if (dc) dc.style.display = 'none';
+                if (mc) mc.style.display = 'none'; // 닫힌 상태이므로 숨김
+            } else {
+                // 데스크탑: 항상 데스크탑 콘텐츠 표시
+                const dc = document.getElementById('desktopSidebarContent');
+                const mc = document.getElementById('mobileSidebarContent');
+                if (dc) dc.style.display = '';
+                if (mc) mc.style.display = 'none';
             }
-            if (window.innerWidth <= 768) sidebar.classList.add('collapsed');
             updateUIText('ko');
             loadHistoryFromStorage();
             
@@ -1749,15 +1970,94 @@
 
         function toggleSidebar() {
             const isCollapsed = sidebar.classList.toggle('collapsed');
-            if (window.innerWidth <= 768) {
-                if (!isCollapsed) sidebarOverlay.classList.add('visible');
-                else sidebarOverlay.classList.remove('visible');
+            const isMobile = window.innerWidth <= 768;
+            if (isMobile) {
+                if (!isCollapsed) {
+                    document.getElementById('desktopSidebarContent').style.display = 'none';
+                    document.getElementById('mobileSidebarContent').style.display = 'flex';
+                    renderMobileSidebar();
+                    sidebarOverlay.style.display = 'none';
+                    document.body.style.overflow = 'hidden';
+                } else {
+                    sidebarOverlay.classList.remove('visible');
+                    sidebarOverlay.style.pointerEvents = 'none';
+                    document.body.style.overflow = '';
+                }
             } else {
-                // PC: 접힌 상태면 프로필 버튼 표시
                 const btn = document.getElementById('collapsed-profile-btn');
                 if (isCollapsed) { btn.style.display = 'flex'; }
                 else { btn.style.display = 'none'; closeProfilePopover(); }
             }
+        }
+
+        // 모바일 전용 히스토리 렌더러
+        function renderMobileSidebar() {
+            // 프로필 정보 동기화
+            const name = document.getElementById('sidebarProfileName').textContent;
+            const initial = document.getElementById('sidebarAvatar').textContent;
+            document.getElementById('mobSidebarName').textContent = name;
+            document.getElementById('mobSidebarAvatar').textContent = initial;
+
+            // 히스토리 렌더링
+            const container = document.getElementById('mobHistoryList');
+            const chats = getStoredChats();
+            if (chats.length === 0) {
+                container.innerHTML = '<div style="padding:40px 20px; text-align:center; color:var(--sub-text-color); font-size:14px; font-family:Google Sans,sans-serif;">대화 기록이 없습니다</div>';
+                return;
+            }
+
+            // 날짜별 그룹핑
+            const now = new Date();
+            const groups = { '오늘': [], '이번 주': [], '이번 달': [], '이전': [] };
+            chats.forEach(chat => {
+                const d = new Date(chat.updatedAt || 0);
+                const diff = (now - d) / 86400000;
+                if (diff < 1) groups['오늘'].push(chat);
+                else if (diff < 7) groups['이번 주'].push(chat);
+                else if (diff < 30) groups['이번 달'].push(chat);
+                else groups['이전'].push(chat);
+            });
+
+            let html = '';
+            for (const [label, items] of Object.entries(groups)) {
+                if (items.length === 0) continue;
+                html += `<div class="mob-history-label"><span>${label}</span></div>`;
+                items.forEach(chat => {
+                    const isActive = chat.id === currentChatId;
+                    const dateStr = new Date(chat.updatedAt || 0).toLocaleDateString('ko-KR', { month: 'numeric', day: 'numeric' });
+                    html += `<div class="mob-history-item${isActive ? ' active' : ''}" onclick="loadChat('${chat.id}'); toggleSidebar();">
+                        <div class="mob-history-text">
+                            <div class="mob-history-title">${chat.title || '새 대화'}</div>
+                            <div class="mob-history-date">${dateStr}</div>
+                        </div>
+                        <button class="mob-history-more" onclick="event.stopPropagation(); openMobChatMenu('${chat.id}', '${(chat.title||'').replace(/'/g,"\'")}', this)">
+                            <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>
+                        </button>
+                    </div>`;
+                });
+            }
+            container.innerHTML = html;
+        }
+
+        // 모바일 채팅 메뉴 (편집/삭제)
+        function openMobChatMenu(id, title, btn) {
+            const existing = document.getElementById('mob-chat-menu');
+            if (existing) existing.remove();
+            const menu = document.createElement('div');
+            menu.id = 'mob-chat-menu';
+            menu.style.cssText = 'position:fixed;background:var(--modal-bg);border:1px solid var(--border-color);border-radius:14px;box-shadow:0 4px 20px rgba(0,0,0,0.15);padding:6px;z-index:9999;min-width:160px;animation:pop 0.15s ease;';
+            menu.innerHTML = `
+                <div onclick="openRenameModal('${id}','${title}');document.getElementById('mob-chat-menu').remove();" style="padding:12px 16px;border-radius:8px;cursor:pointer;font-size:15px;color:var(--text-color);display:flex;align-items:center;gap:10px;font-family:Google Sans,sans-serif;">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>이름 수정
+                </div>
+                <div onclick="confirmDeleteChat('${id}');document.getElementById('mob-chat-menu').remove();" style="padding:12px 16px;border-radius:8px;cursor:pointer;font-size:15px;color:#ef4444;display:flex;align-items:center;gap:10px;font-family:Google Sans,sans-serif;">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>삭제
+                </div>`;
+            const rect = btn.getBoundingClientRect();
+            menu.style.right = '16px';
+            menu.style.top = Math.min(rect.bottom + 4, window.innerHeight - 120) + 'px';
+            document.body.appendChild(menu);
+            setTimeout(() => document.addEventListener('click', () => menu.remove(), { once: true }), 10);
         }
         
         function triggerHaptic() { 
@@ -1797,14 +2097,31 @@
             document.getElementById('sidebarAvatar').textContent = initial;
             document.getElementById('sidebarProfileName').textContent = name || '사용자';
             document.getElementById('collapsed-profile-btn').textContent = initial;
+            // 모바일 헤더도 업데이트
+            const mobAvatar = document.getElementById('mobSidebarAvatar');
+            const mobName = document.getElementById('mobSidebarName');
+            if (mobAvatar) mobAvatar.textContent = initial;
+            if (mobName) mobName.textContent = name || '사용자';
         }
 
         // ── Collapsed profile btn visibility on resize ──
         window.addEventListener('resize', () => {
             const btn = document.getElementById('collapsed-profile-btn');
-            if (window.innerWidth <= 768) { btn.style.display = 'none'; closeProfilePopover(); }
-            else if (sidebar.classList.contains('collapsed')) { btn.style.display = 'flex'; }
-            else { btn.style.display = 'none'; }
+            const isMobile = window.innerWidth <= 768;
+            const dc = document.getElementById('desktopSidebarContent');
+            const mc = document.getElementById('mobileSidebarContent');
+            if (isMobile) {
+                btn.style.display = 'none'; closeProfilePopover();
+                if (dc) dc.style.display = 'none';
+                if (mc && !sidebar.classList.contains('collapsed')) mc.style.display = 'flex';
+                else if (mc) mc.style.display = 'none';
+            } else {
+                document.body.style.overflow = '';
+                if (mc) mc.style.display = 'none';
+                if (dc) dc.style.display = '';
+                if (sidebar.classList.contains('collapsed')) btn.style.display = 'flex';
+                else btn.style.display = 'none';
+            }
         });
 
         // ── Marked + syntax highlight setup ──
@@ -1820,9 +2137,26 @@
             const langIcon = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>`;
             const previewTab = isHtml ? `<button class="code-block-tab" id="tab_preview_${id}" onclick="switchCodeTab('${id}','preview')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>미리보기</button>` : '';
             const runBtn = isHtml ? `<button class="code-block-btn" onclick="switchCodeTab('${id}','preview')" title="실행"><svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg></button>` : '';
-            return `<div class="code-block-wrapper" id="wrapper_${id}"><div class="code-block-header"><div class="code-block-tabs"><button class="code-block-tab active" id="tab_code_${id}" onclick="switchCodeTab('${id}','code')">${langIcon} ${language.toUpperCase()}</button>${previewTab}</div><div class="code-block-actions"><button class="code-block-btn" onclick="copyCode(this,'${id}')" title="복사"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button>${runBtn}</div></div><div class="code-block-body" id="body_code_${id}"><pre><code id="${id}" class="hljs language-${language}">${highlighted}</code></pre></div>${isHtml ? `<iframe class="code-run-frame" id="frame_${id}" sandbox="allow-scripts allow-same-origin" style="display:none;"></iframe>` : ''}</div>`;
+            const ext = {html:'html',css:'css',javascript:'js',js:'js',python:'py',java:'java',c:'c',cpp:'cpp',typescript:'ts',ts:'ts',json:'json',xml:'xml',yaml:'yaml',yml:'yml',bash:'sh',shell:'sh',sql:'sql',markdown:'md',rust:'rs',go:'go',ruby:'rb',php:'php',swift:'swift',kotlin:'kt'}[language] || 'txt';
+            const dlBtn = `<button class="code-block-btn" id="dl_${id}" onclick="downloadCode('${id}','${ext}',this)" title="다운로드"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button>`;
+            return `<div class="code-block-wrapper" id="wrapper_${id}"><div class="code-block-header"><div class="code-block-tabs"><button class="code-block-tab active" id="tab_code_${id}" onclick="switchCodeTab('${id}','code')">${langIcon} ${language.toUpperCase()}</button>${previewTab}</div><div class="code-block-actions">${dlBtn}<button class="code-block-btn" onclick="copyCode(this,'${id}')" title="복사"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button>${runBtn}</div></div><div class="code-block-body" id="body_code_${id}"><pre><code id="${id}" class="hljs language-${language}">${highlighted}</code></pre></div>${isHtml ? `<iframe class="code-run-frame" id="frame_${id}" sandbox="allow-scripts allow-same-origin" style="display:none;"></iframe>` : ''}</div>`;
         };
         marked.setOptions({ renderer, breaks: true, gfm: true });
+
+        function downloadCode(id, ext, btn) {
+            const code = document.getElementById(id)?.innerText || '';
+            const origHTML = btn.innerHTML;
+            btn.innerHTML = '<svg class="g-spinner-dark" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/></svg>';
+            btn.disabled = true;
+            setTimeout(() => {
+                const blob = new Blob([code], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url; a.download = `code.${ext}`; a.click();
+                URL.revokeObjectURL(url);
+                btn.innerHTML = origHTML; btn.disabled = false;
+            }, 600);
+        }
 
         function switchCodeTab(id, tab) {
             const codeBody = document.getElementById(`body_code_${id}`);
