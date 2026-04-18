@@ -188,7 +188,7 @@
         /* Main Area */
         .main { flex: 1; position: relative; display: flex; flex-direction: column; background-color: var(--bg-color); width: 100%; height: 100%; transition: background-color 0.3s; z-index: 1; }
         
-        #welcome-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10; transition: opacity 0.4s ease, visibility 0.4s; }
+        #welcome-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 4; transition: opacity 0.4s ease, visibility 0.4s; }
         #welcome-screen.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
         .center-logo-img { width: 80px; height: auto; border-radius: 50%; margin-bottom: 40px; }
         .center-input-wrapper { width: 100%; max-width: 760px; padding: 0 20px; position: relative; }
@@ -463,7 +463,7 @@
             padding: 0 20px 5px 20px; 
             opacity: 0; transform: translateY(50px); 
             transition: opacity 0.5s ease, transform 0.5s cubic-bezier(0.25, 1, 0.5, 1); 
-            z-index: 5; pointer-events: none; 
+            z-index: 6; pointer-events: none; 
             background: linear-gradient(to top, var(--bg-color) 40%, transparent); 
         }
         #bottom-interface.visible { opacity: 1; transform: translateY(0); pointer-events: auto; }
@@ -1265,19 +1265,22 @@
             transform-origin: center;
         }
 
-        /* ── Mobile: welcome screen input at bottom ── */
+        /* ── Mobile: welcome screen — logo center, input via bottom-interface ── */
         @media (max-width: 768px) {
             #welcome-screen {
-                justify-content: flex-end;
-                padding-bottom: 0;
+                justify-content: center;
+                pointer-events: none;
+                z-index: 4;
             }
-            .center-logo-img { margin-bottom: 20px; }
-            .center-input-wrapper {
-                position: sticky; bottom: 0;
-                background: var(--bg-color);
-                padding-bottom: 0;
+            #welcome-screen .center-input-wrapper {
+                display: none !important;
             }
-            #welcome-screen .center-logo { margin-top: auto; }
+            #welcome-screen .center-logo {
+                pointer-events: none;
+                position: absolute;
+                top: 50%;
+                transform: translateY(-50%);
+            }
         }
 
         /* ── Swipe hint ── */
@@ -2110,31 +2113,40 @@
             document.addEventListener('touchend', function(e) {
                 if (!isMobile() || !isDraggingSidebar) return;
                 isDraggingSidebar = false;
-                sidebar.style.transition = '';
-                sidebar.style.opacity = '';
 
                 const t = e.changedTouches[0];
                 const dx = t.clientX - touchStartX;
 
+                // 트랜지션 복원
+                sidebar.style.transition = 'transform 0.3s cubic-bezier(0.25,1,0.5,1), opacity 0.3s ease';
+                sidebar.style.opacity = '';
+
                 if (swipeOrigin === 'edge' && dx > SWIPE_THRESHOLD) {
                     // 충분히 당겼으면 열기
-                    sidebar.style.transform = '';
+                    sidebar.style.transform = 'translateX(0)';
                     sidebar.classList.remove('collapsed');
                     document.getElementById('desktopSidebarContent').style.display = 'none';
                     document.getElementById('mobileSidebarContent').style.display = 'flex';
                     renderMobileSidebar();
                     document.body.style.overflow = 'hidden';
+                    setTimeout(() => { sidebar.style.transition = ''; sidebar.style.transform = ''; }, 320);
                 } else if (swipeOrigin === 'edge') {
-                    // 덜 당겼으면 원위치
-                    sidebar.style.transform = '';
+                    // 덜 당겼으면 원위치 (애니메이션으로 닫힘)
+                    sidebar.style.transform = 'translateX(-100%)';
                     sidebar.classList.add('collapsed');
+                    setTimeout(() => { sidebar.style.transition = ''; sidebar.style.transform = ''; }, 320);
                 } else if (swipeOrigin === 'sidebar' && dx < -SWIPE_THRESHOLD) {
-                    // 충분히 밀었으면 닫기
-                    sidebar.style.transform = '';
-                    if (!sidebar.classList.contains('collapsed')) toggleSidebar();
+                    // 충분히 밀었으면 닫기 (애니메이션)
+                    sidebar.style.transform = 'translateX(-100%)';
+                    setTimeout(() => {
+                        sidebar.style.transition = ''; sidebar.style.transform = '';
+                        if (!sidebar.classList.contains('collapsed')) toggleSidebar();
+                        else { document.body.style.overflow = ''; }
+                    }, 300);
                 } else {
-                    // 덜 밀었으면 원위치
-                    sidebar.style.transform = '';
+                    // 덜 밀었으면 원위치 (스프링 백)
+                    sidebar.style.transform = 'translateX(0)';
+                    setTimeout(() => { sidebar.style.transition = ''; sidebar.style.transform = ''; }, 320);
                 }
             }, { passive: true });
         })();
